@@ -17,6 +17,28 @@ Flutter web apps need to authenticate with Tercen platform API. Manual HTTP auth
 
 Use `sci_tercen_client` package with `createServiceFactoryForWebApp()` pattern.
 
+**See also**: [Pattern: ServiceFactory Initialization](servicefactory-initialization.md) for detailed initialization patterns.
+
+## ServiceFactory Singleton
+
+The ServiceFactory uses a **singleton pattern** for global access:
+
+```dart
+import 'package:sci_tercen_client/sci_client_service_factory.dart' as tercen;
+
+// Access singleton anywhere
+final task = await tercen.ServiceFactory().taskService.get(taskId);
+```
+
+**All services accessed through this singleton:**
+
+- `taskService` - Task operations
+- `fileService` - File operations
+- `tableSchemaService` - Table/column operations
+- `documentService` - Document operations
+- `projectService` - Project operations
+- And 10+ other services
+
 ## Pattern
 
 ### 1. Add Dependency

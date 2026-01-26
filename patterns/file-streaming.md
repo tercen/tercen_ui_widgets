@@ -21,6 +21,8 @@ Use `ServiceFactory.fileService.download()` which returns a `Stream<List<int>>`.
 
 ### Basic Stream Download
 
+**CRITICAL**: You must manually accumulate chunks - streams don't provide the complete file automatically.
+
 ```dart
 Future<Uint8List> downloadFile(String fileId) async {
   final fileService = _factory.fileService;
@@ -30,7 +32,7 @@ Future<Uint8List> downloadFile(String fileId) async {
   // Get stream from file service
   final stream = fileService.download(fileId);
 
-  // Collect all chunks
+  // IMPORTANT: Collect all chunks manually
   final chunks = <List<int>>[];
 
   await for (final chunk in stream) {
@@ -38,7 +40,8 @@ Future<Uint8List> downloadFile(String fileId) async {
     print('  📦 Received chunk: ${chunk.length} bytes');
   }
 
-  // Flatten into single byte array
+  // IMPORTANT: Flatten into single byte array
+  // Don't forget this step - chunks.expand((x) => x).toList()
   final bytes = Uint8List.fromList(chunks.expand((x) => x).toList());
 
   print('✓ Download complete: ${bytes.length} bytes');
@@ -46,6 +49,13 @@ Future<Uint8List> downloadFile(String fileId) async {
   return bytes;
 }
 ```
+
+**Why chunk accumulation is necessary:**
+
+- File service returns `Stream<List<int>>` (stream of byte arrays)
+- Each emission is a chunk of the file, not the complete file
+- Must collect all chunks and flatten into single byte array
+- `chunks.expand((x) => x).toList()` flattens nested lists
 
 ### With Progress Tracking
 

@@ -170,6 +170,225 @@ Future<List<ImageMetadata>> _downloadImages(List<FileDocument> files) async {
 }
 ```
 
+## Tercen-Specific Error Types
+
+### HTTP Error Codes
+
+Tercen API returns standard HTTP errors with specific meanings:
+
+```dart
+// 404 Not Found - Wrong ID used (metadata vs data ID)
+try {
+  final bytes = await fileService.download(documentId); // Using metadata ID
+} catch (e) {
+  if (e.toString().contains('404') || e.toString().contains('not found')) {
+    print('❌ File not found - likely using documentId instead of .documentId');
+    // Retry with .documentId from task JSON
+  }
+}
+
+// 500 Internal Server Error - Infrastructure issue
+try {
+  final stream = fileService.download(fileId);
+} catch (e) {
+  if (e.toString().contains('500') || e.toString().contains('internal server')) {
+    print('❌ Server error - physical file may be missing from storage');
+    print('   This is a server-side issue, not application code problem');
+    // Fallback to mock or notify user
+  }
+}
+```
+
+**Common scenarios:**
+
+| Error | Cause | Fix |
+| ----- | ----- | --- |
+| 404 | Using `documentId` instead of `.documentId` | Extract `.documentId` from task JSON |
+| 404 | File deleted or moved | Check file exists, use fallback |
+| 500 | Physical file missing from storage | Server-side issue, use mock data |
+| 401 | Authentication failure | Check token, re-authenticate |
+| 403 | Permission denied | Check user permissions |
+| CORS | Manual HTTP call (not using client) | Always use ServiceFactory |
+
+### Parameter Validation
+
+Validate required URL parameters before attempting API calls:
+
+```dart
+// lib/main.dart
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Parse URL parameters
+  final uri = Uri.base;
+  final taskId = uri.queryParameters['taskId'];
+
+  // Validate required parameters
+  if (taskId == null || taskId.isEmpty) {
+    print('❌ Error: Missing required parameter "taskId"');
+    runApp(_buildErrorApp(
+      'Missing Required Parameter',
+      'This operator requires a "taskId" parameter.\n\n'
+      'Please launch this operator from a Tercen workflow step.',
+    ));
+    return;
+  }
+
+  // Continue with normal initialization
+  final tercenFactory = await createServiceFactoryForWebApp();
+  // ...
+}
+```
+
+### User-Friendly Error Screens
+
+```dart
+/// Builds an error screen with clear messaging
+Widget _buildErrorApp(String title, String message) {
+  return MaterialApp(
+    title: 'Image Overview - Error',
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: Colors.red,
+        brightness: Brightness.light,
+      ),
+      useMaterial3: true,
+    ),
+    home: Scaffold(
+      body: Center(
+        child: Container(
+          padding: const EdgeInsets.all(32),
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Card(
+            elevation: 4,
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    color: Colors.red.shade700,
+                    size: 64,
+                  ),
+                  const SizedBox(height: 24),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red.shade900,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      height: 1.5,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+```
+
+### Specific Error Detection in Operations
+
+```dart
+Future<Uint8List?> _downloadAndConvertImage(String imageId) async {
+  try {
+    final bytes = await _downloadImage(imageId);
+    return await _convertImage(bytes);
+  } on TimeoutException {
+    print('⏱️ Timeout downloading image $imageId (exceeded 30 seconds)');
+    return null;
+  } on StateError catch (e) {
+    print('⚠️ Image metadata error for $imageId: $e');
+    return null;
+  } catch (e) {
+    final errorMsg = e.toString().toLowerCase();
+
+    // Provide specific error messages based on error type
+    if (errorMsg.contains('format') || errorMsg.contains('invalid') ||
+        errorMsg.contains('corrupt')) {
+      print('❌ Corrupted image file $imageId: $e');
+      print('   The file may be damaged or in an unsupported format');
+    } else if (errorMsg.contains('not found') || errorMsg.contains('404')) {
+      print('❌ Image file not found $imageId: $e');
+      print('   File may have been deleted or ID is incorrect');
+    } else if (errorMsg.contains('zip')) {
+      print('❌ ZIP entry error for $imageId: $e');
+      print('   The ZIP archive may be corrupted or entry path invalid');
+    } else if (errorMsg.contains('permission') || errorMsg.contains('access')) {
+      print('❌ Permission error accessing $imageId: $e');
+      print('   Check file permissions or access rights');
+    } else {
+      print('❌ Error fetching image $imageId: $e');
+    }
+
+    return null;
+  }
+}
+```
+
+### ZIP File Error Handling
+
+```dart
+Future<List<ImageMetadata>> _loadImagesFromZip(String zipFileId) async {
+  final images = <ImageMetadata>[];
+
+  try {
+    final zipEntries = await fileService.listZipContents(zipFileId);
+
+    if (zipEntries.isEmpty) {
+      print('⚠️ ZIP file is empty or could not be read');
+      return images;
+    }
+
+    // Process entries...
+
+    if (images.isEmpty && zipEntries.isNotEmpty) {
+      print('⚠️ No valid files found in ZIP (${zipEntries.length} total entries)');
+    }
+
+    return images;
+
+  } on TimeoutException {
+    print('❌ Timeout reading ZIP file: Operation took too long');
+    print('   The file may be very large or network is slow');
+    return images;
+  } catch (e) {
+    final errorMsg = e.toString().toLowerCase();
+
+    if (errorMsg.contains('format') || errorMsg.contains('invalid') ||
+        errorMsg.contains('corrupt') || errorMsg.contains('magic')) {
+      print('❌ ZIP file appears to be corrupted or invalid: $e');
+      print('   Please check that the uploaded file is a valid ZIP archive');
+    } else if (errorMsg.contains('permission') || errorMsg.contains('access')) {
+      print('❌ Permission error accessing ZIP file: $e');
+      print('   The file may be locked or access rights are insufficient');
+    } else if (errorMsg.contains('not found') || errorMsg.contains('404')) {
+      print('❌ ZIP file not found: $e');
+      print('   The file may have been deleted or moved');
+    } else {
+      print('❌ Error loading images from ZIP: $e');
+    }
+
+    return images;
+  }
+}
+```
+
 ## Debug Logging
 
 Use consistent emoji prefixes for visual scanning:
