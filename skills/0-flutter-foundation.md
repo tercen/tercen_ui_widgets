@@ -29,6 +29,7 @@ git clone https://github.com/tercen/tercen-style.git _local/tercen-style
 - `_local/tercen-style/specifications/Tercen-Layout-Principles.html`
 - `_local/tercen-style/specifications/Tercen-Style-Guide.html`
 - `_local/tercen-style/specifications/Tercen-Icon-Semantic-Map.html`
+- `_local/tercen-style/specifications/Tercen-Dark-Theme.html`
 
 **If the repository already exists**: Check for updates with `git -C _local/tercen-style pull`
 
@@ -89,8 +90,9 @@ lib/
 │
 ├── core/                      # Cross-cutting concerns
 │   └── theme/                 # Design system
-│       ├── app_theme.dart
-│       ├── app_colors.dart
+│       ├── app_theme.dart       # Light + dark ThemeData
+│       ├── app_colors.dart      # Light theme colours
+│       ├── app_colors_dark.dart # Dark theme colours
 │       ├── app_text_styles.dart
 │       └── app_spacing.dart
 │
@@ -458,12 +460,18 @@ class MyWidget extends StatefulWidget {
 
 Starting a new Flutter project:
 
+- [ ] Clone tercen-style repository to `_local/` (see MANDATORY FIRST STEP)
 - [ ] Create directory structure (di/, domain/, implementations/, presentation/)
-- [ ] Add dependencies (get_it, provider)
+- [ ] Add dependencies (get_it, provider, font_awesome_flutter)
 - [ ] Create service interfaces in domain/
 - [ ] Create mock implementations
 - [ ] Set up GetIt service locator
 - [ ] Create providers for state management
+- [ ] Establish design system with BOTH light and dark themes:
+  - [ ] `app_colors.dart` - Light theme colours
+  - [ ] `app_colors_dark.dart` - Dark theme colours
+  - [ ] `app_theme.dart` - ThemeData for both themes
+  - [ ] `ThemeProvider` - System preference + manual override
+  - [ ] Theme toggle in left panel header
 - [ ] Write tests (unit, widget, provider)
-- [ ] Establish design system (see Issue #9)
 - [ ] Follow mandatory workflow (see Issue #8)

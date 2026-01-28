@@ -29,8 +29,31 @@ This is **standard operating procedure** - Claude should do this automatically w
 | `Tercen-Layout-Principles.html` | C.R.A.P. design, 8px spacing grid, component sizing |
 | `Tercen-Style-Guide.html` | Colors, typography, visual identity |
 | `Tercen-Icon-Semantic-Map.html` | FontAwesome + 6 Tercen custom icons |
+| `Tercen-Dark-Theme.html` | Dark theme colors, implementation patterns |
 
 See `_local/tercen-style/specifications/README.md` for detailed guidance.
+
+## MANDATORY: Dark Mode Support
+
+**All Tercen apps MUST support both light and dark themes.** This is standard, not optional.
+
+### Implementation Requirements
+
+1. **Theme Provider**: Create `ThemeProvider` with system preference detection
+2. **Dual Color Sets**: Use `AppColors` (light) and `AppColorsDark` (dark)
+3. **Theme Toggle**: Add sun/moon toggle to left panel header
+4. **Persistence**: Save user preference to SharedPreferences
+5. **System Default**: Follow OS preference when no user override
+
+### Theme Control
+
+| Scenario | Action |
+| -------- | ------ |
+| First visit | Follow system preference (`prefers-color-scheme`) |
+| User toggles | Override system, save to localStorage |
+| User clears | Return to system preference |
+
+See `Tercen-Dark-Theme.html` for complete color tokens and Flutter implementation patterns.
 
 ## Directory Structure
 
