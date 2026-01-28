@@ -2,6 +2,18 @@
 
 This directory contains Claude Skills for building Flutter web applications integrated with the Tercen platform.
 
+## Required: Tercen Style Specifications
+
+**Before creating any UI**, Claude must read the style specifications in `_local/tercen-style/specifications/`:
+
+| Specification | Purpose |
+| ------------- | ------- |
+| `Tercen-Layout-Principles.html` | C.R.A.P. design, 8px spacing grid, component sizing |
+| `Tercen-Style-Guide.html` | Colors, typography, visual identity |
+| `Tercen-Icon-Semantic-Map.html` | FontAwesome + 6 Tercen custom icons |
+
+See `_local/tercen-style/specifications/README.md` for detailed guidance.
+
 ## Directory Structure
 
 This skills system uses a **modular architecture** for maintainability and cross-referencing:
@@ -189,6 +201,8 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 **Plan Mode required** for all non-trivial features. No skipping specs.
 
 ### Issue #9: UI Design Standards
+- **Read `_local/tercen-style/specifications/` FIRST** before creating UI
+- Apply Tercen Layout Principles (C.R.A.P., 8px grid, equal gaps)
 - Establish design system during **mock phase** (Skill 1)
 - Material Design 3 foundation
 - Centralized theme files: `app_theme.dart`, `app_colors.dart`, `app_spacing.dart`

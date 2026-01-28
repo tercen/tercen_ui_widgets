@@ -261,16 +261,48 @@ void _initializeMockData() {
 
 ## Design System Establishment
 
-**CRITICAL**: Establish design system during mock phase (see [Issue #9](../issues/9-ui-design-standards.md))
+**CRITICAL**: Establish design system during mock phase using Tercen's official style specifications.
+
+### Required Reading: Tercen Style Specifications
+
+Before creating any UI, read and apply these specifications from `_local/tercen-style/specifications/`:
+
+| Specification | Purpose | Key Content |
+|---------------|---------|-------------|
+| `Tercen-Style-Guide.html` | Visual identity | Colors, typography, component styles |
+| `Tercen-Layout-Principles.html` | Spatial design | C.R.A.P. principles, 8px spacing grid, component sizing |
+| `Tercen-Icon-Semantic-Map.html` | Icon usage | FontAwesome + 6 Tercen-specific icons |
+
+### Key Layout Principles (from Tercen-Layout-Principles v2.0)
+
+**Part A: Design Fundamentals**
+1. **C.R.A.P. Principles** - Contrast, Repetition, Alignment, Proximity guide all decisions
+2. **8px Spacing Grid** - Use values: 4, 8, 16, 24, 32, 48 (never arbitrary like 10px, 15px)
+3. **Equal Gap Rule** - Within grids, horizontal and vertical gaps must match
+4. **Size to Content** - Components sized for expected content, not "expand to fill"
+5. **Density Levels** - Compact (4px gaps) for data, Standard (16px) for forms, Spacious for emphasis
+
+**Part B: Structural Layout**
+1. **Corner-Out Design** - All layouts anchor from top-left (0,0)
+2. **Left-Out Approach** - No right sidebars; all panels on left
+3. **No Stretch** - Elements have natural widths; empty space on right is OK
+
+### Anti-Patterns to Avoid
+
+| Anti-Pattern | Problem | Fix |
+|--------------|---------|-----|
+| Unequal grid gaps | 4px horizontal, 12px vertical | Always use equal gaps |
+| Stretched controls | `Expanded` on dropdowns | Size based on expected content |
+| Arbitrary spacing | 10px, 15px, 22px values | Use scale: 4, 8, 16, 24, 32, 48 |
 
 ### Create Theme Files
 
 ```
 lib/core/theme/
 ├── app_theme.dart        # Material Design 3 configuration
-├── app_colors.dart       # Color palette
-├── app_text_styles.dart  # Typography
-└── app_spacing.dart      # Spacing constants
+├── app_colors.dart       # Color palette (from Tercen-Style-Guide)
+├── app_text_styles.dart  # Typography (from Tercen-Style-Guide)
+└── app_spacing.dart      # Spacing constants (8px grid from Layout Principles)
 ```
 
 ### Apply Theme

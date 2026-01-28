@@ -15,7 +15,25 @@ Without standardized design system:
 
 ## Solution
 
-Establish comprehensive design system during **mock implementation phase** (Skill 1).
+Establish comprehensive design system during **mock implementation phase** (Skill 1) using the **official Tercen Style Specifications**.
+
+## Official Tercen Style Specifications
+
+**Location**: `_local/tercen-style/specifications/`
+
+These HTML specifications are the authoritative source for Tercen UI design:
+
+| Document | Purpose |
+| -------- | ------- |
+| `Tercen-Style-Guide.html` | Colors, typography, component styles, visual identity |
+| `Tercen-Layout-Principles.html` | C.R.A.P. design principles, 8px spacing grid, component sizing, structural layout |
+| `Tercen-Icon-Semantic-Map.html` | Icon usage: FontAwesome Solid + 6 Tercen-specific custom icons |
+| `../ICON-GUIDELINES.md` | Quick reference for icon selection |
+
+**When creating mock implementations, Claude MUST:**
+1. Read `Tercen-Layout-Principles.html` for spacing and sizing rules
+2. Read `Tercen-Style-Guide.html` for colors and typography
+3. Apply these specifications to all UI code
 
 ## Foundation: Material Design 3
 
