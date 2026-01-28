@@ -2,6 +2,24 @@
 
 This directory contains Claude Skills for building Flutter web applications integrated with the Tercen platform.
 
+## MANDATORY FIRST STEP: Clone Style Guide
+
+**At the beginning of EVERY new project**, Claude MUST automatically clone the Tercen style guide:
+
+```bash
+# Create _local directory if it doesn't exist
+mkdir -p _local
+
+# Clone tercen-style repository (or update if exists)
+if [ -d "_local/tercen-style" ]; then
+  git -C _local/tercen-style pull
+else
+  git clone https://github.com/tercen/tercen-style.git _local/tercen-style
+fi
+```
+
+This is **standard operating procedure** - Claude should do this automatically without the user needing to provide the style guide.
+
 ## Required: Tercen Style Specifications
 
 **Before creating any UI**, Claude must read the style specifications in `_local/tercen-style/specifications/`:
@@ -140,11 +158,12 @@ Each skill extends the previous one, building on established patterns.
 
 ### Quick Start
 
-1. Review the skill you need
-2. The skill will auto-fetch necessary GitHub repos (Skills 1-3)
-3. Follow the documented patterns
-4. Apply the checklists
-5. Avoid the documented gotchas
+1. **Clone the style guide FIRST** (automatic - see "MANDATORY FIRST STEP" above)
+2. Review the skill you need
+3. The skill will auto-fetch necessary GitHub repos (Skills 1-3)
+4. Follow the documented patterns
+5. Apply the checklists
+6. Avoid the documented gotchas
 
 ### Auto-Fetch Mechanism
 

@@ -253,104 +253,31 @@ class TercenImageService implements ImageService {
 }
 ```
 
-## Pattern 3: Grid Layout
+## Pattern 3: Grid Layout Requirements
 
 ### PamGene Grid Structure
 
-**Rows**: Organized by well (W1, W2, W3, W4)
+**Rows**: Organized by well (W1, W2, W3, W4) - always 4 rows
 
-**Columns**: Organized by barcode (unique plate IDs)
+**Columns**: Organized by barcode (unique plate IDs) - variable count
 
-**Cell Size**: 270px × 200px (aspect ratio optimized for microscopy images)
+**Cell Aspect Ratio**: Approximately 270:200 (1.35:1) optimized for microscopy images
 
-### Grid Implementation
+### Grid Cell Metadata Display
 
-```dart
-// lib/presentation/widgets/image_grid.dart
-class ImageGrid extends StatelessWidget {
-  final List<ImageMetadata> images;
+Each cell should display:
+- Image thumbnail
+- Well and Field identifiers (e.g., "W1 F1")
+- Cycle and Exposure time (e.g., "Cycle 94 • 493ms")
 
-  const ImageGrid({required this.images});
+### UI Implementation
 
-  @override
-  Widget build(BuildContext context) {
-    // Get unique barcodes for columns
-    final barcodes = images
-        .map((img) => img.barcode)
-        .toSet()
-        .toList()
-      ..sort();
+**IMPORTANT**: For the actual UI implementation (widgets, layout structure), follow the Tercen design guidelines:
 
-    return GridView.builder(
-      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: barcodes.length,
-        childAspectRatio: 270 / 200, // PamGene cell aspect ratio
-        crossAxisSpacing: AppSpacing.s,
-        mainAxisSpacing: AppSpacing.s,
-      ),
-      itemCount: images.length,
-      itemBuilder: (context, index) {
-        return ImageGridCell(image: images[index]);
-      },
-    );
-  }
-}
-```
+- **`_local/tercen-style/specifications/Tercen-Layout-Principles.html`** - App structure, left panel layout
+- **`_local/tercen-style/specifications/Tercen-Style-Guide.html`** - Colors, typography, components
 
-### Grid Cell Widget
-
-```dart
-// lib/presentation/widgets/image_grid_cell.dart
-class ImageGridCell extends StatelessWidget {
-  final ImageMetadata image;
-
-  const ImageGridCell({required this.image});
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _showDetails(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Image
-            Expanded(
-              child: Image.memory(
-                image.bytes,
-                fit: BoxFit.cover,
-              ),
-            ),
-
-            // Metadata
-            Padding(
-              padding: AppSpacing.paddingS,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'W${image.well} F${image.field}',
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                  Text(
-                    'Cycle ${image.cycle} • ${image.exposureTime}ms',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showDetails(BuildContext context) {
-    // Navigate to detail view
-  }
-}
-```
+The grid must fit within the Tercen left-panel + content-area structure defined in the Layout Principles.
 
 ## Pattern 4: Well Mapping
 
@@ -465,87 +392,29 @@ class ImageOverviewProvider with ChangeNotifier {
 }
 ```
 
-## Pattern 6: Filter UI
+## Pattern 6: Filter Requirements
 
-```dart
-class FilterControls extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<ImageOverviewProvider>(
-      builder: (context, provider, child) {
-        final cycles = PamGeneFilterDefaults.getAvailableCycles(provider.allImages);
-        final exposureTimes = PamGeneFilterDefaults.getAvailableExposureTimes(provider.allImages);
+### PamGene Filter Controls
 
-        return Row(
-          children: [
-            // Cycle dropdown
-            DropdownButton<int>(
-              value: provider.selectedCycle,
-              hint: Text('Cycle'),
-              items: cycles.map((cycle) {
-                return DropdownMenuItem(
-                  value: cycle,
-                  child: Text('Cycle $cycle'),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) provider.setCycle(value);
-              },
-            ),
+The app requires two filter controls:
+- **Cycle filter**: Dropdown with available pump cycle values
+- **Exposure Time filter**: Dropdown with available exposure times in milliseconds
 
-            SizedBox(width: AppSpacing.m),
+### Filter Placement
 
-            // Exposure time dropdown
-            DropdownButton<int>(
-              value: provider.selectedExposureTime,
-              hint: Text('Exposure'),
-              items: exposureTimes.map((time) {
-                return DropdownMenuItem(
-                  value: time,
-                  child: Text('${time}ms'),
-                );
-              }).toList(),
-              onChanged: (value) {
-                if (value != null) provider.setExposureTime(value);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-}
-```
+**IMPORTANT**: Filter controls must be placed according to Tercen Layout Principles:
+- Filters go in the **LEFT PANEL** (not a top toolbar)
+- See `_local/tercen-style/specifications/Tercen-Layout-Principles.html` for the correct app structure
 
-## PamGene Design Standards
+### PamGene-Specific Constants
 
-**See**: [Issue #9: UI Design Standards](../issues/9-ui-design-standards.md)
+These domain-specific values should be used when implementing the grid:
 
-### Grid Layout Specifics
-
-```dart
-// lib/core/theme/pamgene_theme.dart
-class PamGeneTheme {
-  // Grid cell dimensions
-  static const gridCellWidth = 270.0;
-  static const gridCellHeight = 200.0;
-  static const gridCellAspectRatio = gridCellWidth / gridCellHeight;
-
-  // Grid spacing
-  static const gridSpacing = 8.0;
-
-  // Image display
-  static const imageBorderRadius = 4.0;
-  static final imageBorder = Border.all(
-    color: AppColors.border,
-    width: 1,
-  );
-
-  // Thumbnail hover effect (future)
-  static const thumbnailElevation = 2.0;
-  static const thumbnailHoverElevation = 4.0;
-}
-```
+| Constant | Value | Purpose |
+|----------|-------|---------|
+| Cell aspect ratio | 270:200 (1.35:1) | Optimized for microscopy images |
+| Grid spacing | 8px | Per Tercen spacing grid |
+| Border radius | 4px | Per Tercen style guide |
 
 ## Mock Data for PamGene
 

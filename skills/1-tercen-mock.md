@@ -101,33 +101,16 @@ void setupServiceLocator({bool useMocks = true}) {
 
 ### Phase 4: Build UI
 
-```dart
-// lib/presentation/screens/image_overview_screen.dart
-class ImageOverviewScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<ImageOverviewProvider>()..loadImages(),
-      child: Scaffold(
-        appBar: AppBar(title: Text('Image Overview')),
-        body: Consumer<ImageOverviewProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoading) {
-              return Center(child: CircularProgressIndicator());
-            }
+**IMPORTANT**: For UI implementation, you MUST follow the Tercen design guidelines:
 
-            if (provider.hasError) {
-              return Center(child: Text(provider.errorMessage!));
-            }
+- **`_local/tercen-style/specifications/Tercen-Layout-Principles.html`** - App structure, left panel layout, spacing
+- **`_local/tercen-style/specifications/Tercen-Style-Guide.html`** - Colors, typography, components
 
-            return ImageGrid(images: provider.images!);
-          },
-        ),
-      ),
-    );
-  }
-}
-```
+Read and apply these specifications before creating any UI. Key points:
+- Use **left panel** for controls/filters (not top bars)
+- Follow the **8px spacing grid** (4, 8, 16, 24, 32, 48)
+- **No right sidebars** - all panels on left
+- Size components to content, not "expand to fill"
 
 ## Asset-Based Mock Data
 
@@ -259,75 +242,34 @@ void _initializeMockData() {
 }
 ```
 
-## Design System Establishment
+## Design System
 
-**CRITICAL**: Establish design system during mock phase using Tercen's official style specifications.
+**CRITICAL**: Before creating any UI, read and apply the Tercen style specifications:
 
-### Required Reading: Tercen Style Specifications
+| Specification | Location |
+|---------------|----------|
+| Layout Principles | `_local/tercen-style/specifications/Tercen-Layout-Principles.html` |
+| Style Guide | `_local/tercen-style/specifications/Tercen-Style-Guide.html` |
+| Icon Map | `_local/tercen-style/specifications/Tercen-Icon-Semantic-Map.html` |
 
-Before creating any UI, read and apply these specifications from `_local/tercen-style/specifications/`:
+These are the **single source of truth** for all UI design decisions. Do not duplicate their content in skills or other documents.
 
-| Specification | Purpose | Key Content |
-|---------------|---------|-------------|
-| `Tercen-Style-Guide.html` | Visual identity | Colors, typography, component styles |
-| `Tercen-Layout-Principles.html` | Spatial design | C.R.A.P. principles, 8px spacing grid, component sizing |
-| `Tercen-Icon-Semantic-Map.html` | Icon usage | FontAwesome + 6 Tercen-specific icons |
-
-### Key Layout Principles (from Tercen-Layout-Principles v2.0)
-
-**Part A: Design Fundamentals**
-1. **C.R.A.P. Principles** - Contrast, Repetition, Alignment, Proximity guide all decisions
-2. **8px Spacing Grid** - Use values: 4, 8, 16, 24, 32, 48 (never arbitrary like 10px, 15px)
-3. **Equal Gap Rule** - Within grids, horizontal and vertical gaps must match
-4. **Size to Content** - Components sized for expected content, not "expand to fill"
-5. **Density Levels** - Compact (4px gaps) for data, Standard (16px) for forms, Spacious for emphasis
-
-**Part B: Structural Layout**
-1. **Corner-Out Design** - All layouts anchor from top-left (0,0)
-2. **Left-Out Approach** - No right sidebars; all panels on left
-3. **No Stretch** - Elements have natural widths; empty space on right is OK
-
-### Anti-Patterns to Avoid
-
-| Anti-Pattern | Problem | Fix |
-|--------------|---------|-----|
-| Unequal grid gaps | 4px horizontal, 12px vertical | Always use equal gaps |
-| Stretched controls | `Expanded` on dropdowns | Size based on expected content |
-| Arbitrary spacing | 10px, 15px, 22px values | Use scale: 4, 8, 16, 24, 32, 48 |
-
-### Create Theme Files
+### Theme Files Structure
 
 ```
 lib/core/theme/
 ├── app_theme.dart        # Material Design 3 configuration
 ├── app_colors.dart       # Color palette (from Tercen-Style-Guide)
 ├── app_text_styles.dart  # Typography (from Tercen-Style-Guide)
-└── app_spacing.dart      # Spacing constants (8px grid from Layout Principles)
-```
-
-### Apply Theme
-
-```dart
-// lib/main.dart
-import 'core/theme/app_theme.dart';
-
-void main() {
-  setupServiceLocator(useMocks: true);
-
-  runApp(MaterialApp(
-    theme: AppTheme.lightTheme,
-    home: HomeScreen(),
-  ));
-}
+└── app_spacing.dart      # Spacing constants (from Layout Principles)
 ```
 
 ### User Approval
 
 User reviews and approves:
-1. Visual design (colors, typography, spacing)
-2. UI layout and flow
-3. Component styling
-4. Mock data realism
+1. Visual design matches Tercen specifications
+2. UI layout follows Layout Principles
+3. Mock data is realistic
 
 Lock design system before moving to real implementation.
 

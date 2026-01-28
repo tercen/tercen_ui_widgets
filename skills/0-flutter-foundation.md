@@ -6,6 +6,32 @@
 
 **Use When**: Starting any new Flutter project
 
+## Project Setup - MANDATORY FIRST STEP
+
+**CRITICAL**: Before any other work, Claude MUST clone the Tercen style guide to the project's `_local` folder:
+
+```bash
+# Create _local directory if it doesn't exist
+mkdir -p _local
+
+# Clone tercen-style repository
+git clone https://github.com/tercen/tercen-style.git _local/tercen-style
+```
+
+**Why this is mandatory**:
+
+- All UI work must follow Tercen design specifications
+- The style guide contains layout principles, colors, typography, and icon mappings
+- Without this, Claude cannot create compliant UI
+
+**After cloning, verify these files exist**:
+
+- `_local/tercen-style/specifications/Tercen-Layout-Principles.html`
+- `_local/tercen-style/specifications/Tercen-Style-Guide.html`
+- `_local/tercen-style/specifications/Tercen-Icon-Semantic-Map.html`
+
+**If the repository already exists**: Check for updates with `git -C _local/tercen-style pull`
+
 ## Overview
 
 This skill provides foundational Flutter patterns that apply to all Tercen projects:
@@ -174,37 +200,12 @@ class ImageOverviewProvider with ChangeNotifier {
 
 ### Usage in UI
 
-```dart
-// lib/presentation/screens/home_screen.dart
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../providers/image_overview_provider.dart';
+**IMPORTANT**: For all UI implementation, you MUST follow the Tercen design guidelines:
 
-class HomeScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => getIt<ImageOverviewProvider>()..loadImages(),
-      child: Scaffold(
-        appBar: AppBar(title: Text('Image Overview')),
-        body: Consumer<ImageOverviewProvider>(
-          builder: (context, provider, child) {
-            if (provider.isLoading) {
-              return Center(child: CircularProgressIndicator());
-            }
+- **`_local/tercen-style/specifications/Tercen-Layout-Principles.html`** - App structure, left panel layout, spacing
+- **`_local/tercen-style/specifications/Tercen-Style-Guide.html`** - Colors, typography, components
 
-            if (provider.hasError) {
-              return Center(child: Text(provider.errorMessage!));
-            }
-
-            return ImageGrid(images: provider.images!);
-          },
-        ),
-      ),
-    );
-  }
-}
-```
+Read and apply these specifications before creating any UI. The skills do NOT contain UI code examples to avoid conflicts with the design guidelines.
 
 ## Abstract Service Interfaces
 
