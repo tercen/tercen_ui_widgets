@@ -195,16 +195,105 @@ Each skill extends the previous one, building on established patterns.
 
 ---
 
-## Mandatory Development Workflow
+## Operating Modes
 
-**CRITICAL**: All skills enforce this workflow for non-trivial features:
+These skills support two distinct modes. **Claude MUST determine the mode** before proceeding.
+
+### How to Determine Mode
+
+| Indicator | Mode |
+| --------- | ---- |
+| User provides functional spec document | **Test Mode** |
+| User says "test", "validate", "regression" | **Test Mode** |
+| User describes what they want to build | **Development Mode** |
+| User asks to create/design an app | **Development Mode** |
+| **Unclear from prompt** | **Ask the user** |
+
+**If unclear**, Claude should ask:
+> "Are we in **Development Mode** (creating a new app with planning) or **Test Mode** (validating skills with a pre-existing spec)?"
+
+---
+
+### Mode A: Development Mode (Full Workflow)
+
+**Use when**: Building a real application where requirements need discovery and the functional specification needs to be developed collaboratively.
+
+**Characteristics**:
+
+- User describes what they want (not a complete spec)
+- Planning phase required
+- User provides assets/data during development
+- Iterative refinement expected
+
+### Mode B: Test Mode (Skills Validation)
+
+**Use when**: Running regression tests to validate that skills produce consistent, correct output given the same inputs.
+
+**Characteristics**:
+
+- Pre-generated functional specification provided
+- Mock data/assets already available
+- No planning phase needed
+- Deterministic execution expected
+- Purpose: Verify skills haven't been broken by changes
+
+**Test Mode workflow**:
+
+1. Complete Phase 1 Setup (clone repos, read specs)
+2. **Skip Phase 2** (planning already done)
+3. Read the provided functional specification
+4. Execute Phase 3 (implementation)
+5. Verify output matches expected results
+
+---
+
+## Development Mode Workflow
+
+**CRITICAL**: This workflow applies to Development Mode only.
+
+### Phase 1: Setup (Before ANY Planning)
+
+When given the GitHub URL for this skills repo, Claude MUST:
+
+1. **Clone this skills repo** into `.claude/skills/`
+
+   ```bash
+   gh repo clone tercen/tercen-flutter-skills .claude/skills
+   ```
+
+2. **Clone the style guide** (see MANDATORY FIRST STEP above)
+
+   ```bash
+   mkdir -p _local
+   git clone https://github.com/tercen/tercen-style.git _local/tercen-style
+   ```
+
+3. **Read the style specifications** (required before any UI planning):
+   - [ ] `_local/tercen-style/specifications/Tercen-Layout-Principles.html`
+   - [ ] `_local/tercen-style/specifications/Tercen-Style-Guide.html`
+   - [ ] `_local/tercen-style/specifications/Tercen-Icon-Semantic-Map.html`
+
+4. **Identify skill level** based on project requirements:
+   - Skill 0: Generic Flutter (always read first)
+   - Skill 1: Mock implementation (UI development)
+   - Skill 2: Tercen API integration
+   - Skill 3: PamGene domain (if applicable)
+
+5. **Read relevant skill document(s)** in `.claude/skills/skills/`
+
+### Phase 2: Planning (Plan Mode)
+
+Only AFTER completing Phase 1:
 
 1. **Enter Plan Mode** (EnterPlanMode tool)
 2. **Product Specification** - What are we building? Why? Success criteria?
 3. **Technical Specification** - How? Which patterns? What files? What risks?
 4. **Implementation Plan** - Step-by-step breakdown, verification strategy
 5. **User Approval** (ExitPlanMode tool)
-6. **Implementation** - Follow approved plan
+
+### Phase 3: Implementation
+
+1. **Implementation** - Follow approved plan, applying skill patterns
 
 **Why this matters**: Real projects have experienced authentication issues, URL parsing problems, and deployment confusion that planning would have prevented.
 
