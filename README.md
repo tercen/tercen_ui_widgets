@@ -95,13 +95,14 @@ This skills system uses a **modular architecture** for maintainability and cross
 │   ├── 2-tercen-real.md
 │   └── 3-customer-pamgene.md
 ├── patterns/              # Reusable code patterns
+│   ├── functional-spec-discovery.md  # ← Planning: Read in Phase 2
 │   ├── authentication.md
 │   ├── url-parsing.md
 │   ├── file-streaming.md
 │   ├── concurrency.md
 │   ├── error-handling.md
 │   ├── tiff-conversion.md
-│   ├── app-frame.md       # ← UI: Overall screen structure (read first)
+│   ├── app-frame.md       # ← UI: Overall screen structure
 │   └── left-panel.md      # ← UI: Left panel component
 └── issues/                # Operational gotchas (1-11)
     ├── 1-wasm-build.md
@@ -286,10 +287,11 @@ When given the GitHub URL for this skills repo, Claude MUST:
 Only AFTER completing Phase 1:
 
 1. **Enter Plan Mode** (EnterPlanMode tool)
-2. **Product Specification** - What are we building? Why? Success criteria?
-3. **Technical Specification** - How? Which patterns? What files? What risks?
-4. **Implementation Plan** - Step-by-step breakdown, verification strategy
-5. **User Approval** (ExitPlanMode tool)
+2. **Functional Specification Discovery** - Use [patterns/functional-spec-discovery.md](patterns/functional-spec-discovery.md) to gather requirements through discovery questions
+3. **Draft Functional Specification** - Write spec document with all 8 sections
+4. **Technical Specification** - How? Which patterns? What files? What risks?
+5. **Implementation Plan** - Step-by-step breakdown, verification strategy
+6. **User Approval** (ExitPlanMode tool)
 
 ### Phase 3: Implementation
 
