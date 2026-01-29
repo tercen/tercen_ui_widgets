@@ -42,6 +42,7 @@ class TercenUrlParser {
   String? documentId;
   String? workflowId;
   String? stepId;
+  String? taskId;  // Present when running in Data Step context
   bool isStandaloneMode = false;
   bool isWorkflowMode = false;
 
@@ -49,12 +50,24 @@ class TercenUrlParser {
     _parseUrl();
   }
 
+  /// Returns true if app is running inside a Data Step (has taskId parameter)
+  bool get isInDataStep => taskId != null;
+
+  /// Returns true if app should show its own top bar (not in Data Step)
+  bool get shouldShowTopBar => !isInDataStep;
+
   void _parseUrl() {
     final uri = Uri.base;
     final pathSegments = uri.pathSegments;
 
     print('🔍 Parsing URL: ${uri.toString()}');
     print('📋 Path segments: $pathSegments');
+
+    // Check for Data Step context (taskId in query parameters)
+    taskId = uri.queryParameters['taskId'];
+    if (taskId != null) {
+      print('✓ Data Step context detected: taskId=$taskId');
+    }
 
     // Mode 1: Standalone - /_w3op/{documentId}/
     if (pathSegments.contains('_w3op')) {
@@ -261,8 +274,61 @@ Future<List<FileDocument>> loadFiles() async {
 }
 ```
 
+## Context Detection (Data Step vs Full Screen)
+
+In addition to deployment mode, apps need to detect their execution context to determine UI behaviour.
+
+### The Rule
+
+**If `Uri.base` contains the `taskId` query parameter, the app is running inside a Data Step.**
+
+This was confirmed by the Tercen platform team (January 2026).
+
+### Implementation
+
+```dart
+// Add to TercenUrlParser class
+String? taskId;
+
+bool get isInDataStep => taskId != null;
+bool get shouldShowTopBar => !isInDataStep;
+
+void _parseUrl() {
+  final uri = Uri.base;
+
+  // Check for Data Step context
+  taskId = uri.queryParameters['taskId'];
+
+  // ... rest of URL parsing
+}
+```
+
+### UI Behaviour by Context
+
+| Context | `taskId` | Top Bar | Close Button |
+|---------|----------|---------|--------------|
+| Data Step (embedded) | Present | Hidden | Not needed |
+| Full screen | Absent | Visible | Required |
+
+### Example URLs
+
+```
+# Data Step context (has taskId)
+https://tercen.com/w/wf123/ds/step456?taskId=task789
+→ isInDataStep = true
+→ shouldShowTopBar = false
+
+# Full screen context (no taskId)
+https://tercen.com/w/wf123/ds/step456
+→ isInDataStep = false
+→ shouldShowTopBar = true
+```
+
+See [Pattern: App Frame](app-frame.md) for complete top bar implementation.
+
 ## See Also
 
+- [Pattern: App Frame](app-frame.md)
 - [Pattern: Authentication](authentication.md)
 - [Pattern: Error Handling](error-handling.md)
 - [Skill 2: Tercen Real Implementation](../skills/2-tercen-real.md)

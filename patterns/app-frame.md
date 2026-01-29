@@ -184,7 +184,7 @@ Complex multi-modal, typically embedded in Tercen workflow.
 
 ## Context Detection
 
-Apps need to detect whether they're running embedded or full screen.
+Apps need to detect whether they're running embedded in a Data Step or in full screen mode.
 
 ### Embedded vs Full Screen
 
@@ -193,24 +193,32 @@ Apps need to detect whether they're running embedded or full screen.
 | Embedded in Data Step | Hidden | Not needed | Tercen platform |
 | Full Screen | Visible | Required | App itself |
 
-### Detection Method
+### Detection Method (Confirmed)
 
-**Primary** (pending platform verification):
+**Check for `taskId` parameter in the URL:**
+
 ```dart
-// Using WebAppOperator from sci_tercen_client
-bool get isEmbedded => webAppOperator.entryType == 'embedded';
-bool get shouldShowTopBar => !isEmbedded;
+// lib/utils/context_detector.dart
+class AppContextDetector {
+  /// Returns true if the app is running inside a Data Step
+  bool get isInDataStep => Uri.base.queryParameters.containsKey('taskId');
+
+  /// Returns true if the app is running in full screen mode
+  bool get isFullScreen => !isInDataStep;
+
+  /// Determines whether to show the app's own top bar
+  bool get shouldShowTopBar => isFullScreen;
+}
 ```
 
-**Fallback** (iframe detection):
-```dart
-import 'dart:html' as html;
+| URL Pattern | `taskId` Present | Context | Top Bar |
+|-------------|------------------|---------|---------|
+| `https://tercen.com/...?taskId=abc123` | Yes | Data Step | Hidden |
+| `https://tercen.com/...` | No | Full screen | Visible |
 
-bool get isEmbedded => html.window.parent != html.window;
-bool get shouldShowTopBar => !isEmbedded;
-```
+**Note**: This method was confirmed by the Tercen platform team (January 2026). The `WebAppOperator.entryType` property exists but URL parameter checking is the recommended approach.
 
-See `_local/investigation-context-detection.md` for platform verification status.
+See `_local/investigation-context-detection.md` for full investigation details.
 
 ## Top Bar Specification
 
@@ -401,17 +409,15 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _detectContext() {
-    // Check if embedded or full screen
-    // See Context Detection section
+    // Check if running in Data Step (taskId in URL) or full screen
     setState(() {
-      _showTopBar = !_isEmbedded();
+      _showTopBar = !_isInDataStep();
     });
   }
 
-  bool _isEmbedded() {
-    // Primary: check webAppOperator.entryType
-    // Fallback: check if in iframe
-    return html.window.parent != html.window;
+  bool _isInDataStep() {
+    // Platform-confirmed method: check for taskId parameter in URL
+    return Uri.base.queryParameters.containsKey('taskId');
   }
 
   @override
