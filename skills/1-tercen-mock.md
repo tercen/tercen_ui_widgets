@@ -101,16 +101,27 @@ void setupServiceLocator({bool useMocks = true}) {
 
 ### Phase 4: Build UI
 
-**IMPORTANT**: For UI implementation, you MUST follow the Tercen design guidelines:
+**IMPORTANT**: For UI implementation, read these in order:
 
-- **`_local/tercen-style/specifications/Tercen-Layout-Principles.html`** - App structure, left panel layout, spacing
-- **`_local/tercen-style/specifications/Tercen-Style-Guide.html`** - Colors, typography, components
+1. **`_local/tercen-style/specifications/Tercen-Layout-Principles.html`** - Design principles, spacing
+2. **`_local/tercen-style/specifications/Tercen-Style-Guide.html`** - Colours, typography
+3. **`patterns/app-frame.md`** - Overall screen structure (container, app types, top bar)
+4. **`patterns/left-panel.md`** - Left panel component (header, sections, collapse)
 
-Read and apply these specifications before creating any UI. Key points:
-- Use **left panel** for controls/filters (not top bars)
-- Follow the **8px spacing grid** (4, 8, 16, 24, 32, 48)
+Key points:
+
+- **App frame**: Flex container, left panel + main panel composition
+- **Three app types**: Simple App, Runner App, Data Step
+- **Top bar**: Only shown in full screen mode (not embedded)
+- **Left panel**: 280px default, collapsible to 48px icon strip
+- **Header**: App icon, title, theme toggle, collapse chevron
+- **Sections**: NOT internally collapsible - use vertical scroll
+- **Spacing**: 8px grid (4, 8, 16, 24, 32, 48)
 - **No right sidebars** - all panels on left
-- Size components to content, not "expand to fill"
+
+> **COMMON ERROR**: When implementing collapse, verify the panel **width changes to 48px**. A frequent mistake is hiding content but leaving the panel at 280px. The container width must animate from 280px → 48px.
+
+**Interactive demo**: `_local/left-panel-testboard.html`
 
 ## Asset-Based Mock Data
 
@@ -498,4 +509,6 @@ Mock implementation phase:
 
 ## Related Patterns
 
+- [Pattern: App Frame](../patterns/app-frame.md) - Overall screen structure (read first)
+- [Pattern: Left Panel](../patterns/left-panel.md) - Left panel UI component
 - [Pattern: Error Handling](../patterns/error-handling.md) - Mock error scenarios

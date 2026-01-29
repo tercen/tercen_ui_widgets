@@ -53,6 +53,14 @@ See `_local/tercen-style/specifications/README.md` for detailed guidance.
 | User toggles | Override system, save to localStorage |
 | User clears | Return to system preference |
 
+### Color Distinction
+
+| Theme | Primary Accent | Rationale |
+| ----- | -------------- | --------- |
+| Light | Blue (#1E40AF) | Tercen brand blue |
+| Dark | Violet (#6D28D9) with white text | Tercen violet, high contrast |
+| Links (dark) | Teal (#2DD4BF) | Distinct from action buttons |
+
 See `Tercen-Dark-Theme.html` for complete color tokens and Flutter implementation patterns.
 
 ## Directory Structure
@@ -73,8 +81,10 @@ This skills system uses a **modular architecture** for maintainability and cross
 │   ├── file-streaming.md
 │   ├── concurrency.md
 │   ├── error-handling.md
-│   └── tiff-conversion.md
-└── issues/                # Operational gotchas (1-9)
+│   ├── tiff-conversion.md
+│   ├── app-frame.md       # ← UI: Overall screen structure (read first)
+│   └── left-panel.md      # ← UI: Left panel component
+└── issues/                # Operational gotchas (1-11)
     ├── 1-wasm-build.md
     ├── 2-build-web-commit.md
     ├── 3-cors-errors.md
@@ -83,7 +93,9 @@ This skills system uses a **modular architecture** for maintainability and cross
     ├── 6-dev-files-organization.md
     ├── 7-hot-reload-broken.md
     ├── 8-mandatory-workflow.md
-    └── 9-ui-design-standards.md
+    ├── 9-ui-design-standards.md
+    ├── 10-metadata-data-resolution.md
+    └── 11-schema-filtering.md
 ```
 
 ## Skills Overview
@@ -248,6 +260,50 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 - Establish design system during **mock phase** (Skill 1)
 - Material Design 3 foundation
 - Centralized theme files: `app_theme.dart`, `app_colors.dart`, `app_spacing.dart`
+
+## UI Patterns
+
+**Reading order**: app-frame.md → left-panel.md → Functional Spec
+
+### App Frame Pattern
+
+**Overall screen structure** - read this FIRST. See [patterns/app-frame.md](patterns/app-frame.md).
+
+| Topic              | Coverage                                        |
+| ------------------ | ----------------------------------------------- |
+| Container          | Flex layout, 100vw × 100vh                      |
+| Components         | Left panel + main panel composition             |
+| App Types          | Simple App, Runner App, Data Step               |
+| Top Bar            | When to show, positioning, content              |
+| Context Detection  | Embedded vs full screen                         |
+| Main Content       | Flow direction, sizing principles               |
+
+### Left Panel Pattern
+
+**Left panel component** - read after app-frame.md. See [patterns/left-panel.md](patterns/left-panel.md).
+
+| Property        | Value                      |
+| --------------- | -------------------------- |
+| Default width   | 280px                      |
+| Collapsed width | 48px                       |
+| Header height   | 48px                       |
+| Resizable       | Yes (280-400px)            |
+| Sections        | NOT collapsible internally |
+
+**Header composition** (required elements):
+
+1. App Icon - click expands when collapsed
+2. App Title
+3. Theme Toggle - moon (light) / sun (dark)
+4. Collapse Chevron
+
+**Collapsed state**:
+
+- Section icons become vertical navigation strip
+- Click icon → expands AND scrolls to section
+- No duplicate icons (same elements, CSS transform)
+
+**Interactive demo**: `_local/left-panel-testboard.html`
 
 ## Implementation Status
 

@@ -393,11 +393,28 @@ Container(
 5. Lock design system before real implementation
 6. Real implementation inherits approved design system
 
+## UI Component Patterns
+
+### Left Panel
+
+**All Tercen apps use a left panel** for controls, filters, and navigation.
+
+See [Pattern: Left Panel](../patterns/left-panel.md) for complete specification including:
+
+- Dimensions (280px default, 48px collapsed)
+- Header composition (icon, title, theme toggle, collapse)
+- Section requirements (icons, labels, no internal collapsing)
+- Collapsed state behaviour (icon strip navigation)
+- Top bar rules (full screen mode only)
+
+**Interactive demo**: `_local/left-panel-testboard.html`
+
 ## Future Expansion
 
 Current standards are minimal. Future revisions will add:
 
-- [ ] Dark mode support
+- [x] Dark mode support (see Tercen-Dark-Theme.html)
+- [x] Left panel specification (see patterns/left-panel.md)
 - [ ] Comprehensive color palette (shades, tints)
 - [ ] Icon system standards
 - [ ] Animation standards
