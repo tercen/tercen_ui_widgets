@@ -308,6 +308,68 @@ From Tercen Layout Principles:
 - Light theme: `#F3F4F6` (--background)
 - Dark theme: `#0F172A` (--background)
 
+### Overflow Behaviour
+
+When content exceeds the visible area, **standard scrollbars** appear automatically.
+
+| Property | Value |
+|----------|-------|
+| Overflow mode | `auto` (scrollbars appear only when needed) |
+| Horizontal scroll | Yes, when content exceeds width |
+| Vertical scroll | Yes, when content exceeds height |
+| Scroll type | Standard browser scrollbars |
+| Pan/drag | No (not a canvas interaction) |
+
+**Rules**:
+
+1. **Scrollbars hidden by default** - Only appear when content overflows
+2. **Both directions supported** - Content can overflow right AND down
+3. **Standard scrollbars** - Use native browser/OS scrollbar styling
+4. **No pan/drag** - This is not a canvas; users scroll, not drag
+
+```dart
+// Main content area with auto-scroll
+Container(
+  color: Theme.of(context).colorScheme.background,
+  child: SingleChildScrollView(
+    scrollDirection: Axis.vertical,
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: widget.content,
+    ),
+  ),
+)
+
+// Or for grid/list content, use appropriate scrollable widget
+GridView.builder(
+  // GridView handles its own scrolling
+)
+```
+
+```css
+/* CSS implementation */
+.main-content {
+  flex: 1;
+  overflow: auto;  /* Scrollbars appear only when needed */
+  background: var(--background);
+}
+```
+
+**Visual diagram**:
+
+```text
+Content fits:                    Content overflows:
+┌────────────────────┐           ┌────────────────────┬─┐
+│                    │           │                    │▲│
+│   Content          │           │   Content ───────► │ │
+│                    │           │       │            │ │
+│                    │           │       ▼            │▼│
+└────────────────────┘           ├────────────────────┴─┤
+  No scrollbars                  │◄─────────────────────►│
+                                 └──────────────────────┘
+                                   Scrollbars appear
+```
+
 ## Flutter Implementation
 
 ```dart
