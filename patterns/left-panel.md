@@ -207,6 +207,8 @@ When collapsed, the panel transforms into an icon navigation strip.
      48px width
 ```
 
+> **COMMON ERROR - HEADER RESTRUCTURING**: When collapsed, the **chevron moves from header to footer**. Do NOT keep the chevron in the header row when collapsed - this causes overflow errors because icon (20px) + chevron button (32px) + padding won't fit in 48px. The collapsed header should contain ONLY the centred app icon.
+
 ### Collapsed Behavior
 
 | Element | Visibility | Behavior |

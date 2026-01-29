@@ -124,10 +124,10 @@ PamGene grids always have:
 |----------|-------|
 | Rows | 4 (one per well: W1, W2, W3, W4) |
 | Columns | Variable (one per unique barcode) |
-| Row Headers | Row numbers (1, 2, 3, 4) |
+| Row Headers | Well notation (W1, W2, W3, W4) |
 | Column Headers | Barcode values |
 | Column Order | Barcodes sorted alphanumerically (ascending) |
-| Row Order | Row numbers sorted numerically (ascending) |
+| Row Order | Wells sorted numerically (W1, W2, W3, W4) |
 
 ### PamGene-Specific Error Handling
 
@@ -372,14 +372,11 @@ class TercenImageService implements ImageService {
 
 **Columns**: Organized by barcode (unique plate IDs) - variable count
 
+**Corner Cell**: The top-left corner (intersection of row and column headers) should be empty/unlabelled unless the Functional Specification explicitly requests a label.
+
 **Cell Aspect Ratio**: Approximately 270:200 (1.35:1) optimized for microscopy images
 
-### Grid Cell Metadata Display
-
-Each cell should display:
-- Image thumbnail
-- Well and Field identifiers (e.g., "W1 F1")
-- Cycle and Exposure time (e.g., "Cycle 94 • 493ms")
+**Responsive Sizing**: Cells resize when available space changes (e.g., left panel collapse) while maintaining aspect ratio and ensuring all 4 rows remain visible without scrolling.
 
 ### UI Implementation
 
