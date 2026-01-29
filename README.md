@@ -2,6 +2,25 @@
 
 This directory contains Claude Skills for building Flutter web applications integrated with the Tercen platform.
 
+## Installation
+
+Clone this repository to your project's `.claude/` directory:
+
+```bash
+# From your project root
+git clone https://github.com/tercen/tercen-flutter-skills.git .claude/skills
+```
+
+Alternatively, if given the GitHub URL `https://github.com/tercen/tercen-flutter-skills`, use:
+
+```bash
+gh repo clone tercen/tercen-flutter-skills .claude/skills
+```
+
+Once installed, proceed to the MANDATORY FIRST STEP below.
+
+---
+
 ## MANDATORY FIRST STEP: Clone Style Guide
 
 **At the beginning of EVERY new project**, Claude MUST automatically clone the Tercen style guide:
