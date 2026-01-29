@@ -14,7 +14,7 @@ Developers skip planning phases and jump directly into coding:
 
 ## Impact
 
-ps12 project experienced:
+Real projects have experienced:
 - Authentication issues (manual HTTP instead of sci_tercen_client)
 - URL parsing problems (query params instead of path segments)
 - Deployment confusion (index.html base href, build/web/ not committed)
@@ -135,7 +135,7 @@ Claude: "⚠️ WORKFLOW REMINDER: Our standard process requires:
 5. User approval
 6. Code implementation
 
-Skipping planning phases often leads to rework (as happened with ps12 authentication).
+Skipping planning phases often leads to rework.
 
 Should we follow the proper workflow, or proceed directly to implementation?"
 ```

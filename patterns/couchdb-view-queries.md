@@ -131,10 +131,10 @@ final files = await fileService.findFileByWorkflowIdAndStepId(
 
 **Common bug**: Forgetting to swap keys when using `descending: true`
 
-**From ps12 implementation:**
-- Initial implementation used `descending: true` and failed
-- Changed to `descending: false` and it worked
-- **Recommendation**: Always use `descending: false` unless you have specific reason
+**Common pitfall:**
+- Using `descending: true` often fails due to key ordering confusion
+- Using `descending: false` is more reliable
+- **Recommendation**: Always use `descending: false` unless you have a specific reason
 
 ## Complete Implementation Patterns
 

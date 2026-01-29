@@ -100,7 +100,7 @@ This skills system uses a **modular architecture** for maintainability and cross
 
 ## Skills Overview
 
-These skills codify learnings from the `ps12_image_overview_flutter_operator` project and provide reusable patterns for future Tercen Flutter development.
+These skills provide reusable patterns for Tercen Flutter development.
 
 ### Skill Hierarchy
 
@@ -187,7 +187,7 @@ Each skill extends the previous one, building on established patterns.
 5. **User Approval** (ExitPlanMode tool)
 6. **Implementation** - Follow approved plan
 
-**Why this matters**: ps12 project had authentication issues, URL parsing problems, and deployment confusion that planning would have prevented.
+**Why this matters**: Real projects have experienced authentication issues, URL parsing problems, and deployment confusion that planning would have prevented.
 
 ## How to Use These Skills
 
@@ -204,9 +204,7 @@ Each skill extends the previous one, building on established patterns.
 
 Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 
-- **Skill 1**: ps12 example project
 - **Skill 2**: All 4 Tercen API repos (sci_tercen_client, sci_http_client, sci_base, sci_tercen_model)
-- **Skill 3**: ps12 complete example
 
 ### Key Repositories Referenced
 
@@ -214,7 +212,6 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 2. **sci_http_client** (v1.0.4) - HTTP client with CORS handling
 3. **sci_base** (v1.2.1) - Core service abstractions
 4. **sci_tercen_model** (v1.0.0) - 214+ Tercen data models
-5. **ps12_image_overview_flutter_operator** - Working example
 
 ## Critical Gotchas (Issue #1-9)
 
@@ -324,7 +321,3 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 - New developers onboard faster
 - **Authentication and deployment issues won't repeat**
 - **All operational gotchas documented and enforced**
-
----
-
-Generated from ps12_image_overview_flutter_operator learnings and 4 conversation transcripts.

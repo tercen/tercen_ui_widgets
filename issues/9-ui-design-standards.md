@@ -328,7 +328,7 @@ Card(
 GridView.builder(
   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: columns,
-    childAspectRatio: 270 / 200,  // ps12: 270px × 200px cells
+    childAspectRatio: 1.35,  // Adjust based on content type
     crossAxisSpacing: AppSpacing.s,
     mainAxisSpacing: AppSpacing.s,
   ),

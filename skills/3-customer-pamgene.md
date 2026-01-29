@@ -19,19 +19,20 @@ This skill covers PamGene domain-specific patterns:
 - Filter defaults (latest cycle, longest exposure)
 - Domain-specific error handling
 
-## Prerequisites - Auto-Fetch Example Project
+## Prerequisites - Mock Data Sources
 
-```bash
-# Auto-fetch ps12 working example
-gh repo clone tercen/ps12_image_overview_flutter_operator --depth 1 /tmp/tercen-refs/ps12
-```
+For mock implementation, the user should provide ONE of:
 
-**Key files to review**:
+1. **Production PamGene ZIP file** - Contains `ImageResults/` folder with TIFF images
+   - AI extracts TIFFs from ZIP
+   - Converts 16-bit TIFF → 8-bit PNG using TiffConverter
+   - Places converted PNGs in `assets/` folder
 
-- `lib/utils/tiff_converter.dart` - TIFF conversion utility
-- `lib/implementations/services/mock_image_service.dart` - Filename parsing examples
-- `lib/implementations/services/tercen_image_service.dart` - Complete implementation
-- `assets/` - Real PamGene PNG samples
+2. **Pre-converted PNG assets** - Ready-to-use images
+   - User provides PNG files already converted from TIFFs
+   - Place directly in `assets/` folder
+
+**If no data is provided**: Ask the user to supply either a PamGene ZIP file or PNG assets before proceeding with mock implementation.
 
 ---
 
@@ -563,22 +564,26 @@ class MockImageService implements ImageService {
 }
 ```
 
-## Complete Example
+## Implementation File Structure
 
-Reference implementation: `ps12_image_overview_flutter_operator`
+A complete PamGene implementation typically includes these files:
 
-**Review these files**:
-- `lib/utils/tiff_converter.dart` - Complete TIFF conversion
-- `lib/utils/pamgene_filename_parser.dart` - Filename parsing
-- `lib/presentation/providers/image_overview_provider.dart` - Filtering logic
-- `lib/presentation/widgets/image_grid.dart` - Grid layout
-- `lib/implementations/services/tercen_image_service.dart` - Full integration
+| File | Purpose |
+|------|---------|
+| `lib/utils/tiff_converter.dart` | TIFF to PNG conversion (see Pattern above) |
+| `lib/utils/pamgene_filename_parser.dart` | Filename parsing utility |
+| `lib/presentation/providers/image_overview_provider.dart` | State management with filtering |
+| `lib/presentation/widgets/image_grid.dart` | Grid layout widget |
+| `lib/implementations/services/mock_image_service.dart` | Mock data service |
+| `lib/implementations/services/tercen_image_service.dart` | Real Tercen integration |
+
+All code patterns for these files are documented in this skill and the TIFF Conversion pattern.
 
 ## Checklist
 
 PamGene-specific implementation:
 
-- [ ] Auto-fetch ps12 example project for reference
+- [ ] Obtain mock data (user-provided ZIP or PNG assets)
 - [ ] Implement PamGeneFilenameParser utility
 - [ ] Implement TiffConverter utility (16-bit → 8-bit)
 - [ ] Test TIFF conversion with sample files

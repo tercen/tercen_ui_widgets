@@ -2,7 +2,6 @@
 
 **Severity**: CRITICAL - ARCHITECTURAL
 **Frequency**: Any operation needing dot-prefixed columns
-**First Discovered**: ps12_image_overview_flutter_operator (2026-01-26)
 
 ## The Behavior
 

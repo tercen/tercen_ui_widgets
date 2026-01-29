@@ -2,7 +2,6 @@
 
 **Severity**: CRITICAL - FOUNDATIONAL CONCEPT
 **Frequency**: Every operator that accesses files or data
-**First Discovered**: ps12_image_overview_flutter_operator (2026-01-26)
 
 ## The Architecture
 

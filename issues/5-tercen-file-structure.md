@@ -232,14 +232,14 @@ git status
 
 ```json
 {
-  "name": "Image Overview",
-  "description": "View and filter microscopy images from PamGene experiments",
+  "name": "Your Operator Name",
+  "description": "Brief description of what this operator does",
   "isWebApp": true,
   "isViewOnly": false,
   "entryType": "app",
-  "tags": ["workflow", "visualization", "images"],
+  "tags": ["workflow", "visualization"],
   "authors": ["tercen"],
-  "urls": ["https://github.com/tercen/ps12_image_overview_flutter_operator"],
+  "urls": ["https://github.com/tercen/your-operator-repo"],
   "serve": "build/web",
   "properties": [],
   "auth": [""]
