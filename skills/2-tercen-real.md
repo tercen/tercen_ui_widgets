@@ -42,6 +42,42 @@ gh repo clone tercen/sci_tercen_model --depth 1 /tmp/tercen-refs/sci_tercen_mode
 **From sci_base**:
 - `lib/sci_client_base.dart` - Service abstractions
 
+## Tercen Input Schema
+
+### documentId Column
+
+Tercen operators receive input via the standard operator interface. For file-based operators:
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `.documentId` | String | Reference to file in Tercen storage |
+
+**Important:** The `.documentId` points to a file (often a ZIP archive), not directly to the content. The file must be downloaded and processed.
+
+### ZIP File Handling
+
+When `.documentId` references a ZIP archive:
+
+1. Download the ZIP file using `fileService.download(documentId)`
+2. Extract contents in memory or to temporary storage
+3. Process individual files from the archive
+4. Domain-specific structure (e.g., `ImageResults/` for PamGene) defined in customer skills
+
+```dart
+Future<Uint8List> downloadZipFile(String documentId) async {
+  final stream = _factory.fileService.download(documentId);
+  final chunks = <List<int>>[];
+
+  await for (final chunk in stream) {
+    chunks.add(chunk);
+  }
+
+  return Uint8List.fromList(chunks.expand((x) => x).toList());
+}
+```
+
+---
+
 ## Pattern 1: Authentication
 
 **See**: [Pattern: Authentication](../patterns/authentication.md)

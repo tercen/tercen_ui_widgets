@@ -10,11 +10,14 @@
 
 This skill covers PamGene domain-specific patterns:
 - PamGene filename parsing (`{barcode}_W{well}_F{field}...`)
+- TIFF EXIF metadata extraction
+- Data models (ImageMetadata, ImageCollection, FilterCriteria)
 - TIFF conversion utilities (16-bit → 8-bit PNG)
-- Grid layout patterns (270px × 200px cells)
+- ZIP archive structure (`ImageResults/` directory)
+- Grid layout patterns (4 rows × N barcodes)
 - Well/Field/Array mapping
 - Filter defaults (latest cycle, longest exposure)
-- Domain-specific UI patterns
+- Domain-specific error handling
 
 ## Prerequisites - Auto-Fetch Example Project
 
@@ -24,10 +27,117 @@ gh repo clone tercen/ps12_image_overview_flutter_operator --depth 1 /tmp/tercen-
 ```
 
 **Key files to review**:
+
 - `lib/utils/tiff_converter.dart` - TIFF conversion utility
 - `lib/implementations/services/mock_image_service.dart` - Filename parsing examples
 - `lib/implementations/services/tercen_image_service.dart` - Complete implementation
 - `assets/` - Real PamGene PNG samples
+
+---
+
+## PamGene Data Specification
+
+### ZIP Archive Structure
+
+PamGene data is delivered as ZIP archives with a specific structure:
+
+```text
+{archive}.zip
+└── ImageResults/
+    ├── {barcode}_W{well}_F{field}_T{temp}_P{cycle}_I{exposure}_A{array}.tif
+    ├── {barcode}_W{well}_F{field}_T{temp}_P{cycle}_I{exposure}_A{array}.tif
+    └── ...
+```
+
+**Important:** Images are located in the `ImageResults/` subdirectory within the ZIP, not at the root level.
+
+### TIFF EXIF Tag Mapping
+
+PamGene TIFF files contain metadata in EXIF tags:
+
+| EXIF Tag | Internal Name | Type | Description |
+|----------|---------------|------|-------------|
+| DateTime | date_time | String | Capture timestamp |
+| Barcode | barcode | String | Plate barcode (9 digits) |
+| Col | col | Integer | Column position |
+| Cycle | cycle | Integer | Pump cycle number |
+| Exposure Time | exposure_time | Integer | Exposure in milliseconds |
+| Filter | filter | String | Optical filter used |
+| PS12 | ps12 | String | Instrument identifier |
+| Row | row | Integer | Row position |
+| Temperature | temperature | Float | Temperature in °C |
+| Timestamp | timestamp | String | Unix timestamp |
+| Instrument Unit | instrument_unit | String | Instrument serial number |
+| Run ID | run_id | String | Unique run identifier |
+
+### EXIF Fallback Behaviour
+
+If EXIF tags are missing or corrupted:
+
+1. Attempt to parse metadata from filename using `PamGeneFilenameParser`
+2. Use filename-parsed values as fallback
+3. Log warning for missing EXIF data
+4. Continue processing (do not fail on missing metadata)
+
+### Data Models
+
+#### ImageMetadata
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| id | String | Yes | Unique identifier |
+| filename | String | Yes | Original TIFF filename |
+| barcode | String | Yes | Plate barcode |
+| well | Integer | Yes | Well number (1-4) |
+| field | Integer | Yes | Field of view number |
+| cycle | Integer | Yes | Pump cycle number |
+| exposureTime | Integer | Yes | Exposure in milliseconds |
+| row | Integer | No | Row position |
+| col | Integer | No | Column position |
+| temperature | Float | No | Temperature in °C |
+| dateTime | String | No | Capture timestamp |
+| runId | String | No | Run identifier |
+
+#### ImageCollection
+
+| Field | Type | Description |
+|-------|------|-------------|
+| images | List\<ImageMetadata\> | All loaded images |
+| barcodes | List\<String\> | Unique barcode values (sorted) |
+| wells | List\<Integer\> | Unique well values (sorted) |
+| cycles | List\<Integer\> | Unique cycle values (sorted) |
+| exposureTimes | List\<Integer\> | Unique exposure time values (sorted) |
+
+#### FilterCriteria
+
+| Field | Type | Description |
+|-------|------|-------------|
+| cycle | Integer? | Selected cycle (null = no filter) |
+| exposureTime | Integer? | Selected exposure time (null = no filter) |
+
+### Grid Structure
+
+PamGene grids always have:
+
+| Property | Value |
+|----------|-------|
+| Rows | 4 (one per well: W1, W2, W3, W4) |
+| Columns | Variable (one per unique barcode) |
+| Row Headers | Row numbers (1, 2, 3, 4) |
+| Column Headers | Barcode values |
+| Column Order | Barcodes sorted alphanumerically (ascending) |
+| Row Order | Row numbers sorted numerically (ascending) |
+
+### PamGene-Specific Error Handling
+
+| Error | User Message | Handling |
+|-------|--------------|----------|
+| No images in ZIP | "No images found in the uploaded file" | Display message, check `ImageResults/` path |
+| Filename parse failure | (silent) | Skip image, log warning, continue with others |
+| Image render failure | Show placeholder with error icon | Display placeholder, don't break grid |
+| No images match filter | "No images match the selected filters" | Display message, suggest changing filters |
+
+---
 
 ## Pattern 1: PamGene Filename Convention
 

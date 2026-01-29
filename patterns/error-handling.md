@@ -210,6 +210,16 @@ try {
 | 403 | Permission denied | Check user permissions |
 | CORS | Manual HTTP call (not using client) | Always use ServiceFactory |
 
+### Data Loading Error Reference
+
+Standard handling for common data loading errors:
+
+| Error | User Message | Handling |
+|-------|--------------|----------|
+| Invalid documentId | "Unable to access the requested file" | Display error, prevent further loading |
+| ZIP download failure | "Failed to download file. Please try again." | Display error with retry button |
+| ZIP extraction failure | "Unable to read the uploaded file" | Display error message |
+
 ### Parameter Validation
 
 Validate required URL parameters before attempting API calls:

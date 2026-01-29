@@ -404,6 +404,36 @@ void main() {
 }
 ```
 
+## Error Handling
+
+### TIFF Processing Error Reference
+
+| Error | Handling |
+|-------|----------|
+| Invalid TIFF format | Skip image, log warning, continue with other images |
+| TIFF conversion failure | Skip image, log warning, continue with other images |
+| Missing EXIF data | Use filename parsing as fallback (see Skill 3) |
+
+### Graceful Degradation
+
+```dart
+Future<Uint8List?> convertTiffSafely(Uint8List tiffBytes, String filename) async {
+  try {
+    final pngBytes = TiffConverter.convertToPng(tiffBytes);
+    if (pngBytes == null) {
+      print('⚠️ TIFF conversion returned null for $filename');
+      return null;
+    }
+    return pngBytes;
+  } catch (e) {
+    print('✗ TIFF conversion failed for $filename: $e');
+    return null; // Skip this image, don't fail the batch
+  }
+}
+```
+
+---
+
 ## Common Issues
 
 ### Wrong Byte Order
