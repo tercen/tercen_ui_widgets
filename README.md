@@ -41,33 +41,36 @@ This is **standard operating procedure** - Claude should do this automatically w
 
 ## Required: Tercen UI Design System
 
-**Before creating any UI**, start with the [UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md) - the master navigation for all design documentation.
+**Before creating any UI**, start with the [UI-DESIGN-MAP.md](_local/tercen-style/claude-skills/foundation/UI-DESIGN-MAP.md) - the master navigation for all design documentation.
+
+**IMPORTANT**: UI specifications live in `_local/tercen-style/claude-skills/` (cloned automatically in Phase 1). This is the single source of truth - no duplication.
 
 ### Optimized Documentation Structure
 
 ```
-foundation/           ← Start here
-├── UI-DESIGN-MAP.md  ← Master navigation (READ FIRST)
-└── design-tokens.md  ← Single source of truth for all values
-
-visual/               ← Color & typography application
-├── visual-style-light.md
-├── visual-style-dark.md
-└── visual-style-icons.md
-
-components/           ← Component specifications
-├── component-button.md
-├── component-panel.md
-├── component-form-controls.md
-├── component-grid.md
-└── component-table.md
-
-patterns/             ← How components compose
-├── app-frame.md      ← Overall structure
-└── left-panel.md     ← Left panel pattern
+_local/tercen-style/claude-skills/    ← Single source of truth
+├── foundation/           ← Start here
+│   ├── UI-DESIGN-MAP.md  ← Master navigation (READ FIRST)
+│   └── design-tokens.md  ← Single source of truth for all values
+│
+├── visual/               ← Color & typography application
+│   ├── visual-style-light.md
+│   ├── visual-style-dark.md
+│   └── visual-style-icons.md
+│
+├── components/           ← Component specifications
+│   ├── component-button.md
+│   ├── component-panel.md
+│   ├── component-form-controls.md
+│   ├── component-grid.md
+│   └── component-table.md
+│
+└── patterns/             ← How components compose
+    ├── app-frame.md      ← Overall structure
+    └── left-panel.md     ← Left panel pattern
 ```
 
-**Entry point**: [foundation/UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md)
+**Entry point**: `_local/tercen-style/claude-skills/foundation/UI-DESIGN-MAP.md`
 
 **Original HTML specifications** (in `_local/tercen-style/specifications/`) remain as visual reference but are not authoritative. Use the optimized markdown files above.
 
@@ -113,17 +116,23 @@ This skills system uses a **modular architecture** for maintainability and cross
 │   ├── 1-tercen-mock.md
 │   ├── 2-tercen-real.md
 │   └── 3-customer-pamgene.md
-├── patterns/              # Reusable code patterns
-│   ├── functional-spec-discovery.md  # ← Planning: Read in Phase 2
+├── patterns/              # Reusable code patterns (Tercen/Flutter specific)
+│   ├── functional-spec-discovery.md    # Planning: Read in Phase 2
 │   ├── authentication.md
-│   ├── url-parsing.md
-│   ├── file-streaming.md
+│   ├── column-data-extraction.md
 │   ├── concurrency.md
+│   ├── couchdb-view-queries.md
+│   ├── debug-tools.md
 │   ├── error-handling.md
+│   ├── file-streaming.md
+│   ├── lazy-loading.md
+│   ├── metadata-data-resolution.md
+│   ├── servicefactory-initialization.md
+│   ├── task-hierarchy-navigation.md
+│   ├── tercen-model-types.md
 │   ├── tiff-conversion.md
-│   ├── app-frame.md       # ← UI: Overall screen structure
-│   └── left-panel.md      # ← UI: Left panel component
-└── issues/                # Operational gotchas (1-11)
+│   └── url-parsing.md
+└── issues/                # Operational gotchas (1-12)
     ├── 1-wasm-build.md
     ├── 2-build-web-commit.md
     ├── 3-cors-errors.md
@@ -134,8 +143,11 @@ This skills system uses a **modular architecture** for maintainability and cross
     ├── 8-mandatory-workflow.md
     ├── 9-ui-design-standards.md
     ├── 10-metadata-data-resolution.md
-    └── 11-schema-filtering.md
+    ├── 11-schema-filtering.md
+    └── 12-app-frame-layout-structure.md
 ```
+
+**Note**: UI patterns (app-frame, left-panel) now live in `_local/tercen-style/claude-skills/patterns/` - single source of truth, no duplication.
 
 ## Skills Overview
 
@@ -289,10 +301,10 @@ When given the GitHub URL for this skills repo, Claude MUST:
    ```
 
 3. **Read the UI design system** (required before any UI planning):
-   - [ ] `foundation/UI-DESIGN-MAP.md` (master navigation - read first)
-   - [ ] `foundation/design-tokens.md` (all dimension, color, typography values)
-   - [ ] `visual/visual-style-light.md` (color application for light theme)
-   - [ ] `patterns/app-frame.md` and `patterns/left-panel.md` (structure patterns)
+   - [ ] `_local/tercen-style/claude-skills/foundation/UI-DESIGN-MAP.md` (master navigation - read first)
+   - [ ] `_local/tercen-style/claude-skills/foundation/design-tokens.md` (all dimension, color, typography values)
+   - [ ] `_local/tercen-style/claude-skills/visual/visual-style-light.md` (color application for light theme)
+   - [ ] `_local/tercen-style/claude-skills/patterns/app-frame.md` and `patterns/left-panel.md` (structure patterns)
 
 4. **Identify skill level** based on project requirements:
    - Skill 0: Generic Flutter (always read first)
@@ -382,8 +394,8 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 **Plan Mode required** for all non-trivial features. No skipping specs.
 
 ### Issue #9: UI Design Standards
-- **Read [foundation/UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md) FIRST** before creating UI
-- Follow [design-tokens.md](foundation/design-tokens.md) for all values (8px grid, spacing scale)
+- **Read `_local/tercen-style/claude-skills/foundation/UI-DESIGN-MAP.md` FIRST** before creating UI
+- Follow `_local/tercen-style/claude-skills/foundation/design-tokens.md` for all values (8px grid, spacing scale)
 - Apply C.R.A.P. principles: Contrast, Repetition, Alignment, Proximity
 - Equal gaps in grids (4px both directions)
 - Panel header: accent background + white text
@@ -393,13 +405,17 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 
 ## UI Patterns
 
-**Entry point**: [foundation/UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md) - Master navigation for all UI documentation
+**Entry point**: `_local/tercen-style/claude-skills/foundation/UI-DESIGN-MAP.md` - Master navigation for all UI documentation
+
+**Location**: All UI specs live in `_local/tercen-style/claude-skills/` (single source of truth)
 
 **Reading order**: UI-DESIGN-MAP → design-tokens → visual-style-light → app-frame → left-panel
 
 ### Design System Hierarchy
 
 ```
+_local/tercen-style/claude-skills/    ← All specs here
+
 1. FOUNDATION (read first)
    ├── UI-DESIGN-MAP.md ← Master navigation, decision tree
    └── design-tokens.md ← Single source of truth (spacing, colors, dimensions)
@@ -423,15 +439,17 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 
 ### Key Specifications
 
+All files in `_local/tercen-style/claude-skills/`:
+
 | Topic | File | Key Info |
 |-------|------|----------|
-| **All values** | [design-tokens.md](foundation/design-tokens.md) | Spacing (4,8,16,24,32,48), dimensions, colors |
-| **Screen structure** | [app-frame.md](patterns/app-frame.md) | Container, panels, 3 app types, context detection |
-| **Left panel** | [left-panel.md](patterns/left-panel.md) | 280px default, 48px collapsed, header composition |
-| **Panel component** | [component-panel.md](components/component-panel.md) | Complete panel behavior, collapse, resize |
-| **Light theme** | [visual-style-light.md](visual/visual-style-light.md) | Color application, button styles, form controls |
-| **Dark theme** | [visual-style-dark.md](visual/visual-style-dark.md) | Violet accent, dark backgrounds, contrast |
-| **Icons** | [visual-style-icons.md](visual/visual-style-icons.md) | FontAwesome selection, semantic colors |
+| **All values** | `foundation/design-tokens.md` | Spacing (4,8,16,24,32,48), dimensions, colors |
+| **Screen structure** | `patterns/app-frame.md` | Container, panels, 3 app types, context detection |
+| **Left panel** | `patterns/left-panel.md` | 280px default, 48px collapsed, header composition |
+| **Panel component** | `components/component-panel.md` | Complete panel behavior, collapse, resize |
+| **Light theme** | `visual/visual-style-light.md` | Color application, button styles, form controls |
+| **Dark theme** | `visual/visual-style-dark.md` | Violet accent, dark backgrounds, contrast |
+| **Icons** | `visual/visual-style-icons.md` | FontAwesome selection, semantic colors |
 
 **Benefits of optimized structure**:
 - Zero redundancy (single source of truth)
