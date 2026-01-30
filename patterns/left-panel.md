@@ -130,6 +130,116 @@ Each section has:
 | Navigation | Vertical scroll (no tabs) |
 | Borders | Bottom border between sections |
 
+### Standard Sections
+
+All Tercen apps MUST include an **INFO** section as the last section in the left panel.
+
+#### INFO Section Requirements
+
+| Element | Requirement |
+| ------- | ----------- |
+| Icon | `fa-info-circle` |
+| Label | "INFO" (uppercase) |
+| Position | Last section (bottom of panel) |
+
+**Content Requirements:**
+
+1. **GitHub Line** (required for all apps):
+   - **Label**: "GitHub" (left-aligned)
+   - **Value**: Hyperlink to the GitHub repository
+   - **Link Text**:
+     - Git tag if available (e.g., "v1.2.3")
+     - OR 7-character short commit hash (e.g., "6f8c872")
+     - OR blank/empty if unknown (during development)
+
+**Implementation:**
+
+Use a build-time script to capture git information and generate a Dart constants file:
+
+```dart
+// lib/core/version/version_info.dart
+class VersionInfo {
+  static const String gitRepo = 'https://github.com/tercen/my-app';
+  static const String gitVersion = '6f8c872'; // or 'v1.2.3' or ''
+}
+```
+
+**Build Script** (add to `scripts/generate_version.dart`):
+
+```dart
+import 'dart:io';
+
+void main() async {
+  // Get git tag or commit hash
+  final gitTag = await _runGit(['describe', '--tags', '--exact-match']);
+  final gitHash = await _runGit(['rev-parse', '--short=7', 'HEAD']);
+  final gitRemote = await _runGit(['config', '--get', 'remote.origin.url']);
+
+  final version = gitTag ?? gitHash ?? '';
+  final repo = _formatRepoUrl(gitRemote ?? '');
+
+  final content = '''
+// GENERATED FILE - Do not edit
+// Generated at build time from git repository
+
+class VersionInfo {
+  static const String gitRepo = '$repo';
+  static const String gitVersion = '$version';
+}
+''';
+
+  await File('lib/core/version/version_info.dart').writeAsString(content);
+}
+
+Future<String?> _runGit(List<String> args) async {
+  try {
+    final result = await Process.run('git', args);
+    return result.exitCode == 0 ? result.stdout.toString().trim() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+String _formatRepoUrl(String remote) {
+  // Convert git@github.com:tercen/app.git to https://github.com/tercen/app
+  return remote
+      .replaceAll('git@github.com:', 'https://github.com/')
+      .replaceAll('.git', '');
+}
+```
+
+**Run before build:**
+
+```bash
+dart run scripts/generate_version.dart
+flutter build web
+```
+
+**Display in INFO section:**
+
+```dart
+// In left panel INFO section content
+if (VersionInfo.gitVersion.isNotEmpty)
+  Row(
+    children: [
+      Text('GitHub:', style: AppTextStyles.labelMedium),
+      SizedBox(width: AppSpacing.xs),
+      Expanded(
+        child: InkWell(
+          onTap: () => launchUrl(Uri.parse(VersionInfo.gitRepo)),
+          child: Text(
+            VersionInfo.gitVersion,
+            style: AppTextStyles.labelMedium.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+```
+
 ```dart
 class LeftPanelSection extends StatelessWidget {
   final IconData icon;
