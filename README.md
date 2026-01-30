@@ -39,18 +39,37 @@ fi
 
 This is **standard operating procedure** - Claude should do this automatically without the user needing to provide the style guide.
 
-## Required: Tercen Style Specifications
+## Required: Tercen UI Design System
 
-**Before creating any UI**, Claude must read the style specifications in `_local/tercen-style/specifications/`:
+**Before creating any UI**, start with the [UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md) - the master navigation for all design documentation.
 
-| Specification | Purpose |
-| ------------- | ------- |
-| `Tercen-Layout-Principles.html` | C.R.A.P. design, 8px spacing grid, component sizing |
-| `Tercen-Style-Guide.html` | Colors, typography, visual identity |
-| `Tercen-Icon-Semantic-Map.html` | FontAwesome + 6 Tercen custom icons |
-| `Tercen-Dark-Theme.html` | Dark theme colors, implementation patterns |
+### Optimized Documentation Structure
 
-See `_local/tercen-style/specifications/README.md` for detailed guidance.
+```
+foundation/           ← Start here
+├── UI-DESIGN-MAP.md  ← Master navigation (READ FIRST)
+└── design-tokens.md  ← Single source of truth for all values
+
+visual/               ← Color & typography application
+├── visual-style-light.md
+├── visual-style-dark.md
+└── visual-style-icons.md
+
+components/           ← Component specifications
+├── component-button.md
+├── component-panel.md
+├── component-form-controls.md
+├── component-grid.md
+└── component-table.md
+
+patterns/             ← How components compose
+├── app-frame.md      ← Overall structure
+└── left-panel.md     ← Left panel pattern
+```
+
+**Entry point**: [foundation/UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md)
+
+**Original HTML specifications** (in `_local/tercen-style/specifications/`) remain as visual reference but are not authoritative. Use the optimized markdown files above.
 
 ## MANDATORY: Dark Mode Support
 
@@ -269,10 +288,11 @@ When given the GitHub URL for this skills repo, Claude MUST:
    git clone https://github.com/tercen/tercen-style.git _local/tercen-style
    ```
 
-3. **Read the style specifications** (required before any UI planning):
-   - [ ] `_local/tercen-style/specifications/Tercen-Layout-Principles.html`
-   - [ ] `_local/tercen-style/specifications/Tercen-Style-Guide.html`
-   - [ ] `_local/tercen-style/specifications/Tercen-Icon-Semantic-Map.html`
+3. **Read the UI design system** (required before any UI planning):
+   - [ ] `foundation/UI-DESIGN-MAP.md` (master navigation - read first)
+   - [ ] `foundation/design-tokens.md` (all dimension, color, typography values)
+   - [ ] `visual/visual-style-light.md` (color application for light theme)
+   - [ ] `patterns/app-frame.md` and `patterns/left-panel.md` (structure patterns)
 
 4. **Identify skill level** based on project requirements:
    - Skill 0: Generic Flutter (always read first)
@@ -362,55 +382,63 @@ Skills automatically clone reference repositories to `/tmp/tercen-refs/`:
 **Plan Mode required** for all non-trivial features. No skipping specs.
 
 ### Issue #9: UI Design Standards
-- **Read `_local/tercen-style/specifications/` FIRST** before creating UI
-- Apply Tercen Layout Principles (C.R.A.P., 8px grid, equal gaps)
+- **Read [foundation/UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md) FIRST** before creating UI
+- Follow [design-tokens.md](foundation/design-tokens.md) for all values (8px grid, spacing scale)
+- Apply C.R.A.P. principles: Contrast, Repetition, Alignment, Proximity
+- Equal gaps in grids (4px both directions)
+- Panel header: accent background + white text
 - Establish design system during **mock phase** (Skill 1)
 - Material Design 3 foundation
 - Centralized theme files: `app_theme.dart`, `app_colors.dart`, `app_spacing.dart`
 
 ## UI Patterns
 
-**Reading order**: app-frame.md → left-panel.md → Functional Spec
+**Entry point**: [foundation/UI-DESIGN-MAP.md](foundation/UI-DESIGN-MAP.md) - Master navigation for all UI documentation
 
-### App Frame Pattern
+**Reading order**: UI-DESIGN-MAP → design-tokens → visual-style-light → app-frame → left-panel
 
-**Overall screen structure** - read this FIRST. See [patterns/app-frame.md](patterns/app-frame.md).
+### Design System Hierarchy
 
-| Topic              | Coverage                                        |
-| ------------------ | ----------------------------------------------- |
-| Container          | Flex layout, 100vw × 100vh                      |
-| Components         | Left panel + main panel composition             |
-| App Types          | Simple App, Runner App, Data Step               |
-| Top Bar            | When to show, positioning, content              |
-| Context Detection  | Embedded vs full screen                         |
-| Main Content       | Flow direction, sizing principles               |
+```
+1. FOUNDATION (read first)
+   ├── UI-DESIGN-MAP.md ← Master navigation, decision tree
+   └── design-tokens.md ← Single source of truth (spacing, colors, dimensions)
 
-### Left Panel Pattern
+2. VISUAL STYLE (colors, typography applied)
+   ├── visual-style-light.md
+   ├── visual-style-dark.md
+   └── visual-style-icons.md
 
-**Left panel component** - read after app-frame.md. See [patterns/left-panel.md](patterns/left-panel.md).
+3. COMPONENTS (what exists, how it works)
+   ├── component-button.md
+   ├── component-panel.md
+   ├── component-form-controls.md
+   ├── component-grid.md
+   └── component-table.md
 
-| Property        | Value                      |
-| --------------- | -------------------------- |
-| Default width   | 280px                      |
-| Collapsed width | 48px                       |
-| Header height   | 48px                       |
-| Resizable       | Yes (280-400px)            |
-| Sections        | NOT collapsible internally |
+4. PATTERNS (how components compose)
+   ├── app-frame.md     ← Overall screen structure
+   └── left-panel.md    ← Left panel composition
+```
 
-**Header composition** (required elements):
+### Key Specifications
 
-1. App Icon - click expands when collapsed
-2. App Title
-3. Theme Toggle - moon (light) / sun (dark)
-4. Collapse Chevron
+| Topic | File | Key Info |
+|-------|------|----------|
+| **All values** | [design-tokens.md](foundation/design-tokens.md) | Spacing (4,8,16,24,32,48), dimensions, colors |
+| **Screen structure** | [app-frame.md](patterns/app-frame.md) | Container, panels, 3 app types, context detection |
+| **Left panel** | [left-panel.md](patterns/left-panel.md) | 280px default, 48px collapsed, header composition |
+| **Panel component** | [component-panel.md](components/component-panel.md) | Complete panel behavior, collapse, resize |
+| **Light theme** | [visual-style-light.md](visual/visual-style-light.md) | Color application, button styles, form controls |
+| **Dark theme** | [visual-style-dark.md](visual/visual-style-dark.md) | Violet accent, dark backgrounds, contrast |
+| **Icons** | [visual-style-icons.md](visual/visual-style-icons.md) | FontAwesome selection, semantic colors |
 
-**Collapsed state**:
-
-- Section icons become vertical navigation strip
-- Click icon → expands AND scrolls to section
-- No duplicate icons (same elements, CSS transform)
-
-**Interactive demo**: `_local/left-panel-testboard.html`
+**Benefits of optimized structure**:
+- Zero redundancy (single source of truth)
+- Clear separation of concerns (layout ≠ style ≠ behavior)
+- 62% token reduction vs HTML format
+- Reference-based (no duplication)
+- Discoverable hierarchy with decision tree
 
 ## Implementation Status
 

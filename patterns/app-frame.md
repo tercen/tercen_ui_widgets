@@ -4,7 +4,11 @@
 
 **Read this FIRST** before reading component patterns (left-panel.md, etc.)
 
-**Reference**: `_local/left-panel-testboard.html` (v3.1) - Interactive demonstration
+**Prerequisites**:
+- Read [../foundation/UI-DESIGN-MAP.md](../foundation/UI-DESIGN-MAP.md) for navigation
+- Read [../foundation/design-tokens.md](../foundation/design-tokens.md) for dimensions
+
+---
 
 ## Overview
 
@@ -12,13 +16,15 @@ All Tercen apps share a common frame structure. This pattern defines the overall
 
 ## Reading Order
 
-When building a Tercen app UI, Claude should read patterns in this order:
+When building a Tercen app UI, read patterns in this order:
 
 ```
 1. app-frame.md        ← You are here (overall structure)
 2. left-panel.md       ← Left panel component
 3. Functional Spec     ← App-specific content
 ```
+
+---
 
 ## Frame Structure
 
@@ -39,13 +45,17 @@ When building a Tercen app UI, Claude should read patterns in this order:
 └─────────────────────────────────────────────────────────────┘
 ```
 
+---
+
 ## Container Rules
+
+All dimensions reference [design-tokens.md](../foundation/design-tokens.md#container-dimensions).
 
 | Property | Value |
 |----------|-------|
 | Layout | Flex row |
-| Width | 100vw (full viewport) |
-| Height | 100vh (full viewport) |
+| Width | `appContainerWidth` (100vw) |
+| Height | `appContainerHeight` (100vh) |
 | Overflow | Hidden (components handle their own scroll) |
 
 ```dart
@@ -79,14 +89,17 @@ class AppFrame extends StatelessWidget {
 }
 ```
 
+---
+
 ## Component Composition
 
 ### Left Panel
 
 - **Position**: Left edge, full height
-- **Width**: 280px default (see [left-panel.md](left-panel.md))
-- **Behaviour**: Can collapse to 48px icon strip
+- **Width**: `panelWidth` (280px default) - see [left-panel.md](left-panel.md)
+- **Behaviour**: Can collapse to `panelCollapsedWidth` (48px)
 - **Contains**: App header, sections with controls
+- **Complete spec**: [component-panel.md](../components/component-panel.md)
 
 ### Main Panel
 
@@ -98,7 +111,7 @@ class AppFrame extends StatelessWidget {
 
 - **Position**: Top of main panel (NOT spanning full width)
 - **Visibility**: Only when app is NOT embedded
-- **Height**: 48px (aligns with left panel header)
+- **Height**: `headerHeight` (48px) - aligns with left panel header
 - **Contains**: Context info + Close button
 
 ### Main Content Area
@@ -106,7 +119,9 @@ class AppFrame extends StatelessWidget {
 - **Position**: Below top bar (or top of main panel if no top bar)
 - **Size**: Fills remaining space
 - **Scroll**: Handles its own scrolling as needed
-- **Background**: `--background` colour
+- **Background**: See [visual-style-light.md](../visual/visual-style-light.md#emphasis--hierarchy)
+
+---
 
 ## Three App Types
 
@@ -182,6 +197,8 @@ Complex multi-modal, typically embedded in Tercen workflow.
 - Focus on data visualisation
 - Left panel for filtering/configuration
 
+---
+
 ## Context Detection
 
 Apps need to detect whether they're running embedded in a Data Step or in full screen mode.
@@ -216,9 +233,9 @@ class AppContextDetector {
 | `https://tercen.com/...?taskId=abc123` | Yes | Data Step | Hidden |
 | `https://tercen.com/...` | No | Full screen | Visible |
 
-**Note**: This method was confirmed by the Tercen platform team (January 2026). The `WebAppOperator.entryType` property exists but URL parameter checking is the recommended approach.
+**Note**: This method was confirmed by the Tercen platform team (January 2026).
 
-See `_local/investigation-context-detection.md` for full investigation details.
+---
 
 ## Top Bar Specification
 
@@ -226,9 +243,11 @@ Only shown when app is NOT embedded.
 
 ### Dimensions
 
+All dimensions reference [design-tokens.md](../foundation/design-tokens.md).
+
 | Property | Value |
 |----------|-------|
-| Height | 48px |
+| Height | `topBarHeight` (48px) |
 | Position | Top of main panel |
 | Width | Full width of main panel |
 
@@ -242,9 +261,11 @@ Only shown when app is NOT embedded.
 
 ### Styling
 
+See [visual-style-light.md](../visual/visual-style-light.md) for colors.
+
 ```dart
 Container(
-  height: 48,
+  height: AppSpacing.topBarHeight,
   decoration: BoxDecoration(
     color: AppColors.surface,
     border: Border(
@@ -259,7 +280,7 @@ Container(
         padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
           color: AppColors.primarySurface,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         ),
         child: Text(
           'FULL SCREEN MODE',
@@ -284,6 +305,8 @@ Container(
 )
 ```
 
+---
+
 ## Main Content Area
 
 ### Flow Direction
@@ -302,19 +325,21 @@ Content flows from **top-left**, growing **right** then **down**.
 
 ### Sizing Principles
 
-From Tercen Layout Principles:
+All spacing values reference [design-tokens.md](../foundation/design-tokens.md#spacing).
 
 | Principle | Description |
 |-----------|-------------|
 | Size to content | Components take space they need, no more |
 | No "expand to fill" | Avoid stretching to fill available space |
 | Left-out approach | Leave out features until proven necessary |
-| 8px grid | All spacing uses 4, 8, 16, 24, 32, 48 |
+| 8px grid | Use spacing scale: 4, 8, 16, 24, 32, 48 |
 
 ### Background
 
-- Light theme: `#F3F4F6` (--background)
-- Dark theme: `#0F172A` (--background)
+See [visual-style-light.md](../visual/visual-style-light.md#emphasis--hierarchy) for background colors.
+
+- Light theme: Page background (`neutral-100`)
+- Dark theme: Page background (darker than `neutral-900`)
 
 ### Overflow Behaviour
 
@@ -354,15 +379,6 @@ GridView.builder(
 )
 ```
 
-```css
-/* CSS implementation */
-.main-content {
-  flex: 1;
-  overflow: auto;  /* Scrollbars appear only when needed */
-  background: var(--background);
-}
-```
-
 **Visual diagram**:
 
 ```text
@@ -377,6 +393,8 @@ Content fits:                    Content overflows:
                                  └──────────────────────┘
                                    Scrollbars appear
 ```
+
+---
 
 ## Flutter Implementation
 
@@ -409,14 +427,12 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _detectContext() {
-    // Check if running in Data Step (taskId in URL) or full screen
     setState(() {
       _showTopBar = !_isInDataStep();
     });
   }
 
   bool _isInDataStep() {
-    // Platform-confirmed method: check for taskId parameter in URL
     return Uri.base.queryParameters.containsKey('taskId');
   }
 
@@ -456,74 +472,43 @@ class _AppShellState extends State<AppShell> {
   }
 
   void _closeApp() {
-    // Close the app window/tab
     html.window.close();
   }
 }
 ```
 
-## CSS Variables Reference
-
-For HTML/web implementations:
-
-```css
-:root {
-  /* Frame */
-  --app-min-width: 800px;
-  --app-min-height: 600px;
-
-  /* Top Bar */
-  --top-bar-height: 48px;
-
-  /* See left-panel.md for panel variables */
-}
-
-.app-container {
-  display: flex;
-  width: 100vw;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.main-panel {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.top-bar {
-  height: var(--top-bar-height);
-  min-height: var(--top-bar-height);
-  /* ... */
-}
-
-.main-content {
-  flex: 1;
-  overflow: auto;
-  background: var(--background);
-}
-```
+---
 
 ## Checklist
 
 When implementing an app frame:
 
-- [ ] Read this pattern first (app-frame.md)
+- [ ] Read [UI-DESIGN-MAP.md](../foundation/UI-DESIGN-MAP.md) for navigation
+- [ ] Read [design-tokens.md](../foundation/design-tokens.md) for dimensions
 - [ ] Determine app type (Simple, Runner, Data Step)
-- [ ] Set up flex container (100vw × 100vh)
-- [ ] Add left panel placeholder
+- [ ] Set up flex container (`appContainerWidth` × `appContainerHeight`)
+- [ ] Add left panel (see [left-panel.md](left-panel.md))
 - [ ] Add main panel with flex column
-- [ ] Implement context detection
-- [ ] Add top bar if not embedded
-- [ ] Set main content background colour
-- [ ] Read left-panel.md for left panel implementation
+- [ ] Implement context detection (check for `taskId` in URL)
+- [ ] Add top bar if not embedded (`topBarHeight` = 48px)
+- [ ] Set main content background (see visual-style-light.md)
 - [ ] Test both embedded and full screen modes
 - [ ] Test both light and dark themes
 
+---
+
 ## Related Documents
 
-- [Pattern: Left Panel](left-panel.md) - Left panel component specification
-- `_local/left-panel-testboard.html` - Interactive demonstration
-- `_local/investigation-context-detection.md` - Context detection research
-- `_local/tercen-style/specifications/Tercen-Layout-Principles.html` - Design principles
+### Foundation
+- [design-tokens.md](../foundation/design-tokens.md) - Container, header, spacing dimensions
+- [UI-DESIGN-MAP.md](../foundation/UI-DESIGN-MAP.md) - Navigation guide
+
+### Visual Style
+- [visual-style-light.md](../visual/visual-style-light.md) - Background colors, badge styling
+- [visual-style-dark.md](../visual/visual-style-dark.md) - Dark theme equivalents
+
+### Components
+- [component-panel.md](../components/component-panel.md) - Left panel component specification
+
+### Patterns
+- [left-panel.md](left-panel.md) - Left panel pattern and composition

@@ -2,37 +2,31 @@
 
 **Purpose**: Standard left panel component for all Tercen Flutter apps
 
-**Prerequisite**: Read [app-frame.md](app-frame.md) first for overall screen structure
+**Prerequisites**:
+1. Read [app-frame.md](app-frame.md) first for overall screen structure
+2. Read [../components/component-panel.md](../components/component-panel.md) for complete panel specifications
 
-**Reference**: `_local/left-panel-testboard.html` (v3.1) - Interactive demonstration
+---
 
 ## Overview
 
-All Tercen apps use a **left panel** for controls, filters, and navigation. This pattern defines the left panel component specifications.
+All Tercen apps use a **left panel** for controls, filters, and navigation. This pattern defines how to compose and use the panel component.
 
 For overall app structure (container, main content, top bar, app types), see [app-frame.md](app-frame.md).
 
+For complete panel specifications (dimensions, styling, behavior), see [component-panel.md](../components/component-panel.md).
+
+---
+
 ## Dimensions
 
-| Property | Value | Notes |
-|----------|-------|-------|
-| Default width | 280px | Initial panel width |
-| Min width | 280px | Cannot resize smaller |
-| Max width | 400px | Cannot resize larger |
-| Collapsed width | 48px | Icon strip only |
-| Header height | 48px | Aligns with optional top bar |
+All dimensions reference [design-tokens.md](../foundation/design-tokens.md#panel-dimensions):
+- Default width: `panelWidth` (280px)
+- Min/max width: `panelMinWidth` / `panelMaxWidth` (280-400px)
+- Collapsed width: `panelCollapsedWidth` (48px)
+- Header height: `headerHeight` (48px)
 
-```dart
-// lib/core/theme/app_spacing.dart
-class AppSpacing {
-  // Left Panel dimensions
-  static const double leftPanelWidth = 280.0;
-  static const double leftPanelMinWidth = 280.0;
-  static const double leftPanelMaxWidth = 400.0;
-  static const double leftPanelCollapsedWidth = 48.0;
-  static const double leftPanelHeaderHeight = 48.0;
-}
-```
+---
 
 ## Header Composition
 
@@ -47,9 +41,22 @@ The header contains exactly 4 elements (left to right):
 
 ### Header Styling
 
-- Background: Accent color (`--accent` / `AppColors.primary`)
-- Text/Icons: White (`--on-accent` / `Colors.white`)
-- Height: 48px
+See [visual-style-light.md](../visual/visual-style-light.md#panel-header-accent-style) for complete styling specification.
+
+**Key requirement**:
+- Background: Accent color (`primary`)
+- Text/Icons: White (reversed out)
+
+### Theme Toggle Icons
+
+| Current Theme | Icon Shown | Action |
+|---------------|------------|--------|
+| Light | Moon (`fa-moon`) | Switch to dark |
+| Dark | Sun (`fa-sun`) | Switch to light |
+
+**Rule**: The icon represents what you're switching TO, not the current state.
+
+### Implementation Example
 
 ```dart
 Container(
@@ -100,14 +107,7 @@ Container(
 )
 ```
 
-### Theme Toggle Icons
-
-| Current Theme | Icon Shown | Action |
-|---------------|------------|--------|
-| Light | Moon | Switch to dark |
-| Dark | Sun | Switch to light |
-
-**Rule**: The icon represents what you're switching TO, not the current state.
+---
 
 ## Section Requirements
 
@@ -121,6 +121,8 @@ Each section has:
 | Section Label | Yes | UPPERCASE, describes section purpose |
 | Section Content | Yes | Controls, forms, lists, etc. |
 
+See [visual-style-icons.md](../visual/visual-style-icons.md#tercen-specific-icons) for icon selection.
+
 ### Section Behavior
 
 | Property | Value |
@@ -130,115 +132,7 @@ Each section has:
 | Navigation | Vertical scroll (no tabs) |
 | Borders | Bottom border between sections |
 
-### Standard Sections
-
-All Tercen apps MUST include an **INFO** section as the last section in the left panel.
-
-#### INFO Section Requirements
-
-| Element | Requirement |
-| ------- | ----------- |
-| Icon | `fa-info-circle` |
-| Label | "INFO" (uppercase) |
-| Position | Last section (bottom of panel) |
-
-**Content Requirements:**
-
-1. **GitHub Line** (required for all apps):
-   - **Label**: "GitHub" (left-aligned)
-   - **Value**: Hyperlink to the GitHub repository
-   - **Link Text**:
-     - Git tag if available (e.g., "v1.2.3")
-     - OR 7-character short commit hash (e.g., "6f8c872")
-     - OR blank/empty if unknown (during development)
-
-**Implementation:**
-
-Use a build-time script to capture git information and generate a Dart constants file:
-
-```dart
-// lib/core/version/version_info.dart
-class VersionInfo {
-  static const String gitRepo = 'https://github.com/tercen/my-app';
-  static const String gitVersion = '6f8c872'; // or 'v1.2.3' or ''
-}
-```
-
-**Build Script** (add to `scripts/generate_version.dart`):
-
-```dart
-import 'dart:io';
-
-void main() async {
-  // Get git tag or commit hash
-  final gitTag = await _runGit(['describe', '--tags', '--exact-match']);
-  final gitHash = await _runGit(['rev-parse', '--short=7', 'HEAD']);
-  final gitRemote = await _runGit(['config', '--get', 'remote.origin.url']);
-
-  final version = gitTag ?? gitHash ?? '';
-  final repo = _formatRepoUrl(gitRemote ?? '');
-
-  final content = '''
-// GENERATED FILE - Do not edit
-// Generated at build time from git repository
-
-class VersionInfo {
-  static const String gitRepo = '$repo';
-  static const String gitVersion = '$version';
-}
-''';
-
-  await File('lib/core/version/version_info.dart').writeAsString(content);
-}
-
-Future<String?> _runGit(List<String> args) async {
-  try {
-    final result = await Process.run('git', args);
-    return result.exitCode == 0 ? result.stdout.toString().trim() : null;
-  } catch (e) {
-    return null;
-  }
-}
-
-String _formatRepoUrl(String remote) {
-  // Convert git@github.com:tercen/app.git to https://github.com/tercen/app
-  return remote
-      .replaceAll('git@github.com:', 'https://github.com/')
-      .replaceAll('.git', '');
-}
-```
-
-**Run before build:**
-
-```bash
-dart run scripts/generate_version.dart
-flutter build web
-```
-
-**Display in INFO section:**
-
-```dart
-// In left panel INFO section content
-if (VersionInfo.gitVersion.isNotEmpty)
-  Row(
-    children: [
-      Text('GitHub:', style: AppTextStyles.labelMedium),
-      SizedBox(width: AppSpacing.xs),
-      Expanded(
-        child: InkWell(
-          onTap: () => launchUrl(Uri.parse(VersionInfo.gitRepo)),
-          child: Text(
-            VersionInfo.gitVersion,
-            style: AppTextStyles.labelMedium.copyWith(
-              color: Theme.of(context).colorScheme.primary,
-              decoration: TextDecoration.underline,
-            ),
-          ),
-        ),
-      ),
-    ],
-  ),
-```
+### Section Styling Example
 
 ```dart
 class LeftPanelSection extends StatelessWidget {
@@ -286,19 +180,115 @@ class LeftPanelSection extends StatelessWidget {
 }
 ```
 
+---
+
+## Standard Sections
+
+All Tercen apps MUST include an **INFO** section as the last section in the left panel.
+
+### INFO Section Requirements
+
+| Element | Requirement |
+| ------- | ----------- |
+| Icon | `fa-info-circle` |
+| Label | "INFO" (uppercase) |
+| Position | Last section (bottom of panel) |
+
+**Content Requirements:**
+
+1. **GitHub Line** (required for all apps):
+   - **Label**: "GitHub" (left-aligned)
+   - **Value**: Hyperlink to the GitHub repository
+   - **Link Text**:
+     - Git tag if available (e.g., "v1.2.3")
+     - OR 7-character short commit hash (e.g., "6f8c872")
+     - OR blank/empty if unknown (during development)
+
+### INFO Section Implementation
+
+Use a build-time script to capture git information:
+
+```dart
+// lib/core/version/version_info.dart
+class VersionInfo {
+  static const String gitRepo = 'https://github.com/tercen/my-app';
+  static const String gitVersion = '6f8c872'; // or 'v1.2.3' or ''
+}
+```
+
+**Build Script** (add to `scripts/generate_version.dart`):
+
+```dart
+import 'dart:io';
+
+void main() async {
+  final gitTag = await _runGit(['describe', '--tags', '--exact-match']);
+  final gitHash = await _runGit(['rev-parse', '--short=7', 'HEAD']);
+  final gitRemote = await _runGit(['config', '--get', 'remote.origin.url']);
+
+  final version = gitTag ?? gitHash ?? '';
+  final repo = _formatRepoUrl(gitRemote ?? '');
+
+  final content = '''
+// GENERATED FILE - Do not edit
+class VersionInfo {
+  static const String gitRepo = '$repo';
+  static const String gitVersion = '$version';
+}
+''';
+
+  await File('lib/core/version/version_info.dart').writeAsString(content);
+}
+
+Future<String?> _runGit(List<String> args) async {
+  try {
+    final result = await Process.run('git', args);
+    return result.exitCode == 0 ? result.stdout.toString().trim() : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+String _formatRepoUrl(String remote) {
+  return remote
+      .replaceAll('git@github.com:', 'https://github.com/')
+      .replaceAll('.git', '');
+}
+```
+
+**Display in INFO section:**
+
+```dart
+if (VersionInfo.gitVersion.isNotEmpty)
+  Row(
+    children: [
+      Text('GitHub:', style: AppTextStyles.labelMedium),
+      SizedBox(width: AppSpacing.xs),
+      Expanded(
+        child: InkWell(
+          onTap: () => launchUrl(Uri.parse(VersionInfo.gitRepo)),
+          child: Text(
+            VersionInfo.gitVersion,
+            style: AppTextStyles.labelMedium.copyWith(
+              color: Theme.of(context).colorScheme.primary,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    ],
+  ),
+```
+
+---
+
 ## Collapsed State
 
 When collapsed, the panel transforms into an icon navigation strip.
 
-> **COMMON ERROR - CHECK THIS**: The collapse must **change the panel width to 48px**, not just hide the content. If clicking the chevron only clears/hides the panel contents but the panel stays at 280px width, the implementation is wrong. The panel container itself must animate from 280px → 48px.
->
-> **Inline styles gotcha**: If the panel is resizable, inline styles (`style.width`) will override CSS classes. When collapsing, you MUST clear inline styles so the `.collapsed` class can take effect:
->
-> ```javascript
-> // Clear inline styles when collapsing
-> leftPanel.style.width = '';
-> leftPanel.style.minWidth = '';
-> ```
+**Complete collapse behavior**: See [component-panel.md](../components/component-panel.md#collapse)
+
+> **CRITICAL**: The collapse must **change the panel width to 48px**, not just hide the content. If clicking the chevron only clears/hides the panel contents but the panel stays at 280px width, the implementation is wrong.
 
 ### Collapsed Layout
 
@@ -308,7 +298,7 @@ When collapsed, the panel transforms into an icon navigation strip.
 ├────────────────────┤
 │    [Section 1]     │  ← Section icons become
 │    [Section 2]     │    vertical navigation
-│    [Section 3]     │    (same icons, CSS transform)
+│    [Section 3]     │
 │    [Section 4]     │
 │        ...         │
 ├────────────────────┤
@@ -317,7 +307,7 @@ When collapsed, the panel transforms into an icon navigation strip.
      48px width
 ```
 
-> **COMMON ERROR - HEADER RESTRUCTURING**: When collapsed, the **chevron moves from header to footer**. Do NOT keep the chevron in the header row when collapsed - this causes overflow errors because icon (20px) + chevron button (32px) + padding won't fit in 48px. The collapsed header should contain ONLY the centred app icon.
+> **COMMON ERROR**: When collapsed, the **chevron moves from header to footer**. Do NOT keep the chevron in the header row when collapsed - icon (20px) + chevron button (32px) + padding won't fit in 48px. The collapsed header should contain ONLY the centered app icon.
 
 ### Collapsed Behavior
 
@@ -336,16 +326,14 @@ When collapsed, the panel transforms into an icon navigation strip.
 When a section icon is clicked in collapsed state:
 
 1. Panel expands to default width (280px)
-2. After animation completes (~200ms)
+2. After animation completes (200ms - see `transition-base` in design-tokens.md)
 3. Panel scrolls to bring that section into view
 
 ```dart
 void onSectionIconTap(String sectionId) {
   if (isCollapsed) {
-    // 1. Expand panel
     setState(() => isCollapsed = false);
 
-    // 2. Scroll to section after animation
     Future.delayed(Duration(milliseconds: 200), () {
       final context = sectionKeys[sectionId]?.currentContext;
       if (context != null) {
@@ -360,7 +348,11 @@ void onSectionIconTap(String sectionId) {
 }
 ```
 
+---
+
 ## Resize Behavior
+
+Complete specification: [component-panel.md](../components/component-panel.md#resize)
 
 | Property | Value |
 |----------|-------|
@@ -370,23 +362,7 @@ void onSectionIconTap(String sectionId) {
 | Persistence | No (resets on page reload) |
 | Auto-collapse | No (manual only) |
 
-```dart
-GestureDetector(
-  onHorizontalDragUpdate: (details) {
-    final newWidth = panelWidth + details.delta.dx;
-    setState(() {
-      panelWidth = newWidth.clamp(
-        AppSpacing.leftPanelMinWidth,
-        AppSpacing.leftPanelMaxWidth,
-      );
-    });
-  },
-  child: MouseRegion(
-    cursor: SystemMouseCursors.resizeColumn,
-    child: Container(width: 4, color: Colors.transparent),
-  ),
-)
-```
+---
 
 ## Functional Specification Requirements
 
@@ -399,6 +375,10 @@ The Functional Specification for each app MUST define:
 | Section list | Filters, Display, View, Actions |
 | Section icons | `fa-filter`, `fa-sliders`, `fa-eye`, `fa-bolt` |
 | Section content | What controls appear in each section |
+
+See [visual-style-icons.md](../visual/visual-style-icons.md) for icon selection guidance.
+
+---
 
 ## Flutter Implementation Template
 
@@ -450,43 +430,46 @@ class _LeftPanelState extends State<LeftPanel> {
 }
 ```
 
-## CSS Variables Reference
-
-For HTML/web implementations, use these CSS variables:
-
-```css
-:root {
-  --panel-width: 280px;
-  --panel-min-width: 280px;
-  --panel-max-width: 400px;
-  --panel-collapsed-width: 48px;
-  --header-height: 48px;
-}
-```
+---
 
 ## Checklist
 
 When implementing a left panel:
 
 - [ ] Read [app-frame.md](app-frame.md) first (overall structure)
+- [ ] Read [component-panel.md](../components/component-panel.md) for complete specs
 - [ ] Read Functional Specification for app icon, title, sections
-- [ ] Set panel width to 280px default
+- [ ] Set panel width to 280px default (from design-tokens.md)
 - [ ] Implement header with all 4 required elements
-- [ ] Use accent colour for header background
+- [ ] Use accent color for header background (see visual-style-light.md)
 - [ ] Theme toggle shows moon (light) / sun (dark)
-- [ ] Add section icons to all sections
+- [ ] Add section icons to all sections (see visual-style-icons.md)
 - [ ] Section labels are UPPERCASE
 - [ ] Sections do NOT collapse internally
 - [ ] Implement collapsed state (48px icon strip)
 - [ ] **VERIFY**: Collapse changes panel WIDTH to 48px (not just hiding content)
 - [ ] App icon click expands when collapsed
 - [ ] Section icon click expands AND scrolls
-- [ ] Implement resize (280-400px range)
+- [ ] Implement resize (280-400px range, see component-panel.md)
 - [ ] Test both light and dark themes
+- [ ] Add required INFO section as last section
+
+---
 
 ## Related Documents
 
-- [Pattern: App Frame](app-frame.md) - Overall screen structure (read first)
-- `_local/left-panel-testboard.html` - Interactive HTML demonstration
-- `_local/tercen-style/specifications/Tercen-Layout-Principles.html` - Layout fundamentals
-- `_local/tercen-style/specifications/Tercen-Dark-Theme.html` - Dark theme colours
+### Foundation
+- [design-tokens.md](../foundation/design-tokens.md) - Panel dimensions, spacing, transitions
+- [UI-DESIGN-MAP.md](../foundation/UI-DESIGN-MAP.md) - Navigation guide
+
+### Visual Style
+- [visual-style-light.md](../visual/visual-style-light.md) - Panel header styling, section colors
+- [visual-style-dark.md](../visual/visual-style-dark.md) - Dark theme equivalents
+- [visual-style-icons.md](../visual/visual-style-icons.md) - Icon selection for sections
+
+### Components
+- [component-panel.md](../components/component-panel.md) - Complete panel specifications
+- [component-form-controls.md](../components/component-form-controls.md) - For section content
+
+### Patterns
+- [app-frame.md](app-frame.md) - Overall screen structure (read first)
