@@ -479,6 +479,42 @@ Future<ImageCollection> loadImages({String sortBy = 'filename'}) async {
 }
 ```
 
+### Handling Missing Data
+
+**CRITICAL**: Even in mock implementations, always handle null/missing data gracefully. Production data is often sparse.
+
+```dart
+// Grid cell rendering - ALWAYS handle null case
+Widget _buildImageCell(BuildContext context, ImageMetadata? image) {
+  if (image == null) {
+    // Missing image - show placeholder (NORMAL in production)
+    return Container(
+      width: 270,
+      height: 200,
+      color: Theme.of(context).brightness == Brightness.dark
+          ? AppColorsDark.surface
+          : AppColors.surface,
+      child: const Center(
+        child: Text('—'),
+      ),
+    );
+  }
+
+  // Image exists - show it
+  return InkWell(
+    onTap: () => Navigator.push(...),
+    child: Image.memory(image.bytes!),
+  );
+}
+```
+
+**Why this matters**:
+
+- Mock data may be complete (all grid positions filled) for demonstration
+- Production data is typically sparse (many missing images)
+- UI must handle both cases without errors
+- Don't assume grid positions will always have images
+
 ## Checklist
 
 Mock implementation phase:

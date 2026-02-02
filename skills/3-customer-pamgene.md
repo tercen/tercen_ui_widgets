@@ -524,12 +524,85 @@ These domain-specific values should be used when implementing the grid:
 | Grid spacing | 8px | Per Tercen spacing grid |
 | Border radius | 4px | Per Tercen style guide |
 
+## Real vs Mock Data: Critical Distinction
+
+### Production Data Model (Sparse)
+
+**Real PamGene data characteristics**:
+- **Barcodes**: Variable count (1, 5, 10, 20+ per experiment)
+- **Wells**: Always exactly 4 (W1-W4) - hardware constraint
+- **Images**: Sparse matrix - missing images are NORMAL
+  - Not captured at every cycle/exposure
+  - Equipment failures
+  - Experimental design choices
+
+**Grid must handle missing images**:
+
+```dart
+Widget _buildImageCell(BuildContext context, dynamic image) {
+  if (image == null) {
+    // Missing image - show placeholder (NORMAL in production)
+    return Container(
+      width: 270,
+      height: 200,
+      color: Theme.of(context).colorScheme.surfaceVariant,
+      child: Center(
+        child: Text(
+          '—',
+          style: TextStyle(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+            fontSize: 32,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // Image exists - show it
+  return InkWell(
+    onTap: () => _openDetailView(image),
+    child: Image.memory(image.bytes, fit: BoxFit.contain),
+  );
+}
+```
+
+**Example production grid** (7 barcodes, filter P94/488ms):
+```
+      | 641024305 | 641024309 | 641024313 | 641024320 | 641024325 | 641024330 | 641024335
+------|-----------|-----------|-----------|-----------|-----------|-----------|----------
+  W1  | image     | image     | —         | image     | image     | image     | —
+  W2  | image     | —         | image     | image     | —         | image     | image
+  W3  | image     | image     | image     | —         | image     | image     | image
+  W4  | —         | image     | image     | image     | image     | —         | image
+
+Some cells empty = NORMAL (images not captured for those positions)
+```
+
+### Mock Data Model (Complete Sets)
+
+**For mock implementation ONLY**:
+- Create complete sets (all barcodes × all wells)
+- Purpose: Demonstrate grid functionality
+- Makes filter behavior obvious during development
+
+**Why complete for mocks**:
+- Easier to verify UI works correctly
+- Demonstrates "happy path" with all cells filled
+- Simplifies testing during development
+
+**Critical**: Complete sets for mocks, but sparse handling for production.
+
+---
+
 ## Mock Data for PamGene
 
 ```dart
 // lib/implementations/services/mock_image_service.dart
 class MockImageService implements ImageService {
   void _initializeMockData() {
+    // MOCK DATA: Complete set for demonstration
+    // Real production data will be sparse - this is intentional for testing
+
     final barcodes = ['641070616', '641070617', '641070618'];
     final wells = [1, 2, 3, 4];
     final fields = [1, 2, 3];
@@ -539,8 +612,10 @@ class MockImageService implements ImageService {
     for (final barcode in barcodes) {
       for (final well in wells) {
         for (final field in fields) {
-          final cycle = cycles.last; // Latest
-          final exposure = exposureTimes.last; // Longest
+          // CRITICAL: All images at same cycle/exposure for complete QC snapshot
+          // This creates ONE complete set that filters can display
+          final cycle = cycles.last; // Latest - all images get P94
+          final exposure = exposureTimes.last; // Longest - all images get I493
 
           final filename = '${barcode}_W${well}_F${field}_T100_P${cycle}_I${exposure}_A30.png';
 
@@ -551,12 +626,16 @@ class MockImageService implements ImageService {
             barcode: barcode,
             well: well,
             field: field,
-            cycle: cycle,
-            exposureTime: exposure,
+            cycle: cycle,           // Same for all: P94
+            exposureTime: exposure, // Same for all: I493
           ));
         }
       }
     }
+
+    // Result: 9 complete images (3 barcodes × 3 fields) all at P94, I493
+    // When filters match P94 and I493, grid shows all cells filled
+    // This demonstrates proper grid functionality for QC comparison
   }
 }
 ```
