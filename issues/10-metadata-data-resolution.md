@@ -2,6 +2,7 @@
 
 **Severity**: CRITICAL - FOUNDATIONAL CONCEPT
 **Frequency**: Every operator that accesses files or data
+**Status**: ✅ SOLVED (Feb 2026) - See Solution section below
 
 ## The Architecture
 
@@ -9,13 +10,13 @@ Tercen separates data from metadata:
 
 **Metadata IDs (User-facing):**
 - `taskId` - User-visible task reference
-- `documentId` - File alias (may return 404)
+- `documentId` - File alias (changes on clone)
 - `projectId` - Project reference
 - `workflowId` - Workflow reference
 
 **Data IDs (Actual data):**
 - `.taskId` - Actual task data
-- `.documentId` - **Fundamental file reference (use this!)**
+- **`.documentId`** - **Fundamental file reference (use this!)**
 - `.projectId` - Actual project data
 - `.workflowId` - Actual workflow data
 
@@ -29,19 +30,24 @@ Tercen separates data from metadata:
 File operations need data IDs (`.documentId`), but:
 
 1. Users only see metadata IDs (`taskId` in URL)
-2. Schema API intentionally filters out dot-prefixed columns
-3. Using alias `documentId` often returns 404 (points to wrong data)
+2. URL `documentId` is the **WebAppOperator ID**, not a file ID
+3. Schema API intentionally filters out dot-prefixed columns
+4. Using alias `documentId` returns 500 Error: "WebAppOperator"
 
-### Why 404 Errors Occur
+### Why Errors Occur
 
 ```dart
-// ❌ Using metadata ID - returns 404 in cloned projects
+// ❌ Using URL documentId - returns 500 "WebAppOperator" error
+final documentId = urlParser.documentId;  // This is WebAppOperator ID!
 final bytes = await fileService.download(documentId);
-// Error: 404 Not Found
+// Error: 500 Invalid argument (bad kind error): "WebAppOperator"
 
-// ✅ Using data ID - works in original and cloned projects
-final bytes = await fileService.download(dotDocumentId);
-// Success!
+// ❌ Using relation.inMemoryRelations getter - returns empty
+final relations = relation.inMemoryRelations;  // Empty! Doesn't navigate wrappers
+
+// ✅ Using .documentId from InMemoryTable - works everywhere
+final documentId = extractFromInMemoryTable();  // Navigate manually
+final bytes = await fileService.download(documentId);  // Success!
 ```
 
 **Root cause**: When project is cloned:
@@ -49,24 +55,128 @@ final bytes = await fileService.download(dotDocumentId);
 - `.documentId` (data) stays the same (shared data)
 - File service needs `.documentId` to find actual file
 
-## The Solution
+## The Solution ✅
 
-**Always extract dot-prefixed IDs from task JSON:**
+### Understanding Relation Hierarchy
+
+Tercen Relations are **expression trees**, not flat tables. You must manually navigate through wrappers to find the InMemoryTable:
+
+```
+Relation (abstract)
+├── Leaf Relations (actual data)
+│   └── InMemoryRelation    ← Contains InMemoryTable with columns
+└── Unary Wrappers (transformations)
+    ├── GatherRelation      ← Wide → Long pivot (wraps other relations)
+    └── CompositeRelation   ← Has mainRelation + joinOperators
+```
+
+**Typical structure in production:**
+```
+GatherRelation (depth 0)
+    └── CompositeRelation (depth 1)
+            └── mainRelation: InMemoryRelation (depth 2)
+                    └── InMemoryTable
+                            └── columns[]
+                                    ├── .documentId (actual file ID) ✓
+                                    ├── documentId (alias)
+                                    ├── Image
+                                    └── ...
+```
+
+### Navigation Algorithm
+
+**Step 1: Navigate through relation tree to find InMemoryTable**
 
 ```dart
-// ❌ WRONG - Schema API filters dot-prefixed columns
-final schema = await tableSchemaService.get(columnHash);
-final col = schema.columns.where((c) => c.name == '.documentId'); // Empty!
-
-// ✅ RIGHT - Extract from task JSON
+// Start from task JSON (not Relation object!)
 final taskJson = cubeTask.toJson();
-final columns = taskJson['query']['relation']['inMemoryTable']['columns'];
+var currentRelation = taskJson['query']['relation'] as Map?;
+int depth = 0;
 
+while (currentRelation != null && depth < 20) {
+  final kind = currentRelation['kind'];
+  print('📋 Relation[$depth] kind: $kind');
+
+  // Found InMemoryRelation? Extract columns!
+  if (kind == 'InMemoryRelation' && currentRelation['inMemoryTable'] != null) {
+    final columns = currentRelation['inMemoryTable']['columns'] as List;
+
+    // Search for .documentId column
+    for (final col in columns) {
+      final name = col['name'];
+      if (name == '.documentId' || name.endsWith('..documentId')) {
+        final documentId = col['values'].first;  // ← Use this!
+        return documentId;
+      }
+    }
+    break;
+  }
+
+  // Navigate deeper based on relation type:
+  // 1. Most wrappers use 'relation' property
+  // 2. CompositeRelation uses 'mainRelation' property
+  if (currentRelation['relation'] != null) {
+    currentRelation = currentRelation['relation'];
+  } else if (kind == 'CompositeRelation' && currentRelation['mainRelation'] != null) {
+    print('📋 CompositeRelation detected, navigating to mainRelation...');
+    currentRelation = currentRelation['mainRelation'];
+  } else {
+    print('⚠️ No child relation found');
+    break;
+  }
+
+  depth++;
+}
+```
+
+**Step 2: Use Relation.findDocumentId() as fallback (SDK 1.11.0+)**
+
+If `.documentId` is not in columns, but `documentId` aliases exist:
+
+```dart
+// Find documentId aliases in columns
 for (final col in columns) {
-  if (col['name'] == '.documentId') {
-    return col['values'].first; // This works!
+  if (col['name'] == 'documentId' || col['name'].endsWith('.documentId')) {
+    final alias = col['values'].first;
+
+    // Resolve alias to actual .documentId
+    final relation = cubeTask.query.relation;
+    final actualDocId = relation.findDocumentId(alias);
+    return actualDocId;
   }
 }
+```
+
+**How `relation.findDocumentId()` works:**
+- Searches InMemoryRelations for both `documentId` and `.documentId` columns
+- Finds the index where alias matches in `documentId` column
+- Returns the `.documentId` value at that same index
+
+### Common Pitfalls
+
+**❌ DON'T: Use relation.inMemoryRelations getter**
+```dart
+final relations = relation.inMemoryRelations;  // Empty! Doesn't navigate wrappers
+```
+
+**❌ DON'T: Use URL documentId**
+```dart
+final documentId = urlParser.documentId;  // This is WebAppOperator ID!
+fileService.download(documentId);  // 500 Error: "WebAppOperator"
+```
+
+**❌ DON'T: Use tableSchemaService**
+```dart
+final schema = await tableSchemaService.get(columnHash);
+final col = schema.columns.where((c) => c.name == '.documentId');  // Filtered out!
+```
+
+**✅ DO: Navigate manually through JSON to InMemoryTable**
+```dart
+var currentRelation = taskJson['query']['relation'];
+// Navigate through wrappers...
+final columns = currentRelation['inMemoryTable']['columns'];
+// Extract .documentId from columns
 ```
 
 ## Why This Matters
@@ -75,31 +185,40 @@ This is NOT a workaround - it's **fundamental Tercen architecture**:
 
 - Enables efficient project cloning (no data duplication)
 - Separates user context (metadata) from actual data
+- Relations are expression trees that must be navigated
 - Will apply to other resources (projects, workflows, tasks)
 
 **You will encounter this in EVERY operator that accesses files.**
 
 ## Implementation
 
-Create `lib/utils/document_id_resolver.dart` with hierarchical fallback:
+See `lib/utils/document_id_resolver.dart` for complete implementation.
 
-1. **Primary**: Extract `.documentId` from task JSON (production)
-2. **Fallback 1**: Try `documentId` alias from schema (may 404)
-3. **Fallback 2**: Search files by workflowId/stepId
-4. **Fallback 3**: Use development hardcoded ID
-5. **Final**: Return null for mock data fallback
+**Strategy order:**
+1. **Primary**: Navigate to InMemoryTable and extract `.documentId` directly
+2. **Fallback**: Find `documentId` aliases and resolve using `Relation.findDocumentId()`
+3. **Development**: Use hardcoded ID for local testing
+4. **NEVER**: Use URL documentId (it's the WebAppOperator ID!)
 
-**See**: [Pattern: Metadata-to-Data Resolution](../patterns/metadata-data-resolution.md)
+## Debugging
 
-## Future Implications
+**Expected console logs when working correctly:**
 
-Expect similar patterns for:
+```
+📋 Relation[0] kind: GatherRelation
+📋 Relation[1] kind: CompositeRelation
+📋 CompositeRelation detected, navigating to mainRelation...
+📋 Relation[2] kind: InMemoryRelation
+✓ Found InMemoryRelation at depth 2
+📋 InMemoryTable has 15 columns
+📋 Found 1 .documentId value(s) in column "ds1..documentId": abc123...
+✓ Using .documentId directly: abc123...
+```
 
-- Project cloning: `projectId` → `.projectId`
-- Workflow operations: `workflowId` → `.workflowId`
-- Task data access: `taskId` → `.taskId` (potentially)
-
-**General principle**: User-facing IDs are metadata; file operations need data IDs (dot-prefixed).
+**If you see "WebAppOperator" error:**
+- You're using URL documentId instead of table .documentId
+- Check navigation reached InMemoryRelation
+- Verify value is from `.documentId` column (with dot!)
 
 ## Testing Considerations
 
@@ -119,20 +238,15 @@ Expect similar patterns for:
 - ✅ Data IDs remain the same (`.documentId` points to original data)
 - ✅ Your operator should work in both if using data IDs correctly
 
-### Common Clone Failures
+## Dependencies
 
-**Symptom**: Operator works in original, fails with 404 in clone
-**Cause**: Using `documentId` (metadata) instead of `.documentId` (data)
-**Fix**: Implement proper metadata → data ID resolution
-
-**Symptom**: Cloned project shows different data
-**Cause**: Using metadata reference that changed during clone
-**Fix**: Resolve to data ID first, then access files
+- **sci_tercen_client 1.11.0+**: Required for `Relation.findDocumentId()` method
+- Manual JSON navigation for relation hierarchy
 
 ## Related
 
 - **Pattern**: [Metadata-to-Data Resolution](../patterns/metadata-data-resolution.md)
 - **Pattern**: [Task Hierarchy Navigation](../patterns/task-hierarchy-navigation.md)
-- **Pattern**: [Column Data Extraction](../patterns/column-data-extraction.md)
 - **Issue**: [#11 Schema Service Filtering](11-schema-filtering.md)
-- **Skill**: [2 Tercen Real Implementation](../skills/2-tercen-real.md)
+- **Reference**: [Tercen Relational Algebra](https://github.com/tercen/sci/blob/main/docs/TERCEN_RELATIONAL_ALGEBRA.md)
+- **Example**: See pamsoft_grid_flutter_operator for complete working implementation
