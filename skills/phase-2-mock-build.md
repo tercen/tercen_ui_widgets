@@ -150,7 +150,7 @@ Every control follows this one-way data flow:
 control.onChanged → provider.setXxx(value) → notifyListeners() → Consumer rebuilds main content
 ```
 
-The skeleton's `controls_section.dart` demonstrates all 10 control types wired to the provider. Copy the wiring pattern exactly — only change the field names and values.
+The skeleton's `controls_section.dart` demonstrates all 11 control types wired to the provider. Copy the wiring pattern exactly — only change the field names and values.
 
 ---
 
