@@ -14,7 +14,7 @@ MUST follow these rules when designing the UI.
 2. **Left panel sections scroll vertically.** No tabs. No internal collapse. Sections are always visible and scroll as a single list.
 3. **Every section has an icon and UPPERCASE label.** Example: a filter icon with "FILTERS", a settings icon with "SETTINGS".
 4. **INFO section is mandatory.** Every app has an INFO section at the bottom of the left panel with a GitHub repository link.
-5. **Available control types**: dropdown, slider, range slider, toggle, number input, button, searchable input, text input. Do not invent new control types.
+5. **Available control types** (exactly 10): dropdown, slider, range slider, toggle, number input, button, searchable input, text input, checkbox, radio. Do not invent new control types.
 6. **Identify the app type**:
    - Type 1 (Visualization): Tercen → App → Screen (+ download)
    - Type 2 (Interactive): Same as Type 1 + writes data back to Tercen
