@@ -68,7 +68,7 @@ Run it: `cd skeleton && flutter run -d chrome`
 | Type | Data flow | Status |
 | ---- | --------- | ------ |
 | 1: Visualization | Tercen -> App -> Screen | Supported (3 deployed apps) |
-| 2: Interactive | Tercen -> App -> Screen -> Write back | Phase 3 skill covers read; write-back TBD |
+| 2: Interactive | Tercen -> App -> Screen -> Write back | Supported (ctx.saveTable, ctx.save) |
 | 3: Workflow manager | Multi-step orchestration | Not yet attempted |
 
 ## Updating skills

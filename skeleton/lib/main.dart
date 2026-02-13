@@ -18,7 +18,10 @@ void main() async {
   if (useMocks) {
     setupServiceLocator(useMocks: true);
   } else {
-    // Phase 3: Uncomment to initialize Tercen SDK.
+    // Phase 3: Uncomment to initialize Tercen context.
+    // Also add these imports at the top of the file:
+    //   import 'package:sci_tercen_client/sci_service_factory_web.dart';
+    //   import 'package:sci_tercen_context/sci_tercen_context.dart';
     //
     // final taskId = Uri.base.queryParameters['taskId'];
     // if (taskId == null || taskId.isEmpty) {
@@ -27,8 +30,9 @@ void main() async {
     // }
     //
     // try {
-    //   final tercenFactory = await createServiceFactoryForWebApp();
-    //   setupServiceLocator(useMocks: false, tercenFactory: tercenFactory, taskId: taskId);
+    //   final factory = await createServiceFactoryForWebApp();
+    //   final ctx = await tercenCtx(serviceFactory: factory, taskId: taskId);
+    //   setupServiceLocator(useMocks: false, ctx: ctx);
     // } catch (e) {
     //   debugPrint('Tercen init failed: $e — falling back to mocks');
     //   setupServiceLocator(useMocks: true);
