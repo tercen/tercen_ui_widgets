@@ -117,6 +117,8 @@ Use the **Read** tool to read each file, then check for skeleton defaults.
 - `description` must NOT contain "skeleton"
 - `urls` must NOT contain `skeleton_app`
 - `isWebApp` must be `true`
+- `isViewOnly` must be `false`
+- `entryType` must be `"app"`
 - `serve` must be `"build/web"`
 
 ### C3: version_info.dart
@@ -310,7 +312,7 @@ Use the **Read** tool to read `service_locator.dart`. `setupServiceLocator` must
 
 ### I2: Phase 3 readiness
 
-`service_locator.dart` should accept optional parameters for Phase 3 integration (`useMocks`, `ctx`), either as active parameters or commented-out stubs. The function signature must NOT block Phase 3 modifications.
+`service_locator.dart` should accept optional parameters for Phase 3 integration (`useMocks`, `factory`, `taskId`), either as active parameters or commented-out stubs. The function signature must NOT block Phase 3 modifications.
 
 ---
 

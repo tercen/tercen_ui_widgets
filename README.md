@@ -22,7 +22,7 @@ Build Tercen Flutter web apps in 3 phases. Each phase is a separate Claude Code 
 
 Start a new Claude Code session. Tell Claude:
 
-> Read `skills/phase-1-functional-spec.md`. I want to build [describe your app]. Here is [screenshot / Shiny code / description].
+> Read `skills/phase-1-functional-spec.md`. I want to build [describe your app]. Here is [screenshot / existing app code / description].
 
 Claude will work through discovery questions and produce a standardised functional spec document.
 

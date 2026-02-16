@@ -2,6 +2,8 @@
   "name": "Skeleton App",
   "description": "Tercen operator skeleton. Replace with your app description.",
   "isWebApp": true,
+  "isViewOnly": false,
+  "entryType": "app",
   "serve": "build/web",
   "tags": [],
   "authors": ["tercen"],

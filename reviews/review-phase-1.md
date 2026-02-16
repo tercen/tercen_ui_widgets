@@ -103,7 +103,7 @@ The document must have a top-level heading with the app name (e.g., `# Volcano P
 
 ### B5: Reference field
 
-`**Reference:**` must be present, describing the source material (Shiny app path, screenshots, verbal description, etc.). If the app was specified from scratch with no reference, the field must still be present with a note (e.g., "Original specification").
+`**Reference:**` must be present, describing the source material (existing app, screenshots, verbal description, etc.). If the app was specified from scratch with no reference, the field must still be present with a note (e.g., "Original specification").
 
 ### B6: App type identified
 

@@ -229,13 +229,17 @@ Read spec **Section 4.3 (Main Panel)**.
 
 The main content widget reads from the provider and renders the visualization described in the spec. If the spec describes multiple view modes (e.g., grid + detail view, chart + table), manage the view state in the provider and switch within this widget.
 
+**Theme in the main content area:** The left panel and top bar are fully theme-aware (light + dark). For the main content area, force a white background and light-mode colours (`isDark = false`) regardless of the user's theme setting. Scientific visualizations (charts, scatter plots, matrices) require maximum contrast and readability — dark backgrounds degrade axis labels, overlapping text, and fine detail. Only pass `isDark` from `ThemeProvider` to visualization widgets if the functional spec explicitly requests dark-mode graphs.
+
 Structure:
 ```dart
 class _MainContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<AppStateProvider>();
-    final isDark = context.watch<ThemeProvider>().isDarkMode;
+    // Graph area always uses light theme for maximum readability.
+    // Dark mode only applies to the chrome (left panel, top bar).
+    const isDark = false;
 
     if (provider.isLoading) {
       return /* loading indicator */;
@@ -322,7 +326,7 @@ Before completing Phase 2:
 - [ ] Main content matches spec Section 4.3
 - [ ] Mock data loaded from assets (not hardcoded placeholder values)
 - [ ] Panel collapse/expand/resize works identically to skeleton
-- [ ] Theme toggle works (light + dark)
+- [ ] Theme toggle works (light + dark) — chrome only, graph area stays white
 - [ ] INFO section present with correct GitHub URL
 - [ ] No controls in the main content area
 - [ ] No modifications to DO NOT MODIFY files

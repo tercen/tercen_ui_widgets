@@ -10,13 +10,14 @@ final GetIt serviceLocator = GetIt.instance;
 /// Real mode: registers Tercen context + real data service.
 ///
 /// Phase 3 adds:
-///   import 'package:sci_tercen_context/sci_tercen_context.dart';
-///   setupServiceLocator(useMocks: false, ctx: ctx);
-///   // where ctx = await tercenCtx(serviceFactory: factory, taskId: taskId)
+///   import 'package:sci_tercen_client/sci_client_service_factory.dart';
+///   setupServiceLocator(useMocks: false, factory: factory, taskId: taskId);
+///   // where factory = await createServiceFactoryForWebApp()
 void setupServiceLocator({
   bool useMocks = true,
-  // Phase 3: uncomment to accept context
-  // AbstractOperatorContext? ctx,
+  // Phase 3: uncomment to accept factory + taskId
+  // ServiceFactory? factory,
+  // String? taskId,
 }) {
   if (serviceLocator.isRegistered<DataService>()) return;
 
@@ -27,9 +28,8 @@ void setupServiceLocator({
   }
   // Phase 3: add else branch:
   // else {
-  //   serviceLocator.registerSingleton<AbstractOperatorContext>(ctx!);
   //   serviceLocator.registerLazySingleton<DataService>(
-  //     () => TercenDataService(ctx),
+  //     () => TercenDataService(factory!, taskId!),
   //   );
   // }
 }

@@ -58,7 +58,7 @@ dependencies:
       path: sci_tercen_client
 ```
 
-The single import `package:sci_tercen_context/sci_tercen_context.dart` gives you everything — all Tercen model classes (CubeQuery, Schema, Table, Column, etc.), `ServiceFactoryBase`, the context classes, and the `tercenCtx()` factory.
+The single import `package:sci_tercen_context/sci_tercen_context.dart` gives you everything — all Tercen model classes (CubeQuery, Schema, Table, Column, etc.), `ServiceFactoryBase`, the context classes, and `OperatorContext.create()`.
 
 ---
 
@@ -66,32 +66,32 @@ The single import `package:sci_tercen_context/sci_tercen_context.dart` gives you
 
 ```dart
 import 'package:sci_tercen_client/sci_service_factory_web.dart';
-import 'package:sci_tercen_context/sci_tercen_context.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   const useMocks = bool.fromEnvironment('USE_MOCKS', defaultValue: false);
 
-  AbstractOperatorContext? ctx;
+  ServiceFactory? factory;
+  String? taskId;
 
   if (!useMocks) {
     try {
-      final taskId = Uri.base.queryParameters['taskId'];
+      taskId = Uri.base.queryParameters['taskId'];
       if (taskId == null || taskId.isEmpty) {
         runApp(_buildErrorApp('Missing taskId parameter'));
         return;
       }
-      final factory = await createServiceFactoryForWebApp();
-      ctx = await tercenCtx(serviceFactory: factory, taskId: taskId);
+      factory = await createServiceFactoryForWebApp();
     } catch (e) {
-      debugPrint('Tercen init failed: $e');
+      print('Tercen init failed: $e');
     }
   }
 
   setupServiceLocator(
-    useMocks: ctx == null,
-    ctx: ctx,
+    useMocks: factory == null,
+    factory: factory,
+    taskId: taskId,
   );
 
   final prefs = await SharedPreferences.getInstance();
@@ -99,33 +99,33 @@ void main() async {
 }
 ```
 
-The `tercenCtx()` factory handles all task hierarchy navigation internally — it resolves `RunWebAppTask` -> `CubeQueryTask` automatically.
+`createServiceFactoryForWebApp()` is lightweight (sets up HTTP client). The heavy work — `OperatorContext.create()` which fetches the task and resolves `RunWebAppTask` -> `CubeQueryTask` — happens lazily inside the data service when `loadData()` is first called. Use `print()` (not `debugPrint()`) for WASM console visibility.
 
 ---
 
 ## Step 3: service_locator.dart
 
 ```dart
-import 'package:sci_tercen_context/sci_tercen_context.dart';
+import 'package:sci_tercen_client/sci_client_service_factory.dart';
 
 void setupServiceLocator({
   bool useMocks = true,
-  AbstractOperatorContext? ctx,
+  ServiceFactory? factory,
+  String? taskId,
 }) {
   if (serviceLocator.isRegistered<DataService>()) return;
 
   if (useMocks) {
     serviceLocator.registerLazySingleton<DataService>(() => MockDataService());
   } else {
-    serviceLocator.registerSingleton<AbstractOperatorContext>(ctx!);
     serviceLocator.registerLazySingleton<DataService>(
-      () => TercenDataService(ctx),
+      () => TercenDataService(factory!, taskId!),
     );
   }
 }
 ```
 
-For multiple services that need Tercen access, pass the same `ctx` to each.
+For multiple services that need Tercen access, pass the same `factory` and `taskId` to each. Each service creates its own context lazily.
 
 ---
 
@@ -308,26 +308,36 @@ Limit concurrent downloads to 3.
 ## Step 5: Real service
 
 ```dart
+import 'package:sci_tercen_client/sci_client_service_factory.dart';
 import 'package:sci_tercen_context/sci_tercen_context.dart';
 
 class TercenDataService implements DataService {
-  final AbstractOperatorContext _ctx;
+  final ServiceFactoryBase _factory;
+  final String _taskId;
   final MockDataService _mockService = MockDataService();
+  AbstractOperatorContext? _ctx;
 
-  TercenDataService(this._ctx);
+  TercenDataService(this._factory, this._taskId);
+
+  Future<AbstractOperatorContext> _getContext() async {
+    if (_ctx != null) return _ctx!;
+    _ctx = await OperatorContext.create(serviceFactory: _factory, taskId: _taskId);
+    return _ctx!;
+  }
 
   @override
   Future<List<YourModel>> loadData() async {
     try {
-      final qtData  = await _ctx.select(names: ['.y', '.ci', '.ri']);
-      final colData = await _ctx.cselect();
-      final rowData = await _ctx.rselect();
+      final ctx = await _getContext();
+      final qtData  = await ctx.select(names: ['.y', '.ci', '.ri']);
+      final colData = await ctx.cselect();
+      final rowData = await ctx.rselect();
 
       final models = _joinAndBuild(qtData, colData, rowData);
       if (models.isEmpty) return _mockService.loadData();
       return models;
     } catch (e) {
-      debugPrint('Tercen error: $e');
+      print('Tercen error: $e');
       await _printDiagnosticReport();
       return _mockService.loadData();
     }
@@ -419,8 +429,10 @@ index.html line 17 must stay commented: `<!--<base href="$FLUTTER_BASE_HREF"> --
 operator.json must have:
 
 ```json
-{"name": "Your Operator", "isWebApp": true, "serve": "build/web", "urls": ["https://github.com/tercen/your-repo"]}
+{"name": "Your Operator", "isWebApp": true, "isViewOnly": false, "entryType": "app", "serve": "build/web", "urls": ["https://github.com/tercen/your-repo"]}
 ```
+
+> `isViewOnly: false` and `entryType: "app"` are **required** for operators that save results (Type 2 apps). Without them, Tercen creates a CubeQueryTask instead of a RunWebAppTask, and save() will appear to succeed but produce no visible results.
 
 Hot reload is broken for Tercen web apps. Always stop and restart with `flutter run -d chrome --web-port 8080`.
 
@@ -462,10 +474,8 @@ Future<void> _printDiagnosticReport() async {
 
 | Function | Mode | Input |
 | -------- | ---- | ----- |
-| `tercenCtx(serviceFactory: f, taskId: id)` | Production | taskId from URL |
-| `tercenCtx(serviceFactory: f, workflowId: w, stepId: s)` | Dev | workflowId + stepId |
-| `OperatorContext.create(serviceFactory: f, taskId: id)` | Production (direct) | taskId |
-| `OperatorContextDev(serviceFactory: f, workflowId: w, stepId: s)` | Dev (direct) | workflowId + stepId |
+| `OperatorContext.create(serviceFactory: f, taskId: id)` | Production | taskId from URL |
+| `OperatorContextDev(serviceFactory: f, workflowId: w, stepId: s)` | Dev | workflowId + stepId |
 
 ### Data selection (all return `Future<Table>`)
 
@@ -575,15 +585,16 @@ All accept optional `offset` (default 0) and `limit` (default -1 = all rows).
 - [ ] `sci_tercen_context` and `sci_tercen_client` in pubspec.yaml at matching versions
 - [ ] `createServiceFactoryForWebApp()` in main.dart with try/catch
 - [ ] taskId from `Uri.base.queryParameters['taskId']`
-- [ ] Context created via `tercenCtx(serviceFactory: factory, taskId: taskId)`
-- [ ] `<AbstractOperatorContext>` explicit type on GetIt registration
+- [ ] Context created lazily via `OperatorContext.create()` inside data service (NOT in main.dart)
+- [ ] `ServiceFactory` and `taskId` passed from main.dart through service locator to data service
 - [ ] Data flow matches functional spec Section 2.2
 - [ ] Real service uses `ctx.select()` / `ctx.cselect()` / `ctx.rselect()` — NOT manual tableSchemaService calls
 - [ ] Real service falls back to mock on error
 - [ ] Diagnostic report function included in every real service
+- [ ] `print()` used instead of `debugPrint()` (required for WASM console output)
 - [ ] `flutter build web --wasm` succeeds
 - [ ] `build/web/` committed
-- [ ] operator.json correct
+- [ ] operator.json has `isViewOnly: false` and `entryType: "app"` (required for Type 2 save)
 - [ ] index.html line 17 commented
 - [ ] No `dart:html` or `http` package API calls
 - [ ] No manual task navigation code (context handles it)
@@ -596,7 +607,7 @@ All accept optional `offset` (default 0) and `limit` (default -1 = all rows).
 | File | Action |
 | ---- | ------ |
 | `pubspec.yaml` | Add `sci_tercen_context` dependency, verify `sci_tercen_client` version matches |
-| `lib/main.dart` | Modify — create context, pass to service locator |
+| `lib/main.dart` | Modify — create ServiceFactory, pass factory + taskId to service locator |
 | `lib/di/service_locator.dart` | Modify — register context + real data service |
 | `lib/implementations/services/tercen_*_service.dart` | Create — uses context for data access |
 | `lib/utils/*_resolver.dart` | Create (if Flow B needs relation tree walking) |

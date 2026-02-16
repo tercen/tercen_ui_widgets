@@ -31,10 +31,9 @@ void main() async {
     //
     // try {
     //   final factory = await createServiceFactoryForWebApp();
-    //   final ctx = await tercenCtx(serviceFactory: factory, taskId: taskId);
-    //   setupServiceLocator(useMocks: false, ctx: ctx);
+    //   setupServiceLocator(useMocks: false, factory: factory, taskId: taskId);
     // } catch (e) {
-    //   debugPrint('Tercen init failed: $e — falling back to mocks');
+    //   print('Tercen init failed: $e — falling back to mocks');
     //   setupServiceLocator(useMocks: true);
     // }
 

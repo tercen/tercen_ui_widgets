@@ -69,7 +69,7 @@ Use the **Read** tool to read `lib/main.dart` for all checks in this group.
 
 ### B2: Context creation
 
-`main.dart` must call `tercenCtx(serviceFactory: factory, taskId: taskId)` from `package:sci_tercen_context/sci_tercen_context.dart`.
+`main.dart` must create a `ServiceFactory` via `createServiceFactoryForWebApp()` and pass it (along with `taskId`) to `setupServiceLocator`. Context creation happens lazily inside the data service via `OperatorContext.create()`.
 
 ### B3: taskId from URL
 
@@ -83,19 +83,19 @@ Use the **Read** tool to read `lib/main.dart` for all checks in this group.
 
 The factory creation and context creation must be wrapped in a try-catch. If Tercen init fails, the app must fall back to mock mode (not crash).
 
-### B6: Context passed to service locator
+### B6: Factory and taskId passed to service locator
 
-`setupServiceLocator` must be called with the context. The call should look like:
+`setupServiceLocator` must be called with the `ServiceFactory` and `taskId`. The call should look like:
 
 ```dart
-setupServiceLocator(useMocks: ctx == null, ctx: ctx);
+setupServiceLocator(useMocks: factory == null, factory: factory, taskId: taskId);
 ```
 
-or equivalent logic where `useMocks` is true when context creation failed.
+or equivalent logic where `useMocks` is true when factory creation failed. Context must NOT be created in main.dart — it is created lazily in the data service.
 
 ### B7: No manual task navigation
 
-`main.dart` must NOT contain code that manually navigates `RunWebAppTask` to `CubeQueryTask` or calls `taskService.get()`. The `tercenCtx()` factory handles this automatically.
+`main.dart` must NOT contain code that manually navigates `RunWebAppTask` to `CubeQueryTask` or calls `taskService.get()`. `OperatorContext.create()` handles this automatically inside the data service.
 
 ---
 
@@ -103,23 +103,23 @@ or equivalent logic where `useMocks` is true when context creation failed.
 
 Use the **Read** tool to read `lib/di/service_locator.dart` for all checks in this group.
 
-### C1: Accepts context parameter
+### C1: Accepts factory and taskId parameters
 
-`setupServiceLocator` must accept an `AbstractOperatorContext?` parameter (not commented out).
+`setupServiceLocator` must accept `ServiceFactory?` and `String?` parameters for factory and taskId (not commented out).
 
-### C2: AbstractOperatorContext registered with explicit type
+### C2: Real service receives factory and taskId
 
-When not using mocks, the service locator must register the context with an explicit type parameter:
+When not using mocks, the service locator must register a real data service that receives the factory and taskId:
 
 ```dart
-serviceLocator.registerSingleton<AbstractOperatorContext>(ctx!);
+serviceLocator.registerLazySingleton<DataService>(
+  () => TercenDataService(factory!, taskId!),
+);
 ```
-
-A registration without the type parameter (e.g., `registerSingleton(ctx!)`) is a FAIL.
 
 ### C3: Real service registered
 
-When not using mocks, at least one real data service must be registered that receives the context.
+When not using mocks, at least one real data service must be registered.
 
 ### C4: Guard against double registration
 
@@ -127,7 +127,7 @@ When not using mocks, at least one real data service must be registered that rec
 
 ### C5: Import present
 
-`service_locator.dart` must import `package:sci_tercen_context/sci_tercen_context.dart` (not commented out).
+`service_locator.dart` must import `package:sci_tercen_client/sci_client_service_factory.dart` (not commented out).
 
 ---
 
@@ -187,9 +187,9 @@ Use the **Glob** tool to find files matching `lib/implementations/services/*.dar
 
 At least one file in `lib/implementations/services/` must implement a real Tercen data service (not the mock).
 
-### E2: Real service receives context
+### E2: Real service receives factory and taskId
 
-The real service constructor must accept an `AbstractOperatorContext` parameter.
+The real service constructor must accept `ServiceFactoryBase` and `String` parameters (factory + taskId). It must create the context lazily via `OperatorContext.create()` inside a `_getContext()` method or equivalent — NOT receive a pre-built context.
 
 ### E3: Single fallback strategy
 
@@ -247,7 +247,15 @@ Use the **Read** tool to read `operator.json`. It must have `"isWebApp": true`.
 
 `operator.json` must have `"serve": "build/web"`.
 
-### G3: index.html base href commented
+### G3: operator.json isViewOnly
+
+`operator.json` must have `"isViewOnly": false` for Type 2 apps (operators that save results). For Type 1 apps, note but do not FAIL if missing.
+
+### G4: operator.json entryType
+
+`operator.json` must have `"entryType": "app"` for Type 2 apps. For Type 1 apps, note but do not FAIL if missing.
+
+### G5: index.html base href commented
 
 Use the **Read** tool to read `web/index.html`. It must contain the base href line commented out:
 
@@ -257,11 +265,11 @@ Use the **Read** tool to read `web/index.html`. It must contain the base href li
 
 If the line is uncommented or missing, that is a FAIL.
 
-### G4: .gitignore preserves build/web
+### G6: .gitignore preserves build/web
 
 Use the **Read** tool to read `.gitignore`. It must contain `!build/web/` to preserve the web build output.
 
-### G5: build/web committed (if build was done)
+### G7: build/web committed (if build was done)
 
 Use the **Glob** tool to check if `build/web/` exists with content. If it exists, it should contain the Flutter web build output. If the directory does not exist, note it but do not FAIL — the build may not have been run yet.
 
@@ -365,12 +373,12 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - B3: [PASS/FAIL] — taskId from URL [detail if FAIL]
 - B4: [PASS/FAIL] — Null/empty taskId handling [detail if FAIL]
 - B5: [PASS/FAIL] — Try-catch around init [detail if FAIL]
-- B6: [PASS/FAIL] — Context passed to service locator [detail if FAIL]
+- B6: [PASS/FAIL] — Factory and taskId passed to service locator [detail if FAIL]
 - B7: [PASS/FAIL] — No manual task navigation [detail if FAIL]
 
 ### C: service_locator.dart
-- C1: [PASS/FAIL] — Accepts context parameter [detail if FAIL]
-- C2: [PASS/FAIL] — Explicit type on registration [detail if FAIL]
+- C1: [PASS/FAIL] — Accepts factory and taskId parameters [detail if FAIL]
+- C2: [PASS/FAIL] — Real service receives factory and taskId [detail if FAIL]
 - C3: [PASS/FAIL] — Real service registered [detail if FAIL]
 - C4: [PASS/FAIL] — Guard against double registration [detail if FAIL]
 - C5: [PASS/FAIL] — Import present [detail if FAIL]
@@ -384,7 +392,7 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 
 ### E: Real Data Service
 - E1: [PASS/FAIL] — Real service exists [detail if FAIL]
-- E2: [PASS/FAIL] — Receives context [detail if FAIL]
+- E2: [PASS/FAIL] — Receives factory and taskId, lazy context [detail if FAIL]
 - E3: [PASS/FAIL] — Single fallback strategy [detail if FAIL]
 - E4: [PASS/FAIL] — Diagnostic report present [detail if FAIL]
 - E5: [PASS/FAIL] — No workaround code [detail if FAIL]
@@ -398,9 +406,11 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 ### G: Build and Deploy
 - G1: [PASS/FAIL] — operator.json isWebApp [detail if FAIL]
 - G2: [PASS/FAIL] — operator.json serve [detail if FAIL]
-- G3: [PASS/FAIL] — index.html base href commented [detail if FAIL]
-- G4: [PASS/FAIL] — .gitignore preserves build/web [detail if FAIL]
-- G5: [PASS/FAIL] — build/web committed [detail if FAIL]
+- G3: [PASS/FAIL/N/A] — operator.json isViewOnly [detail if FAIL]
+- G4: [PASS/FAIL/N/A] — operator.json entryType [detail if FAIL]
+- G5: [PASS/FAIL] — index.html base href commented [detail if FAIL]
+- G6: [PASS/FAIL] — .gitignore preserves build/web [detail if FAIL]
+- G7: [PASS/FAIL] — build/web committed [detail if FAIL]
 
 ### H: Import Hygiene
 - H1: [PASS/FAIL] — Single context import [detail if FAIL]

@@ -44,7 +44,7 @@ Every functional spec follows this structure. All 8 sections are required.
 **Version:** 1.0.0
 **Status:** Draft
 **Last Updated:** [Date]
-**Reference**: [Source material — Shiny app path, screenshots, description, etc.]
+**Reference**: [Source material — existing app, screenshots, description, etc.]
 
 ---
 
@@ -206,7 +206,7 @@ Icon: info icon
 
 ## Discovery Process
 
-Gather information in this order. Adapt questions to the input source (Shiny code, screenshots, verbal description, existing documentation).
+Gather information in this order. Adapt questions to the input source (existing app code, screenshots, verbal description, existing documentation).
 
 ### Round 1: Purpose and Data
 
@@ -244,7 +244,7 @@ Gather information in this order. Adapt questions to the input source (Shiny cod
 ## Question Efficiency
 
 - Do NOT dump all questions at once. Ask 3-4 per round.
-- Skip questions already answered by provided material (Shiny code, screenshots, etc.).
+- Skip questions already answered by provided material (existing app code, screenshots, etc.).
 - When reviewing existing code/UI, proactively identify Tercen constraint violations and propose fixes.
 - Consolidate related questions.
 
