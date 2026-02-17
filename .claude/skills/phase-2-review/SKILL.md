@@ -1,4 +1,15 @@
-# Review: Phase 2 Mock Build Conformance
+---
+name: phase-2-review
+description: Review a Phase 2 mock build for conformance against the skeleton template and functional spec. Runs as a read-only reviewer agent that compares DO-NOT-MODIFY files, checks wiring patterns, and produces a PASS/FAIL conformance report. Use after a mock app is built and before starting Phase 3.
+argument-hint: "[path to built app] [path to functional spec]"
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - AskUserQuestion
+---
 
 **This file is READ-ONLY during reviews. Do NOT modify it.**
 
@@ -24,9 +35,9 @@ Follow this order:
 
 1. Use the **Read** tool to read the entire functional spec file.
 2. **Check Group A (DO-NOT-MODIFY files):** For each of the 12 file pairs, use the **Read** tool to read both the skeleton version and the app version. You can read multiple files in parallel by making parallel Read tool calls. Compare the content — they must be identical. Any difference is a FAIL.
-3. **Check Groups B–C (structural, placeholder):** Use the **Glob** tool to verify directories exist. Use the **Read** tool to read `pubspec.yaml`, `operator.json`, `version_info.dart`, `main.dart`, and `home_screen.dart`.
-4. **Check Groups D–G (spec conformance, wiring, data, UI):** Use the **Read** tool to read each section widget, the provider, and service files. Use the **Grep** tool when searching for patterns across `lib/` (e.g., checking for `setState` calls or tab widgets).
-5. **Check Groups H–I (config, service locator):** Use the **Read** tool to read `web/index.html`, `.gitignore`, `analysis_options.yaml`, and `service_locator.dart`.
+3. **Check Groups B-C (structural, placeholder):** Use the **Glob** tool to verify directories exist. Use the **Read** tool to read `pubspec.yaml`, `operator.json`, `version_info.dart`, `main.dart`, and `home_screen.dart`.
+4. **Check Groups D-G (spec conformance, wiring, data, UI):** Use the **Read** tool to read each section widget, the provider, and service files. Use the **Grep** tool when searching for patterns across `lib/` (e.g., checking for `setState` calls or tab widgets).
+5. **Check Groups H-I (config, service locator):** Use the **Read** tool to read `web/index.html`, `.gitignore`, `analysis_options.yaml`, and `service_locator.dart`.
 6. Produce the **Conformance Report** (format at the bottom of this skill).
 7. Use the **Write** tool to save the report to `_local/phase-2-conformance-report.md` in the app directory.
 
@@ -221,7 +232,7 @@ Every control from spec Section 4.2 must have a corresponding field in the provi
 For each control widget (read with the **Read** tool), verify the one-way data flow:
 
 ```
-control.onChanged → provider.setXxx(value) → notifyListeners() → Consumer rebuilds
+control.onChanged -> provider.setXxx(value) -> notifyListeners() -> Consumer rebuilds
 ```
 
 Check that:

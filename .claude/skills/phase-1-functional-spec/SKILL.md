@@ -1,4 +1,9 @@
-# Phase 1: Functional Specification
+---
+name: phase-1-functional-spec
+description: Write a functional specification for a new Tercen Flutter web app. Use when starting a new app, converting an existing app, or when the user asks for a spec, requirements, or functional design. Produces a complete spec document with no code.
+argument-hint: "[app name or description]"
+disable-model-invocation: true
+---
 
 **This file is READ-ONLY during app builds. Do NOT modify it. If you encounter a gap or error, note it in the app's `_local/skill-feedback.md` and continue.**
 
@@ -18,7 +23,7 @@ MUST follow these rules when designing the UI.
    - Use **segmented button** for 2-4 mutually exclusive modes that should be always visible.
    - Use **radio** for longer option lists or settings-style selections.
 6. **Identify the app type**:
-   - Type 1 (Visualization): Tercen → App → Screen (+ download)
+   - Type 1 (Visualization): Tercen -> App -> Screen (+ download)
    - Type 2 (Interactive): Same as Type 1 + writes data back to Tercen
    - Type 3 (Workflow Manager): Multi-step with Tercen object creation and breakpoints
 
@@ -115,21 +120,21 @@ Every functional spec follows this structure. All 8 sections are required.
 
 [ASCII layout diagram showing left panel sections and main content area. Example:]
 
-┌──────────────────────────┬──────────────────────────────────┐
-│ Left Panel (280px)       │ Main Content                     │
-│                          │                                  │
-│ [Panel Header]           │ [Main display description]       │
-│                          │                                  │
-│ ▼ SECTION NAME           │                                  │
-│ ┌──────────────────────┐ │                                  │
-│ │ [Control] [Type]     │ │                                  │
-│ └──────────────────────┘ │                                  │
-│                          │                                  │
-│ ▼ INFO                   │                                  │
-│ ┌──────────────────────┐ │                                  │
-│ │ GitHub link          │ │                                  │
-│ └──────────────────────┘ │                                  │
-└──────────────────────────┴──────────────────────────────────┘
++----------------------------+------------------------------------+
+| Left Panel (280px)         | Main Content                       |
+|                            |                                    |
+| [Panel Header]             | [Main display description]         |
+|                            |                                    |
+| > SECTION NAME             |                                    |
+| +------------------------+ |                                    |
+| | [Control] [Type]       | |                                    |
+| +------------------------+ |                                    |
+|                            |                                    |
+| > INFO                     |                                    |
+| +------------------------+ |                                    |
+| | GitHub link            | |                                    |
+| +------------------------+ |                                    |
++----------------------------+------------------------------------+
 
 ### 4.2 Left Panel Sections
 

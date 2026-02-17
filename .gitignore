@@ -1,3 +1,4 @@
 *_local*
-.claude/
+.claude/*
+!.claude/skills/
 _feedback/

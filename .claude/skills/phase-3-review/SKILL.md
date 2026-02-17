@@ -1,4 +1,15 @@
-# Review: Phase 3 Tercen Integration Conformance
+---
+name: phase-3-review
+description: Review a Phase 3 Tercen integration for conformance against SDK rules, data flow patterns, and deployment configuration. Runs as a read-only reviewer agent that produces a PASS/FAIL conformance report. Use after Tercen integration is complete. Assumes Phase 2 conformance has already been verified.
+argument-hint: "[path to built app] [path to functional spec]"
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - AskUserQuestion
+---
 
 **This file is READ-ONLY during reviews. Do NOT modify it.**
 

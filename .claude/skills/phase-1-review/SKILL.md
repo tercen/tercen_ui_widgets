@@ -1,4 +1,15 @@
-# Review: Phase 1 Functional Spec Conformance
+---
+name: phase-1-review
+description: Review a Phase 1 functional spec for conformance to all structural and content rules. Runs as a read-only reviewer agent that produces a PASS/FAIL conformance report. Use after a functional spec is written and before starting Phase 2.
+argument-hint: "[path to functional spec]"
+disable-model-invocation: true
+allowed-tools:
+  - Read
+  - Glob
+  - Grep
+  - Write
+  - AskUserQuestion
+---
 
 **This file is READ-ONLY during reviews. Do NOT modify it.**
 
@@ -108,7 +119,7 @@ The document must have a top-level heading with the app name (e.g., `# Volcano P
 ### B6: App type identified
 
 The spec must explicitly identify the app type somewhere (typically in Section 1.1 or 1.3):
-- Type 1 (Visualization): Tercen → App → Screen (+ download)
+- Type 1 (Visualization): Tercen -> App -> Screen (+ download)
 - Type 2 (Interactive): Same as Type 1 + writes data back to Tercen
 - Type 3 (Workflow Manager): Multi-step with Tercen object creation and breakpoints
 
@@ -154,7 +165,7 @@ The INFO section must include a control or item described as a GitHub repository
 
 Every control in Section 4.2 must specify:
 - **Control name** — what it is called
-- **Type** — one of the 10 allowed types (see Check E1)
+- **Type** — one of the 11 allowed types (see Check E1)
 - **Default** — the default value
 - **Range/Notes** — valid range, options list, or behavioral notes
 
@@ -172,7 +183,7 @@ NOT allowed in main panel: sliders, dropdowns, text inputs, buttons that change 
 
 ### E1: Only allowed control types used
 
-Every control in Section 4.2 must use one of these 10 types:
+Every control in Section 4.2 must use one of these 11 types:
 
 1. dropdown
 2. slider
@@ -184,6 +195,7 @@ Every control in Section 4.2 must use one of these 10 types:
 8. text input
 9. checkbox
 10. radio
+11. segmented button
 
 If a control uses a type not on this list (e.g., "color picker", "date picker", "tree view", "multi-select list"), that is a FAIL.
 

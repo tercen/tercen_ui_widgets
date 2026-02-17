@@ -1,4 +1,9 @@
-# Phase 2: Mock Build
+---
+name: phase-2-mock-build
+description: Build a mock Flutter web app from a Phase 1 functional spec. Copies the skeleton template, wires controls to a mock data service, and produces a runnable app with no Tercen dependency. Use after a functional spec is approved.
+argument-hint: "[path to functional spec]"
+disable-model-invocation: true
+---
 
 **This file is READ-ONLY during app builds. Do NOT modify it. If you encounter a gap or error, note it in the app's `_local/skill-feedback.md` and continue.**
 
@@ -36,7 +41,7 @@ Copy the entire `skeleton/` directory to the target project location, then updat
 - `commitHash` — leave empty (populated at build time)
 
 ### main.dart (`lib/main.dart`)
-- Rename `SkeletonApp` class → `YourAppNameApp`
+- Rename `SkeletonApp` class -> `YourAppNameApp`
 - Update `title:` in `MaterialApp`
 
 ### home_screen.dart (`lib/presentation/screens/home_screen.dart`)
@@ -147,7 +152,7 @@ Keep the data loading infrastructure (`loadData`, `isLoading`, `error`, `data`).
 Every control follows this one-way data flow:
 
 ```
-control.onChanged → provider.setXxx(value) → notifyListeners() → Consumer rebuilds main content
+control.onChanged -> provider.setXxx(value) -> notifyListeners() -> Consumer rebuilds main content
 ```
 
 The skeleton's `controls_section.dart` demonstrates all 11 control types wired to the provider. Copy the wiring pattern exactly — only change the field names and values.
