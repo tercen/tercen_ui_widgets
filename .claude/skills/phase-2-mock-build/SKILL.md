@@ -5,7 +5,7 @@ argument-hint: "[path to functional spec]"
 disable-model-invocation: true
 ---
 
-**This file is READ-ONLY during app builds. Do NOT modify it. If you encounter a gap or error, note it in the app's `_local/skill-feedback.md` and continue.**
+**This file is READ-ONLY during app builds. Do NOT modify it. If you encounter a gap, error, workaround, or unexpected behaviour, append a one-line note to `_issues/session-log.md` and continue working. Do not stop to discuss the issue.**
 
 Load this skill when building a mock app from a functional spec. The skeleton provides all structural code. Your job is to copy it, replace placeholders, and wire controls to a mock data service.
 
