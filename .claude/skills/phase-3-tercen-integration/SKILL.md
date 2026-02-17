@@ -19,7 +19,7 @@ Replace mock services with real Tercen data services. The Phase 2 mock app is yo
 
 ## Rules — read before writing any code
 
-1. **No fallback chains in data access.** The real service has ONE fallback: Tercen fails entirely -> fall back to mock. Do NOT add fallback strategies within data access itself. Flow A and Flow B are different access patterns for different data, not fallback alternatives.
+1. **No mock fallback in real services.** When Tercen data access fails, rethrow the error and let the UI show an error state. Do NOT silently return mock data — it hides real problems. Use the `USE_MOCKS` flag in `main.dart` for local development only. Flow A and Flow B are different access patterns for different data, not fallback alternatives.
 2. **Use `sci_tercen_context` for all data access.** Do NOT manually navigate task hierarchies (`RunWebAppTask` -> `CubeQueryTask`) or call `tableSchemaService.select()` directly. The context handles task navigation, schema resolution, system column filtering, and data fetching automatically.
 3. **Always use explicit GetIt type parameters.** `getIt.registerSingleton<ServiceFactory>(factory)` not `getIt.registerSingleton(factory)`. Omitting the type defaults to `Object` and causes runtime type mismatches.
 4. **Never use `dart:html` or `http` package for Tercen API calls.** Always use `sci_tercen_client` services — they handle auth and CORS.
@@ -30,8 +30,8 @@ Replace mock services with real Tercen data services. The Phase 2 mock app is yo
 ## Inputs
 
 1. Working mock app (Phase 2 output)
-2. Functional spec Section 2.2 (Data Source) — determines Flow A, B, or C
-3. A real Tercen taskId for testing (user provides)
+2. Functional spec Section 2.2 (Data Source) — determines Flow A, B, C, or D
+3. A real Tercen taskId (Flows A/B/C) or projectId (Flow D) for testing (user provides)
 
 ---
 
@@ -44,12 +44,13 @@ Read the functional spec Section 2.2.
 | A | App displays computed values, charts, grids from Tercen projections | `ctx.select()` + `ctx.cselect()` + `ctx.rselect()` |
 | B | App downloads files (images, ZIPs, documents) referenced by `.documentId` | `ctx.cselect(names: ['.documentId'])` -> `fileService.download()` |
 | C | App needs both | Flow A for data + Flow B for files, in separate resolver classes |
+| D | App browses/navigates Tercen objects (projects, workflows, steps, folders, documents) | Entity services (`projectService`, `workflowService`, `folderService`, etc.) with `startKey`/`endKey` range queries. No CubeQueryTask — uses `projectId` instead of `taskId`. |
 
 ---
 
 ## Step 1: Update dependencies
 
-In `pubspec.yaml`, add `sci_tercen_context` and update `sci_tercen_client` to the same version:
+In `pubspec.yaml`, add `sci_tercen_context` and update `sci_tercen_client`. Always use the latest version from <https://github.com/tercen/sci_tercen_client> — check the repo's tags for the most recent release. Both packages must use the same `ref`:
 
 ```yaml
 dependencies:
@@ -57,13 +58,13 @@ dependencies:
   sci_tercen_context:
     git:
       url: https://github.com/tercen/sci_tercen_client.git
-      ref: 1.12.0  # Update to latest version
+      ref: <latest-version>  # e.g. 1.13.0 — check repo tags
       path: sci_tercen_context
   # Tercen client — needed for createServiceFactoryForWebApp()
   sci_tercen_client:
     git:
       url: https://github.com/tercen/sci_tercen_client.git
-      ref: 1.12.0  # Must match sci_tercen_context version
+      ref: <latest-version>  # Must match sci_tercen_context ref
       path: sci_tercen_client
 ```
 
@@ -314,7 +315,410 @@ Limit concurrent downloads to 3.
 
 ---
 
+## Step 4D: Flow D — entity navigation
+
+Flow D is for apps that browse, list, and navigate Tercen objects — **not** cross-tab projection data. These apps use `projectId` and `teamId` (not `taskId`) and call entity services directly.
+
+### App lifecycle: always inside the orchestrator
+
+All apps run as iframes inside the orchestrator — never standalone. The orchestrator is the only component that reads URL params and `--dart-define` values. It passes credentials and context to each app via `postMessage`.
+
+**Lifecycle:**
+
+1. Orchestrator loads the app iframe
+2. App starts in a **waiting** state (shows loading spinner)
+3. Orchestrator sends `init-context` message with token, teamId, projectId
+4. App creates `ServiceFactory` with the received token
+5. App registers services, loads data
+6. App sends `app-ready` back to orchestrator
+
+**Dev workflow:** Build the sub-apps (`flutter build web`), then run the orchestrator with `--dart-define` flags. The orchestrator passes those values to child apps via `init-context`.
+
+```bash
+# Build a sub-app
+cd apps/project_nav && flutter build web --release
+
+# Run orchestrator (which loads the built sub-apps)
+cd apps/orchestrator
+flutter run -d chrome --web-port 8080 \
+  --dart-define=TERCEN_TOKEN=xxx \
+  --dart-define=TEAM_ID=thiago_library \
+  --dart-define=PROJECT_ID=abc123
+```
+
+**Mock mode:** `--dart-define=USE_MOCKS=true` on the sub-app build skips the postMessage wait and uses mock data directly.
+
+### postMessage protocol
+
+All inter-app messages use the same envelope — small JSON, one `type`, flat `payload`:
+
+```json
+{"type": "init-context", "source": "orchestrator", "target": "project-nav",
+ "payload": {"token": "xxx", "teamId": "thiago_library", "projectId": "abc123"}}
+```
+
+```json
+{"type": "app-ready", "source": "project-nav", "target": "orchestrator",
+ "payload": {}}
+```
+
+```json
+{"type": "step-selected", "source": "project-nav", "target": "*",
+ "payload": {"projectId": "abc123", "workflowId": "wf1", "stepId": "s1"}}
+```
+
+**Envelope shape:**
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `type` | `String` | Message kind — the only field receivers switch on |
+| `source` | `String` | Sender app ID (e.g., `"orchestrator"`, `"project-nav"`) |
+| `target` | `String` | Receiver app ID, or `"*"` for broadcast |
+| `payload` | `Map` | Flat key/value data specific to the message type |
+
+### Listening for messages (receive)
+
+```dart
+import 'package:web/web.dart' as web;
+import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
+import 'dart:convert';
+
+void _listenForMessages(void Function(String type, Map<String, dynamic> payload) onMessage) {
+  web.window.addEventListener('message', (web.Event event) {
+    final msgEvent = event as web.MessageEvent;
+    final data = msgEvent.data;
+    if (data == null) return;
+
+    // Convert JS object to Dart map
+    final jsonStr = web.window['JSON'].callMethod('stringify'.toJS, data) as JSString;
+    final map = json.decode(jsonStr.toDart) as Map<String, dynamic>;
+
+    final type = map['type'] as String?;
+    final payload = map['payload'] as Map<String, dynamic>? ?? {};
+    if (type != null) {
+      onMessage(type, payload);
+    }
+  }.toJS);
+}
+```
+
+### Sending messages (emit)
+
+```dart
+void _postToOrchestrator(String type, String sourceAppId, Map<String, dynamic> payload, {String target = 'orchestrator'}) {
+  final message = {
+    'type': type,
+    'source': sourceAppId,
+    'target': target,
+    'payload': payload,
+  };
+  web.window.parent?.postMessage(message.jsify(), '*'.toJS);
+}
+```
+
+### main.dart for Flow D
+
+```dart
+import 'package:web/web.dart' as web;
+import 'dart:js_interop';
+import 'package:sci_tercen_client/sci_service_factory_web.dart';
+import 'package:sci_tercen_client/sci_client_service_factory.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  const useMocks = bool.fromEnvironment('USE_MOCKS', defaultValue: false);
+
+  if (useMocks) {
+    setupServiceLocator(useMocks: true);
+    final prefs = await SharedPreferences.getInstance();
+    runApp(YourApp(prefs: prefs));
+    return;
+  }
+
+  // Wait for init-context from orchestrator
+  _listenForMessages((type, payload) async {
+    if (type == 'init-context') {
+      try {
+        final token = payload['token'] as String;
+        final teamId = payload['teamId'] as String;
+        final projectId = payload['projectId'] as String?;
+
+        final factory = await createServiceFactoryForWebApp(tercenToken: token);
+
+        setupServiceLocator(
+          useMocks: false,
+          tercenFactory: factory,
+          teamId: teamId,
+          projectId: projectId,
+        );
+
+        final prefs = await SharedPreferences.getInstance();
+        runApp(YourApp(prefs: prefs));
+
+        _postToOrchestrator('app-ready', 'project-nav', {});
+      } catch (e) {
+        print('Tercen init failed: $e');
+        runApp(_buildErrorApp('Initialization failed: $e'));
+      }
+    }
+  });
+}
+```
+
+### service_locator.dart for Flow D
+
+```dart
+void setupServiceLocator({
+  bool useMocks = true,
+  ServiceFactory? tercenFactory,
+  String? projectId,
+  String? teamId,
+}) {
+  if (serviceLocator.isRegistered<DataService>()) return;
+
+  if (useMocks) {
+    serviceLocator.registerLazySingleton<DataService>(() => MockDataService());
+  } else {
+    serviceLocator.registerSingleton<ServiceFactory>(tercenFactory!);
+    serviceLocator.registerLazySingleton<DataService>(
+      () => TercenDataService(
+        tercenFactory,
+        projectId: projectId,
+        teamId: teamId!,
+      ),
+    );
+  }
+}
+```
+
+### Sending domain messages from providers
+
+```dart
+// In AppStateProvider — when user clicks a data step:
+void selectStep(TreeNode step) {
+  _selectedStepId = step.id;
+  notifyListeners();
+
+  _postToOrchestrator('step-selected', 'project-nav', {
+    'projectId': _findAncestorId(step, TreeNodeType.project),
+    'workflowId': _findAncestorId(step, TreeNodeType.workflow),
+    'stepId': step.id,
+  }, target: '*');
+}
+```
+
+### The startKey/endKey pattern
+
+Entity services use CouchDB-style range queries. **The method name encodes the key structure.**
+
+```
+findProjectByOwnerName(...)       → keys are [owner, name]
+findFolderByParentFolderAndName(...)  → keys are [projectId, parentFolderId, name]
+findProjectObjectsByFolderAndName(...)→ keys are [projectId, folderId, name]
+findOperatorByUrlAndVersion(...)  → keys are [url, version]
+findWorkflowByProjectIdFolder(...)→ keys are [projectId, folderId]
+```
+
+**How to read the method name:** `find<Entity>By<Key1><Key2>...<KeyN>` → `startKey: [key1, key2, ..., keyN]`, `endKey: [key1, key2, ..., keyN]`.
+
+**Range conventions:**
+
+| Want | startKey | endKey |
+| ---- | -------- | ------ |
+| All items matching a prefix | `[prefix, ""]` | `[prefix, "\uf000"]` |
+| Descending (newest first) | `[prefix, "\ufff0"]` | `[prefix, ""]` |
+| All items for a project/folder | `[projectId, folderId, ""]` | `[projectId, folderId, "\uf000"]` |
+
+`"\uf000"` and `"\ufff0"` are Unicode high characters used as upper bounds. Use either — both work as "greater than any normal string."
+
+### List projects for a team/user
+
+`teamId` comes from the `init-context` payload (production) or `--dart-define=TEAM_ID` (dev).
+
+```dart
+// teamId = "thiago_library" (from init-context payload or --dart-define)
+final projects = await factory.projectService.findProjectByOwnerNameStream(
+  startKeyOwner: teamId,
+  endKeyOwner: teamId,
+  startKeyName: "",
+  endKeyName: "\uf000",
+).toList();
+// Returns all projects owned by "thiago_library"
+```
+
+### List folders in a project
+
+```dart
+final folders = await factory.folderService.findFolderByParentFolderAndName(
+  startKey: [projectId, parentFolderId, ""],
+  endKey: [projectId, parentFolderId, "\uf000"],
+);
+```
+
+### List documents (workflows, schemas, files) in a folder
+
+```dart
+// Workflows
+final workflows = await factory.projectDocumentService
+    .findWorkflowByProjectIdFolderStream(
+      startKeyProjectId: projectId, endKeyProjectId: projectId,
+      startKeyFolderId: folderId,   endKeyFolderId: folderId,
+    ).toList();
+
+// Schemas
+final schemas = await factory.projectDocumentService
+    .findSchemaByProjectIdFolderStream(
+      startKeyProjectId: projectId, endKeyProjectId: projectId,
+      startKeyFolderId: folderId,   endKeyFolderId: folderId,
+    ).toList();
+
+// File documents
+final files = await factory.projectDocumentService
+    .findFileDocumentByProjectIdFolderStream(
+      startKeyProjectId: projectId, endKeyProjectId: projectId,
+      startKeyFolderId: folderId,   endKeyFolderId: folderId,
+    ).toList();
+```
+
+### Get a workflow and its steps
+
+```dart
+final workflow = await factory.workflowService.get(workflowId);
+// workflow.steps is List<Step> — iterate to find DataStep instances
+for (final step in workflow.steps) {
+  if (step is DataStep) {
+    // step.id, step.name, step.state, step.computedRelation
+  }
+}
+```
+
+### Get multiple workflows at once
+
+```dart
+final workflowList = await factory.workflowService.list(workflowIds);
+```
+
+### Access data from a workflow step (bridging Flow D → Flow A)
+
+When a user selects a data step, you may need its output data:
+
+```dart
+final workflow = await factory.workflowService.get(workflowId);
+final step = workflow.steps.firstWhere((s) => s.id == stepId) as DataStep;
+
+// Get output schemas from the step's computed relation
+final relations = _getSimpleRelations(step.computedRelation);
+final schemaList = await factory.tableSchemaService.list(
+  relations.map((r) => r.id).toList(),
+);
+
+// Select data from a specific schema
+final targetSchema = schemaList.firstWhere((s) => s.name == "TargetTable");
+final table = await factory.tableSchemaService.select(
+  targetSchema.id,
+  targetSchema.columns.map((c) => c.name).toList(),
+  0,
+  targetSchema.nRows,
+);
+```
+
+### Helper: extract simple relations from nested structure
+
+```dart
+List<Relation> _getSimpleRelations(Relation relation) {
+  final result = <Relation>[];
+  void _walk(Relation? r) {
+    if (r == null) return;
+    if (r is SimpleRelation || r is ReferenceRelation) {
+      result.add(r);
+    } else if (r is JoinRelation) {
+      _walk(r.left);
+      _walk(r.right);
+    } else if (r is WhereRelation || r is RenameRelation) {
+      _walk(r.relation);
+    } else if (r is CompositeRelation) {
+      _walk(r.mainRelation);
+      for (final j in r.joinOperators) {
+        _walk(j.rightRelation);
+      }
+    }
+  }
+  _walk(relation);
+  return result;
+}
+```
+
+### Folder tree caching pattern (for navigation apps)
+
+Load the full folder structure once, then navigate in memory:
+
+```dart
+class ProjectStructureCache {
+  final ServiceFactory _factory;
+  final String _projectId;
+  List<FolderDocument>? _folders;
+  List<ProjectDocument>? _documents;
+
+  ProjectStructureCache(this._factory, this._projectId);
+
+  Future<void> load() async {
+    _folders = await _fetchAllFolders(_projectId, "");
+    _documents = await _fetchAllDocuments(_projectId, "");
+  }
+
+  Future<List<FolderDocument>> _fetchAllFolders(String projectId, String parentId) async {
+    final folders = await _factory.folderService.findFolderByParentFolderAndName(
+      startKey: [projectId, parentId, ""],
+      endKey: [projectId, parentId, "\uf000"],
+    );
+    final children = <FolderDocument>[];
+    for (final folder in folders) {
+      children.addAll(await _fetchAllFolders(projectId, folder.id));
+    }
+    return [...folders, ...children];
+  }
+
+  Future<List<ProjectDocument>> _fetchAllDocuments(String projectId, String folderId) async {
+    return await _factory.projectDocumentService
+        .findProjectObjectsByFolderAndName(
+          startKey: [projectId, folderId, ""],
+          endKey: [projectId, folderId, "\uf000"],
+        );
+  }
+}
+```
+
+### Diagnostic report for Flow D
+
+```dart
+Future<void> _printFlowDDiagnostic(ServiceFactory factory, String projectId) async {
+  print('=== TERCEN DIAGNOSTIC REPORT (Flow D) ===');
+  print('ProjectId: $projectId');
+
+  try {
+    final project = await factory.projectService.get(projectId);
+    print('Project: ${project.name} (owner: ${project.acl.owner})');
+  } catch (e) { print('Project fetch ERROR: $e'); }
+
+  try {
+    final folders = await factory.folderService.findFolderByParentFolderAndName(
+      startKey: [projectId, "", ""], endKey: [projectId, "", "\uf000"],
+    );
+    print('Root folders: ${folders.length}');
+    for (final f in folders) { print('  - ${f.name} (${f.id})'); }
+  } catch (e) { print('Folder list ERROR: $e'); }
+
+  print('=== END REPORT ===');
+}
+```
+
+---
+
 ## Step 5: Real service
+
+Do NOT fall back to mock data on error — it hides real problems and makes debugging harder. Instead, let the error propagate so the UI can show an error state. The `USE_MOCKS` flag in `main.dart` is sufficient for local development without a Tercen connection.
 
 ```dart
 import 'package:sci_tercen_client/sci_client_service_factory.dart';
@@ -323,7 +727,6 @@ import 'package:sci_tercen_context/sci_tercen_context.dart';
 class TercenDataService implements DataService {
   final ServiceFactoryBase _factory;
   final String _taskId;
-  final MockDataService _mockService = MockDataService();
   AbstractOperatorContext? _ctx;
 
   TercenDataService(this._factory, this._taskId);
@@ -342,13 +745,11 @@ class TercenDataService implements DataService {
       final colData = await ctx.cselect();
       final rowData = await ctx.rselect();
 
-      final models = _joinAndBuild(qtData, colData, rowData);
-      if (models.isEmpty) return _mockService.loadData();
-      return models;
+      return _joinAndBuild(qtData, colData, rowData);
     } catch (e) {
       print('Tercen error: $e');
       await _printDiagnosticReport();
-      return _mockService.loadData();
+      rethrow; // Let the UI handle the error state
     }
   }
 }
@@ -479,23 +880,40 @@ Future<void> _printDiagnosticReport() async {
 
 ## Checklist
 
-- [ ] `sci_tercen_context` and `sci_tercen_client` in pubspec.yaml at matching versions
+### All flows
+
 - [ ] `createServiceFactoryForWebApp()` in main.dart with try/catch
-- [ ] taskId from `Uri.base.queryParameters['taskId']`
-- [ ] Context created lazily via `OperatorContext.create()` inside data service (NOT in main.dart)
-- [ ] `ServiceFactory` and `taskId` passed from main.dart through service locator to data service
 - [ ] Data flow matches functional spec Section 2.2
-- [ ] Real service uses `ctx.select()` / `ctx.cselect()` / `ctx.rselect()` — NOT manual tableSchemaService calls
-- [ ] Real service falls back to mock on error
+- [ ] Real service rethrows errors (no mock fallback) — UI shows error state
 - [ ] Diagnostic report function included in every real service
 - [ ] `print()` used instead of `debugPrint()` (required for WASM console output)
 - [ ] `flutter build web --wasm` succeeds
 - [ ] `build/web/` committed
-- [ ] operator.json has `isViewOnly: false` and `entryType: "app"` (required for Type 2 save)
+- [ ] operator.json correct
 - [ ] index.html line 17 commented
 - [ ] No `dart:html` or `http` package API calls
-- [ ] No manual task navigation code (context handles it)
 - [ ] Mock mode works (`--dart-define=USE_MOCKS=true`)
+
+### Flows A/B/C specific
+
+- [ ] `sci_tercen_context` and `sci_tercen_client` in pubspec.yaml at latest matching version (same `ref`)
+- [ ] taskId from `Uri.base.queryParameters['taskId']`
+- [ ] Context created lazily via `OperatorContext.create()` inside data service (NOT in main.dart)
+- [ ] `ServiceFactory` and `taskId` passed from main.dart through service locator to data service
+- [ ] Real service uses `ctx.select()` / `ctx.cselect()` / `ctx.rselect()` — NOT manual tableSchemaService calls
+- [ ] No manual task navigation code (context handles it)
+- [ ] operator.json has `isViewOnly: false` and `entryType: "app"` (required for Type 2 save)
+
+### Flow D specific
+
+- [ ] App waits for `init-context` postMessage before initializing (no standalone credential resolution)
+- [ ] `createServiceFactoryForWebApp(tercenToken: token)` uses token from `init-context` payload
+- [ ] teamId and projectId extracted from `init-context` payload
+- [ ] `app-ready` message sent to orchestrator after successful init
+- [ ] Domain messages (e.g., `step-selected`) sent via `_postToOrchestrator()` with correct envelope
+- [ ] Mock mode (`--dart-define=USE_MOCKS=true`) skips postMessage wait and uses mock data
+- [ ] startKey/endKey range queries return expected data
+- [ ] Entity service finder methods match the key order from the method name
 
 ---
 
