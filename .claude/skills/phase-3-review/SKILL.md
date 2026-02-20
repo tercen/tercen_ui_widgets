@@ -202,14 +202,14 @@ At least one file in `lib/implementations/services/` must implement a real Terce
 
 The real service constructor must accept `ServiceFactoryBase` and `String` parameters (factory + taskId). It must create the context lazily via `OperatorContext.create()` inside a `_getContext()` method or equivalent — NOT receive a pre-built context.
 
-### E3: Single fallback strategy
+### E3: Error handling — diagnostic + rethrow
 
-The real service must have exactly ONE fallback: Tercen fails -> fall back to mock. Verify:
+The real service must NOT fall back to mock data at runtime. Verify:
 - There is a try-catch around Tercen data access
-- The catch block falls back to mock data (calls `MockDataService` or equivalent)
-- There are NO nested fallback chains (e.g., try Flow A, if fail try Flow B, if fail try manual query)
+- The catch block prints a diagnostic report and rethrows the error
+- The UI shows the error state (via `AppStateProvider._error`) — it does NOT silently show mock data
 
-Flow A and Flow B are different access patterns for different data — they are NOT fallback alternatives for each other.
+Mock mode is handled at startup in `main.dart` (`USE_MOCKS` flag), not at runtime inside the data service.
 
 ### E4: Diagnostic report present
 
