@@ -15,9 +15,19 @@ Set up a new Tercen Flutter operator project called `$ARGUMENTS`.
 - **Operator repo name:** `${ARGUMENTS}_flutter_operator`
 - **Target directory:** Ask the user where to create the project, or use the current working directory parent
 
+### 1b. Determine app type
+
+Ask the user: **"Is this a Type 1/2 app (visualization/interactive) or a Type 3 app (workflow manager)?"**
+
+- **Type 1/2:** Standard visualization or data write-back app
+- **Type 3:** Multi-step workflow manager with run history and status tracking
+
 ### 2. Copy skeleton
 
-Copy the entire `skeleton/` directory from the tercen-flutter-skills repo to the target location as `${ARGUMENTS}_flutter_operator/`.
+- **Type 1/2:** Copy `skeleton/` from the tercen-flutter-skills repo
+- **Type 3:** Copy `skeleton-type3/` from the tercen-flutter-skills repo
+
+Copy to the target location as `${ARGUMENTS}_flutter_operator/`.
 
 ### 3. Update project identity
 

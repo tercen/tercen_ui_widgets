@@ -11,116 +11,71 @@ allowed-tools:
   - AskUserQuestion
 ---
 
-**This file is READ-ONLY during reviews. Do NOT modify it.**
+**READ-ONLY — do not modify this file.**
 
-You are a reviewer agent running in Claude Code. Your job is to read a functional spec document and verify it conforms to all structural and content rules before it can be used as input to Phase 2.
+## Input
 
----
+Spec path (markdown file). Ask user if not provided.
 
-## Inputs Required
+## Workflow
 
-Before starting, confirm you have:
-
-1. **Functional spec** — the Phase 1 output document (markdown file)
-
-If the user has not provided the spec path, use the AskUserQuestion tool to request it.
-
----
-
-## Execution Strategy
-
-Follow this order:
-
-1. Use the **Read** tool to read the entire functional spec file.
-2. Work through every check group below (A through H) in order.
-3. For each individual check, record PASS or FAIL. Do NOT skip checks. Do NOT fix issues — only report them.
-4. When all checks are complete, produce the **Conformance Report** (format at the bottom of this skill).
-5. Use the **Write** tool to save the report to `_local/phase-1-conformance-report.md` in the app directory. Ask the user for the app directory path if not already known.
+1. Read the entire spec. Run all checks A–H in order, recording PASS/FAIL for each.
+2. Produce the Conformance Report (template below). Report only — never edit the spec.
+3. Save report to `_local/phase-1-conformance-report.md` in the app directory (ask user for path if unknown).
 
 ---
 
 ## Check Group A: Document Structure
 
-All 8 sections are required. Each section must be present as a heading and contain meaningful content (not empty, not just a placeholder like "TBD").
+All 8 sections required with meaningful content (not empty or "TBD").
 
 ### A1: Section 1 — Overview
-
-Must contain:
-- **1.1 Purpose** — at least one paragraph describing what the app does
-- **1.2 Users** — who uses this app
-- **1.3 Scope** — explicit "In Scope" and "Out of Scope" lists
+Subsections: **1.1 Purpose** (paragraph on what app does), **1.2 Users**, **1.3 Scope** (explicit "In Scope" / "Out of Scope" lists).
 
 ### A2: Section 2 — Domain Context
-
-Must contain:
-- **2.1 Background** — domain knowledge needed to understand the app
-- **2.2 Data Source** — table(s) describing data columns with Column, Description, and Example columns. Must describe what data comes from Tercen (projections like `.y`, `.ci`, `.ri`, `.x`, labels, colours) and what the data characteristics are (ranges, counts, sparsity)
-- **2.3 Typical Workflow** — numbered steps describing how the app fits into the user's workflow
+Subsections: **2.1 Background**, **2.2 Data Source** (table with Column/Description/Example; must describe Tercen projections like `.y`, `.ci`, `.ri`, `.x`, labels, colours and data characteristics: ranges, counts, sparsity), **2.3 Typical Workflow** (numbered steps).
 
 ### A3: Section 3 — Functional Requirements
-
-Must contain a requirements table with columns: ID, Requirement, Priority. Every requirement must have a priority of Must / Should / Could.
+Requirements table with columns: ID, Requirement, Priority (Must / Should / Could).
 
 ### A4: Section 4 — User Interface Components
-
-Must contain:
-- **4.1 App Structure** — ASCII layout diagram (see Check Group C for detail)
-- **4.2 Left Panel Sections** — section definitions with controls (see Check Group D for detail)
-- **4.3 Main Panel** — description of main content area
+Subsections: **4.1 App Structure** (ASCII layout — see Group C), **4.2 Left Panel Sections** (controls — see Group D), **4.3 Main Panel**.
 
 ### A5: Section 5 — Non-Functional Requirements
-
-Must contain a table with ID and Requirement columns. At least one entry.
+Table with ID and Requirement columns. At least one entry.
 
 ### A6: Section 6 — Feature Summary
-
-Must contain categorized feature tables:
-- **Must Have** — required features
-- **Should Have** — important but not critical
-- **Could Have** — nice to have
-
-Each table must have Feature and Status columns.
+Categorized feature tables: **Must Have**, **Should Have**, **Could Have**. Each with Feature and Status columns.
 
 ### A7: Section 7 — Assumptions
-
-Must contain:
-- **7.1 Data Assumptions** — what is assumed about input data
-- **7.2 Environment Assumptions** — browser, screen size, network, etc.
-- **7.3 Mock Data** — what example data is available, its characteristics, and how it maps to the data source in Section 2.2
+Subsections: **7.1 Data Assumptions**, **7.2 Environment Assumptions**, **7.3 Mock Data** (available data, characteristics, mapping to Section 2.2).
 
 ### A8: Section 8 — Glossary
-
-Must contain a table with Term and Definition columns. If no domain-specific terms exist, the section must still be present with a note that no glossary is needed.
+Table with Term and Definition columns. Section must exist even if no terms apply (add a note).
 
 ---
 
 ## Check Group B: Header Metadata
 
 ### B1: App name present
-
-The document must have a top-level heading with the app name (e.g., `# Volcano Plot - Functional Specification`).
+Top-level heading with app name (e.g., `# Volcano Plot - Functional Specification`).
 
 ### B2: Version field
-
-`**Version:**` must be present (e.g., `1.0.0`).
+`**Version:**` present (e.g., `1.0.0`).
 
 ### B3: Status field
-
-`**Status:**` must be present (e.g., `Draft`, `Approved`).
+`**Status:**` present (e.g., `Draft`, `Approved`).
 
 ### B4: Last Updated field
-
-`**Last Updated:**` must be present with a date.
+`**Last Updated:**` present with a date.
 
 ### B5: Reference field
-
-`**Reference:**` must be present, describing the source material (existing app, screenshots, verbal description, etc.). If the app was specified from scratch with no reference, the field must still be present with a note (e.g., "Original specification").
+`**Reference:**` present, describing source material. If built from scratch: "Original specification".
 
 ### B6: App type identified
-
-The spec must explicitly identify the app type somewhere (typically in Section 1.1 or 1.3):
+Spec must explicitly state the app type (typically in 1.1 or 1.3):
 - Type 1 (Visualization): Tercen -> App -> Screen (+ download)
-- Type 2 (Interactive): Same as Type 1 + writes data back to Tercen
+- Type 2 (Interactive): Type 1 + writes data back to Tercen
 - Type 3 (Workflow Manager): Multi-step with Tercen object creation and breakpoints
 
 ---
@@ -128,54 +83,35 @@ The spec must explicitly identify the app type somewhere (typically in Section 1
 ## Check Group C: Layout Diagram
 
 ### C1: ASCII diagram present
-
-Section 4.1 must contain an ASCII layout diagram showing the left panel and main content area.
+Section 4.1 must contain an ASCII layout diagram showing left panel and main content area.
 
 ### C2: Diagram shows left panel
-
-The diagram must show a left panel region with section names.
+Diagram must show a left panel region with section names.
 
 ### C3: Diagram shows main content
-
-The diagram must show a main content region with a description of what it displays.
+Diagram must show a main content region describing what it displays.
 
 ### C4: Diagram matches sections
-
-Every section name in the diagram must correspond to a section defined in Section 4.2. No sections in the diagram that are missing from 4.2, and no sections in 4.2 that are missing from the diagram.
+Every section name in the diagram must match a section in 4.2 and vice versa. No mismatches in either direction.
 
 ---
 
 ## Check Group D: Left Panel Sections
 
 ### D1: Every section has icon and label
-
-Each section defined in Section 4.2 must specify:
-- An icon (described by name or purpose, e.g., "filter icon", "settings gear")
-- A label in UPPERCASE (e.g., "FILTERS", "DISPLAY", "SETTINGS")
+Each section in 4.2 must specify an icon (by name/purpose) and an UPPERCASE label (e.g., "FILTERS", "SETTINGS").
 
 ### D2: INFO section present
-
-There must be an INFO section. It must be the last section listed.
+INFO section must exist and be the last section listed.
 
 ### D3: INFO section has GitHub link
-
-The INFO section must include a control or item described as a GitHub repository link.
+INFO section must include a GitHub repository link.
 
 ### D4: Controls have required attributes
-
-Every control in Section 4.2 must specify:
-- **Control name** — what it is called
-- **Type** — one of the 11 allowed types (see Check E1)
-- **Default** — the default value
-- **Range/Notes** — valid range, options list, or behavioral notes
+Every control in 4.2 must specify: **name**, **type** (from E1 list), **default**, **range/notes**.
 
 ### D5: ALL controls in left panel
-
-Every interactive control described anywhere in the spec must be in the left panel (Section 4.2). Section 4.3 (Main Panel) must NOT describe input controls — only display and read-only interactions (hover, click-to-select, zoom).
-
-Allowed in main panel: hover tooltips, click-to-select/highlight, zoom/pan, drag-to-select regions, context menus for export. These are feedback interactions, not input controls.
-
-NOT allowed in main panel: sliders, dropdowns, text inputs, buttons that change app state, toggles, checkboxes, radio buttons.
+All interactive controls must be in Section 4.2. Section 4.3 (Main Panel) may only have read-only interactions (hover tooltips, click-to-select/highlight, zoom/pan, drag-to-select, context menus for export). No sliders, dropdowns, text inputs, state-changing buttons, toggles, checkboxes, or radio buttons in main panel.
 
 ---
 
@@ -183,23 +119,9 @@ NOT allowed in main panel: sliders, dropdowns, text inputs, buttons that change 
 
 ### E1: Only allowed control types used
 
-Every control in Section 4.2 must use one of these 11 types:
+Allowed types: dropdown, slider, range slider, toggle (switch), number input, button, searchable input, text input, checkbox, radio, segmented button.
 
-1. dropdown
-2. slider
-3. range slider
-4. toggle (switch)
-5. number input
-6. button
-7. searchable input
-8. text input
-9. checkbox
-10. radio
-11. segmented button
-
-If a control uses a type not on this list (e.g., "color picker", "date picker", "tree view", "multi-select list"), that is a FAIL.
-
-Record each control and its type:
+Any other type (e.g., "color picker", "date picker", "tree view", "multi-select list") is a FAIL. Record each control:
 
 | Section | Control Name | Type | Allowed | PASS/FAIL |
 |---------|-------------|------|---------|-----------|
@@ -208,70 +130,57 @@ Record each control and its type:
 
 ## Check Group F: No Implementation Detail
 
-The spec must describe WHAT the app does, never HOW. Scan the entire document text for violations.
+Spec must describe WHAT, never HOW. Scan entire document for violations.
 
 ### F1: No code
-
-The spec must NOT contain Dart code, pseudo-code, or code-like syntax (variable assignments, function calls, class definitions). Exception: the ASCII layout diagram is not code.
+No Dart code, pseudo-code, or code-like syntax (variable assignments, function calls, class definitions). Exception: ASCII layout diagram.
 
 ### F2: No framework references
-
-The spec must NOT reference Flutter widgets, Provider, GetIt, ChangeNotifier, Consumer, context.watch, setState, or any framework-specific terms.
+No Flutter widgets, Provider, GetIt, ChangeNotifier, Consumer, context.watch, setState, or framework-specific terms.
 
 ### F3: No pixel values or spacing tokens
-
-The spec must NOT contain pixel values (e.g., "280px", "16px padding"), spacing token names (e.g., "AppSpacing.md"), or CSS-like specifications. Exception: domain-specific sizes described in user terms (e.g., "thumbnail 100x100") are acceptable if they describe the user's expectation, not implementation.
+No pixel values ("280px"), spacing tokens ("AppSpacing.md"), or CSS-like specs. Exception: domain-specific user-facing sizes ("thumbnail 100x100").
 
 ### F4: No colour codes
-
-The spec must NOT contain hex colour codes (e.g., "#1E40AF"), RGB values, or theme token names (e.g., "AppColors.primary"). Exception: domain-specific colours used in charts or visualizations (e.g., "red for upregulated, blue for downregulated") are acceptable — these describe the domain, not the implementation.
+No hex codes ("#1E40AF"), RGB values, or theme tokens ("AppColors.primary"). Exception: domain-level colour descriptions ("red for upregulated").
 
 ### F5: No file paths or import statements
-
-The spec must NOT reference Dart file paths (e.g., "lib/domain/models/"), import statements, or package names.
+No Dart file paths ("lib/domain/models/"), imports, or package names.
 
 ### F6: Mock data describes WHAT not HOW
-
-Section 7.3 must describe what mock data is needed and where it comes from, NOT how to load it. References to `rootBundle`, `loadString()`, `CsvToListConverter`, or any loading mechanism are a FAIL.
+Section 7.3: no loading mechanisms (`rootBundle`, `loadString()`, `CsvToListConverter`). Only describe what data is needed and where it comes from.
 
 ---
 
 ## Check Group G: Feature Consistency
 
 ### G1: Requirements trace to features
-
-Every "Must" priority requirement in Section 3 must appear in the "Must Have" table in Section 6. Cross-reference:
+Every "Must" requirement in Section 3 must appear in the "Must Have" table in Section 6. Cross-reference:
 
 | Requirement ID | Requirement | In Must Have Table | PASS/FAIL |
 |---|---|---|---|
 
 ### G2: Controls trace to requirements
-
-Every control in Section 4.2 should relate to at least one functional requirement in Section 3. A control that serves no requirement may indicate a gap in the spec.
+Every control in 4.2 should relate to at least one requirement in Section 3. Unrelated controls indicate a spec gap.
 
 ### G3: Main panel matches requirements
-
-The main panel description (Section 4.3) should cover the display/visualization requirements from Section 3. A requirement for "display X" must be reflected in 4.3.
+Section 4.3 must cover display/visualization requirements from Section 3. Any "display X" requirement must be reflected.
 
 ### G4: Data source supports requirements
-
-The data described in Section 2.2 must provide the columns/values needed to fulfill the requirements. If a requirement needs data not described in 2.2, that is a FAIL.
+Section 2.2 must provide the columns/values needed for all requirements. Missing data = FAIL.
 
 ---
 
 ## Check Group H: Mock Data Completeness
 
 ### H1: Mock data described
-
-Section 7.3 must describe what mock/example data is available. It must not be empty or "TBD".
+Section 7.3 must describe available mock/example data. Not empty or "TBD".
 
 ### H2: Data characteristics specified
-
-Section 7.3 must describe the characteristics of the mock data: approximate number of rows, value ranges, data types, sparsity, etc.
+Section 7.3 must include: approximate row count, value ranges, data types, sparsity.
 
 ### H3: Mock data maps to data source
-
-Section 7.3 must explain how the mock data maps to the data source described in Section 2.2. A Phase 2 builder must be able to read 7.3 and know exactly what CSV columns or file structure to create.
+Section 7.3 must map mock data to Section 2.2 clearly enough that a Phase 2 builder knows exactly what CSV columns/file structure to create.
 
 ---
 
@@ -372,14 +281,10 @@ An app is CONFORMING only if every check is PASS. Any FAIL makes it NON-CONFORMI
 
 ---
 
-## Rules for the Reviewer
+## Rules
 
-1. **Use the Read tool** to read the spec file. Do not use Bash with `cat` or `head`.
-2. **Read the entire spec** before starting checks. Do not skip sections. Do not assume sections are correct without reading them.
-3. **Be precise.** Cite section numbers and quote the problematic text in failures.
-4. **Do not fix.** Report only. Never edit the spec file.
-5. **Do not invent requirements.** Only check what this skill defines. Do not add your own opinions about domain accuracy, writing quality, or completeness beyond what is specified here.
-6. **All failures are equal.** There is no distinction between warnings and failures. Every check is PASS or FAIL.
-7. **Judge content, not formatting.** A section that uses slightly different markdown formatting but contains the required information is PASS. A section that has perfect formatting but is empty or placeholder is FAIL.
-8. **Domain accuracy is out of scope.** You are checking structural and rule conformance. You are NOT judging whether the domain context is scientifically accurate or whether the requirements are sensible — that is the user's responsibility.
-9. **Save the report.** Use the Write tool to save the completed report to `_local/phase-1-conformance-report.md`.
+1. **Report only.** Never edit the spec. Cite section numbers and quote problematic text in failures.
+2. **Only check what this skill defines.** No opinions on domain accuracy, writing quality, or extra requirements.
+3. **Judge content, not formatting.** Correct info in non-standard markdown = PASS. Perfect formatting with empty/placeholder content = FAIL.
+4. **All checks are binary PASS/FAIL.** No warnings or partial credit.
+5. **Domain accuracy is out of scope.** Structural and rule conformance only.

@@ -13,36 +13,22 @@ allowed-tools:
 
 **This file is READ-ONLY during reviews. Do NOT modify it.**
 
-You are a reviewer agent running in Claude Code. Your job is to read a built app and verify its Tercen integration conforms to all rules. This review assumes Phase 2 conformance has already been verified — it focuses only on Phase 3 integration concerns.
+## Inputs
+
+- **Built app directory** — the Phase 3 output (app project folder)
+- **Functional spec** — the Phase 1 output document (markdown file)
+
+If missing, ask the user.
 
 ---
 
-## Inputs Required
+## Workflow
 
-Before starting, confirm you have:
-
-1. **Built app directory** — the Phase 3 output (the app project folder)
-2. **Functional spec** — the Phase 1 output document (markdown file)
-
-If the user has not provided both paths, use the AskUserQuestion tool to request missing paths.
-
----
-
-## Execution Strategy
-
-Follow this order:
-
-1. Use the **Read** tool to read the entire functional spec file. Identify the app type (1/2/3) and data flow (A/B/C) from Section 2.2.
-2. Use the **Read** tool to read the key integration files in parallel: `pubspec.yaml`, `lib/main.dart`, `lib/di/service_locator.dart`.
-3. Use the **Glob** tool to find real service files: `lib/implementations/services/*.dart`.
-4. Use the **Read** tool to read each real service file found.
-5. Use the **Grep** tool for pattern searches (Check Groups D and H): search `lib/` for `dart:html`, `tableSchemaService`, `taskService.get`, `RunWebAppTask`, `CubeQueryTask`, `package:http/`.
-6. **Check Group G (config):** Use the **Read** tool to read `operator.json`, `web/index.html`, `.gitignore`.
-7. **Check Group I (spot check):** Use the **Read** tool to read `lib/core/theme/app_theme.dart` and `lib/presentation/widgets/left_panel/left_panel.dart` from both the skeleton and the app (for comparison). Read these in parallel.
-8. Produce the **Conformance Report** (format at the bottom of this skill).
-9. Use the **Write** tool to save the report to `_local/phase-3-conformance-report.md` in the app directory.
-
-**Parallelism:** When reading multiple independent files (Steps 2, 5, 7), make parallel Read/Grep tool calls. Do not read files one at a time when they are independent.
+1. Read the functional spec. Identify app type (1/2/3) and data flow (A/B/C) from Section 2.2.
+2. Read `pubspec.yaml`, `lib/main.dart`, `lib/di/service_locator.dart`, `operator.json`, `web/index.html`, `.gitignore`. Glob `lib/implementations/services/*.dart` and read each result.
+3. Grep `lib/` for banned patterns: `dart:html`, `tableSchemaService`, `taskService.get`, `RunWebAppTask`, `CubeQueryTask`, `package:http/`, `sci_tercen_context`, `Phase 3:`.
+4. Spot-check: read `lib/core/theme/app_theme.dart`, `lib/presentation/widgets/left_panel/left_panel.dart`, `lib/core/theme/app_line_weights.dart` from both skeleton and app.
+5. Produce the conformance report and save to `_local/phase-3-conformance-report.md` in the app directory.
 
 ---
 
@@ -50,29 +36,27 @@ Follow this order:
 
 ### A1: sci_tercen_context in pubspec.yaml
 
-Use the **Read** tool to read `pubspec.yaml`. It must contain a `sci_tercen_context` dependency pointing to the `sci_tercen_client` git repo with a `path: sci_tercen_context`.
+`pubspec.yaml` must contain a `sci_tercen_context` dependency pointing to the `sci_tercen_client` git repo with `path: sci_tercen_context`.
 
 ### A2: sci_tercen_client in pubspec.yaml
 
-`pubspec.yaml` must contain a `sci_tercen_client` dependency pointing to the `sci_tercen_client` git repo with a `path: sci_tercen_client`.
+`pubspec.yaml` must contain a `sci_tercen_client` dependency pointing to the `sci_tercen_client` git repo with `path: sci_tercen_client`.
 
 ### A3: Version match
 
-Both `sci_tercen_context` and `sci_tercen_client` must use the same `ref:` value (version tag). Mismatched versions are a FAIL.
+Both `sci_tercen_context` and `sci_tercen_client` must use the same `ref:` value. Mismatch is a FAIL.
 
 ### A4: No dart:html imports
 
-Use the **Grep** tool to search `lib/` for the pattern `import ['"]dart:html`. Any occurrence is a FAIL.
+Grep `lib/` for `import ['"]dart:html`. Any occurrence is a FAIL.
 
 ### A5: No http package for Tercen calls
 
-Use the **Grep** tool to search `lib/` for the pattern `import ['"]package:http/`. If found, use the **Read** tool to read the file and verify it is NOT used for Tercen API calls. If it is used for Tercen API calls (auth, data fetch, file download), that is a FAIL. Usage for unrelated purposes (e.g., fetching external non-Tercen resources described in the spec) is acceptable.
+Grep `lib/` for `import ['"]package:http/`. If found, read the file — FAIL only if used for Tercen API calls (auth, data fetch, file download). Non-Tercen usage (external resources described in spec) is acceptable.
 
 ---
 
 ## Check Group B: main.dart Integration
-
-Use the **Read** tool to read `lib/main.dart` for all checks in this group.
 
 ### B1: Factory creation
 
@@ -92,11 +76,11 @@ Use the **Read** tool to read `lib/main.dart` for all checks in this group.
 
 ### B5: Try-catch around Tercen init
 
-The factory creation and context creation must be wrapped in a try-catch. If Tercen init fails, the app must fall back to mock mode (not crash).
+Factory creation must be wrapped in a try-catch. If init fails, the app must fall back to mock mode (not crash).
 
 ### B6: Factory and taskId passed to service locator
 
-`setupServiceLocator` must be called with the `ServiceFactory` and `taskId`. The call should look like:
+`setupServiceLocator` must receive the `ServiceFactory` and `taskId`:
 
 ```dart
 setupServiceLocator(useMocks: factory == null, factory: factory, taskId: taskId);
@@ -106,21 +90,19 @@ or equivalent logic where `useMocks` is true when factory creation failed. Conte
 
 ### B7: No manual task navigation
 
-`main.dart` must NOT contain code that manually navigates `RunWebAppTask` to `CubeQueryTask` or calls `taskService.get()`. `OperatorContext.create()` handles this automatically inside the data service.
+`main.dart` must NOT contain code that manually navigates `RunWebAppTask` to `CubeQueryTask` or calls `taskService.get()`. `OperatorContext.create()` handles this inside the data service.
 
 ---
 
 ## Check Group C: service_locator.dart
 
-Use the **Read** tool to read `lib/di/service_locator.dart` for all checks in this group.
-
 ### C1: Accepts factory and taskId parameters
 
-`setupServiceLocator` must accept `ServiceFactory?` and `String?` parameters for factory and taskId (not commented out).
+`setupServiceLocator` must accept `ServiceFactory?` and `String?` parameters (not commented out).
 
 ### C2: Real service receives factory and taskId
 
-When not using mocks, the service locator must register a real data service that receives the factory and taskId:
+When not using mocks, must register a real data service that receives factory and taskId:
 
 ```dart
 serviceLocator.registerLazySingleton<DataService>(
@@ -134,17 +116,17 @@ When not using mocks, at least one real data service must be registered.
 
 ### C4: Guard against double registration
 
-`setupServiceLocator` must check `if (serviceLocator.isRegistered<DataService>()) return;` (or equivalent) before registering.
+Must check `if (serviceLocator.isRegistered<DataService>()) return;` (or equivalent) before registering.
 
 ### C5: Import present
 
-`service_locator.dart` must import `package:sci_tercen_client/sci_client_service_factory.dart` (not commented out).
+Must import `package:sci_tercen_client/sci_client_service_factory.dart` (not commented out).
 
 ---
 
 ## Check Group D: Data Flow
 
-Read the functional spec Section 2.2 to determine which data flow the app should use:
+Determine flow from spec Section 2.2:
 
 | Flow | When | Expected methods |
 | ---- | ---- | ---------------- |
@@ -158,93 +140,84 @@ Determine from the spec which flow applies. Record it.
 
 ### D2: Flow A — select/cselect/rselect usage (if applicable)
 
-If the app uses Flow A, use the **Read** tool to read the real data service. It must call:
-- `ctx.select()` for main data
-- `ctx.cselect()` for column metadata (if needed)
-- `ctx.rselect()` for row metadata (if needed)
-
-These must be called on the `AbstractOperatorContext` instance, NOT via manual `tableSchemaService.select()`.
+Real data service must call `ctx.select()`, `ctx.cselect()`, `ctx.rselect()` on the `AbstractOperatorContext` instance, NOT via manual `tableSchemaService.select()`.
 
 ### D3: Flow B — file download usage (if applicable)
 
-If the app uses Flow B, use the **Read** tool to read the real data service. Verify:
-- Document IDs are obtained via `ctx.cselect(names: ['.documentId'])` or relation tree walking
-- File downloads use `ctx.serviceFactory.fileService.download()` (not `dart:html` or `http`)
-- Concurrent downloads are limited (max 3)
+Real data service must:
+- Obtain document IDs via `ctx.cselect(names: ['.documentId'])` or relation tree walking
+- Download files via `ctx.serviceFactory.fileService.download()` (not `dart:html` or `http`)
+- Limit concurrent downloads (max 3)
 
 ### D4: No manual tableSchemaService calls
 
-Use the **Grep** tool to search `lib/` for `tableSchemaService`. Any direct call to `tableSchemaService.select()` or `tableSchemaService.get()` is a FAIL. All data access must go through the context API.
+Grep `lib/` for `tableSchemaService`. Any direct call to `tableSchemaService.select()` or `tableSchemaService.get()` is a FAIL. All data access must go through the context API.
 
 ### D5: No manual task hierarchy navigation
 
-Use the **Grep** tool to search `lib/` for these patterns (run as separate Grep calls in parallel):
-- `taskService.get(`
-- `RunWebAppTask`
-- `CubeQueryTask`
-- `.state.taskId`
+Grep `lib/` for: `taskService.get(`, `RunWebAppTask`, `CubeQueryTask`, `.state.taskId`.
 
 Any code that manually walks the task hierarchy is a FAIL (the context handles this).
 
-Exception: `RunWebAppTask` or `CubeQueryTask` may appear in import statements from `sci_tercen_context` — that is acceptable. It must NOT appear in manually-written navigation logic. Use the **Read** tool on the file to verify if a match is in an import or in logic.
+Exception: `RunWebAppTask` or `CubeQueryTask` in import statements from `sci_tercen_context` is acceptable. Read the file to verify matches are in imports, not in logic.
 
 ---
 
 ## Check Group E: Real Data Service
 
-Use the **Glob** tool to find files matching `lib/implementations/services/*.dart`, then use the **Read** tool to read each one.
+Glob `lib/implementations/services/*.dart` and read each result.
 
 ### E1: Real service exists
 
-At least one file in `lib/implementations/services/` must implement a real Tercen data service (not the mock).
+At least one file must implement a real Tercen data service (not the mock).
 
 ### E2: Real service receives factory and taskId
 
-The real service constructor must accept `ServiceFactoryBase` and `String` parameters (factory + taskId). It must create the context lazily via `OperatorContext.create()` inside a `_getContext()` method or equivalent — NOT receive a pre-built context.
+Constructor must accept `ServiceFactoryBase` and `String` parameters (factory + taskId). Must create context lazily via `OperatorContext.create()` inside a `_getContext()` method or equivalent — NOT receive a pre-built context.
 
 ### E3: Error handling — diagnostic + rethrow
 
 The real service must NOT fall back to mock data at runtime. Verify:
-- There is a try-catch around Tercen data access
-- The catch block prints a diagnostic report and rethrows the error
-- The UI shows the error state (via `AppStateProvider._error`) — it does NOT silently show mock data
+- Try-catch around Tercen data access
+- Catch block prints a diagnostic report and rethrows the error
+- UI shows error state (via `AppStateProvider._error`) — does NOT silently show mock data
 
 Mock mode is handled at startup in `main.dart` (`USE_MOCKS` flag), not at runtime inside the data service.
 
 ### E4: Diagnostic report present
 
-The real service must contain a `_printDiagnosticReport()` method (or equivalent) that prints:
+Must contain a `_printDiagnosticReport()` method (or equivalent) that prints:
 - Task ID and type
 - Schema info (qtHash, columnHash, rowHash) with column names and types
 - Namespace
 
-The diagnostic report must be called in the catch block when data access fails.
+Must be called in the catch block when data access fails.
 
 ### E5: No workaround code
 
-The real service must NOT contain commented-out alternative approaches, multiple retry strategies, or progressively degraded data access paths. If Tercen fails, it falls back to mock — period.
+Must NOT contain commented-out alternative approaches, multiple retry strategies, or progressively degraded data access paths. If Tercen fails, it falls back to mock — period.
 
 ---
 
 ## Check Group F: Type 2 Specifics (Write-Back)
 
-Read the functional spec to determine the app type. If the app is NOT Type 2, mark all F checks as N/A.
+If app is NOT Type 2, mark all F checks as N/A.
 
 ### F1: Output table construction
 
-If Type 2, use the **Grep** tool to search the real service for `makeInt32Column`, `makeFloat64Column`, `makeStringColumn`. The service must build output tables using these static column helpers.
+Grep real service for `makeInt32Column`, `makeFloat64Column`, `makeStringColumn`. Must build output tables using these static column helpers.
 
 ### F2: Save method used
 
-Use the **Grep** tool to search the real service for `saveTable`, `saveTables`, or `ctx.save`. Output must be saved via context methods, NOT via manual file upload or task service calls.
+Grep real service for `saveTable`, `saveTables`, or `ctx.save`. Output must be saved via context methods, NOT via manual file upload or task service calls.
 
 ### F3: Namespace applied
 
-If the service creates output columns, use the **Grep** tool to search for `addNamespace`. It should use `ctx.addNamespace()` to prefix column names.
+Grep real service for `addNamespace`. Should use `ctx.addNamespace()` to prefix column names.
 
 ### F4: Lifecycle logging
 
-Use the **Grep** tool to search the real service for `ctx.log` and `ctx.progress`. Type 2 apps should report status to the Tercen UI.
+Grep real service for `ctx.log` and `ctx.progress`. Type 2 apps should report status to the Tercen UI.
 
 ---
 
@@ -252,7 +225,7 @@ Use the **Grep** tool to search the real service for `ctx.log` and `ctx.progress
 
 ### G1: operator.json isWebApp
 
-Use the **Read** tool to read `operator.json`. It must have `"isWebApp": true`.
+`operator.json` must have `"isWebApp": true`.
 
 ### G2: operator.json serve
 
@@ -260,29 +233,29 @@ Use the **Read** tool to read `operator.json`. It must have `"isWebApp": true`.
 
 ### G3: operator.json isViewOnly
 
-`operator.json` must have `"isViewOnly": false` for Type 2 apps (operators that save results). For Type 1 apps, note but do not FAIL if missing.
+Must have `"isViewOnly": false` for Type 2 apps. For Type 1 apps, note but do not FAIL if missing.
 
 ### G4: operator.json entryType
 
-`operator.json` must have `"entryType": "app"` for Type 2 apps. For Type 1 apps, note but do not FAIL if missing.
+Must have `"entryType": "app"` for Type 2 apps. For Type 1 apps, note but do not FAIL if missing.
 
 ### G5: index.html base href commented
 
-Use the **Read** tool to read `web/index.html`. It must contain the base href line commented out:
+`web/index.html` must contain the base href line commented out:
 
 ```html
 <!--<base href="$FLUTTER_BASE_HREF">-->
 ```
 
-If the line is uncommented or missing, that is a FAIL.
+If uncommented or missing, FAIL.
 
 ### G6: .gitignore preserves build/web
 
-Use the **Read** tool to read `.gitignore`. It must contain `!build/web/` to preserve the web build output.
+`.gitignore` must contain `!build/web/`.
 
 ### G7: build/web committed (if build was done)
 
-Use the **Glob** tool to check if `build/web/` exists with content. If it exists, it should contain the Flutter web build output. If the directory does not exist, note it but do not FAIL — the build may not have been run yet.
+Glob `build/web/` for content. If it exists, it should contain Flutter web build output. If missing, note but do not FAIL — the build may not have been run yet.
 
 ---
 
@@ -290,17 +263,17 @@ Use the **Glob** tool to check if `build/web/` exists with content. If it exists
 
 ### H1: Single context import pattern
 
-Use the **Grep** tool to search `lib/` for `sci_tercen_context`. Files that use it should import via:
+Grep `lib/` for `sci_tercen_context`. Files that use it should import via:
 
 ```dart
 import 'package:sci_tercen_context/sci_tercen_context.dart';
 ```
 
-This single import re-exports all models. Importing individual model files from the package internals is unnecessary (note but do not FAIL for this — it still works, it's just not clean).
+This single import re-exports all models. Importing individual model files is unnecessary (note but do not FAIL — it still works).
 
 ### H2: Factory import
 
-Use the **Read** tool to verify `main.dart` imports:
+`main.dart` must import:
 
 ```dart
 import 'package:sci_tercen_client/sci_service_factory_web.dart';
@@ -308,36 +281,40 @@ import 'package:sci_tercen_client/sci_service_factory_web.dart';
 
 ### H3: No stale commented-out Phase 3 stubs
 
-Use the **Grep** tool to search `service_locator.dart` for `Phase 3:`. The skeleton's commented-out stubs like `// Phase 3: uncomment to accept context` and `// Phase 3: add else branch:` should have been replaced with actual code. If these comments still exist, that is a FAIL.
+Grep `service_locator.dart` for `Phase 3:`. Skeleton stubs like `// Phase 3: uncomment to accept context` must have been replaced with actual code. If these comments remain, FAIL.
 
 ---
 
 ## Check Group I: DO-NOT-MODIFY Files (Spot Check)
 
-Phase 2 review covers the full DO-NOT-MODIFY comparison. This Phase 3 review does a targeted spot check to ensure integration work did not accidentally modify protected files.
+Targeted spot check to ensure integration work did not accidentally modify protected files. Phase 2 review covers the full comparison.
 
 ### I1: main.dart structure preserved
 
-Use the **Read** tool to read `main.dart`. It should have been modified for Tercen integration, but the overall structure must remain:
-- `WidgetsFlutterBinding.ensureInitialized()` present
-- `SharedPreferences` initialization present
-- `ChangeNotifierProvider` for `ThemeProvider` present
-- App class with `MaterialApp` present
+Modified for Tercen integration, but must retain:
+- `WidgetsFlutterBinding.ensureInitialized()`
+- `SharedPreferences` initialization
+- `ChangeNotifierProvider` for `ThemeProvider`
+- App class with `MaterialApp`
 
 ### I2: service_locator.dart structure preserved
 
-`service_locator.dart` should have been modified to accept context and register real services, but:
-- The `GetIt serviceLocator = GetIt.instance` declaration must remain
-- The guard check must remain
-- Mock registration must still work when `useMocks` is true
+Modified for real services, but must retain:
+- `GetIt serviceLocator = GetIt.instance` declaration
+- Guard check
+- Mock registration when `useMocks` is true
 
 ### I3: Theme files untouched
 
-Use the **Read** tool to read `lib/core/theme/app_theme.dart` from both the skeleton and the app. Compare content — they must be identical. Phase 3 has no reason to touch theme files.
+`lib/core/theme/app_theme.dart` must be identical to skeleton version. Phase 3 has no reason to touch theme files.
 
 ### I4: Panel files untouched
 
-Use the **Read** tool to read `lib/presentation/widgets/left_panel/left_panel.dart` from both the skeleton and the app. Compare content — they must be identical.
+`lib/presentation/widgets/left_panel/left_panel.dart` must be identical to skeleton version.
+
+### I5: app_line_weights.dart present and untouched
+
+`lib/core/theme/app_line_weights.dart` must exist and be identical to skeleton version.
 
 ---
 
@@ -450,15 +427,10 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 
 ---
 
-## Rules for the Reviewer
+## Rules
 
-1. **Use the correct tools.** Use the **Read** tool to read files (not Bash with `cat`/`head`/`tail`). Use the **Grep** tool to search file content (not Bash with `grep`/`rg`). Use the **Glob** tool to find files (not Bash with `find`/`ls`).
-2. **Read the spec first.** Read the entire functional spec before starting checks to understand the app type and data flow.
-3. **Parallelize.** When reading multiple independent files or running multiple Grep searches, make parallel tool calls.
-4. **Be precise.** Cite file paths and line numbers in failures.
-5. **Do not fix.** Report only. Never edit app files.
-6. **Do not invent requirements.** Only check what the spec and this skill define. Do not add your own opinions about code quality, naming conventions, or architecture beyond what is specified here.
-7. **All failures are equal.** There is no distinction between warnings and failures. Every check is PASS or FAIL.
-8. **N/A is not a loophole.** Mark a check N/A only when the skill explicitly says it can be N/A (e.g., Type 2 checks for a Type 1 app, Flow B checks for a Flow A app).
-9. **Phase 2 is assumed.** This review does not re-check all Phase 2 requirements. Run the Phase 2 review separately if needed.
-10. **Save the report.** Use the Write tool to save the completed report to `_local/phase-3-conformance-report.md` in the app directory.
+1. **Read the spec first.** Understand app type and data flow before starting checks.
+2. **Report only.** Never edit app files.
+3. **Only check what this skill defines.** Do not add opinions about code quality, naming, or architecture beyond what is specified here.
+4. **All failures are equal.** Every check is PASS or FAIL. N/A only when the skill explicitly allows it (e.g., Type 2 checks for a Type 1 app, Flow B checks for a Flow A app).
+5. **Cite file paths and line numbers in failures.** Phase 2 is assumed passing — do not re-check Phase 2 requirements.

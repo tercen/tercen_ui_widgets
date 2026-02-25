@@ -5,15 +5,11 @@ argument-hint: "[path to mock app]"
 disable-model-invocation: true
 ---
 
-**This file is READ-ONLY during app builds. Do NOT modify it. If you encounter a gap, error, workaround, or unexpected behaviour, append a one-line note to `_issues/session-log.md` and continue working. Do not stop to discuss the issue.**
+**READ-ONLY. Do NOT modify. Log gaps to `_issues/session-log.md` and continue.**
 
-Replace mock services with real Tercen data services. The Phase 2 mock app is your starting point.
+Replace mock services with real Tercen data services. Phase 2 mock app is the starting point.
 
-**SDK**: sci_tercen_context (context API) + sci_tercen_client (low-level services) — always use the latest version from <https://github.com/tercen/sci_tercen_client>
-
-## Additional resources
-
-- For the complete sci_tercen_context API reference, see [api-reference.md](api-reference.md)
+**SDK**: `sci_tercen_context` (context API) + `sci_tercen_client` (low-level) — always latest from <https://github.com/tercen/sci_tercen_client>. API reference: [api-reference.md](api-reference.md).
 
 ---
 
@@ -109,7 +105,7 @@ void main() async {
 }
 ```
 
-`createServiceFactoryForWebApp()` is lightweight (sets up HTTP client). The heavy work — `OperatorContext.create()` which fetches the task and resolves `RunWebAppTask` -> `CubeQueryTask` — happens lazily inside the data service when `loadData()` is first called. Use `print()` (not `debugPrint()`) for WASM console visibility.
+`createServiceFactoryForWebApp()` is lightweight. `OperatorContext.create()` (heavy) happens lazily inside the data service. Use `print()` not `debugPrint()` for WASM console.
 
 ---
 
@@ -151,7 +147,7 @@ final colData = await ctx.cselect();   // auto-filters system columns (int64/uin
 final rowData = await ctx.rselect();   // auto-filters system columns
 ```
 
-When `names` is empty, `cselect()` and `rselect()` return all non-system columns automatically. When `names` is explicit, exactly those columns are returned.
+Empty `names` = all non-system columns. Explicit `names` = exactly those columns.
 
 ### Discover available columns
 
@@ -163,13 +159,7 @@ final mainCols      = await ctx.names;    // e.g. ['.y', '.ci', '.ri', '.x']
 
 ### Three-table join
 
-The three tables are indexed by `.ci` and `.ri`:
-
-| Table | Contains | Index |
-| ----- | -------- | ----- |
-| `ctx.select()` (qtHash) | `.y`, `.ci`, `.ri` projection data | — |
-| `ctx.cselect()` (columnHash) | Per-column metadata (labels, attributes) | Indexed by `.ci` |
-| `ctx.rselect()` (rowHash) | Per-row metadata (variable names, factors) | Indexed by `.ri` |
+Three tables indexed by `.ci`/`.ri`: `select()` = projection data, `cselect()` = per-column metadata (by `.ci`), `rselect()` = per-row metadata (by `.ri`).
 
 ```dart
 // Extract arrays from Table objects
@@ -317,22 +307,15 @@ Limit concurrent downloads to 3.
 
 ## Step 4D: Flow D — entity navigation
 
-Flow D is for apps that browse, list, and navigate Tercen objects — **not** cross-tab projection data. These apps use `projectId` and `teamId` (not `taskId`) and call entity services directly.
+Flow D: browse/navigate Tercen objects. Uses `projectId`/`teamId` (not `taskId`), entity services directly.
 
-### App lifecycle: always inside the orchestrator
+### App lifecycle
 
-All apps run as iframes inside the orchestrator — never standalone. The orchestrator is the only component that reads URL params and `--dart-define` values. It passes credentials and context to each app via `postMessage`.
+Apps run as iframes inside an orchestrator. Orchestrator reads URL params/`--dart-define`, passes context via `postMessage`.
 
-**Lifecycle:**
+Lifecycle: orchestrator loads iframe → app waits → orchestrator sends `init-context` (token, teamId, projectId) → app creates factory → registers services → sends `app-ready` back.
 
-1. Orchestrator loads the app iframe
-2. App starts in a **waiting** state (shows loading spinner)
-3. Orchestrator sends `init-context` message with token, teamId, projectId
-4. App creates `ServiceFactory` with the received token
-5. App registers services, loads data
-6. App sends `app-ready` back to orchestrator
-
-**Dev workflow:** Build the sub-apps (`flutter build web`), then run the orchestrator with `--dart-define` flags. The orchestrator passes those values to child apps via `init-context`.
+Dev: build sub-apps, run orchestrator with `--dart-define` flags.
 
 ```bash
 # Build a sub-app
@@ -350,7 +333,7 @@ flutter run -d chrome --web-port 8080 \
 
 ### postMessage protocol
 
-All inter-app messages use the same envelope — small JSON, one `type`, flat `payload`:
+Envelope: small JSON, one `type`, flat `payload`:
 
 ```json
 {"type": "init-context", "source": "orchestrator", "target": "project-nav",
@@ -511,27 +494,9 @@ void selectStep(TreeNode step) {
 
 ### The startKey/endKey pattern
 
-Entity services use CouchDB-style range queries. **The method name encodes the key structure.**
+Entity services use CouchDB-style range queries. Method name encodes key structure: `find<Entity>By<Key1><Key2>` → `startKey: [key1, key2]`, `endKey: [key1, key2]`.
 
-```
-findProjectByOwnerName(...)       → keys are [owner, name]
-findFolderByParentFolderAndName(...)  → keys are [projectId, parentFolderId, name]
-findProjectObjectsByFolderAndName(...)→ keys are [projectId, folderId, name]
-findOperatorByUrlAndVersion(...)  → keys are [url, version]
-findWorkflowByProjectIdFolder(...)→ keys are [projectId, folderId]
-```
-
-**How to read the method name:** `find<Entity>By<Key1><Key2>...<KeyN>` → `startKey: [key1, key2, ..., keyN]`, `endKey: [key1, key2, ..., keyN]`.
-
-**Range conventions:**
-
-| Want | startKey | endKey |
-| ---- | -------- | ------ |
-| All items matching a prefix | `[prefix, ""]` | `[prefix, "\uf000"]` |
-| Descending (newest first) | `[prefix, "\ufff0"]` | `[prefix, ""]` |
-| All items for a project/folder | `[projectId, folderId, ""]` | `[projectId, folderId, "\uf000"]` |
-
-`"\uf000"` and `"\ufff0"` are Unicode high characters used as upper bounds. Use either — both work as "greater than any normal string."
+Range conventions: `[prefix, ""]` to `[prefix, "\uf000"]` for all items. `"\uf000"` is a Unicode high char upper bound.
 
 ### List projects for a team/user
 
@@ -652,7 +617,7 @@ List<Relation> _getSimpleRelations(Relation relation) {
 
 ### Folder tree caching pattern (for navigation apps)
 
-Load the full folder structure once, then navigate in memory:
+Load full folder structure once, navigate in memory:
 
 ```dart
 class ProjectStructureCache {
@@ -718,7 +683,7 @@ Future<void> _printFlowDDiagnostic(ServiceFactory factory, String projectId) asy
 
 ## Step 5: Real service
 
-Do NOT fall back to mock data on error — it hides real problems and makes debugging harder. Instead, let the error propagate so the UI can show an error state. The `USE_MOCKS` flag in `main.dart` is sufficient for local development without a Tercen connection.
+No mock fallback on error — rethrow and let UI show error state. `USE_MOCKS` in `main.dart` handles local dev.
 
 ```dart
 import 'package:sci_tercen_client/sci_client_service_factory.dart';
@@ -808,7 +773,7 @@ result.joinOperators.add(joinOp);
 await ctx.save(result);
 ```
 
-`save()` automatically normalizes columns (TSON binary types, column type inference, row count inference) before uploading. It handles the full task lifecycle: file upload, task update, run, and wait-for-done.
+`save()` normalizes columns and handles the full lifecycle (upload, task update, run, wait-for-done).
 
 ### Lifecycle logging
 
@@ -830,27 +795,15 @@ flutter build web --wasm
 git add build/web/ && git commit -m "Update web build" && git push
 ```
 
-The skeleton `.gitignore` already preserves `build/web/`.
+Required: `index.html` base href commented out. `operator.json`: `isWebApp: true`, `isViewOnly: false`, `entryType: "app"`, `serve: "build/web"`. Type 2 apps MUST have `isViewOnly: false` + `entryType: "app"` or `save()` silently fails.
 
-### Required files
-
-index.html line 17 must stay commented: `<!--<base href="$FLUTTER_BASE_HREF"> -->`
-
-operator.json must have:
-
-```json
-{"name": "Your Operator", "isWebApp": true, "isViewOnly": false, "entryType": "app", "serve": "build/web", "urls": ["https://github.com/tercen/your-repo"]}
-```
-
-> `isViewOnly: false` and `entryType: "app"` are **required** for operators that save results (Type 2 apps). Without them, Tercen creates a CubeQueryTask instead of a RunWebAppTask, and save() will appear to succeed but produce no visible results.
-
-Hot reload is broken for Tercen web apps. Always stop and restart with `flutter run -d chrome --web-port 8080`.
+Hot reload broken for Tercen web apps — always stop and restart.
 
 ---
 
 ## Diagnostic report
 
-Add this to every real service. Call it when data loading fails. Present the output to the user — do NOT try to fix the problem by adding code.
+Add to every real service. Call on data loading failure. Present output to user — do NOT fix with code.
 
 ```dart
 Future<void> _printDiagnosticReport() async {

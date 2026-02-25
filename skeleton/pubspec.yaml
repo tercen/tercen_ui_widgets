@@ -20,13 +20,13 @@ dependencies:
   # Always use the latest version tag from https://github.com/tercen/sci_tercen_client
   sci_tercen_context:
     git:
-      url: https://github.com/tercen/sci_tercen_client.git
+      url: https://github.com/tercen/sci_tercen_client
       ref: 1.12.0  # Update to latest version
       path: sci_tercen_context
   # Tercen client — needed for createServiceFactoryForWebApp()
   sci_tercen_client:
     git:
-      url: https://github.com/tercen/sci_tercen_client.git
+      url: https://github.com/tercen/sci_tercen_client
       ref: 1.12.0  # Must match sci_tercen_context version
       path: sci_tercen_client
 

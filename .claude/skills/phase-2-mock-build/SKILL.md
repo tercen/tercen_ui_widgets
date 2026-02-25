@@ -5,20 +5,18 @@ argument-hint: "[path to functional spec]"
 disable-model-invocation: true
 ---
 
-**This file is READ-ONLY during app builds. Do NOT modify it. If you encounter a gap, error, workaround, or unexpected behaviour, append a one-line note to `_issues/session-log.md` and continue working. Do not stop to discuss the issue.**
+**READ-ONLY. Do NOT modify. Log gaps to `_issues/session-log.md` and continue.**
 
-Load this skill when building a mock app from a functional spec. The skeleton provides all structural code. Your job is to copy it, replace placeholders, and wire controls to a mock data service.
+Copy skeleton, replace placeholders, wire controls to mock data service.
 
----
+For shared patterns: `_references/global-rules.md`.
 
-## Inputs Required
+## Inputs
 
-Before starting, confirm you have:
-
-1. **Functional spec** — the Phase 1 output document (markdown file)
-2. **Skeleton** — the `skeleton/` directory from tercen-flutter-skills
-3. **Target directory** — where the new app will be created
-4. **Mock data** — CSV files, JSON, or generated data described in the spec's Section 7.3
+1. **Functional spec** — Phase 1 output (markdown)
+2. **Skeleton** — `skeleton/` from tercen-flutter-skills
+3. **Target directory** — new app location
+4. **Mock data** — files described in spec Section 7.3
 
 ---
 
@@ -52,216 +50,55 @@ Copy the entire `skeleton/` directory to the target project location, then updat
 
 ## Step 2: Define Domain Models
 
-Read spec **Section 2.2 (Data Source)** and **Section 7.3 (Mock Data)**.
+Read spec **Section 2.2** and **Section 7.3**.
 
-### Create domain models in `lib/domain/models/`
+Create model classes in `lib/domain/models/` from the spec's data columns and types.
 
-Create one or more classes representing the app's data. Use the spec's data columns and types.
-
-Example (from a volcano app spec):
-```dart
-// lib/domain/models/gene_data.dart
-class GeneData {
-  final String gene;
-  final double log2FoldChange;
-  final double negLog10PValue;
-  final String regulation;
-
-  const GeneData({
-    required this.gene,
-    required this.log2FoldChange,
-    required this.negLog10PValue,
-    required this.regulation,
-  });
-}
-```
-
-### Update DataService interface (`lib/domain/services/data_service.dart`)
-
-Replace the generic `Map<String, dynamic>` return type with your domain model. If the spec requires distinct operations (e.g., load metadata separately from fetching binary assets), add multiple methods — don't force everything through one `loadData()` call.
-
-```dart
-abstract class DataService {
-  Future<List<GeneData>> loadData();
-}
-```
+Update `lib/domain/services/data_service.dart` — replace `Map<String, dynamic>` with domain types. Add multiple methods if the spec requires distinct operations.
 
 ---
 
 ## Step 3: Build Mock Service
 
-Read spec **Section 7.3 (Mock Data)**.
+Read spec **Section 7.3**.
 
-### Place mock data files
-
-Put data files in `assets/data/` (CSV, JSON, images, or any format the spec requires). Register them in `pubspec.yaml`:
-```yaml
-flutter:
-  uses-material-design: true
-  assets:
-    - assets/data/
-```
-
-### Create mock service (`lib/implementations/services/mock_data_service.dart`)
-
-Replace the placeholder with a service that loads your mock data. Use `rootBundle.loadString()` for text (CSV, JSON) or `rootBundle.load()` for binary (images, files). Match the approach to your data type:
-
-```dart
-class MockDataService implements DataService {
-  @override
-  Future<List<GeneData>> loadData() async {
-    final csvString = await rootBundle.loadString('assets/data/sample.csv');
-    final rows = const CsvToListConverter(eol: '\n').convert(csvString);
-    // Skip header row, parse each data row into domain model
-    return rows.skip(1).map((row) => GeneData(
-      gene: row[0].toString(),
-      log2FoldChange: (row[1] as num).toDouble(),
-      negLog10PValue: (row[2] as num).toDouble(),
-      regulation: row[3].toString(),
-    )).toList();
-  }
-}
-```
-
-The mock service must return real, usable data — not placeholder values.
+1. Put data files in `assets/data/`. Register in `pubspec.yaml` under `flutter: assets:`.
+2. Replace `mock_data_service.dart` — load from `rootBundle.loadString()` (text) or `rootBundle.load()` (binary).
+3. Must return real data from assets — not placeholder values.
 
 ---
 
-## Step 4: Build Provider (State Management)
+## Step 4: Build Provider
 
-Read spec **Section 4.2 (Left Panel Sections)** — every control listed becomes a state field.
+Read spec **Section 4.2** — every control becomes a provider field.
 
-### Replace AppStateProvider (`lib/presentation/providers/app_state_provider.dart`)
+Replace `app_state_provider.dart`. For each control: private field + getter + setter calling `notifyListeners()`. Keep the data loading infrastructure (`loadData`, `isLoading`, `error`, `data`). Update `data` type to your domain model.
 
-For each control in the spec, add one field following this exact pattern:
-
-```dart
-// [Type] — [Control name from spec]
-Type _fieldName = defaultValue;
-Type get fieldName => _fieldName;
-void setFieldName(Type value) {
-  _fieldName = value;
-  notifyListeners();
-}
-```
-
-Keep the data loading infrastructure (`loadData`, `isLoading`, `error`, `data`). Update the `data` field type to match your domain model.
-
-### Wiring Golden Rule
-
-Every control follows this one-way data flow:
-
-```
-control.onChanged -> provider.setXxx(value) -> notifyListeners() -> Consumer rebuilds main content
-```
-
-The skeleton's `controls_section.dart` demonstrates all 11 control types wired to the provider. Copy the wiring pattern exactly — only change the field names and values.
+Wiring: `control.onChanged → provider.setXxx(value) → notifyListeners() → Consumer rebuilds`. See `_references/global-rules.md` and skeleton `controls_section.dart` for all 11 control patterns.
 
 ---
 
 ## Step 5: Build Left Panel Sections
 
-Read spec **Section 4.2 (Left Panel Sections)**.
+Read spec **Section 4.2**.
 
-### Create one widget per section
+Create one widget per section in `lib/presentation/widgets/left_panel/`. Use control types and styling from `_references/global-rules.md` and skeleton `controls_section.dart`.
 
-For each section defined in the spec, create a file in `lib/presentation/widgets/left_panel/`:
-
-```dart
-// lib/presentation/widgets/left_panel/display_section.dart
-class DisplaySection extends StatelessWidget {
-  // Controls for this section, wired to provider
-}
-```
-
-**Reference the skeleton's `controls_section.dart` for every control type:**
-
-| Control Type | Skeleton Example | Key Widget |
-|---|---|---|
-| Text input | `TextField` with `onChanged: provider.setXxx` | `TextField` |
-| Dropdown | `DropdownButton` with `onChanged` | `DropdownButton<String>` |
-| Checkbox | `SizedBox(16x16)` + `Checkbox` with `visualDensity: compact` | `Checkbox` |
-| Radio | `SizedBox(16x16)` + `Radio` with `visualDensity: compact` | `Radio<String>` |
-| Switch/toggle | `SizedBox(36x20)` + `FittedBox` + `Switch` | `Switch` |
-| Slider | `Slider` with `onChanged` | `Slider` |
-| Range slider | `RangeSlider` with `onChanged` | `RangeSlider` |
-| Number input | `TextField` with `keyboardType: number`, nullable parse | `TextField` |
-| Searchable input | `Autocomplete<String>` | `Autocomplete` |
-| Segmented button | `SegmentedButton<String>` | `SegmentedButton` |
-
-For control styling (labels, spacing, theme awareness), copy the pattern from `controls_section.dart`:
-```dart
-final isDark = context.watch<ThemeProvider>().isDarkMode;
-final labelColor = isDark ? AppColorsDark.textSecondary : AppColors.textSecondary;
-
-Text('Label', style: AppTextStyles.label.copyWith(color: labelColor)),
-const SizedBox(height: AppSpacing.xs),
-// control widget here
-const SizedBox(height: AppSpacing.controlSpacing),
-```
-
-### Wire sections into home_screen.dart
-
-Replace the placeholder sections list in `home_screen.dart`:
-
-```dart
-sections: const [
-  PanelSection(
-    icon: Icons.filter_list,     // from spec
-    label: 'FILTERS',           // UPPERCASE from spec
-    content: FiltersSection(),
-  ),
-  PanelSection(
-    icon: Icons.display_settings,
-    label: 'DISPLAY',
-    content: DisplaySection(),
-  ),
-  PanelSection(
-    icon: Icons.info_outline,
-    label: 'INFO',
-    content: InfoSection(),      // always last, never remove
-  ),
-],
-```
+Wire into `home_screen.dart` `sections:` list — one `PanelSection` per spec section with icon, UPPERCASE label, and content widget. INFO always last.
 
 ---
 
 ## Step 6: Build Main Content
 
-Read spec **Section 4.3 (Main Panel)**.
+Read spec **Section 4.3**.
 
-### Replace _MainContent in home_screen.dart
+Replace `_MainContent` in `home_screen.dart`. Reads from provider, renders spec visualization. Handle `isLoading` and `error` states.
 
-The main content widget reads from the provider and renders the visualization described in the spec. If the spec describes multiple view modes (e.g., grid + detail view, chart + table), manage the view state in the provider and switch within this widget.
+**Theme:** Main panel chrome is theme-aware. Graph/chart containers force white background (see `_references/global-rules.md`).
 
-**Theme in the main content area:** The main panel is fully theme-aware (light + dark), just like the left panel and top bar. Read `isDark` from `ThemeProvider` and use it for the panel background, status text, legends, error messages, and loading indicators. However, **graph/chart containers** (scatter plots, matrices, image viewers) must always force a white background and use light-mode colours inside — scientific visualizations require maximum contrast and readability.
+**Line weights:** All `strokeWidth` must use `AppLineWeights.*` constants — no hardcoded numbers.
 
-Structure:
-```dart
-class _MainContent extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final provider = context.watch<AppStateProvider>();
-    // Main panel respects theme for its own chrome (background, text, legend).
-    final isDark = context.watch<ThemeProvider>().isDarkMode;
-
-    if (provider.isLoading) {
-      return /* loading indicator */;
-    }
-    if (provider.error != null) {
-      return /* error display */;
-    }
-
-    // Filter/transform data based on provider state
-    final filteredData = provider.data.where((item) => /* apply control values */);
-
-    // Render visualization from spec Section 4.3
-    return /* chart, grid, image, canvas, table */;
-  }
-}
-```
-
-The main content is **display only**. No controls, inputs, or buttons in this area. Spec-described interactions (hover tooltips, click-to-select, zoom) are read-only feedback, not input controls.
+**Display only.** No controls in main content. Spec-described interactions (hover, click-to-select, zoom) are read-only feedback.
 
 ---
 
@@ -287,6 +124,7 @@ Copy these files unchanged.
 | `lib/core/theme/app_spacing.dart` | Spacing and dimension tokens |
 | `lib/core/theme/app_text_styles.dart` | Typography tokens |
 | `lib/core/theme/app_theme.dart` | Material 3 ThemeData (light + dark) |
+| `lib/core/theme/app_line_weights.dart` | Line weight constants for UI and viz |
 | `lib/core/utils/context_detector.dart` | Tercen embedded detection |
 | `lib/presentation/providers/theme_provider.dart` | Theme persistence |
 | `lib/di/service_locator.dart` | DI registration (add services, don't restructure) |

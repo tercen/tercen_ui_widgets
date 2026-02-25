@@ -1,0 +1,11 @@
+{
+  "name": "Skeleton Type3 App",
+  "description": "Tercen Type 3 operator skeleton. Replace with your app description.",
+  "isWebApp": true,
+  "isViewOnly": false,
+  "entryType": "app",
+  "serve": "build/web",
+  "tags": [],
+  "authors": ["tercen"],
+  "urls": ["https://github.com/tercen/skeleton_app"]
+}

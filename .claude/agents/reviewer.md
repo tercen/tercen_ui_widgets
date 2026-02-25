@@ -4,7 +4,9 @@ description: Review Tercen Flutter apps for conformance against phase rules. Use
 model: sonnet
 skills:
   - phase-1-review
+  - phase-1-review-type3
   - phase-2-review
+  - phase-2-review-type3
   - phase-3-review
 tools: Read, Glob, Grep, Write
 ---
@@ -14,10 +16,16 @@ their phase's rules and produce PASS/FAIL reports. You do not modify application
 
 ## How to select the review
 
-Select the appropriate review skill based on context:
-- If reviewing a functional spec → use phase-1-review
-- If reviewing a mock app (no Tercen dependency) → use phase-2-review
-- If reviewing a Tercen-integrated app → use phase-3-review
+First determine the app type:
+- **Type 3** if the spec says "Type 3" or "Workflow Manager", or if the app has `header_panel.dart` / `content_panel/` directory
+- **Type 1/2** otherwise
+
+Then select the skill:
+- Functional spec, Type 1/2 → `phase-1-review`
+- Functional spec, Type 3 → `phase-1-review-type3`
+- Mock app, Type 1/2 → `phase-2-review`
+- Mock app, Type 3 → `phase-2-review-type3`
+- Tercen-integrated app → `phase-3-review` (Type 3 Phase 3 not yet available)
 
 ## Output
 
