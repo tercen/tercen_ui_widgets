@@ -47,12 +47,59 @@ class _LeftPanelState extends State<LeftPanel> {
   bool _isCollapsed = false;
   double _panelWidth = AppSpacing.panelWidth;
   bool _isResizeHovering = false;
+  final ScrollController _scrollController = ScrollController();
+  final List<GlobalKey> _sectionKeys = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _initSectionKeys();
+  }
+
+  @override
+  void didUpdateWidget(covariant LeftPanel oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.sections.length != widget.sections.length) {
+      _initSectionKeys();
+    }
+  }
+
+  void _initSectionKeys() {
+    _sectionKeys.clear();
+    for (var i = 0; i < widget.sections.length; i++) {
+      _sectionKeys.add(GlobalKey());
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   void _toggleCollapse() {
     setState(() {
       _isCollapsed = !_isCollapsed;
       if (!_isCollapsed) {
         _panelWidth = AppSpacing.panelWidth;
+      }
+    });
+  }
+
+  void _expandAndScrollTo(int index) {
+    setState(() {
+      _isCollapsed = false;
+      _panelWidth = AppSpacing.panelWidth;
+    });
+    Future.delayed(const Duration(milliseconds: 200), () {
+      if (!mounted) return;
+      final ctx = _sectionKeys[index].currentContext;
+      if (ctx != null) {
+        Scrollable.ensureVisible(
+          ctx,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
       }
     });
   }
@@ -144,31 +191,37 @@ class _LeftPanelState extends State<LeftPanel> {
   /// Expanded content: scrollable list of sections.
   Widget _buildExpandedContent() {
     return SingleChildScrollView(
+      controller: _scrollController,
       child: Column(
-        children: widget.sections.map((section) {
-          return LeftPanelSection(
-            icon: section.icon,
-            label: section.label,
-            child: section.content,
+        children: List.generate(widget.sections.length, (i) {
+          final section = widget.sections[i];
+          return KeyedSubtree(
+            key: _sectionKeys[i],
+            child: LeftPanelSection(
+              icon: section.icon,
+              label: section.label,
+              child: section.content,
+            ),
           );
-        }).toList(),
+        }),
       ),
     );
   }
 
-  /// Collapsed content: vertical icon strip. Tap any icon to expand.
+  /// Collapsed content: vertical icon strip. Tap any icon to expand and scroll to that section.
   Widget _buildCollapsedContent(bool isDark) {
     final iconColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
 
     return SingleChildScrollView(
       child: Column(
-        children: widget.sections.map((section) {
+        children: List.generate(widget.sections.length, (i) {
+          final section = widget.sections[i];
           return Tooltip(
             message: section.label,
             preferBelow: false,
             waitDuration: const Duration(milliseconds: 500),
             child: InkWell(
-              onTap: _toggleCollapse,
+              onTap: () => _expandAndScrollTo(i),
               child: SizedBox(
                 width: double.infinity,
                 height: AppSpacing.xxl,
@@ -178,7 +231,7 @@ class _LeftPanelState extends State<LeftPanel> {
               ),
             ),
           );
-        }).toList(),
+        }),
       ),
     );
   }

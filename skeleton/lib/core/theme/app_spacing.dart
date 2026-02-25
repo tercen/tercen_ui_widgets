@@ -21,7 +21,7 @@ class AppSpacing {
 
   // Section
   static const double sectionPadding = 16.0;
-  static const double controlSpacing = 12.0;
+  static const double controlSpacing = 8.0;
   static const double labelSpacing = 8.0;
 
   // Border radius

@@ -22,7 +22,7 @@ class AppColorsDark {
   static const Color neutral300 = Color(0xFFD1D5DB);
   static const Color neutral200 = Color(0xFFE5E7EB);
   static const Color neutral100 = Color(0xFFF3F4F6);
-  static const Color neutral50 = Color(0xFFF8FAFC);
+  static const Color neutral50 = Color(0xFFF9FAFB);
 
   // Semantic text
   static const Color textPrimary = neutral50;
@@ -32,13 +32,13 @@ class AppColorsDark {
   static const Color textDisabled = neutral600;
 
   // Backgrounds
-  static const Color background = Color(0xFF0F172A);
+  static const Color background = Color(0xFF0A0A0A);
   static const Color surface = neutral900;
   static const Color surfaceElevated = neutral800;
   static const Color panelBackground = neutral900;
 
   // Borders
-  static const Color border = Color(0xFF334155);
+  static const Color border = Color(0xFF374151);
   static const Color borderSubtle = neutral700;
 
   // Status

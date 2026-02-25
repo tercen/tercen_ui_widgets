@@ -12,16 +12,16 @@ class AppTextStyles {
 
   // Body
   static const TextStyle bodyLarge = TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 1.5);
-  static const TextStyle body = TextStyle(fontSize: 13, fontWeight: FontWeight.w400, height: 1.5);
+  static const TextStyle body = TextStyle(fontSize: 14, fontWeight: FontWeight.w400, height: 1.5);
   static const TextStyle bodySmall = TextStyle(fontSize: 12, fontWeight: FontWeight.w400, height: 1.5);
 
   // Labels
-  static const TextStyle label = TextStyle(fontSize: 12, fontWeight: FontWeight.w500, height: 1.5);
-  static const TextStyle labelSmall = TextStyle(fontSize: 11, fontWeight: FontWeight.w500, height: 1.5);
+  static const TextStyle label = TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 1.5);
+  static const TextStyle labelSmall = TextStyle(fontSize: 12, fontWeight: FontWeight.w500, height: 1.5);
 
   // Section header (UPPERCASE, used in left panel)
   static const TextStyle sectionHeader = TextStyle(
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: FontWeight.w600,
     letterSpacing: 0.5,
     height: 1.25,

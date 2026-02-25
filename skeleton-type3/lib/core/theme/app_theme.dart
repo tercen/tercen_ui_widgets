@@ -10,6 +10,7 @@ class AppTheme {
   static ThemeData get light {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'Fira Sans',
       brightness: Brightness.light,
       colorScheme: ColorScheme.light(
         primary: AppColors.primary,
@@ -47,8 +48,8 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
         isDense: true,
-        hintStyle: const TextStyle(color: AppColors.neutral500, fontSize: 13),
-        labelStyle: const TextStyle(color: AppColors.neutral700, fontSize: 13),
+        hintStyle: const TextStyle(color: AppColors.neutral500, fontSize: 14),
+        labelStyle: const TextStyle(color: AppColors.neutral700, fontSize: 14),
       ),
       // Slider — compact style matching radio/checkbox scale
       sliderTheme: SliderThemeData(
@@ -86,7 +87,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -97,7 +98,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.primary, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -107,7 +108,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -156,6 +157,7 @@ class AppTheme {
   static ThemeData get dark {
     return ThemeData(
       useMaterial3: true,
+      fontFamily: 'Fira Sans',
       brightness: Brightness.dark,
       colorScheme: ColorScheme.dark(
         primary: AppColorsDark.primary,
@@ -193,8 +195,8 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColorsDark.error, width: 2),
         ),
         isDense: true,
-        hintStyle: const TextStyle(color: AppColorsDark.neutral500, fontSize: 13),
-        labelStyle: const TextStyle(color: AppColorsDark.neutral200, fontSize: 13),
+        hintStyle: const TextStyle(color: AppColorsDark.neutral500, fontSize: 14),
+        labelStyle: const TextStyle(color: AppColorsDark.neutral200, fontSize: 14),
       ),
       // Slider — compact style matching radio/checkbox scale
       sliderTheme: SliderThemeData(
@@ -232,7 +234,7 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColorsDark.primary,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -243,7 +245,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColorsDark.primary,
           side: const BorderSide(color: AppColorsDark.primary, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -253,7 +255,7 @@ class AppTheme {
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColorsDark.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -273,6 +275,27 @@ class AppTheme {
             borderSide: const BorderSide(color: AppColorsDark.border),
           ),
           isDense: true,
+        ),
+      ),
+      // Segmented button
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          backgroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColorsDark.primary;
+            return Colors.transparent;
+          }),
+          foregroundColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return Colors.white;
+            return AppColorsDark.textPrimary;
+          }),
+          side: WidgetStateProperty.all(
+            const BorderSide(color: AppColorsDark.border),
+          ),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+          ),
         ),
       ),
     );
