@@ -54,7 +54,7 @@ For Phase 1 (no app yet): ask the user or infer from the spec-writer conversatio
 5. After fixes, re-run the reviewer
 6. Loop steps 3–5 until PASS or the user intervenes
 
-*Note: Phase 3 Type 3 skills are not yet available. Phase 3 currently only supports Type 1/2 apps.*
+*Phase 3 supports Type 1/2 apps (Flows A-D) and Type 3 apps (Flow E: workflow execution).*
 
 ## Rules
 

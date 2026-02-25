@@ -1,6 +1,6 @@
 ---
 name: phase-3-tercen-integration
-description: Replace mock services with real Tercen data services in a Phase 2 mock app. Handles SDK setup, context creation, data flows (projections, file downloads, write-back), build, and deploy. Use after a mock app is approved and a real Tercen taskId is available.
+description: Replace mock services with real Tercen data services in a Phase 2 mock app. Handles SDK setup, context creation, data flows (projections, file downloads, write-back, entity navigation, workflow execution), build, and deploy. Use after a mock app is approved and a real Tercen taskId or projectId is available.
 argument-hint: "[path to mock app]"
 disable-model-invocation: true
 ---
@@ -16,7 +16,7 @@ Replace mock services with real Tercen data services. Phase 2 mock app is the st
 ## Rules — read before writing any code
 
 1. **No mock fallback in real services.** When Tercen data access fails, rethrow the error and let the UI show an error state. Do NOT silently return mock data — it hides real problems. Use the `USE_MOCKS` flag in `main.dart` for local development only. Flow A and Flow B are different access patterns for different data, not fallback alternatives.
-2. **Use `sci_tercen_context` for all data access.** Do NOT manually navigate task hierarchies (`RunWebAppTask` -> `CubeQueryTask`) or call `tableSchemaService.select()` directly. The context handles task navigation, schema resolution, system column filtering, and data fetching automatically.
+2. **Use `sci_tercen_context` for all data access (Flows A-C).** Do NOT manually navigate task hierarchies (`RunWebAppTask` -> `CubeQueryTask`) or call `tableSchemaService.select()` directly. The context handles task navigation, schema resolution, system column filtering, and data fetching automatically. **Exception:** Flow E (Type 3 workflow execution) uses entity services directly — `tableSchemaService.select()` and `taskService` calls are correct for reading step outputs and managing workflow execution.
 3. **Always use explicit GetIt type parameters.** `getIt.registerSingleton<ServiceFactory>(factory)` not `getIt.registerSingleton(factory)`. Omitting the type defaults to `Object` and causes runtime type mismatches.
 4. **Never use `dart:html` or `http` package for Tercen API calls.** Always use `sci_tercen_client` services — they handle auth and CORS.
 5. **When data access fails: STOP.** Do not add workarounds. Run the diagnostic report (see bottom of this skill), present results to the user. The fix may require workflow reconfiguration, a different flow choice, or an SDK enhancement — not more code.
@@ -26,8 +26,8 @@ Replace mock services with real Tercen data services. Phase 2 mock app is the st
 ## Inputs
 
 1. Working mock app (Phase 2 output)
-2. Functional spec Section 2.2 (Data Source) — determines Flow A, B, C, or D
-3. A real Tercen taskId (Flows A/B/C) or projectId (Flow D) for testing (user provides)
+2. Functional spec Section 2.2 (Data Source) — determines Flow A, B, C, D, or E
+3. A real Tercen taskId (Flows A/B/C), projectId (Flow D), or projectId + templateWorkflowId (Flow E) for testing (user provides)
 
 ---
 
@@ -41,12 +41,25 @@ Read the functional spec Section 2.2.
 | B | App downloads files (images, ZIPs, documents) referenced by `.documentId` | `ctx.cselect(names: ['.documentId'])` -> `fileService.download()` |
 | C | App needs both | Flow A for data + Flow B for files, in separate resolver classes |
 | D | App browses/navigates Tercen objects (projects, workflows, steps, folders, documents) | Entity services (`projectService`, `workflowService`, `folderService`, etc.) with `startKey`/`endKey` range queries. No CubeQueryTask — uses `projectId` instead of `taskId`. |
+| E | App manages workflow execution — clone template, upload files, set properties, run, monitor, read results (Type 3 workflow managers) | `workflowService.copyApp()` + `taskService.create()/runTask()` + `eventService.listenTaskChannel()`. Uses `projectId`, no `OperatorContext`. |
+
+---
+
+## Step routing by flow
+
+| Flow | Steps to follow |
+| ---- | --------------- |
+| A/B/C | 1 → 2 → 3 → 4A/4B → 5 → 6 (if Type 2) → 7 |
+| D | 1 → 4D (includes main.dart + locator) → 5 → 7 |
+| E | 1 (sci_tercen_client only) → 2E → 3E → 4E → 5E → 7 |
 
 ---
 
 ## Step 1: Update dependencies
 
-In `pubspec.yaml`, add `sci_tercen_context` and update `sci_tercen_client`. Always use the latest version from <https://github.com/tercen/sci_tercen_client> — check the repo's tags for the most recent release. Both packages must use the same `ref`:
+In `pubspec.yaml`, add `sci_tercen_context` and update `sci_tercen_client`. Always use the latest version from <https://github.com/tercen/sci_tercen_client> — check the repo's tags for the most recent release. Both packages must use the same `ref`.
+
+**Flow E exception:** Flow E does not use `sci_tercen_context`. Only add `sci_tercen_client`:
 
 ```yaml
 dependencies:
@@ -831,6 +844,344 @@ Future<void> _printDiagnosticReport() async {
 
 ---
 
+## Step 2E: main.dart for Flow E
+
+Flow E apps use `projectId` (not `taskId`). No `OperatorContext`.
+
+### Standalone variant
+
+```dart
+import 'package:sci_tercen_client/sci_service_factory_web.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  const useMocks = bool.fromEnvironment('USE_MOCKS', defaultValue: false);
+
+  ServiceFactory? factory;
+  String? projectId;
+
+  if (!useMocks) {
+    try {
+      projectId = Uri.base.queryParameters['projectId'];
+      if (projectId == null || projectId.isEmpty) {
+        runApp(_buildErrorApp('Missing projectId parameter'));
+        return;
+      }
+      factory = await createServiceFactoryForWebApp();
+    } catch (e) {
+      print('Tercen init failed: $e');
+    }
+  }
+
+  setupServiceLocator(
+    useMocks: factory == null,
+    factory: factory,
+    projectId: projectId,
+  );
+
+  final prefs = await SharedPreferences.getInstance();
+  runApp(YourApp(prefs: prefs));
+}
+```
+
+### Orchestrated variant (iframe)
+
+Use the Flow D postMessage pattern (Step 4D). The only difference: pass `projectId` to `setupServiceLocator` instead of `teamId` + entity-navigation services.
+
+---
+
+## Step 3E: service_locator.dart for Flow E
+
+```dart
+import 'package:sci_tercen_client/sci_client_service_factory.dart';
+
+void setupServiceLocator({
+  bool useMocks = true,
+  ServiceFactory? factory,
+  String? projectId,
+}) {
+  if (serviceLocator.isRegistered<DataService>()) return;
+
+  if (useMocks) {
+    serviceLocator.registerLazySingleton<DataService>(() => MockDataService());
+  } else {
+    serviceLocator.registerSingleton<ServiceFactory>(factory!);
+    serviceLocator.registerLazySingleton<DataService>(
+      () => TercenWorkflowService(factory!, projectId!),
+    );
+  }
+}
+```
+
+---
+
+## Step 4E: Flow E — workflow execution
+
+### 4E.1: Template cloning
+
+Each run = a cloned workflow. The clone is a full copy in the project.
+
+```dart
+final clonedWorkflow = await factory.workflowService.copyApp(templateWorkflowId, projectId);
+// clonedWorkflow.id — new workflow ID for this run
+// clonedWorkflow.steps — step list (same structure as template)
+```
+
+### 4E.2: File upload
+
+Upload input data files to the project before running:
+
+```dart
+final fileDoc = FileDocument()
+  ..name = 'input_data.csv'
+  ..projectId = projectId;
+final uploaded = await factory.fileService.upload(fileDoc, Stream.value(bytes));
+// uploaded.id — file document ID to reference in workflow steps
+```
+
+### 4E.3: Operator property setting
+
+Set operator properties on workflow steps before execution:
+
+```dart
+final workflow = await factory.workflowService.get(clonedWorkflowId);
+for (final step in workflow.steps) {
+  if (step is DataStep && step.name == 'Target Step') {
+    for (final pv in step.operatorRef.propertyValues) {
+      if (pv.name == 'threshold') pv.value = '0.5';
+      if (pv.name == 'method') pv.value = 'mean';
+    }
+  }
+}
+await factory.workflowService.update(workflow);
+```
+
+### 4E.4: Workflow execution
+
+Create and run a `RunWorkflowTask`:
+
+```dart
+final task = RunWorkflowTask()
+  ..projectId = projectId
+  ..workflowId = workflow.id
+  ..workflowRev = workflow.rev
+  ..stepsToRun.addAll(workflow.steps.map((s) => s.id))
+  ..stepsToReset.addAll(workflow.steps.map((s) => s.id));
+
+final createdTask = await factory.taskService.create(task) as RunWorkflowTask;
+await factory.taskService.runTask(createdTask.id);
+```
+
+`stepsToRun` empty = run all steps. `stepsToReset` clears previous step results before running.
+
+### 4E.5: Progress monitoring
+
+Stream task events via WebSocket:
+
+```dart
+final stream = factory.eventService.listenTaskChannel(createdTask.id, true);
+await for (final event in stream) {
+  if (event is TaskLogEvent) {
+    print('Log: ${event.message}');
+  } else if (event is TaskProgressEvent) {
+    // Update UI: event.message, event.actual, event.total
+    provider.updateProgress(event.message, event.actual, event.total);
+  } else if (event is TaskStateEvent) {
+    if (event.state is DoneState) {
+      provider.setCompleted();
+      break;
+    } else if (event.state is FailedState) {
+      final failed = event.state as FailedState;
+      provider.setError('${failed.error}: ${failed.reason}');
+      break;
+    }
+  }
+}
+```
+
+Alternative — state changes only: `factory.eventService.onTaskState(taskId)` returns `Stream<TaskStateEvent>`.
+
+Alternative — blocking wait: `final done = await factory.taskService.waitDone(taskId);` (blocks until terminal state).
+
+### 4E.6: Task cancellation
+
+```dart
+await factory.taskService.cancelTask(taskId);
+```
+
+Wire to the Stop button in the Status Panel ACTIONS section.
+
+### 4E.7: Step output reading
+
+Read results from completed workflow steps. Navigate `step.computedRelation` to find output schemas, then read data:
+
+```dart
+final workflow = await factory.workflowService.get(workflowId);
+final step = workflow.steps.firstWhere((s) => s.name == 'Target Step') as DataStep;
+
+// Extract schema IDs from the step's output relation tree
+final relations = _getSimpleRelations(step.computedRelation);
+final schemaList = await factory.tableSchemaService.list(
+  relations.map((r) => r.id).toList(),
+);
+
+// Read data from a specific output schema
+final targetSchema = schemaList.firstWhere((s) => s.nRows > 0);
+final table = await factory.tableSchemaService.select(
+  targetSchema.id,
+  targetSchema.columns.map((c) => c.name).toList(),
+  0,
+  targetSchema.nRows,
+);
+```
+
+The `_getSimpleRelations()` helper is already documented in Step 4D. Reuse it.
+
+### 4E.8: Run history
+
+List cloned workflows in the project to build run history:
+
+```dart
+final workflows = await factory.projectDocumentService
+    .findWorkflowByProjectIdFolderStream(
+      startKeyProjectId: projectId, endKeyProjectId: projectId,
+      startKeyFolderId: '',         endKeyFolderId: '\uf000',
+    ).toList();
+
+// Filter to cloned runs (vs the template itself)
+// Each workflow has .name, .id, .lastModifiedDate
+```
+
+### Task state reference
+
+| State | Properties | When |
+| ----- | ---------- | ---- |
+| `InitState` | — | Task created, not started |
+| `PendingState` | — | Task queued |
+| `RunningState` | — | Task executing |
+| `DoneState` | — | Completed successfully |
+| `FailedState` | `.error`, `.reason` | Failed |
+
+Check with `is`: `if (task.state is FailedState) { ... }`
+
+Step-level state: `step.state.taskState` (type `State`), `step.state.taskId` (type `String`).
+
+---
+
+## Step 5E: Real service for Flow E
+
+```dart
+class TercenWorkflowService implements DataService {
+  final ServiceFactory _factory;
+  final String _projectId;
+
+  TercenWorkflowService(this._factory, this._projectId);
+
+  Future<Workflow> cloneTemplate(String templateId) async {
+    try {
+      return await _factory.workflowService.copyApp(templateId, _projectId);
+    } catch (e) {
+      print('Tercen error: $e');
+      await _printDiagnosticReport();
+      rethrow;
+    }
+  }
+
+  Future<void> runWorkflow(
+    String workflowId, {
+    required void Function(String message, int actual, int total) onProgress,
+    required void Function(String message) onLog,
+    required void Function(State state) onStateChange,
+  }) async {
+    try {
+      final workflow = await _factory.workflowService.get(workflowId);
+
+      final task = RunWorkflowTask()
+        ..projectId = _projectId
+        ..workflowId = workflow.id
+        ..workflowRev = workflow.rev
+        ..stepsToRun.addAll(workflow.steps.map((s) => s.id))
+        ..stepsToReset.addAll(workflow.steps.map((s) => s.id));
+
+      final created = await _factory.taskService.create(task) as RunWorkflowTask;
+      await _factory.taskService.runTask(created.id);
+
+      await for (final event in _factory.eventService.listenTaskChannel(created.id, true)) {
+        if (event is TaskProgressEvent) onProgress(event.message, event.actual, event.total);
+        else if (event is TaskLogEvent) onLog(event.message);
+        else if (event is TaskStateEvent) {
+          onStateChange(event.state);
+          if (event.state is DoneState || event.state is FailedState) break;
+        }
+      }
+    } catch (e) {
+      print('Tercen error: $e');
+      await _printDiagnosticReport();
+      rethrow;
+    }
+  }
+
+  Future<void> cancelRun(String taskId) async {
+    await _factory.taskService.cancelTask(taskId);
+  }
+
+  Future<InMemoryTable> readStepOutput(String workflowId, String stepName) async {
+    final workflow = await _factory.workflowService.get(workflowId);
+    final step = workflow.steps.firstWhere((s) => s.name == stepName) as DataStep;
+    final relations = _getSimpleRelations(step.computedRelation);
+    final schemaList = await _factory.tableSchemaService.list(
+      relations.map((r) => r.id).toList(),
+    );
+    final schema = schemaList.firstWhere((s) => s.nRows > 0);
+    return await _factory.tableSchemaService.select(
+      schema.id,
+      schema.columns.map((c) => c.name).toList(),
+      0,
+      schema.nRows,
+    );
+  }
+
+  Future<List<Workflow>> getRunHistory() async {
+    return await _factory.projectDocumentService
+        .findWorkflowByProjectIdFolderStream(
+          startKeyProjectId: _projectId, endKeyProjectId: _projectId,
+          startKeyFolderId: '', endKeyFolderId: '\uf000',
+        ).toList();
+  }
+}
+```
+
+---
+
+## Diagnostic report for Flow E
+
+```dart
+Future<void> _printDiagnosticReport() async {
+  print('=== TERCEN DIAGNOSTIC REPORT (Flow E) ===');
+  print('ProjectId: $_projectId');
+
+  try {
+    final project = await _factory.projectService.get(_projectId);
+    print('Project: ${project.name} (owner: ${project.acl.owner})');
+  } catch (e) { print('Project fetch ERROR: $e'); }
+
+  try {
+    final workflows = await _factory.projectDocumentService
+        .findWorkflowByProjectIdFolderStream(
+          startKeyProjectId: _projectId, endKeyProjectId: _projectId,
+          startKeyFolderId: '', endKeyFolderId: '\uf000',
+        ).toList();
+    print('Workflows in project: ${workflows.length}');
+    for (final w in workflows) { print('  - ${w.name} (${w.id})'); }
+  } catch (e) { print('Workflow list ERROR: $e'); }
+
+  print('=== END REPORT ===');
+}
+```
+
+---
+
 ## Checklist
 
 ### All flows
@@ -868,14 +1219,33 @@ Future<void> _printDiagnosticReport() async {
 - [ ] startKey/endKey range queries return expected data
 - [ ] Entity service finder methods match the key order from the method name
 
+### Flow E specific
+
+- [ ] `projectId` from URL (`Uri.base.queryParameters['projectId']`) or from `init-context` postMessage
+- [ ] No `OperatorContext` — Flow E does not use `ctx.select()` / `ctx.cselect()` / `ctx.rselect()`
+- [ ] `ServiceFactory` registered in service locator (not `AbstractOperatorContext`)
+- [ ] Template cloned via `workflowService.copyApp(templateId, projectId)`
+- [ ] `RunWorkflowTask` constructed with `workflowId`, `workflowRev`, `stepsToRun`, `stepsToReset`
+- [ ] Task created with `taskService.create()`, then started with `taskService.runTask()`
+- [ ] Progress monitored via `eventService.listenTaskChannel()` stream
+- [ ] Stream events dispatched by type: `TaskLogEvent`, `TaskProgressEvent`, `TaskStateEvent`
+- [ ] `TaskStateEvent.state` checked with `is DoneState` / `is FailedState` to detect completion
+- [ ] `FailedState.error` and `.reason` extracted for error display
+- [ ] Task cancellation via `taskService.cancelTask()` wired to Stop button
+- [ ] Step outputs read via `computedRelation` → `_getSimpleRelations()` → `tableSchemaService.select()`
+- [ ] Run history listed via `projectDocumentService.findWorkflowByProjectIdFolderStream()`
+- [ ] File upload via `fileService.upload(fileDoc, stream)` — not `dart:html` or `http`
+- [ ] Operator properties set via `step.operatorRef.propertyValues` + `workflowService.update()`
+- [ ] Diagnostic report includes projectId, project name, workflow count
+
 ---
 
 ## Files created/modified
 
 | File | Action |
 | ---- | ------ |
-| `pubspec.yaml` | Add `sci_tercen_context` dependency, verify `sci_tercen_client` version matches |
-| `lib/main.dart` | Modify — create ServiceFactory, pass factory + taskId to service locator |
-| `lib/di/service_locator.dart` | Modify — register context + real data service |
-| `lib/implementations/services/tercen_*_service.dart` | Create — uses context for data access |
+| `pubspec.yaml` | Add `sci_tercen_context` dependency (Flows A-C), verify `sci_tercen_client` version |
+| `lib/main.dart` | Modify — create ServiceFactory, pass factory + taskId/projectId to service locator |
+| `lib/di/service_locator.dart` | Modify — register real data service |
+| `lib/implementations/services/tercen_*_service.dart` | Create — uses context (A-C) or entity services (E) |
 | `lib/utils/*_resolver.dart` | Create (if Flow B needs relation tree walking) |

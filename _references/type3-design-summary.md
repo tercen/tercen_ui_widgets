@@ -136,13 +136,34 @@ No mid-step pause. Stop cancels the running data step (resets it). Completed ste
 
 ## Data Context & Launch Modes
 
-- No `taskId` — works at project level
-- `createServiceFactoryForWebApp()` for auth
-- `sci_tercen_client` is the sole API
+- No `taskId` — works at project level with `projectId`
+- `createServiceFactoryForWebApp()` for auth (standalone) or `createServiceFactoryForWebApp(tercenToken: token)` (orchestrated)
+- `sci_tercen_client` is the sole API — no `sci_tercen_context` / `OperatorContext`
+- Phase 3 uses Flow E: workflow execution pattern
 
 Two launch modes (apps support both by default):
-1. **Standalone** — app creates a new project
-2. **In-project** — app detects existing project from URL/session
+1. **Standalone** — reads `projectId` from URL query parameters, creates factory from embedded auth
+2. **In-project** (orchestrated) — receives credentials and projectId via `init-context` postMessage from orchestrator
+
+### Phase 3 Integration Pattern (Flow E)
+
+- main.dart: create factory from URL params or postMessage → pass factory + projectId to setupServiceLocator
+- service_locator: register `ServiceFactory` + `TercenWorkflowService(factory, projectId)`
+- Real service receives factory + projectId, calls workflow/task/event services directly
+- No OperatorContext at any point
+- Step output reading: navigate `step.computedRelation` → `_getSimpleRelations()` → `tableSchemaService.select()`
+
+### Key Services Used
+
+| Service | Purpose |
+|---------|---------|
+| `workflowService` | Clone template (`copyApp`), get/update workflow, read steps |
+| `taskService` | Create `RunWorkflowTask`, `runTask`, `cancelTask`, `waitDone` |
+| `eventService` | `listenTaskChannel` for progress/state streams |
+| `fileService` | Upload input files, download result files |
+| `tableSchemaService` | Read step output data (via `computedRelation`) |
+| `projectDocumentService` | List workflows in project (run history) |
+| `projectService` | Get/create project metadata |
 
 ---
 
