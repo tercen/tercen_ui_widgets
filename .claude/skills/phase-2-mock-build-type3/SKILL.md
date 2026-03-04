@@ -43,7 +43,7 @@ Copy the entire `skeleton-type3/` directory to the target project location, then
 
 ### home_screen.dart (`lib/presentation/screens/home_screen.dart`)
 - Update `appTitle:` — display name shown in panel header
-- Update `appIcon:` — app icon shown in panel header
+- The App icon is hardcoded in `LeftPanelHeader` — do NOT modify it
 
 ---
 

@@ -8,14 +8,12 @@ import 'left_panel/left_panel.dart';
 /// TopBar is conditional: hidden when embedded in Tercen Data Step (taskId present).
 class AppShell extends StatelessWidget {
   final String appTitle;
-  final IconData appIcon;
   final List<PanelSection> sections;
   final Widget content;
 
   const AppShell({
     super.key,
     required this.appTitle,
-    required this.appIcon,
     required this.sections,
     required this.content,
   });
@@ -29,7 +27,6 @@ class AppShell extends StatelessWidget {
         children: [
           LeftPanel(
             appTitle: appTitle,
-            appIcon: appIcon,
             sections: sections,
           ),
           Expanded(

@@ -12,7 +12,6 @@ import 'left_panel/left_panel.dart';
 /// The Status Panel (LeftPanel) remains fully interactive during Running.
 class AppShell extends StatelessWidget {
   final String appTitle;
-  final IconData appIcon;
   final List<PanelSection> sections;
   final Widget content;
 
@@ -25,7 +24,6 @@ class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
     required this.appTitle,
-    required this.appIcon,
     required this.sections,
     required this.content,
     this.onPrimaryAction,
@@ -44,7 +42,6 @@ class AppShell extends StatelessWidget {
           // Status Panel — always visible and interactive, even during Running
           LeftPanel(
             appTitle: appTitle,
-            appIcon: appIcon,
             sections: sections,
           ),
           // Right column: Header + Content, wrapped in running overlay

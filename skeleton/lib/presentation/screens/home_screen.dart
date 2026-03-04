@@ -37,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return AppShell(
       appTitle: 'Skeleton App',
-      appIcon: Icons.apps,
       sections: const [
         // Replace these placeholder sections with app-specific sections.
         // Each section: icon + UPPERCASE label + content widget.

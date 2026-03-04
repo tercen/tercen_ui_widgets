@@ -29,13 +29,11 @@ class PanelSection {
 /// Only replace the sections list with app-specific sections.
 class LeftPanel extends StatefulWidget {
   final String appTitle;
-  final IconData appIcon;
   final List<PanelSection> sections;
 
   const LeftPanel({
     super.key,
     required this.appTitle,
-    required this.appIcon,
     required this.sections,
   });
 
@@ -131,7 +129,6 @@ class _LeftPanelState extends State<LeftPanel> {
                 builder: (context, constraints) {
                   final isNarrow = constraints.maxWidth < 200;
                   return LeftPanelHeader(
-                    appIcon: widget.appIcon,
                     appTitle: widget.appTitle,
                     isCollapsed: isNarrow,
                     onToggleCollapse: _toggleCollapse,

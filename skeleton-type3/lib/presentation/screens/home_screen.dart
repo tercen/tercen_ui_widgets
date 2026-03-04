@@ -12,7 +12,7 @@ import '../widgets/content_panel/content_panel.dart';
 
 /// Home screen: assembles the Type 3 three-panel layout.
 ///
-/// Replace appTitle, appIcon, and content panel widgets with your app's specific content.
+/// Replace appTitle and content panel widgets with your app's specific content.
 /// The Status Panel sections (left) and Content Panel (right) are the two things you customize.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -37,7 +37,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return AppShell(
       appTitle: 'Skeleton Type3',
-      appIcon: Icons.science,
       sections: const [
         // Status Panel sections — 5 sections in order
         PanelSection(

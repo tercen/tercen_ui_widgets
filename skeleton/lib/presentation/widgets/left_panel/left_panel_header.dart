@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
 import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/app_icon.dart';
 import '../../providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 
 /// Accent-colored header for the left panel.
 ///
-/// Expanded: icon + title + theme toggle + collapse chevron (left to right).
-/// Collapsed: icon only (centered). Theme toggle and chevron move to footer.
+/// Expanded: App icon + title + theme toggle + collapse chevron (left to right).
+/// Collapsed: App icon only (centered). Theme toggle and chevron move to footer.
+///
+/// The App icon is hardcoded (Tercen standard) and must NOT be changed.
 class LeftPanelHeader extends StatelessWidget {
-  final IconData appIcon;
   final String appTitle;
   final bool isCollapsed;
   final VoidCallback onToggleCollapse;
 
   const LeftPanelHeader({
     super.key,
-    required this.appIcon,
     required this.appTitle,
     required this.isCollapsed,
     required this.onToggleCollapse,
@@ -37,8 +38,8 @@ class LeftPanelHeader extends StatelessWidget {
   }
 
   Widget _buildCollapsed() {
-    return Center(
-      child: Icon(appIcon, color: Colors.white, size: 20),
+    return const Center(
+      child: AppIcon(size: 20),
     );
   }
 
@@ -47,7 +48,7 @@ class LeftPanelHeader extends StatelessWidget {
 
     return Row(
       children: [
-        Icon(appIcon, color: Colors.white, size: 20),
+        const AppIcon(size: 20),
         const SizedBox(width: AppSpacing.sm),
         Expanded(
           child: Text(

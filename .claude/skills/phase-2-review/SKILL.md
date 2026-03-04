@@ -128,7 +128,7 @@ Check for skeleton defaults in each file.
 ### C5: home_screen.dart app identity
 
 - `appTitle:` must NOT be `'Skeleton'` or `'Skeleton App'`
-- `appIcon:` must be set (not the skeleton default)
+- The App icon (`AppIcon` widget) is hardcoded — must NOT be modified or removed
 
 ---
 
