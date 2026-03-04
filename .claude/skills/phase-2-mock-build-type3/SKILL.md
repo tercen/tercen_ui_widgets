@@ -260,6 +260,34 @@ If panel collapse, resize, theme toggle, or running overlay breaks — a DO-NOT-
 
 ---
 
+## Phase 2 Rules — Learned from Production
+
+These rules prevent bugs that were found in the first Type 3 production deployment. Follow them exactly.
+
+### Error handling
+
+1. **Every error path must produce a user-visible error dialog.** Never silently set `_error` without UI feedback. Use `_advanceError` (shown by HomeScreen's provider listener) for stage-advance and workflow errors. Set `_advanceError` BEFORE calling `notifyListeners()` — setting it after requires two notification cycles.
+2. **`update*FromFiles()` must use real file data, not hardcoded stats.** Count actual files, parse CSV headers for real column names/sample counts. FCS channel/event counts are workflow-output data (unavailable at upload time) — set to 0 honestly.
+3. **Stage completion must handle empty data gracefully.** If a stage depends on data from a previous workflow run that hasn't happened yet (e.g. channel list from "Read FCS"), allow the stage to be marked complete with a "will use defaults on first run" message.
+
+### Stage sequencing
+
+4. **All file uploads must complete before any processing starts.** Do NOT run workflow preflight steps between upload stages. Collect all inputs first, then process.
+5. **Default project/run names must use real data.** Parse username from JWT token (`data.u` claim), use current timestamp. Never use hardcoded placeholders like `"User"` or `"My Team"`.
+6. **Forbidden characters in names:** `: / \ ? # [ ] @ ! $ & ' ( ) * + , ; =` — sanitize all generated names.
+
+### Re-run state
+
+7. **Re-run must restore previous state.** File upload zones must receive `initialFiles` from the previous run. Tercen file document IDs must be saved in run settings so uploads can be skipped on re-run.
+8. **Dropdown `value` must always be in `items` or null.** Use a guard: `value: items.contains(selected) ? selected : null`. Initialize selection fields to `''` (not to a placeholder string), update after async data loads.
+
+### Header panel
+
+9. **Titles belong in the scrollable content, not the 48px header.** The header is a toolbar — it holds action buttons only. Stage/run titles go as the first element in the content panel, styled `AppTextStyles.h1`.
+10. **Validate layout at 1440px+ width.** The two most common layout problems — buttons too far from content and Exit too close to action buttons — are only visible at real desktop widths.
+
+---
+
 ## Checklist
 
 Before completing Phase 2:
@@ -282,4 +310,10 @@ Before completing Phase 2:
 - [ ] INFO section present with correct GitHub URL
 - [ ] No modifications to DO-NOT-MODIFY files
 - [ ] `flutter build web --wasm` succeeds
+- [ ] Every error path shows user-visible dialog (no silent `_error` fields)
+- [ ] `update*FromFiles()` uses real file data (no hardcoded stats)
+- [ ] Dropdown values guarded against missing items (`value: items.contains(x) ? x : null`)
+- [ ] Default project/run names use real username + timestamp (no placeholder strings)
+- [ ] Layout validated at 1440px+ width (buttons near content, Exit separated)
+- [ ] Stage titles in scrollable content, not in 48px header strip
 - [ ] User has reviewed and approved

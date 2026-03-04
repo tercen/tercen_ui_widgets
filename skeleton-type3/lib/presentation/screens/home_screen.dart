@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:web/web.dart' as web;
 import '../providers/app_state_provider.dart';
+import '../providers/theme_provider.dart';
 import '../widgets/app_shell.dart';
 import '../widgets/left_panel/left_panel.dart';
 import '../widgets/left_panel/actions_section.dart';
@@ -14,6 +16,9 @@ import '../widgets/content_panel/content_panel.dart';
 ///
 /// Replace appTitle and content panel widgets with your app's specific content.
 /// The Status Panel sections (left) and Content Panel (right) are the two things you customize.
+///
+/// Exit button and theme toggle are pre-wired. Error dialogs for advanceError
+/// are handled automatically via provider listener.
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -22,13 +27,45 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late final AppStateProvider _provider;
+
   @override
   void initState() {
     super.initState();
+    _provider = context.read<AppStateProvider>();
+    // Listen for advance errors and show dialog
+    _provider.addListener(_onProviderChanged);
     // Load data on startup (pre-populates run history in mock)
     Future.microtask(() {
-      context.read<AppStateProvider>().loadData();
+      if (!mounted) return;
+      _provider.loadData();
     });
+  }
+
+  @override
+  void dispose() {
+    _provider.removeListener(_onProviderChanged);
+    super.dispose();
+  }
+
+  void _onProviderChanged() {
+    final error = _provider.advanceError;
+    if (error != null && mounted) {
+      _provider.clearAdvanceError();
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Error'),
+          content: Text(error),
+          actions: [
+            FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   @override
@@ -86,7 +123,20 @@ class _HomeScreenState extends State<HomeScreen> {
           _confirmDelete(context, provider, runId);
         }
       },
+      onExit: () => _doExit(provider),
+      onToggleTheme: () {
+        context.read<ThemeProvider>().toggleTheme();
+      },
     );
+  }
+
+  /// Exit navigation — works for all Type 3 apps.
+  /// No project created yet: go back to previous Tercen screen.
+  /// Project exists: navigate to the project page.
+  void _doExit(AppStateProvider provider) {
+    // Apps should override this with their projectId and teamId.
+    // Default: browser back.
+    web.window.history.back();
   }
 
   void _confirmDelete(BuildContext context, AppStateProvider provider, String runId) {

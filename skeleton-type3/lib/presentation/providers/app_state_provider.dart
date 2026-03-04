@@ -15,6 +15,8 @@ class RunEntry {
   final DateTime timestamp;
   final String status; // 'complete', 'error', 'stopped'
   final Map<String, dynamic> settings;
+  final String? errorMessage;
+  final String? failedStep;
 
   const RunEntry({
     required this.id,
@@ -22,6 +24,8 @@ class RunEntry {
     required this.timestamp,
     required this.status,
     this.settings = const {},
+    this.errorMessage,
+    this.failedStep,
   });
 }
 
@@ -45,12 +49,38 @@ class AppStateProvider extends ChangeNotifier {
   ContentMode _contentMode = ContentMode.input;
   ContentMode get contentMode => _contentMode;
 
-  // --- Data loading (initial load from mock service) ---
+  // --- Data loading (initial load + stage advance operations) ---
   bool _isLoading = false;
   String? _error;
 
   bool get isLoading => _isLoading;
   String? get error => _error;
+
+  // --- Progress tracking (workflow execution) ---
+  int _completedSteps = 0;
+  int get completedSteps => _completedSteps;
+
+  int _totalSteps = 0;
+  int get totalSteps => _totalSteps;
+
+  String _currentRunningStep = '';
+  String get currentRunningStep => _currentRunningStep;
+
+  /// Update progress during workflow execution or stage advance.
+  void updateProgress(String stepMessage, int completed, int total) {
+    _currentRunningStep = stepMessage;
+    _completedSteps = completed;
+    _totalSteps = total;
+    notifyListeners();
+  }
+
+  // --- Advance error (shown as dialog by HomeScreen) ---
+  String? _advanceError;
+  String? get advanceError => _advanceError;
+
+  void clearAdvanceError() {
+    _advanceError = null;
+  }
 
   Future<void> loadData() async {
     _isLoading = true;
@@ -132,12 +162,16 @@ class AppStateProvider extends ChangeNotifier {
     _contentMode = ContentMode.display;
     _headerHeading = entry.name;
     _appState = AppState.waiting;
+    _completedSteps = 0;
+    _totalSteps = 0;
+    _currentRunningStep = '';
     notifyListeners();
   }
 
   /// Stop the current run. In mock mode, this is a no-op.
   void stopRun() {
     _appState = AppState.waiting;
+    _currentRunningStep = '';
     notifyListeners();
   }
 
@@ -151,6 +185,9 @@ class AppStateProvider extends ChangeNotifier {
     _currentResults = {};
     _headerHeading = 'Getting started';
     _headerActionLabel = 'Continue';
+    _completedSteps = 0;
+    _totalSteps = 0;
+    _currentRunningStep = '';
     notifyListeners();
   }
 

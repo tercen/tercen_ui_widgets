@@ -20,6 +20,8 @@ class AppShell extends StatelessWidget {
   final VoidCallback? onReRun;
   final VoidCallback? onExport;
   final VoidCallback? onDelete;
+  final VoidCallback? onExit;
+  final VoidCallback? onToggleTheme;
 
   const AppShell({
     super.key,
@@ -30,6 +32,8 @@ class AppShell extends StatelessWidget {
     this.onReRun,
     this.onExport,
     this.onDelete,
+    this.onExit,
+    this.onToggleTheme,
   });
 
   @override
@@ -55,6 +59,8 @@ class AppShell extends StatelessWidget {
                     onReRun: onReRun,
                     onExport: onExport,
                     onDelete: onDelete,
+                    onExit: onExit,
+                    onToggleTheme: onToggleTheme,
                   ),
                   Expanded(child: content),
                 ],

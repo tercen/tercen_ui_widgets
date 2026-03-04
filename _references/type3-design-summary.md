@@ -57,7 +57,7 @@ Header Panel sits inside the right column, NOT spanning full app width.
 Uses existing skeleton left panel mechanics (collapse, expand, resize). 5 sections:
 
 1. **ACTIONS** — Run/Stop/Reset buttons. State-driven enabled/disabled. Re-Run is NOT here (it's in Header Panel Display mode).
-2. **STATUS** — Colour-coded state indicator, progress bar, current step label. Shows what app is waiting for when in Waiting state.
+2. **STATUS** — Six-state indicator (Waiting/Processing/Running/Complete/Error/Stopped) with progress bar. Processing = synchronous operations (uploading, cloning). Running = full workflow execution. Progress bar: determinate when running (with clamp + zero-guard), indeterminate when processing. Explicit `valueColor`/`backgroundColor` mandatory (Flutter defaults invisible in dark mode).
 3. **CURRENT RUN** — Read-only summary of files uploaded and parameter values. Updates live as user provides input.
 4. **HISTORY** — List of past runs (most recent first). Click to view results. Each entry: name/number, timestamp, status.
 5. **INFO** — GitHub link, version, app name. Mandatory, always at bottom.
@@ -66,13 +66,24 @@ Uses existing skeleton left panel mechanics (collapse, expand, resize). 5 sectio
 
 ## Header Panel (48px Fixed Strip)
 
-Two zones: left-aligned context label, right-aligned action buttons.
+Two-zone responsive layout — action buttons left-aligned to content margin, exit pinned right:
+
+```
+[Action buttons (left)] — [Spacer] — [Theme toggle | Divider | Exit (right)]
+```
 
 | Mode | Left Zone | Right Zone |
 |------|-----------|------------|
-| Input | Page heading (e.g. "Select channels") | Primary action button ("Continue", "Upload", "Run") |
-| Display | Cloned workflow name (run identifier) | Re-Run, Export, Delete |
-| Running | Dimmed (keeps current label) | Dimmed (no active buttons) |
+| Input | Primary action button ("Continue", "Upload", "Run") | Theme toggle, divider, Exit |
+| Display | Re-Run, Export, Delete | Theme toggle, divider, Exit |
+| Running | Dimmed (no active buttons) | Theme toggle, divider, Exit |
+
+**Layout rules:**
+- Action buttons left-aligned, matching content panel left padding
+- `Spacer()` fills remaining width — responsive to any screen size, never use fixed gaps
+- Theme toggle to left of vertical divider
+- Exit button (X icon) pinned to right edge, after vertical divider
+- Stage/run titles go in the scrollable content panel (first element), NOT in the 48px header
 
 Header Panel is DO-NOT-MODIFY. Apps configure it via AppStateProvider (mode, heading text, button labels).
 

@@ -2,15 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_colors_dark.dart';
+import '../../core/theme/app_line_weights.dart';
 import '../../core/theme/app_spacing.dart';
-import '../../core/theme/app_text_styles.dart';
 import '../providers/app_state_provider.dart';
 import '../providers/theme_provider.dart';
 
 /// Header Panel — 48px fixed strip at top of the right column.
 ///
-/// Two zones: left-aligned context label, right-aligned action buttons.
-/// Content changes by mode (Input / Display / Running).
+/// Two-zone responsive layout:
+///   [Action buttons (left)] — [Spacer] — [Theme toggle | Divider | Exit (right)]
+///
+/// Action buttons are left-aligned to match the content margin below.
+/// Exit button is pinned to the right edge, separated by a vertical divider.
+/// Spacer fills all remaining width — responsive to any screen size.
 ///
 /// DO NOT MODIFY this widget directly. Apps configure it via AppStateProvider:
 /// - setHeaderConfig(heading, actionLabel) for Input mode
@@ -29,12 +33,20 @@ class HeaderPanel extends StatelessWidget {
   /// Callback when Delete is pressed in Display mode.
   final VoidCallback? onDelete;
 
+  /// Callback when Exit is pressed. If null, uses default navigation.
+  final VoidCallback? onExit;
+
+  /// Callback when theme toggle is pressed. If null, toggle is hidden.
+  final VoidCallback? onToggleTheme;
+
   const HeaderPanel({
     super.key,
     this.onPrimaryAction,
     this.onReRun,
     this.onExport,
     this.onDelete,
+    this.onExit,
+    this.onToggleTheme,
   });
 
   @override
@@ -43,7 +55,7 @@ class HeaderPanel extends StatelessWidget {
     final isDark = context.watch<ThemeProvider>().isDarkMode;
     final bgColor = isDark ? AppColorsDark.surface : AppColors.surface;
     final borderColor = isDark ? AppColorsDark.border : AppColors.border;
-    final textPrimary = isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
+    final textSecondary = isDark ? AppColorsDark.textSecondary : AppColors.textSecondary;
 
     return Container(
       height: AppSpacing.topBarHeight,
@@ -51,19 +63,42 @@ class HeaderPanel extends StatelessWidget {
         color: bgColor,
         border: Border(bottom: BorderSide(color: borderColor)),
       ),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      padding: const EdgeInsets.only(left: AppSpacing.md, right: AppSpacing.md),
       child: Row(
         children: [
-          // Left zone: context label
-          Expanded(
-            child: Text(
-              provider.headerHeading,
-              style: AppTextStyles.h3.copyWith(color: textPrimary),
-              overflow: TextOverflow.ellipsis,
+          // Left zone: action buttons aligned to content margin
+          ..._buildActions(context, provider, isDark),
+
+          // Spacer fills remaining width — responsive
+          const Spacer(),
+
+          // Right zone: theme toggle + divider + exit
+          if (onToggleTheme != null) ...[
+            IconButton(
+              onPressed: onToggleTheme,
+              icon: Icon(
+                isDark ? Icons.light_mode : Icons.dark_mode,
+                size: 18,
+                color: textSecondary,
+              ),
+              tooltip: isDark ? 'Light mode' : 'Dark mode',
+              visualDensity: VisualDensity.compact,
+            ),
+          ],
+          SizedBox(
+            height: AppSpacing.topBarHeight * 0.5,
+            child: VerticalDivider(
+              width: AppSpacing.md,
+              thickness: AppLineWeights.lineSubtle,
+              color: borderColor,
             ),
           ),
-          // Right zone: action buttons
-          ..._buildActions(context, provider, isDark),
+          IconButton(
+            onPressed: onExit,
+            icon: Icon(Icons.close, size: 18, color: textSecondary),
+            tooltip: 'Exit',
+            visualDensity: VisualDensity.compact,
+          ),
         ],
       ),
     );

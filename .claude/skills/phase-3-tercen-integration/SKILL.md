@@ -918,31 +918,182 @@ void setupServiceLocator({
 
 ## Step 4E: Flow E — workflow execution
 
-### 4E.1: Template cloning
+> All patterns in this section are production-validated from immunophenotyping_v3.
 
-Each run = a cloned workflow. The clone is a full copy in the project.
+### 4E.0: Setup — team discovery and project creation
+
+**Team discovery** — username is NOT available from the factory. Parse from JWT token:
 
 ```dart
-final clonedWorkflow = await factory.workflowService.copyApp(templateWorkflowId, projectId);
-// clonedWorkflow.id — new workflow ID for this run
-// clonedWorkflow.steps — step list (same structure as template)
+String _usernameFromToken() {
+  final token = Uri.base.queryParameters['token'];
+  if (token == null) throw Exception('No token in URL');
+  final parts = token.split('.');
+  final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+  final claims = jsonDecode(payload) as Map<String, dynamic>;
+  return (claims['data'] as Map<String, dynamic>)['u'] as String;
+}
+
+// Get teams: useFactory: true is MANDATORY for full ACL data
+final user = await factory.userService.get(username, useFactory: true);
+final teamNames = user.teamAcl.aces.map((a) => a.principals[0].principalId).toList()
+  ..sort()
+  ..insert(0, username); // home team first
 ```
+
+Wrong approaches (do NOT use): `teamService.findTeamByOwner()`, `userService.findTeamMembers()`, `userService.get('')`.
+
+**Project creation:**
+
+```dart
+final project = Project()
+  ..name = sanitizedName
+  ..acl = (Acl()..owner = teamId);
+final created = await factory.projectService.create(project);
+```
+
+**Forbidden characters in Tercen names:** `: / \ ? # [ ] @ ! $ & ' ( ) * + , ; =` — sanitize all generated names:
+
+```dart
+String sanitizeName(String name) =>
+    name.replaceAll(RegExp(r'''[:/\\?#\[\]@!$&'()*+,;=]'''), '_');
+```
+
+### 4E.1: Template cloning
+
+Each run = a cloned workflow. Templates live in the Tercen Site Library, not in user projects. Use `documentService.getLibrary()` to find them, match by URL+version (not name), resolve via `workflowService.list()`, then clone.
+
+```dart
+// 1. Find template in library (returns List<Document>, NOT List<Workflow>)
+final libDocs = await factory.documentService.getLibrary('', [], ['Workflow'], [], 0, -1);
+final match = libDocs.where((doc) =>
+  doc.version == templateVersion &&
+  (doc.url.uri == templateUrl || doc.urls.any((u) => u.uri == templateUrl))
+).firstOrNull;
+
+// 2. Resolve Document → Workflow (required before copyApp)
+final resolved = await factory.workflowService.list([match!.id]);
+
+// 3. Clone into project
+final cloned = await factory.workflowService.copyApp(resolved.first.id, projectId);
+
+// 4. Persist if needed (copyApp may return unpersisted body with id="")
+final workflow = cloned.id.isEmpty
+    ? await factory.workflowService.create(cloned)
+    : cloned;
+
+// 5. NEVER modify workflow.acl after copyApp — causes JS null crash in dart2js
+// 6. Set wf.folderId = '' to place in project root
+```
+
+**Critical rules:**
+- `getLibrary()` returns `List<Document>` — do NOT use `whereType<Workflow>()`
+- Match by `doc.url.uri` + `doc.version`, NOT by `doc.name`
+- Step IDs in cloned workflow are identical to template — use stable IDs
+- Never modify `workflow.acl` after `copyApp()` — server handles ownership
 
 ### 4E.2: File upload
 
-Upload input data files to the project before running:
+Two patterns depending on file type.
+
+**Binary files (FCS zip, images):** simple FileDocument upload.
 
 ```dart
-final fileDoc = FileDocument()
-  ..name = 'input_data.csv'
-  ..projectId = projectId;
+final fileDoc = FileDocument()..name = filename..projectId = projectId;
 final uploaded = await factory.fileService.upload(fileDoc, Stream.value(bytes));
-// uploaded.id — file document ID to reference in workflow steps
 ```
 
-### 4E.3: Operator property setting
+**CSV/tabular files:** must use CSVTask to parse into a schema.
 
-Set operator properties on workflow steps before execution:
+```dart
+// 1. Pre-parse CSV header for schema
+final csvString = utf8.decode(bytes);
+final headers = csvString.split('\n').first.split(',');
+final columns = headers.map((name) => ColumnSchema()
+  ..name = name.trim()..type = 'string'..nRows = 0).toList();
+final inputSchema = Schema()..nRows = 0..columns.addAll(columns);
+
+// 2. Set CSV metadata on FileDocument BEFORE upload
+final fileDoc = FileDocument()
+  ..name = filename..projectId = projectId
+  ..metadata = (CSVFileMetadata()
+    ..separator = ','..quote = '"'
+    ..contentType = 'text/csv'..contentEncoding = 'utf-8');
+final uploaded = await factory.fileService.upload(fileDoc, Stream.value(bytes));
+
+// 3. Create and run CSVTask with ALL required fields
+final csvTask = CSVTask()
+  ..state = InitState()          // MANDATORY — default State() is rejected
+  ..fileDocumentId = uploaded.id
+  ..projectId = projectId
+  ..owner = project.acl.owner
+  ..schema = inputSchema;
+csvTask.params = CSVParserParam()
+  ..separator = ','..encoding = 'utf-8'..quote = '"'
+  ..hasHeaders = true..allowMalformed = true..comment = '';
+
+final created = await factory.taskService.create(csvTask) as CSVTask;
+await factory.taskService.runTask(created.id);
+final done = await factory.taskService.waitDone(created.id) as CSVTask;
+final schemaId = done.schemaId;  // Use this for relation wiring
+```
+
+**Every Task subclass requires `state = InitState()` before `taskService.create()`.**
+
+### 4E.3: Relation wiring (connecting files to workflow steps)
+
+Data input to workflow steps is via **TableStep relations**, NOT operator properties. Two relation types:
+
+**File relation** (binary files): `RenameRelation → InMemoryRelation` with `.documentId` column.
+**Table relation** (CSVTask-parsed): `RenameRelation → SimpleRelation(id=schemaId)`.
+
+```dart
+// Wire relations to TableSteps by stable ID (not by name)
+for (final step in workflow.steps) {
+  if (step is TableStep && step.id == fcsTableStepId) {
+    step.model.relation = _createDocumentRelation(fcsFileDocId);
+    step.state.taskState = DoneState();
+  }
+  if (step is TableStep && step.id == annotationTableStepId) {
+    step.model.relation = await _createTableRelation(annotationSchemaId);
+    step.state.taskState = DoneState();
+  }
+}
+await factory.workflowService.update(workflow);
+```
+
+**`_createDocumentRelation()` — for binary files:**
+
+```dart
+Relation _createDocumentRelation(String documentId) {
+  final tbl = Table()..nRows = 1..columns.addAll([
+    Column()..name = 'documentId'..values = [_newId()],
+    Column()..name = '.documentId'..values = [documentId],
+  ]);
+  return RenameRelation()
+    ..inNames.addAll(['documentId', '.documentId'])
+    ..outNames.addAll(['documentId', '.documentId'])
+    ..relation = (InMemoryRelation()..inMemoryTable = tbl);
+}
+```
+
+**`_createTableRelation()` — for CSVTask-parsed schemas:**
+
+```dart
+Future<Relation> _createTableRelation(String schemaId) async {
+  final sch = await factory.tableSchemaService.get(schemaId);
+  final colNames = sch.columns.where((c) => c.name != '.ci').map((c) => c.name).toList();
+  return RenameRelation()
+    ..inNames.addAll(colNames)..outNames.addAll(colNames)
+    ..relation = (SimpleRelation()..id = sch.id);
+}
+```
+
+Guard with `.isNotEmpty` — never wire empty IDs.
+
+### 4E.3b: Operator property setting
+
+For operator properties (not data connectivity):
 
 ```dart
 final workflow = await factory.workflowService.get(clonedWorkflowId);
@@ -950,59 +1101,98 @@ for (final step in workflow.steps) {
   if (step is DataStep && step.name == 'Target Step') {
     for (final pv in step.operatorRef.propertyValues) {
       if (pv.name == 'threshold') pv.value = '0.5';
-      if (pv.name == 'method') pv.value = 'mean';
     }
   }
 }
 await factory.workflowService.update(workflow);
 ```
 
-### 4E.4: Workflow execution
+### 4E.3c: Channel filtering via NamedFilters
 
-Create and run a `RunWorkflowTask`:
-
-```dart
-final task = RunWorkflowTask()
-  ..projectId = projectId
-  ..workflowId = workflow.id
-  ..workflowRev = workflow.rev
-  ..stepsToRun.addAll(workflow.steps.map((s) => s.id))
-  ..stepsToReset.addAll(workflow.steps.map((s) => s.id));
-
-final createdTask = await factory.taskService.create(task) as RunWorkflowTask;
-await factory.taskService.runTask(createdTask.id);
-```
-
-`stepsToRun` empty = run all steps. `stepsToReset` clears previous step results before running.
-
-### 4E.5: Progress monitoring
-
-Stream task events via WebSocket:
+Channel selection uses **NamedFilters**, NOT operator properties. Critical: `Filter.not` and `NamedFilter.not` both default to `true` — must explicitly set `.not = false`.
 
 ```dart
-final stream = factory.eventService.listenTaskChannel(createdTask.id, true);
-await for (final event in stream) {
-  if (event is TaskLogEvent) {
-    print('Log: ${event.message}');
-  } else if (event is TaskProgressEvent) {
-    // Update UI: event.message, event.actual, event.total
-    provider.updateProgress(event.message, event.actual, event.total);
-  } else if (event is TaskStateEvent) {
-    if (event.state is DoneState) {
-      provider.setCompleted();
-      break;
-    } else if (event.state is FailedState) {
-      final failed = event.state as FailedState;
-      provider.setError('${failed.error}: ${failed.reason}');
-      break;
-    }
+void applyChannelFilter(Workflow workflow, String stepId, List<String> selectedChannels) {
+  final step = workflow.steps.firstWhere((s) => s.id == stepId) as DataStep;
+  final namedFilter = NamedFilter()
+    ..name = 'Channel Selection'
+    ..logical = 'or'
+    ..not = false;  // CRITICAL: defaults to true — must set false
+
+  for (final channel in selectedChannels) {
+    final filter = Filter()..logical = 'and'..not = false;  // CRITICAL
+    filter.filterExprs.add(FilterExpr()
+      ..filterOp = 'equals'
+      ..stringValue = channel
+      ..factor = (Factor()..name = 'channel_name'..type = 'string'));
+    namedFilter.filterExprs.addAll(filter.filterExprs);
   }
+
+  step.model.filters.namedFilters.clear();
+  step.model.filters.namedFilters.add(namedFilter);
 }
 ```
 
-Alternative — state changes only: `factory.eventService.onTaskState(taskId)` returns `Stream<TaskStateEvent>`.
+### 4E.4: Workflow execution
 
-Alternative — blocking wait: `final done = await factory.taskService.waitDone(taskId);` (blocks until terminal state).
+**Step type hierarchy — critical knowledge:**
+- `DataStep` extends `CrossTabStep` extends ... extends `Step` — computation
+- `ViewStep` extends `Step` directly — visualisations (NOT a DataStep subclass!)
+- `TableStep` extends `RelationStep` extends ... extends `Step` — input data sources
+
+Use exclusion (`is! TableStep`) not inclusion (`is DataStep`) for `stepsToRun`.
+
+```dart
+final task = RunWorkflowTask()
+  ..state = InitState()    // MANDATORY
+  ..projectId = projectId
+  ..workflowId = workflow.id
+  ..workflowRev = workflow.rev;
+
+// Only non-TableStep IDs — includes both DataStep AND ViewStep
+for (final step in workflow.steps) {
+  if (step is! TableStep) {
+    task.stepsToRun.add(step.id);
+  }
+}
+// stepsToReset: leave EMPTY — never reset TableSteps (clears file connections)
+
+final created = await factory.taskService.create(task) as RunWorkflowTask;
+```
+
+### 4E.5: Progress monitoring
+
+**Subscribe to event stream BEFORE starting task** (race condition otherwise). **Filter by taskId** for completion detection (sub-tasks fire DoneState first).
+
+```dart
+// 1. Subscribe FIRST
+final stream = factory.eventService.listenTaskChannel(created.id, false);
+
+// 2. Then start
+await factory.taskService.runTask(created.id);
+
+// 3. Process events — only break on main task's final state
+await for (final event in stream) {
+  if (event is TaskProgressEvent) {
+    currentMessage = event.message;
+  } else if (event is TaskStateEvent) {
+    if (event.taskId == created.id && event.state.isFinal) {
+      if (event.state is FailedState) { /* handle error */ }
+      break;
+    } else if (event.state is DoneState && event.taskId != created.id) {
+      completedStepCount++;  // sub-task progress tracking
+    }
+  }
+}
+
+// 4. Post-stream verification — check ALL step states
+final finalWf = await factory.workflowService.get(workflowId);
+for (final step in finalWf.steps) {
+  if (step.state.taskState is FailedState) { /* report failure */ }
+}
+```
+
+Progress capping: sub-task count can exceed `stepsToRun.length` due to internal tasks. Always cap: `reported = min(completedStepCount, totalDataSteps)`.
 
 ### 4E.6: Task cancellation
 
@@ -1036,7 +1226,34 @@ final table = await factory.tableSchemaService.select(
 );
 ```
 
-The `_getSimpleRelations()` helper is already documented in Step 4D. Reuse it.
+**`_getSimpleRelations()` — must handle ALL 13 Relation subclasses.** The version in Step 4D only handles 5 types and will silently return empty results on real workflows.
+
+```dart
+List<SimpleRelation> _getSimpleRelations(Relation? relation) {
+  final result = <SimpleRelation>[];
+  void walk(Relation? r) {
+    if (r == null) return;
+    if (r is SimpleRelation) { result.add(r); }
+    else if (r is ReferenceRelation) { result.add(SimpleRelation()..id = r.id); }
+    else if (r is InMemoryRelation) { /* leaf — no schema ID */ }
+    else if (r is CompositeRelation) {
+      walk(r.mainRelation);
+      for (final j in r.joinOperators) { walk(j.rightRelation); }
+    } else if (r is UnionRelation) {
+      for (final sub in r.relations) { walk(sub); }
+    } else if (r is JoinRelation) { walk(r.left); walk(r.right); }
+    else if (r is WhereRelation) { walk(r.relation); }
+    else if (r is RenameRelation) { walk(r.relation); }
+    else if (r is GatherRelation) { walk(r.relation); }
+    else if (r is DistinctRelation) { walk(r.relation); }
+    else if (r is GroupByRelation) { walk(r.relation); }
+    else if (r is RangeRelation) { walk(r.relation); }
+    else if (r is PairwiseRelation) { walk(r.relation); }
+  }
+  walk(relation);
+  return result;
+}
+```
 
 ### 4E.8: Run history
 
@@ -1075,65 +1292,123 @@ Step-level state: `step.state.taskState` (type `State`), `step.state.taskId` (ty
 class TercenWorkflowService implements DataService {
   final ServiceFactory _factory;
   final String _projectId;
+  String? _runningTaskId;
 
   TercenWorkflowService(this._factory, this._projectId);
 
-  Future<Workflow> cloneTemplate(String templateId) async {
-    try {
-      return await _factory.workflowService.copyApp(templateId, _projectId);
-    } catch (e) {
-      print('Tercen error: $e');
-      await _printDiagnosticReport();
-      rethrow;
-    }
+  /// Clone a template from the Tercen library.
+  Future<String> cloneWorkflowTemplate(String templateUrl, String templateVersion) async {
+    // 1. Find in library by URL + version
+    final libDocs = await _factory.documentService.getLibrary('', [], ['Workflow'], [], 0, -1);
+    final match = libDocs.where((doc) =>
+      doc.version == templateVersion &&
+      (doc.url.uri == templateUrl || doc.urls.any((u) => u.uri == templateUrl))
+    ).firstOrNull;
+    if (match == null) throw Exception('Template not found in library');
+
+    // 2. Resolve Document → Workflow
+    final resolved = await _factory.workflowService.list([match.id]);
+    if (resolved.isEmpty) throw Exception('Cannot resolve template');
+
+    // 3. Clone + persist
+    final cloned = await _factory.workflowService.copyApp(resolved.first.id, _projectId);
+    final created = cloned.id.isEmpty
+        ? await _factory.workflowService.create(cloned)
+        : cloned;
+    return created.id;
+    // NEVER modify workflow.acl after copyApp
   }
 
+  /// Run workflow with correct event filtering and progress tracking.
   Future<void> runWorkflow(
     String workflowId, {
     required void Function(String message, int actual, int total) onProgress,
-    required void Function(String message) onLog,
-    required void Function(State state) onStateChange,
+    required void Function() onComplete,
+    required void Function(String error, String reason) onError,
   }) async {
-    try {
-      final workflow = await _factory.workflowService.get(workflowId);
+    final workflow = await _factory.workflowService.get(workflowId);
 
-      final task = RunWorkflowTask()
-        ..projectId = _projectId
-        ..workflowId = workflow.id
-        ..workflowRev = workflow.rev
-        ..stepsToRun.addAll(workflow.steps.map((s) => s.id))
-        ..stepsToReset.addAll(workflow.steps.map((s) => s.id));
+    final task = RunWorkflowTask()
+      ..state = InitState()    // MANDATORY
+      ..projectId = _projectId
+      ..workflowId = workflow.id
+      ..workflowRev = workflow.rev;
 
-      final created = await _factory.taskService.create(task) as RunWorkflowTask;
-      await _factory.taskService.runTask(created.id);
+    // Only non-TableStep IDs (includes DataStep + ViewStep)
+    for (final step in workflow.steps) {
+      if (step is! TableStep) task.stepsToRun.add(step.id);
+    }
+    // stepsToReset: leave EMPTY
 
-      await for (final event in _factory.eventService.listenTaskChannel(created.id, true)) {
-        if (event is TaskProgressEvent) onProgress(event.message, event.actual, event.total);
-        else if (event is TaskLogEvent) onLog(event.message);
-        else if (event is TaskStateEvent) {
-          onStateChange(event.state);
-          if (event.state is DoneState || event.state is FailedState) break;
+    final totalDataSteps = task.stepsToRun.length;
+    final created = await _factory.taskService.create(task) as RunWorkflowTask;
+    _runningTaskId = created.id;
+
+    // Subscribe BEFORE starting
+    final stream = _factory.eventService.listenTaskChannel(created.id, false);
+    await _factory.taskService.runTask(created.id);
+
+    var completedStepCount = 0;
+    final completedIds = <String>{};
+    var currentMessage = '';
+
+    await for (final event in stream) {
+      if (event is TaskProgressEvent) {
+        currentMessage = event.message;
+      } else if (event is TaskStateEvent) {
+        if (event.taskId == created.id && event.state.isFinal) {
+          if (event.state is FailedState) {
+            final fs = event.state as FailedState;
+            _runningTaskId = null;
+            onError(fs.error, fs.reason);
+            return;
+          }
+          break;
+        } else if (event.state is DoneState && event.taskId != created.id) {
+          if (completedIds.add(event.taskId)) {
+            completedStepCount++;
+            final reported = completedStepCount > totalDataSteps
+                ? totalDataSteps : completedStepCount;
+            onProgress(currentMessage, reported, totalDataSteps);
+          }
         }
       }
-    } catch (e) {
-      print('Tercen error: $e');
-      await _printDiagnosticReport();
-      rethrow;
+    }
+
+    // Post-stream verification
+    _runningTaskId = null;
+    final finalWf = await _factory.workflowService.get(workflowId);
+    for (final step in finalWf.steps) {
+      if (step.state.taskState is FailedState) {
+        final fs = step.state.taskState as FailedState;
+        onError('Step "${step.name}" failed', '${fs.error}: ${fs.reason}');
+        return;
+      }
+    }
+    onComplete();
+  }
+
+  Future<void> cancelRun() async {
+    if (_runningTaskId != null) {
+      await _factory.taskService.cancelTask(_runningTaskId!);
+      _runningTaskId = null;
     }
   }
 
-  Future<void> cancelRun(String taskId) async {
-    await _factory.taskService.cancelTask(taskId);
-  }
-
-  Future<InMemoryTable> readStepOutput(String workflowId, String stepName) async {
+  /// Read output from a specific step + schema name.
+  /// Use schema NAME to find the right table (not first with nRows > 0).
+  Future<InMemoryTable> readStepOutput(
+    String workflowId, String stepName, {String? schemaName}
+  ) async {
     final workflow = await _factory.workflowService.get(workflowId);
     final step = workflow.steps.firstWhere((s) => s.name == stepName) as DataStep;
     final relations = _getSimpleRelations(step.computedRelation);
     final schemaList = await _factory.tableSchemaService.list(
       relations.map((r) => r.id).toList(),
     );
-    final schema = schemaList.firstWhere((s) => s.nRows > 0);
+    final schema = schemaName != null
+        ? schemaList.firstWhere((s) => s.name == schemaName)
+        : schemaList.firstWhere((s) => s.nRows > 0);
     return await _factory.tableSchemaService.select(
       schema.id,
       schema.columns.map((c) => c.name).toList(),
@@ -1224,19 +1499,25 @@ Future<void> _printDiagnosticReport() async {
 - [ ] `projectId` from URL (`Uri.base.queryParameters['projectId']`) or from `init-context` postMessage
 - [ ] No `OperatorContext` — Flow E does not use `ctx.select()` / `ctx.cselect()` / `ctx.rselect()`
 - [ ] `ServiceFactory` registered in service locator (not `AbstractOperatorContext`)
-- [ ] Template cloned via `workflowService.copyApp(templateId, projectId)`
-- [ ] `RunWorkflowTask` constructed with `workflowId`, `workflowRev`, `stepsToRun`, `stepsToReset`
-- [ ] Task created with `taskService.create()`, then started with `taskService.runTask()`
-- [ ] Progress monitored via `eventService.listenTaskChannel()` stream
-- [ ] Stream events dispatched by type: `TaskLogEvent`, `TaskProgressEvent`, `TaskStateEvent`
-- [ ] `TaskStateEvent.state` checked with `is DoneState` / `is FailedState` to detect completion
-- [ ] `FailedState.error` and `.reason` extracted for error display
-- [ ] Task cancellation via `taskService.cancelTask()` wired to Stop button
-- [ ] Step outputs read via `computedRelation` → `_getSimpleRelations()` → `tableSchemaService.select()`
-- [ ] Run history listed via `projectDocumentService.findWorkflowByProjectIdFolderStream()`
-- [ ] File upload via `fileService.upload(fileDoc, stream)` — not `dart:html` or `http`
-- [ ] Operator properties set via `step.operatorRef.propertyValues` + `workflowService.update()`
+- [ ] Template found via `documentService.getLibrary()` → match by `url.uri` + `version` → resolved via `workflowService.list([docId])` → then `copyApp()`
+- [ ] Never use `whereType<Workflow>()` on `getLibrary()` results (returns `List<Document>`)
+- [ ] Never modify `workflow.acl` after `copyApp()` (causes JS null crash)
+- [ ] `copyApp` result persisted with `workflowService.create()` if `id.isEmpty`
+- [ ] Every Task subclass has `state = InitState()` before `taskService.create()`
+- [ ] `RunWorkflowTask.stepsToRun` contains only non-TableStep IDs (`step is! TableStep`)
+- [ ] `RunWorkflowTask.stepsToReset` is EMPTY (never reset TableSteps)
+- [ ] Event stream subscribed BEFORE `taskService.runTask()` (race condition prevention)
+- [ ] Event loop filters by `event.taskId == created.id` for completion (sub-tasks fire first)
+- [ ] Post-stream verification: fetch workflow and check all step states
+- [ ] Progress capped at `totalDataSteps` (event stream overcounts with internal tasks)
+- [ ] `CanceledState` handled in event loop (not just `DoneState` and `FailedState`)
+- [ ] Binary files: `FileDocument` + `fileService.upload()` → `_createDocumentRelation(docId)`
+- [ ] CSV files: `CSVTask` with `InitState`, `CSVParserParam`, `CSVFileMetadata`, pre-parsed `Schema` → `_createTableRelation(schemaId)`
+- [ ] TableStep relations wired by stable step ID (not by step name)
+- [ ] `_getSimpleRelations()` handles all 13 Relation subclasses
+- [ ] Channel filtering via `NamedFilter` (not operator properties); `Filter.not = false` set explicitly
 - [ ] Diagnostic report includes projectId, project name, workflow count
+- [ ] Forbidden characters sanitized in all generated names (`: / \ ? # [ ] @ ! $ & ' ( ) * + , ; =`)
 
 ---
 
