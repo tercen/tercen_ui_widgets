@@ -612,7 +612,7 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 
 ## Rules
 
-1. **Read the spec first.** Understand app type and data flow before starting checks.
+1. **Read the spec first.** Understand widget kind and data flow before starting checks.
 2. **Report only.** Never edit app files.
 3. **Only check what this skill defines.** Do not add opinions about code quality, naming, or architecture beyond what is specified here.
 4. **All failures are equal.** Every check is PASS or FAIL. N/A only when the skill explicitly allows it (e.g., write-back checks for a read-only widget, Flow B checks for a Flow A widget).

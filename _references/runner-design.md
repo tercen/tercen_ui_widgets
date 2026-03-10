@@ -1,6 +1,6 @@
 # Runner Widget — Design Summary
 
-> Condensed reference for runner widget skills. Full rationale in `_local/type3-design-decisions.md`.
+> Condensed reference for runner widget skills. Full rationale in `_local/runner-design-decisions.md`.
 
 ---
 

@@ -69,7 +69,7 @@ Check for skeleton defaults in each file.
 
 ### C2: operator.json
 
-- `name` must NOT be `"Skeleton App"` or `"Skeleton Type3 App"`
+- `name` must NOT be `"Skeleton App"` or `"Skeleton Runner App"`
 - `description` must NOT contain "skeleton"
 - `urls` must NOT contain `skeleton_app` or `skeleton_type3_app`
 - `isWebApp` must be `true`

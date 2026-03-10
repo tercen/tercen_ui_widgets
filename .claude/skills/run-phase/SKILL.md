@@ -44,7 +44,7 @@ Before invoking any agent, detect the widget kind:
 
 ### Phase 3 (Tercen Integration)
 
-1. Invoke the **integrator** agent with the mock app at $ARGUMENTS[1]
+1. Invoke the **integrator** agent with the mock widget at $ARGUMENTS[1]
 2. When integration completes, invoke the **reviewer** agent for Phase 3 review
 3. If review **PASSES** → run `flutter build web --wasm` to verify, then notify user
 4. If review **FAILS** → pass the failure items back to the integrator agent to fix

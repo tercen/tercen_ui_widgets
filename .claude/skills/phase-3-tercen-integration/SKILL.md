@@ -1,7 +1,7 @@
 ---
 name: phase-3-tercen-integration
 description: Replace mock services with real Tercen data services in a Phase 2 mock widget. Handles SDK setup, context creation, data flows (projections, file downloads, write-back, entity navigation, workflow execution), build, and deploy. Use after a mock widget is approved and a real Tercen taskId or projectId is available.
-argument-hint: "[path to mock app]"
+argument-hint: "[path to mock widget]"
 disable-model-invocation: true
 ---
 
@@ -25,7 +25,7 @@ Replace mock services with real Tercen data services. Phase 2 mock widget is the
 
 ## Inputs
 
-1. Working mock app (Phase 2 output)
+1. Working mock widget (Phase 2 output)
 2. Functional spec Section 2.2 (Data Source) — determines Flow A, B, C, D, or E
 3. A real Tercen taskId (Flows A/B/C), projectId (Flow D), or projectId + templateWorkflowId (Flow E) for testing (user provides)
 

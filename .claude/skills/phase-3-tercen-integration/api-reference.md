@@ -110,9 +110,9 @@ All accept optional `offset` (default 0) and `limit` (default -1 = all rows).
 
 ---
 
-## Workflow execution services (Type 3 / Flow E)
+## Workflow execution services (Runner / Flow E)
 
-Type 3 apps do not use OperatorContext. They access services directly via `ServiceFactory`.
+Runner widgets do not use OperatorContext. They access services directly via `ServiceFactory`.
 
 ### WorkflowService — `factory.workflowService`
 

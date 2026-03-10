@@ -4,7 +4,7 @@ Steps 2-10 for building a runner widget. Step 1 (Copy and Rename) is in `SKILL.m
 
 Source skeleton: `skeletons/runner/`
 
-For design rules: `_references/type3-design-summary.md` and `_references/global-rules.md`.
+For design rules: `_references/runner-design.md` and `_references/global-rules.md`.
 
 ---
 
