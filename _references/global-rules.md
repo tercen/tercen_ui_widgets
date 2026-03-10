@@ -1,12 +1,12 @@
-# Global Rules — All App Types
+# Global Rules — All Widget Kinds
 
-> Shared reference for all skills. Applies to Type 1, Type 2, and Type 3 apps equally.
+> Shared reference for all skills. Applies to all widget kinds (panel, runner, window) equally.
 
 ---
 
 ## Typography Scale
 
-All apps use `AppTextStyles` from the skeleton. No custom font sizes.
+All widgets use `AppTextStyles` from the skeleton. No custom font sizes.
 
 | Token | Size | Weight | Line Height | Use |
 |-------|------|--------|-------------|-----|
@@ -47,7 +47,7 @@ All `strokeWidth` values must use `AppLineWeights.*` constants. No hardcoded num
 
 ## 11 Control Types
 
-All apps draw from the same control vocabulary. Reference the skeleton's `controls_section.dart` for implementation patterns.
+All widget kinds draw from the same control vocabulary. Reference the skeleton's `controls_section.dart` for implementation patterns.
 
 | Control Type | Key Widget | Sizing Notes |
 |---|---|---|

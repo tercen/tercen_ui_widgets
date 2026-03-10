@@ -1,12 +1,12 @@
-# Type 3 App — Design Summary
+# Runner Widget — Design Summary
 
-> Condensed reference for Type 3 skills. Full rationale in `_local/type3-design-decisions.md`.
+> Condensed reference for runner widget skills. Full rationale in `_local/type3-design-decisions.md`.
 
 ---
 
-## What Is a Type 3 App?
+## What Is a Runner Widget?
 
-A **workflow manager** that wraps a Tercen template workflow. It does not visualise cross-tab projections (Type 1) or compute and write back results (Type 2). Instead it:
+A **workflow manager** that wraps a Tercen template workflow. It does not visualise cross-tab projections (panel widget) or compute and write back results (panel widget with write-back). Instead it:
 
 1. Wraps a Tercen template workflow for data analysis
 2. Sets up the project (creates Tercen objects: project, data uploads, connectors)
@@ -107,7 +107,7 @@ Header Panel: "Select channels for analysis"          [Continue]
 └──────────────────────────────────────────────────────────────┘
 ```
 
-Rules: heading in Header Panel, description at top of Content Panel, form sections use same typography/control types as Type 1/2. When no viz, form goes full width. No nesting.
+Rules: heading in Header Panel, description at top of Content Panel, form sections use same typography/control types as panel widgets. When no viz, form goes full width. No nesting.
 
 ### Display Mode — Scrollable Results
 
@@ -194,7 +194,7 @@ Each run = cloned Tercen workflow via `workflowService.copyApp()`. Results store
 
 ---
 
-## AppStateProvider Shape (Type 3)
+## AppStateProvider Shape (Runner)
 
 ```
 - App state: Running / Waiting
