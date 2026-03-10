@@ -7,26 +7,25 @@ argument-hint: "[phase-number] [path-to-spec-or-app]"
 
 Orchestrate a build-review-fix cycle for Phase $ARGUMENTS[0].
 
-## Type Detection
+## Kind Detection
 
-Before invoking any agent, detect the app type:
+Before invoking any agent, detect the widget kind:
 
-1. Check for `lib/presentation/widgets/header_panel.dart` or `lib/presentation/widgets/content_panel/` directory
-2. If found → **Type 3** app. Use `-type3` skill variants.
-3. If not found → **Type 1/2** app. Use standard skills.
-
-For Phase 1 (no app yet): ask the user or infer from the spec-writer conversation.
+1. Read `skeleton.yaml` in the project root. The `kind` field determines the widget kind.
+2. If no `skeleton.yaml`, fall back to file-presence detection:
+   - `lib/presentation/widgets/header_panel.dart` or `lib/presentation/widgets/content_panel/` → **runner**
+   - `lib/presentation/widgets/window_shell.dart` → **window**
+   - Otherwise → **panel**
+3. For Phase 1 (no project yet): ask the user which widget kind they want.
 
 ## Workflow
 
 ### Phase 1 (Functional Spec)
 
 1. Invoke the **spec-writer** agent with the user's input
-   - Type 1/2 → agent uses `phase-1-functional-spec` skill
-   - Type 3 → agent uses `phase-1-functional-spec-type3` skill
+   - Agent uses `phase-1-functional-spec` skill (dispatches by kind internally)
 2. When the spec is written, invoke the **reviewer** agent for Phase 1 review
-   - Type 1/2 → reviewer uses `phase-1-review` skill
-   - Type 3 → reviewer uses `phase-1-review-type3` skill
+   - Reviewer uses `phase-1-review` skill (dispatches by kind internally)
 3. If review **PASSES** → notify the user the spec is ready
 4. If review **FAILS** → pass the failure items back to the spec-writer agent to fix
 5. After fixes, re-run the reviewer
@@ -35,11 +34,9 @@ For Phase 1 (no app yet): ask the user or infer from the spec-writer conversatio
 ### Phase 2 (Mock Build)
 
 1. Invoke the **mock-builder** agent with the functional spec at $ARGUMENTS[1]
-   - Type 1/2 → agent uses `phase-2-mock-build` skill
-   - Type 3 → agent uses `phase-2-mock-build-type3` skill
+   - Agent uses `phase-2-mock-build` skill (dispatches by kind internally)
 2. When the build completes, invoke the **reviewer** agent for Phase 2 review
-   - Type 1/2 → reviewer uses `phase-2-review` skill
-   - Type 3 → reviewer uses `phase-2-review-type3` skill
+   - Reviewer uses `phase-2-review` skill (dispatches by kind internally)
 3. If review **PASSES** → run `flutter build web --wasm` to verify, then notify user
 4. If review **FAILS** → pass the failure items back to the mock-builder agent to fix
 5. After fixes, re-run the reviewer
@@ -54,7 +51,7 @@ For Phase 1 (no app yet): ask the user or infer from the spec-writer conversatio
 5. After fixes, re-run the reviewer
 6. Loop steps 3–5 until PASS or the user intervenes
 
-*Phase 3 supports Type 1/2 apps (Flows A-D) and Type 3 apps (Flow E: workflow execution).*
+*Phase 3 supports panel widgets (Flows A-D) and runner widgets (Flow E: workflow execution).*
 
 ## Rules
 

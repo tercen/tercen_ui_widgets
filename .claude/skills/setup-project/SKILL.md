@@ -1,8 +1,8 @@
 ---
 name: setup-project
-description: Set up a new Tercen Flutter operator project from the skeleton template. Creates the project directory, copies skeleton and skills, and prepares the project structure.
+description: Set up a new Tercen Flutter operator project from a skeleton template. Creates the project directory, copies skeleton and skills, and prepares the project structure.
 disable-model-invocation: true
-argument-hint: "[app-name]"
+argument-hint: "[widget-name]"
 ---
 
 Set up a new Tercen Flutter operator project called `$ARGUMENTS`.
@@ -11,23 +11,25 @@ Set up a new Tercen Flutter operator project called `$ARGUMENTS`.
 
 ### 1. Determine paths
 
-- **App name:** `$ARGUMENTS` (snake_case, e.g., `volcano_explorer`)
+- **Widget name:** `$ARGUMENTS` (snake_case, e.g., `volcano_explorer`)
 - **Operator repo name:** `${ARGUMENTS}_flutter_operator`
 - **Target directory:** Ask the user where to create the project, or use the current working directory parent
 
-### 1b. Determine app type
+### 1b. Determine widget kind
 
-Ask the user: **"Is this a Type 1/2 app (visualization/interactive) or a Type 3 app (workflow manager)?"**
+Ask the user which widget kind to use:
 
-- **Type 1/2:** Standard visualization or data write-back app
-- **Type 3:** Multi-step workflow manager with run history and status tracking
+| Kind | Description |
+|------|-------------|
+| **panel** | Two-panel layout for visualization and interactive data widgets |
+| **runner** | Three-panel layout for workflow manager widgets |
+| **window** | Feature window for embedding within the Tercen UI orchestrator |
 
 ### 2. Copy skeleton
 
-- **Type 1/2:** Copy `skeleton/` from the tercen-flutter-skills repo
-- **Type 3:** Copy `skeleton-type3/` from the tercen-flutter-skills repo
+Copy `skeletons/{kind}/` from the tercen-flutter-skills repo to the target location as `${ARGUMENTS}_flutter_operator/`.
 
-Copy to the target location as `${ARGUMENTS}_flutter_operator/`.
+Also copy the `skeleton.yaml` manifest — it stays in the project root so skills can detect the widget kind.
 
 ### 3. Update project identity
 
@@ -38,7 +40,7 @@ In the new project:
 - `description:` → ask the user for a one-line description
 
 **operator.json:**
-- `name` → display name (title case of app name, e.g., "Volcano Explorer")
+- `name` → display name (title case of widget name, e.g., "Volcano Explorer")
 - `description` → same one-line description
 - `urls` → `["https://github.com/tercen/${ARGUMENTS}_flutter_operator"]`
 - `isWebApp` → `true`
@@ -77,15 +79,15 @@ Tags: [skill-gap] [sdk-issue] [workaround] [fixed] [pattern]
 
 Tell the user:
 
-> Project `${ARGUMENTS}_flutter_operator` is set up. Before starting Phase 1:
+> Project `${ARGUMENTS}_flutter_operator` is set up as a **{kind}** widget. Before starting Phase 1:
 >
 > 1. Add any beginning materials to the project — screenshots, data files,
->    existing code, documentation, or anything that describes what the app should do.
+>    existing code, documentation, or anything that describes what the widget should do.
 > 2. When ready, run `/run-phase 1` to start the functional spec.
 
 ## Do NOT
 
-- Do not start building the app
+- Do not start building the widget
 - Do not write any application code
 - Do not modify skeleton files beyond the identity updates in step 3
 - Do not run flutter commands
