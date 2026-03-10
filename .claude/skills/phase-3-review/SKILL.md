@@ -24,9 +24,9 @@ If missing, ask the user.
 
 ## Workflow
 
-1. Read the functional spec. Identify app type (1/2/3) and data flow (A/B/C/D/E) from Section 2.2.
+1. Read the functional spec. Identify widget kind (panel/runner/window) and data flow (A/B/C/D/E) from Section 2.2.
 2. Read `pubspec.yaml`, `lib/main.dart`, `lib/di/service_locator.dart`, `operator.json`, `web/index.html`, `.gitignore`. Glob `lib/implementations/services/*.dart` and read each result.
-3. Grep `lib/` for banned patterns: `dart:html`, `tableSchemaService`, `taskService.get`, `RunWebAppTask`, `CubeQueryTask`, `package:http/`, `sci_tercen_context`, `Phase 3:`. For Type 3 apps, also grep for `OperatorContext` (should NOT appear).
+3. Grep `lib/` for banned patterns: `dart:html`, `tableSchemaService`, `taskService.get`, `RunWebAppTask`, `CubeQueryTask`, `package:http/`, `sci_tercen_context`, `Phase 3:`. For runner widgets, also grep for `OperatorContext` (should NOT appear).
 4. Spot-check: read `lib/core/theme/app_theme.dart`, `lib/presentation/widgets/left_panel/left_panel.dart`, `lib/core/theme/app_line_weights.dart` from both skeleton and app.
 5. Produce the conformance report and save to `_local/phase-3-conformance-report.md` in the app directory.
 
@@ -36,7 +36,7 @@ If missing, ask the user.
 
 ### A1: sci_tercen_context in pubspec.yaml
 
-N/A for Type 3 apps (Flow E does not use sci_tercen_context).
+N/A for runner widgets (Flow E does not use sci_tercen_context).
 
 `pubspec.yaml` must contain a `sci_tercen_context` dependency pointing to the `sci_tercen_client` git repo with `path: sci_tercen_context`.
 
@@ -46,7 +46,7 @@ N/A for Type 3 apps (Flow E does not use sci_tercen_context).
 
 ### A3: Version match
 
-N/A for Type 3 apps if only sci_tercen_client is used.
+N/A for runner widgets if only sci_tercen_client is used.
 
 Both `sci_tercen_context` and `sci_tercen_client` must use the same `ref:` value. Mismatch is a FAIL.
 
@@ -62,7 +62,7 @@ Grep `lib/` for `import ['"]package:http/`. If found, read the file — FAIL onl
 
 ## Check Group B: main.dart Integration
 
-**N/A for Type 3 apps — see Group J.**
+**N/A for runner widgets — see Group J.**
 
 ### B1: Factory creation
 
@@ -102,7 +102,7 @@ or equivalent logic where `useMocks` is true when factory creation failed. Conte
 
 ## Check Group C: service_locator.dart
 
-**N/A for Type 3 apps — see Group J.**
+**N/A for runner widgets — see Group J.**
 
 ### C1: Accepts factory and taskId parameters
 
@@ -142,7 +142,7 @@ Determine flow from spec Section 2.2:
 | B | File downloads via `.documentId` | `ctx.cselect(names: ['.documentId'])`, `fileService.download()` |
 | C | Both | Flow A + Flow B in separate resolver classes |
 | D | In-project app receiving context via postMessage | Same as A/B/C but with orchestrated init |
-| E | Type 3 workflow execution (clone, upload, run, monitor) | `workflowService.copyApp()`, `taskService.runTask()`, `eventService.listenTaskChannel()` |
+| E | Runner workflow execution (clone, upload, run, monitor) | `workflowService.copyApp()`, `taskService.runTask()`, `eventService.listenTaskChannel()` |
 
 ### D1: Correct flow identified
 
@@ -161,13 +161,13 @@ Real data service must:
 
 ### D4: No manual tableSchemaService calls
 
-N/A for Type 3 / Flow E (Flow E legitimately uses `tableSchemaService.select()` for step output reading).
+N/A for runner / Flow E (Flow E legitimately uses `tableSchemaService.select()` for step output reading).
 
 Grep `lib/` for `tableSchemaService`. Any direct call to `tableSchemaService.select()` or `tableSchemaService.get()` is a FAIL. All data access must go through the context API.
 
 ### D5: No manual task hierarchy navigation
 
-N/A for Type 3 / Flow E (Flow E uses `taskService` directly for workflow execution — this is correct, not a ban violation).
+N/A for runner / Flow E (Flow E uses `taskService` directly for workflow execution — this is correct, not a ban violation).
 
 Grep `lib/` for: `taskService.get(`, `RunWebAppTask`, `CubeQueryTask`, `.state.taskId`.
 
@@ -179,7 +179,7 @@ Exception: `RunWebAppTask` or `CubeQueryTask` in import statements from `sci_ter
 
 ## Check Group E: Real Data Service
 
-**N/A for Type 3 apps — see Group K.**
+**N/A for runner widgets — see Group K.**
 
 Glob `lib/implementations/services/*.dart` and read each result.
 
@@ -215,9 +215,9 @@ Must NOT contain commented-out alternative approaches, multiple retry strategies
 
 ---
 
-## Check Group F: Type 2 Specifics (Write-Back)
+## Check Group F: Write-Back Specifics
 
-If app is NOT Type 2, mark all F checks as N/A.
+If widget does NOT write back to Tercen, mark all F checks as N/A.
 
 ### F1: Output table construction
 
@@ -233,7 +233,7 @@ Grep real service for `addNamespace`. Should use `ctx.addNamespace()` to prefix 
 
 ### F4: Lifecycle logging
 
-Grep real service for `ctx.log` and `ctx.progress`. Type 2 apps should report status to the Tercen UI.
+Grep real service for `ctx.log` and `ctx.progress`. Write-back widgets should report status to the Tercen UI.
 
 ---
 
@@ -249,11 +249,11 @@ Grep real service for `ctx.log` and `ctx.progress`. Type 2 apps should report st
 
 ### G3: operator.json isViewOnly
 
-Must have `"isViewOnly": false` for Type 2 apps. For Type 1 apps, note but do not FAIL if missing.
+Must have `"isViewOnly": false` for write-back widgets. For read-only widgets, note but do not FAIL if missing.
 
 ### G4: operator.json entryType
 
-Must have `"entryType": "app"` for Type 2 apps. For Type 1 apps, note but do not FAIL if missing.
+Must have `"entryType": "app"` for write-back widgets. For read-only widgets, note but do not FAIL if missing.
 
 ### G5: index.html base href commented
 
@@ -279,7 +279,7 @@ Glob `build/web/` for content. If it exists, it should contain Flutter web build
 
 ### H1: Single context import pattern
 
-N/A for Type 3 apps (Flow E does not use sci_tercen_context).
+N/A for runner widgets (Flow E does not use sci_tercen_context).
 
 Grep `lib/` for `sci_tercen_context`. Files that use it should import via:
 
@@ -299,7 +299,7 @@ import 'package:sci_tercen_client/sci_service_factory_web.dart';
 
 ### H3: No stale commented-out Phase 3 stubs
 
-N/A for Type 3 apps (Type 3 skeleton has different stubs — checked by Group J).
+N/A for runner widgets (runner skeleton has different stubs — checked by Group J).
 
 Grep `service_locator.dart` for `Phase 3:`. Skeleton stubs like `// Phase 3: uncomment to accept context` must have been replaced with actual code. If these comments remain, FAIL.
 
@@ -336,23 +336,23 @@ Modified for real services, but must retain:
 
 `lib/core/theme/app_line_weights.dart` must exist and be identical to skeleton version.
 
-### I6: Header panel untouched (Type 3 only)
+### I6: Header panel untouched (runner only)
 
-N/A for Type 1/2 apps.
+N/A for panel widgets.
 
 `lib/presentation/widgets/header_panel.dart` must be identical to skeleton version. Phase 3 has no reason to modify the header panel.
 
-### I7: Content panel structure untouched (Type 3 only)
+### I7: Content panel structure untouched (runner only)
 
-N/A for Type 1/2 apps.
+N/A for panel widgets.
 
 `lib/presentation/widgets/content_panel/` directory structure must match skeleton. Files within may be modified for real data, but no files should be deleted or added.
 
 ---
 
-## Check Group J: Type 3 main.dart and service_locator.dart
+## Check Group J: Runner main.dart and service_locator.dart
 
-**N/A for Type 1/2 apps.** Replaces Groups B and C for Type 3.
+**N/A for panel widgets.** Replaces Groups B and C for runner widgets.
 
 ### J1: projectId from URL or postMessage
 
@@ -360,7 +360,7 @@ N/A for Type 1/2 apps.
 
 ### J2: No OperatorContext creation
 
-Grep entire `lib/` for `OperatorContext`. Any occurrence (create, import, type annotation) is a FAIL. Type 3 apps do not use OperatorContext.
+Grep entire `lib/` for `OperatorContext`. Any occurrence (create, import, type annotation) is a FAIL. Runner widgets do not use OperatorContext.
 
 ### J3: ServiceFactory + projectId passed to service locator
 
@@ -390,7 +390,7 @@ serviceLocator.registerLazySingleton<WorkflowDataService>(
 
 ### J7: service_locator registers ServiceFactory
 
-`ServiceFactory` itself must be registered in the service locator (Type 3 services access it for task/event/file operations):
+`ServiceFactory` itself must be registered in the service locator (runner services access it for task/event/file operations):
 
 ```dart
 serviceLocator.registerSingleton<ServiceFactoryBase>(factory!);
@@ -398,9 +398,9 @@ serviceLocator.registerSingleton<ServiceFactoryBase>(factory!);
 
 ---
 
-## Check Group K: Type 3 Workflow Service
+## Check Group K: Runner Workflow Service
 
-**N/A for Type 1/2 apps.** Replaces Group E for Type 3.
+**N/A for panel widgets.** Replaces Group E for runner widgets.
 
 Glob `lib/implementations/services/*.dart` and read each result.
 
@@ -442,9 +442,9 @@ Try-catch around Tercen operations. Catch block must print diagnostic info (proj
 
 ---
 
-## Check Group L: Type 3 Output Reading
+## Check Group L: Runner Output Reading
 
-**N/A for Type 1/2 apps. N/A if app does not read step outputs (check spec).**
+**N/A for panel widgets. N/A if app does not read step outputs (check spec).**
 
 ### L1: step.computedRelation navigation
 
@@ -460,13 +460,13 @@ Must have a method that walks the `Relation` tree to extract `SimpleRelation` ob
 
 ---
 
-## Check Group M: Type 3 operator.json
+## Check Group M: Runner operator.json
 
-**N/A for Type 1/2 apps.** Common checks (isWebApp, serve) are covered by Group G — this group covers Type 3-specific fields only.
+**N/A for panel widgets.** Common checks (isWebApp, serve) are covered by Group G — this group covers runner-specific fields only.
 
 ### M1: isViewOnly noted
 
-Note whether `"isViewOnly"` is present and its value. Do not FAIL — Type 3 apps may vary. Record for informational purposes.
+Note whether `"isViewOnly"` is present and its value. Do not FAIL — runner widgets may vary. Record for informational purposes.
 
 ---
 
@@ -481,7 +481,7 @@ Produce the report in this exact format. List every check — do not abbreviate 
 **Spec:** [spec filename]
 **Date:** [review date]
 **Data Flow:** [A / B / C / D / E — determined from spec]
-**App Type:** [1 / 2 / 3 — determined from spec]
+**Widget Kind:** [panel / runner / window — determined from spec]
 
 ## Summary
 
@@ -507,7 +507,7 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - A4: [PASS/FAIL] — No dart:html [detail if FAIL]
 - A5: [PASS/FAIL] — No http for Tercen calls [detail if FAIL]
 
-### B: main.dart Integration (N/A for Type 3 — see J)
+### B: main.dart Integration (N/A for runner — see J)
 - B1: [PASS/FAIL/N/A] — Factory creation [detail if FAIL]
 - B2: [PASS/FAIL/N/A] — Context creation [detail if FAIL]
 - B3: [PASS/FAIL/N/A] — taskId from URL [detail if FAIL]
@@ -516,7 +516,7 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - B6: [PASS/FAIL/N/A] — Factory and taskId passed to service locator [detail if FAIL]
 - B7: [PASS/FAIL/N/A] — No manual task navigation [detail if FAIL]
 
-### C: service_locator.dart (N/A for Type 3 — see J)
+### C: service_locator.dart (N/A for runner — see J)
 - C1: [PASS/FAIL/N/A] — Accepts factory and taskId parameters [detail if FAIL]
 - C2: [PASS/FAIL/N/A] — Real service receives factory and taskId [detail if FAIL]
 - C3: [PASS/FAIL/N/A] — Real service registered [detail if FAIL]
@@ -530,14 +530,14 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - D4: [PASS/FAIL/N/A] — No manual tableSchemaService calls [detail if FAIL]
 - D5: [PASS/FAIL/N/A] — No manual task navigation [detail if FAIL]
 
-### E: Real Data Service (N/A for Type 3 — see K)
+### E: Real Data Service (N/A for runner — see K)
 - E1: [PASS/FAIL/N/A] — Real service exists [detail if FAIL]
 - E2: [PASS/FAIL/N/A] — Receives factory and taskId, lazy context [detail if FAIL]
 - E3: [PASS/FAIL/N/A] — Single fallback strategy [detail if FAIL]
 - E4: [PASS/FAIL/N/A] — Diagnostic report present [detail if FAIL]
 - E5: [PASS/FAIL/N/A] — No workaround code [detail if FAIL]
 
-### F: Type 2 Specifics
+### F: Write-Back Specifics
 - F1: [PASS/FAIL/N/A] — Output table construction [detail if FAIL]
 - F2: [PASS/FAIL/N/A] — Save method [detail if FAIL]
 - F3: [PASS/FAIL/N/A] — Namespace applied [detail if FAIL]
@@ -563,10 +563,10 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - I3: [PASS/FAIL] — Theme files untouched [detail if FAIL]
 - I4: [PASS/FAIL] — Panel files untouched [detail if FAIL]
 - I5: [PASS/FAIL] — app_line_weights.dart untouched [detail if FAIL]
-- I6: [PASS/FAIL/N/A] — Header panel untouched (Type 3 only) [detail if FAIL]
-- I7: [PASS/FAIL/N/A] — Content panel structure untouched (Type 3 only) [detail if FAIL]
+- I6: [PASS/FAIL/N/A] — Header panel untouched (runner only) [detail if FAIL]
+- I7: [PASS/FAIL/N/A] — Content panel structure untouched (runner only) [detail if FAIL]
 
-### J: Type 3 main.dart and service_locator (N/A for Type 1/2)
+### J: Runner main.dart and service_locator (N/A for panel)
 - J1: [PASS/FAIL/N/A] — projectId from URL or postMessage [detail if FAIL]
 - J2: [PASS/FAIL/N/A] — No OperatorContext [detail if FAIL]
 - J3: [PASS/FAIL/N/A] — Factory + projectId to service locator [detail if FAIL]
@@ -575,7 +575,7 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - J6: [PASS/FAIL/N/A] — TercenWorkflowService registered [detail if FAIL]
 - J7: [PASS/FAIL/N/A] — ServiceFactory registered [detail if FAIL]
 
-### K: Type 3 Workflow Service (N/A for Type 1/2)
+### K: Runner Workflow Service (N/A for panel)
 - K1: [PASS/FAIL/N/A] — Real workflow service exists [detail if FAIL]
 - K2: [PASS/FAIL/N/A] — Receives factory + projectId [detail if FAIL]
 - K3: [PASS/FAIL/N/A] — Template cloning via copyApp [detail if FAIL]
@@ -586,12 +586,12 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 - K8: [PASS/FAIL/N/A] — Task cancellation [detail if FAIL]
 - K9: [PASS/FAIL/N/A] — Error handling diagnostic + rethrow [detail if FAIL]
 
-### L: Type 3 Output Reading (N/A for Type 1/2 or if app doesn't read outputs)
+### L: Runner Output Reading (N/A for panel or if widget doesn't read outputs)
 - L1: [PASS/FAIL/N/A] — step.computedRelation navigation [detail if FAIL]
 - L2: [PASS/FAIL/N/A] — tableSchemaService.select() usage [detail if FAIL]
 - L3: [PASS/FAIL/N/A] — Relation tree walker [detail if FAIL]
 
-### M: Type 3 operator.json (N/A for Type 1/2)
+### M: Runner operator.json (N/A for panel)
 - M1: [N/A] — isViewOnly noted [informational only]
 
 ---
@@ -615,5 +615,5 @@ An app is CONFORMING only if every check is PASS or N/A. Any FAIL makes it NON-C
 1. **Read the spec first.** Understand app type and data flow before starting checks.
 2. **Report only.** Never edit app files.
 3. **Only check what this skill defines.** Do not add opinions about code quality, naming, or architecture beyond what is specified here.
-4. **All failures are equal.** Every check is PASS or FAIL. N/A only when the skill explicitly allows it (e.g., Type 2 checks for a Type 1 app, Flow B checks for a Flow A app).
+4. **All failures are equal.** Every check is PASS or FAIL. N/A only when the skill explicitly allows it (e.g., write-back checks for a read-only widget, Flow B checks for a Flow A widget).
 5. **Cite file paths and line numbers in failures.** Phase 2 is assumed passing — do not re-check Phase 2 requirements.

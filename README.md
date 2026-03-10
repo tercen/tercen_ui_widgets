@@ -1,57 +1,65 @@
 # Tercen Flutter Skills
 
-Build Tercen Flutter web apps in 3 phases. Each phase is a separate Claude Code session loading one skill.
+Build Tercen Flutter web widgets in 3 phases. Each phase uses a skill that dispatches by widget kind.
 
-## Quick start
+## Widget Kinds
 
-1. Clone this repo into your new app project
-2. Start a Claude Code session
-3. Tell Claude which phase you're in and point it to the skill file
+| Kind | Layout | Use case |
+| ---- | ------ | -------- |
+| **Panel** | Two-panel: left controls + main content | Visualization, interactive data display, write-back |
+| **Runner** | Three-panel: status + header + content | Workflow managers with run history and execution |
+| **Window** | Feature window embedded in UI orchestrator | LLM interaction context, in-app tools |
+
+Skeletons for each kind live in `skeletons/{kind}/`.
+
+## Quick Start
+
+1. Run `/setup-project widget_name` to create a new project from a skeleton
+2. Add beginning materials (screenshots, data, docs) to the project
+3. Run `/run-phase 1` to write the functional spec
+4. Run `/run-phase 2` to build the mock widget
+5. Run `/run-phase 3` to integrate with Tercen
 
 ## Phases
 
-| Phase | What happens | Skill to load | Input | Output |
-| ----- | ------------ | ------------- | ----- | ------ |
-| 1 | Write functional spec | `skills/phase-1-functional-spec.md` | User requirements, screenshots, existing code | Functional spec markdown document |
-| 2 | Build mock app | `skills/phase-2-mock-build.md` | Functional spec + `skeleton/` | Running Flutter app with mock data |
-| 3 | Connect to Tercen | `skills/phase-3-tercen-integration.md` | Working mock app + taskId | Deployed app in Tercen |
+| Phase | What happens | Skill | Input | Output |
+| ----- | ------------ | ----- | ----- | ------ |
+| 1 | Write functional spec | `phase-1-functional-spec` | User requirements, screenshots, existing code | Functional spec markdown document |
+| 2 | Build mock widget | `phase-2-mock-build` | Functional spec + `skeletons/{kind}/` | Running Flutter widget with mock data |
+| 3 | Connect to Tercen | `phase-3-tercen-integration` | Working mock widget + taskId/projectId | Deployed widget in Tercen |
 
-## How to use
+Each skill dispatches internally by widget kind — no separate skill variants needed.
 
-### Phase 1: Functional spec
+## Project Structure
 
-Start a new Claude Code session. Tell Claude:
-
-> Read `skills/phase-1-functional-spec.md`. I want to build [describe your app]. Here is [screenshot / existing app code / description].
-
-Claude will work through discovery questions and produce a standardised functional spec document.
-
-### Phase 2: Mock build
-
-Start a new Claude Code session. Tell Claude:
-
-> Read `skills/phase-2-mock-build.md`. Here is the functional spec: [path to spec]. The skeleton is in `skeleton/`.
-
-Claude will copy the skeleton, replace placeholders using the spec, and produce a working mock app. Verify it runs with `flutter run -d chrome`.
-
-### Phase 3: Tercen integration
-
-Start a new Claude Code session. Tell Claude:
-
-> Read `skills/phase-3-tercen-integration.md`. The mock app is at [path]. My taskId is [id].
-
-Claude will replace mock services with real Tercen data services, build, and deploy.
+```text
+tercen-flutter-skills/
+├── skeletons/
+│   ├── panel/           # Panel widget skeleton (two-panel layout)
+│   ├── runner/          # Runner widget skeleton (three-panel layout)
+│   └── window/          # Window widget skeleton (feature window)
+├── _references/
+│   ├── global-rules.md  # Shared rules for all widget kinds
+│   ├── panel-design.md  # Panel design constraints
+│   ├── runner-design.md # Runner design constraints
+│   └── window-design.md # Window design constraints
+├── .claude/
+│   ├── skills/          # Phase skills (dispatch by kind)
+│   └── agents/          # Agent definitions (spec-writer, mock-builder, reviewer, integrator)
+└── _feedback/           # Post-build feedback for skill improvement
+```
 
 ## Rules
 
 - **One skill per session.** Do not load multiple skills.
 - **Phase 1 output bridges to Phase 2.** The functional spec markdown document.
-- **Phase 2 output bridges to Phase 3.** The working mock app.
-- **Do not modify the skeleton structure.** Copy it, rename it, replace placeholders. Do not restructure the app shell, left panel, or theme system.
+- **Phase 2 output bridges to Phase 3.** The working mock widget.
+- **Do not modify the skeleton structure.** Copy it, rename it, replace placeholders. Do not restructure the shell, panels, or theme system.
+- **Skills are read-only during builds.** Claude must never modify skill files while building a widget.
 
-## What's in the skeleton
+## What's in the Skeletons
 
-`skeleton/` is a runnable Flutter web app (Type 1: visualization). It has:
+### Panel Skeleton
 
 - App shell with conditional top bar
 - Left panel with collapse, resize, sections, header/footer
@@ -61,37 +69,30 @@ Claude will replace mock services with real Tercen data services, build, and dep
 - INFO section with GitHub link
 - Deployment files (operator.json, index.html, .gitignore)
 
-Run it: `cd skeleton && flutter run -d chrome`
+### Runner Skeleton
 
-## App types
+- Three-panel layout: Status Panel (left) + Header Panel (top-right) + Content Panel (main-right)
+- Status Panel with 5 sections: ACTIONS, STATUS, CURRENT RUN, HISTORY, INFO
+- Header Panel with two-zone layout (Actions | Theme/Exit)
+- Content Panel with Input and Display modes
+- Running overlay with AbsorbPointer + dimming
+- AppStateProvider state machine (Running/Waiting)
+- StatusIndicator with 6 states
 
-| Type | Data flow | Status |
-| ---- | --------- | ------ |
-| 1: Visualization | Tercen -> App -> Screen | Supported (3 deployed apps) |
-| 2: Interactive | Tercen -> App -> Screen -> Write back | Supported (ctx.saveTable, ctx.save) |
-| 3: Workflow manager | Multi-step orchestration | Not yet attempted |
+### Window Skeleton
 
-## Updating skills
+- Feature window shell with toolbar and body area
+- Event bus for communication with UI orchestrator
+- Minimal chrome for embedding context
 
-Skills are **read-only during app builds**. Claude must never modify skill files while building an app.
+Run any skeleton: `cd skeletons/{kind} && flutter run -d chrome`
 
-### Feedback process
+## Feedback Process
 
-1. **During an app build**: If Claude encounters a skill gap or error, it notes it in the app's `_local/skill-feedback.md` — what it expected, what happened, what it did instead
-2. **After the build**: Copy the feedback file into this repo's `_feedback/` directory
-3. **Dedicated session**: Open a Claude Code session in this repo and say "review feedback and update skills". Claude reads the feedback, proposes changes, you approve
+1. **During a build**: If Claude encounters a skill gap, it notes it in `_issues/session-log.md`
+2. **After the build**: Copy feedback into this repo's `_feedback/` directory
+3. **Dedicated session**: Open a session in this repo and say "review feedback and update skills"
 
-### What goes in skill-feedback.md
+## Style Guide
 
-```markdown
-## [Date] - [App name] - Phase [N]
-
-**Skill gap**: [what the skill didn't cover]
-**What happened**: [what Claude encountered]
-**Workaround used**: [what Claude did instead]
-**Suggested fix**: [how the skill should change]
-```
-
-## Style guide
-
-The Tercen style guide is baked into the skeleton. Do not clone or read it during app builds. It is maintained separately at <https://github.com/tercen/tercen-style>.
+The Tercen style guide is baked into the skeletons. Do not clone or read it during builds. It is maintained separately at <https://github.com/tercen/tercen-style>.

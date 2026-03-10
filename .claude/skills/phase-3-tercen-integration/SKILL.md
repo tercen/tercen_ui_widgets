@@ -1,13 +1,13 @@
 ---
 name: phase-3-tercen-integration
-description: Replace mock services with real Tercen data services in a Phase 2 mock app. Handles SDK setup, context creation, data flows (projections, file downloads, write-back, entity navigation, workflow execution), build, and deploy. Use after a mock app is approved and a real Tercen taskId or projectId is available.
+description: Replace mock services with real Tercen data services in a Phase 2 mock widget. Handles SDK setup, context creation, data flows (projections, file downloads, write-back, entity navigation, workflow execution), build, and deploy. Use after a mock widget is approved and a real Tercen taskId or projectId is available.
 argument-hint: "[path to mock app]"
 disable-model-invocation: true
 ---
 
 **READ-ONLY. Do NOT modify. Log gaps to `_issues/session-log.md` and continue.**
 
-Replace mock services with real Tercen data services. Phase 2 mock app is the starting point.
+Replace mock services with real Tercen data services. Phase 2 mock widget is the starting point.
 
 **SDK**: `sci_tercen_context` (context API) + `sci_tercen_client` (low-level) — always latest from <https://github.com/tercen/sci_tercen_client>. API reference: [api-reference.md](api-reference.md).
 
@@ -16,7 +16,7 @@ Replace mock services with real Tercen data services. Phase 2 mock app is the st
 ## Rules — read before writing any code
 
 1. **No mock fallback in real services.** When Tercen data access fails, rethrow the error and let the UI show an error state. Do NOT silently return mock data — it hides real problems. Use the `USE_MOCKS` flag in `main.dart` for local development only. Flow A and Flow B are different access patterns for different data, not fallback alternatives.
-2. **Use `sci_tercen_context` for all data access (Flows A-C).** Do NOT manually navigate task hierarchies (`RunWebAppTask` -> `CubeQueryTask`) or call `tableSchemaService.select()` directly. The context handles task navigation, schema resolution, system column filtering, and data fetching automatically. **Exception:** Flow E (Type 3 workflow execution) uses entity services directly — `tableSchemaService.select()` and `taskService` calls are correct for reading step outputs and managing workflow execution.
+2. **Use `sci_tercen_context` for all data access (Flows A-C).** Do NOT manually navigate task hierarchies (`RunWebAppTask` -> `CubeQueryTask`) or call `tableSchemaService.select()` directly. The context handles task navigation, schema resolution, system column filtering, and data fetching automatically. **Exception:** Flow E (runner workflow execution) uses entity services directly — `tableSchemaService.select()` and `taskService` calls are correct for reading step outputs and managing workflow execution.
 3. **Always use explicit GetIt type parameters.** `getIt.registerSingleton<ServiceFactory>(factory)` not `getIt.registerSingleton(factory)`. Omitting the type defaults to `Object` and causes runtime type mismatches.
 4. **Never use `dart:html` or `http` package for Tercen API calls.** Always use `sci_tercen_client` services — they handle auth and CORS.
 5. **When data access fails: STOP.** Do not add workarounds. Run the diagnostic report (see bottom of this skill), present results to the user. The fix may require workflow reconfiguration, a different flow choice, or an SDK enhancement — not more code.
@@ -41,7 +41,7 @@ Read the functional spec Section 2.2.
 | B | App downloads files (images, ZIPs, documents) referenced by `.documentId` | `ctx.cselect(names: ['.documentId'])` -> `fileService.download()` |
 | C | App needs both | Flow A for data + Flow B for files, in separate resolver classes |
 | D | App browses/navigates Tercen objects (projects, workflows, steps, folders, documents) | Entity services (`projectService`, `workflowService`, `folderService`, etc.) with `startKey`/`endKey` range queries. No CubeQueryTask — uses `projectId` instead of `taskId`. |
-| E | App manages workflow execution — clone template, upload files, set properties, run, monitor, read results (Type 3 workflow managers) | `workflowService.copyApp()` + `taskService.create()/runTask()` + `eventService.listenTaskChannel()`. Uses `projectId`, no `OperatorContext`. |
+| E | Widget manages workflow execution — clone template, upload files, set properties, run, monitor, read results (runner widgets) | `workflowService.copyApp()` + `taskService.create()/runTask()` + `eventService.listenTaskChannel()`. Uses `projectId`, no `OperatorContext`. |
 
 ---
 
@@ -49,7 +49,7 @@ Read the functional spec Section 2.2.
 
 | Flow | Steps to follow |
 | ---- | --------------- |
-| A/B/C | 1 → 2 → 3 → 4A/4B → 5 → 6 (if Type 2) → 7 |
+| A/B/C | 1 → 2 → 3 → 4A/4B → 5 → 6 (if write-back) → 7 |
 | D | 1 → 4D (includes main.dart + locator) → 5 → 7 |
 | E | 1 (sci_tercen_client only) → 2E → 3E → 4E → 5E → 7 |
 
@@ -735,7 +735,7 @@ class TercenDataService implements DataService {
 
 ---
 
-## Step 6: Saving results (Type 2 apps)
+## Step 6: Saving results (write-back widgets)
 
 For operators that write data back to Tercen, use the context's save methods and column helpers.
 
@@ -808,7 +808,7 @@ flutter build web --wasm
 git add build/web/ && git commit -m "Update web build" && git push
 ```
 
-Required: `index.html` base href commented out. `operator.json`: `isWebApp: true`, `isViewOnly: false`, `entryType: "app"`, `serve: "build/web"`. Type 2 apps MUST have `isViewOnly: false` + `entryType: "app"` or `save()` silently fails.
+Required: `index.html` base href commented out. `operator.json`: `isWebApp: true`, `isViewOnly: false`, `entryType: "app"`, `serve: "build/web"`. Write-back widgets MUST have `isViewOnly: false` + `entryType: "app"` or `save()` silently fails.
 
 Hot reload broken for Tercen web apps — always stop and restart.
 
@@ -1481,7 +1481,7 @@ Future<void> _printDiagnosticReport() async {
 - [ ] `ServiceFactory` and `taskId` passed from main.dart through service locator to data service
 - [ ] Real service uses `ctx.select()` / `ctx.cselect()` / `ctx.rselect()` — NOT manual tableSchemaService calls
 - [ ] No manual task navigation code (context handles it)
-- [ ] operator.json has `isViewOnly: false` and `entryType: "app"` (required for Type 2 save)
+- [ ] operator.json has `isViewOnly: false` and `entryType: "app"` (required for write-back save)
 
 ### Flow D specific
 
