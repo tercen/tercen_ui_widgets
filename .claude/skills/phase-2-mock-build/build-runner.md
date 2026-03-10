@@ -1,49 +1,10 @@
----
-name: phase-2-mock-build-type3
-description: Build a mock Type 3 Flutter web app from a Phase 1 functional spec. Copies the skeleton-type3 template, wires Status Panel sections, Header Panel, and Content Panel modes to a stateful mock data service. Produces a runnable app with no Tercen dependency.
-argument-hint: "[path to functional spec]"
-disable-model-invocation: true
----
+# Phase 2 Mock Build — Runner Widget
 
-**READ-ONLY. Do NOT modify. Log gaps to `_issues/session-log.md` and continue.**
+Steps 2-10 for building a runner widget. Step 1 (Copy and Rename) is in `SKILL.md`.
 
-Copy skeleton-type3, replace placeholders, wire controls to stateful mock data service.
+Source skeleton: `skeletons/runner/`
 
 For design rules: `_references/type3-design-summary.md` and `_references/global-rules.md`.
-
-## Inputs
-
-1. **Functional spec** — Phase 1 Type 3 output
-2. **Skeleton-type3** — `skeleton-type3/` from tercen-flutter-skills
-3. **Target directory** — new app location
-4. **Mock data** — real workflow data from spec Section 7.3
-
----
-
-## Step 1: Copy and Rename
-
-Copy the entire `skeleton-type3/` directory to the target project location, then update:
-
-### pubspec.yaml
-- `name:` — new app name in snake_case (e.g., `immuno_flutter_operator`)
-- `description:` — one-line description from spec Section 1.1
-
-### operator.json
-- `name` — display name from spec
-- `description` — one-line description
-- `urls` — GitHub repository URL
-
-### version_info.dart (`lib/core/version/version_info.dart`)
-- `gitRepo` — GitHub repository URL
-- `version` — set to `'0.1.0'`
-
-### main.dart (`lib/main.dart`)
-- Rename `SkeletonType3App` class -> `YourAppNameApp`
-- Update `title:` in `MaterialApp`
-
-### home_screen.dart (`lib/presentation/screens/home_screen.dart`)
-- Update `appTitle:` — display name shown in panel header
-- The App icon is hardcoded in `LeftPanelHeader` — do NOT modify it
 
 ---
 
@@ -67,7 +28,7 @@ Put data files in `assets/data/`. Register in `pubspec.yaml`.
 
 ### Update DataService interface (`lib/domain/services/data_service.dart`)
 
-The Type 3 service interface is stateful:
+The runner service interface is stateful:
 
 ```dart
 abstract class DataService {
@@ -78,7 +39,7 @@ abstract class DataService {
 }
 ```
 
-Adapt the methods to your app's specific needs. Add methods if the spec requires distinct operations (e.g., file upload handling, intermediate data loading).
+Adapt the methods to your widget's specific needs. Add methods if the spec requires distinct operations (e.g., file upload handling, intermediate data loading).
 
 ### Create mock service (`lib/implementations/services/mock_data_service.dart`)
 
@@ -109,7 +70,7 @@ Replace `lib/presentation/providers/app_state_provider.dart` with:
 - `setXxx()` method for each field — calls `notifyListeners()`
 - Input completion logic — `isInputComplete` checks required fields
 - Stage navigation — `navigateToStage()` updates heading/action label per stage
-- Any app-specific state (selected files, parsed data previews, etc.)
+- Any widget-specific state (selected files, parsed data previews, etc.)
 
 ### Wiring Rules
 
@@ -130,7 +91,7 @@ Read spec **Section 4.2**.
 
 ### Replace demo sections in `lib/presentation/widgets/left_panel/`
 
-For each of the 5 Status Panel sections, replace the skeleton demo with your app's specific content:
+For each of the 5 Status Panel sections, replace the skeleton demo with your widget's specific content:
 
 | File | Spec Section | What to customize |
 |------|-------------|-------------------|
@@ -140,7 +101,7 @@ For each of the 5 Status Panel sections, replace the skeleton demo with your app
 | `history_section.dart` | 4.2 HISTORY | Entry format, metadata shown |
 | `info_section.dart` | — | Keep unchanged (GitHub link) |
 
-**Control styling** — use same pattern as Type 1/2 (see `_references/global-rules.md`).
+**Control styling** — use same pattern as panel widgets (see `_references/global-rules.md`).
 
 ---
 
@@ -161,7 +122,7 @@ For each input stage in the spec:
 
 If the spec has multiple input stages, use `provider.currentStage` to switch between them in `input_content.dart`.
 
-**Form sections** use the same 11 control types and styling as Type 1/2. Reference `_references/global-rules.md` for the control type table.
+**Form sections** use the same 11 control types and styling as panel widgets. Reference `_references/global-rules.md` for the control type table.
 
 ---
 
@@ -199,7 +160,7 @@ The Header Panel widget is DO-NOT-MODIFY. Configure it via:
 
 Update `lib/presentation/screens/home_screen.dart`:
 
-1. Replace Status Panel sections list with your app's 5 sections
+1. Replace Status Panel sections list with your widget's 5 sections
 2. Content Panel already switches via `ContentPanel` widget
 3. Wire Header Panel callbacks as described in Step 8
 4. Keep the `loadData()` call in `initState`
@@ -214,7 +175,7 @@ Run `flutter run -d chrome`. Verify against the checklist below.
 
 ## DO NOT MODIFY
 
-Copy these files unchanged from skeleton-type3.
+Copy these files unchanged from `skeletons/runner/`.
 
 | File | What it does |
 |------|-------------|
@@ -242,14 +203,14 @@ If panel collapse, resize, theme toggle, or running overlay breaks — a DO-NOT-
 | File | Action |
 |------|--------|
 | `lib/domain/models/*.dart` | Create — domain models from spec |
-| `lib/domain/services/data_service.dart` | Replace — Type 3 service interface |
+| `lib/domain/services/data_service.dart` | Replace — runner service interface |
 | `lib/implementations/services/mock_data_service.dart` | Replace — stateful mock |
-| `lib/presentation/providers/app_state_provider.dart` | Replace — app state + settings |
+| `lib/presentation/providers/app_state_provider.dart` | Replace — widget state + settings |
 | `lib/presentation/screens/home_screen.dart` | Replace — sections + callbacks |
-| `lib/presentation/widgets/left_panel/actions_section.dart` | Replace — app-specific |
-| `lib/presentation/widgets/left_panel/status_section.dart` | Replace — app-specific |
-| `lib/presentation/widgets/left_panel/current_run_section.dart` | Replace — app-specific |
-| `lib/presentation/widgets/left_panel/history_section.dart` | Replace — app-specific |
+| `lib/presentation/widgets/left_panel/actions_section.dart` | Replace — widget-specific |
+| `lib/presentation/widgets/left_panel/status_section.dart` | Replace — widget-specific |
+| `lib/presentation/widgets/left_panel/current_run_section.dart` | Replace — widget-specific |
+| `lib/presentation/widgets/left_panel/history_section.dart` | Replace — widget-specific |
 | `lib/presentation/widgets/content_panel/input_content.dart` | Replace — input stages |
 | `lib/presentation/widgets/content_panel/display_content.dart` | Replace — results layout |
 | `lib/presentation/widgets/content_panel/content_panel.dart` | Keep or replace if adding stages |
@@ -262,7 +223,7 @@ If panel collapse, resize, theme toggle, or running overlay breaks — a DO-NOT-
 
 ## Phase 2 Rules — Learned from Production
 
-These rules prevent bugs that were found in the first Type 3 production deployment. Follow them exactly.
+These rules prevent bugs that were found in the first runner production deployment. Follow them exactly.
 
 ### Error handling
 
@@ -292,7 +253,7 @@ These rules prevent bugs that were found in the first Type 3 production deployme
 
 Before completing Phase 2:
 
-- [ ] App runs with `flutter run -d chrome` — no errors
+- [ ] Widget runs with `flutter run -d chrome` — no errors
 - [ ] All 5 Status Panel sections present with correct icons and UPPERCASE labels
 - [ ] Header Panel shows correct content per mode (Input/Display)
 - [ ] Content Panel Input mode has all controls from spec with correct types, defaults, ranges

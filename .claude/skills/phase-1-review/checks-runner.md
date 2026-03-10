@@ -1,29 +1,14 @@
----
-name: phase-1-review-type3
-description: Review a Phase 1 functional spec for a Type 3 (workflow manager) app. Checks three-panel layout, Status Panel sections, Header Panel modes, Content Panel stages, and workflow template. Produces a PASS/FAIL conformance report.
-argument-hint: "[path to functional spec]"
-disable-model-invocation: true
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - AskUserQuestion
----
+# Phase 1 Review — Runner Widget Checks
 
-**This file is READ-ONLY during reviews. Do NOT modify it.**
+**READ-ONLY — do not modify this file.**
 
-Review a Type 3 functional spec against all checks below. For design rules, read `_references/type3-design-summary.md` and `_references/global-rules.md`.
-
-**Input:** Path to the Phase 1 spec (markdown). Use AskUserQuestion if not provided.
-
-**Steps:** Read entire spec. Run checks A-J in order (PASS/FAIL only, no fixes). Write report to `_local/phase-1-conformance-report.md`.
+These checks apply to runner widgets (three-panel layout: status panel + header panel + content panel). They are loaded by `SKILL.md` after kind detection.
 
 ---
 
 ## Check Group A: Document Structure
 
-All 9 sections are required. Each must be present and contain meaningful content.
+All 9 sections required with meaningful content (not empty or "TBD").
 
 ### A1: Section 1 — Overview
 Must contain: 1.1 Purpose, 1.2 Users, 1.3 Scope (In/Out), 1.4 Launch Modes (table).
@@ -35,7 +20,7 @@ Must contain: 2.1 Background, 2.2 Workflow Template (step table + data flow), 2.
 Table with ID, Requirement, Priority (Must/Should/Could).
 
 ### A4: Section 4 — User Interface Components
-Must contain: 4.1 App Structure (ASCII diagram), 4.2 Status Panel Sections, 4.3 Header Panel, 4.4 Content Panel Input Mode, 4.5 Content Panel Display Mode, 4.6 Running State.
+Must contain: 4.1 Widget Structure (ASCII diagram), 4.2 Status Panel Sections, 4.3 Header Panel, 4.4 Content Panel Input Mode, 4.5 Content Panel Display Mode, 4.6 Running State.
 
 ### A5: Section 5 — Non-Functional Requirements
 Table with at least one entry.
@@ -49,19 +34,8 @@ Must contain: 7.1 Data Assumptions, 7.2 Environment Assumptions, 7.3 Mock Data.
 ### A8: Section 8 — Glossary
 Table with Term and Definition. Must be present even if empty (with note).
 
-### A9: App type identified as Type 3
-The spec must explicitly identify the app as Type 3 (Workflow Manager).
-
----
-
-## Check Group B: Header Metadata
-
-### B1: App name in top-level heading
-### B2: Version field present
-### B3: Status field present
-### B4: Last Updated field present
-### B5: Reference field present
-### B6: App Type field shows "Type 3"
+### A9: Widget kind identified as runner
+The spec must explicitly identify the widget as a runner (workflow manager).
 
 ---
 
@@ -174,17 +148,6 @@ Each "Yes" mode must have a behaviour description.
 
 ---
 
-## Check Group I: No Implementation Detail
-
-### I1: No code
-### I2: No framework references (Flutter, Provider, GetIt, etc.)
-### I3: No pixel values or spacing tokens
-### I4: No colour codes (except domain-specific)
-### I5: No file paths or import statements
-### I6: Mock data describes WHAT not HOW
-
----
-
 ## Check Group J: Mock Data Completeness
 
 ### J1: Mock data described
@@ -197,79 +160,70 @@ Mock data must come from a real completed workflow, not synthetic/generated data
 Must specify 2-3 pre-built run datasets for history browsing.
 
 ### J4: Data maps to workflow steps
-Must explain which workflow step outputs appear where in the app.
+Must explain which workflow step outputs appear where in the widget.
 
 ---
 
-## Conformance Report Format
+## Runner Report Sections
 
-```markdown
-# Phase 1 Type 3 Conformance Report
+Insert the following check groups into the conformance report Results section (between Header Metadata and No Implementation Detail):
 
-**Spec:** [filename]
-**App Name:** [from heading]
-**App Type:** Type 3
-**Date:** [review date]
-
-## Summary
-
-| Result | Count |
-|--------|-------|
-| PASS | [n] |
-| FAIL | [n] |
-| **Total** | [n] |
-
-**Verdict:** [CONFORMING / NON-CONFORMING]
-
----
-
-## Results
-
+```
 ### A: Document Structure
-- A1–A9: [PASS/FAIL each]
-
-### B: Header Metadata
-- B1–B6: [PASS/FAIL each]
+- A1: [PASS/FAIL] — Section 1: Overview [detail if FAIL]
+- A2: [PASS/FAIL] — Section 2: Domain Context [detail if FAIL]
+- A3: [PASS/FAIL] — Section 3: Functional Requirements [detail if FAIL]
+- A4: [PASS/FAIL] — Section 4: User Interface Components [detail if FAIL]
+- A5: [PASS/FAIL] — Section 5: Non-Functional Requirements [detail if FAIL]
+- A6: [PASS/FAIL] — Section 6: Feature Summary [detail if FAIL]
+- A7: [PASS/FAIL] — Section 7: Assumptions [detail if FAIL]
+- A8: [PASS/FAIL] — Section 8: Glossary [detail if FAIL]
+- A9: [PASS/FAIL] — Widget kind identified as runner [detail if FAIL]
 
 ### C: Layout Diagram
-- C1–C5: [PASS/FAIL each]
+- C1: [PASS/FAIL] — ASCII diagram present [detail if FAIL]
+- C2: [PASS/FAIL] — Three-panel structure shown [detail if FAIL]
+- C3: [PASS/FAIL] — Diagram shows Status Panel sections [detail if FAIL]
+- C4: [PASS/FAIL] — Diagram shows Header Panel [detail if FAIL]
+- C5: [PASS/FAIL] — Diagram matches sections [detail if FAIL]
 
 ### D: Status Panel Sections
-- D1–D7: [PASS/FAIL each]
+- D1: [PASS/FAIL] — All 5 sections present [detail if FAIL]
+- D2: [PASS/FAIL] — Every section has icon and UPPERCASE label [detail if FAIL]
+- D3: [PASS/FAIL] — ACTIONS section specifies buttons [detail if FAIL]
+- D4: [PASS/FAIL] — STATUS section specifies states [detail if FAIL]
+- D5: [PASS/FAIL] — CURRENT RUN section specifies parameters [detail if FAIL]
+- D6: [PASS/FAIL] — HISTORY section specifies entry format [detail if FAIL]
+- D7: [PASS/FAIL] — INFO section present and last [detail if FAIL]
 
 ### E: Header Panel
-- E1–E4: [PASS/FAIL each]
+- E1: [PASS/FAIL] — Header Panel modes defined [detail if FAIL]
+- E2: [PASS/FAIL] — Input mode defined [detail if FAIL]
+- E3: [PASS/FAIL] — Display mode defined [detail if FAIL]
+- E4: [PASS/FAIL] — Running mode defined [detail if FAIL]
 
 ### F: Content Panel
-- F1–F6: [PASS/FAIL each]
+- F1: [PASS/FAIL] — Input stages enumerated [detail if FAIL]
+- F2: [PASS/FAIL] — Input controls have required attributes [detail if FAIL]
+- F3: [PASS/FAIL] — Only allowed control types [detail if FAIL]
+- F4: [PASS/FAIL] — Display mode layout described [detail if FAIL]
+- F5: [PASS/FAIL] — Display export format specified [detail if FAIL]
+- F6: [PASS/FAIL] — Running state described [detail if FAIL]
 
 ### G: Workflow Template
-- G1–G4: [PASS/FAIL each]
+- G1: [PASS/FAIL] — Template identified [detail if FAIL]
+- G2: [PASS/FAIL] — Steps listed [detail if FAIL]
+- G3: [PASS/FAIL] — Data flow described [detail if FAIL]
+- G4: [PASS/FAIL] — User-input steps match input stages [detail if FAIL]
 
 ### H: Launch Modes
-- H1–H3: [PASS/FAIL each]
-
-### I: No Implementation Detail
-- I1–I6: [PASS/FAIL each]
+- H1: [PASS/FAIL] — Launch modes table present [detail if FAIL]
+- H2: [PASS/FAIL] — At least one mode supported [detail if FAIL]
+- H3: [PASS/FAIL] — Behaviour described for each supported mode [detail if FAIL]
 
 ### J: Mock Data Completeness
-- J1–J4: [PASS/FAIL each]
-
----
-
-## Failures Detail
-
-### [Check ID]: [Check name]
-**Location:** [section]
-**Expected:** [what should be there]
-**Found:** [what was found]
+- J1: [PASS/FAIL] — Mock data described [detail if FAIL]
+- J2: [PASS/FAIL] — Real workflow data required [detail if FAIL]
+- J3: [PASS/FAIL] — Multiple run datasets [detail if FAIL]
+- J4: [PASS/FAIL] — Data maps to workflow steps [detail if FAIL]
 ```
-
----
-
-## Rules for the Reviewer
-
-1. **Be precise.** Cite section numbers and quote text in failures.
-2. **Only check what this skill defines.** No invented requirements, no domain-accuracy judgments.
-3. **PASS or FAIL only.** No warnings, no partial credit. Judge content, not formatting.
-4. **Report only — never fix the spec.**

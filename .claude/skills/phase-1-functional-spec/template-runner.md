@@ -1,56 +1,37 @@
----
-name: phase-1-functional-spec-type3
-description: Write a functional specification for a new Tercen Type 3 (workflow manager) Flutter web app. Produces a complete spec document covering Status Panel, Header Panel, Content Panel modes, workflow template, and run management — with no code.
-argument-hint: "[app name or description]"
-disable-model-invocation: true
----
+# Runner Widget — Phase 1 Functional Spec Template
 
-**READ-ONLY. Do NOT modify. Log gaps to `_issues/session-log.md` and continue.**
-
-Produce a Type 3 functional spec document. Do NOT write any code.
-
-For design rules: `_references/type3-design-summary.md` and `_references/global-rules.md`.
+**Reference:** `_references/runner-design.md`
 
 ---
 
-## Type 3 Design Constraints
+## Runner Design Constraints
 
 MUST follow these rules when designing the UI.
 
 1. **Three-panel layout:** Status Panel (left) + Header Panel (top-right, 48px) + Content Panel (main-right, scrollable).
 2. **Status Panel has 5 sections** in order: ACTIONS, STATUS, CURRENT RUN, HISTORY, INFO. Each has an icon and UPPERCASE label.
 3. **Header Panel** has two zones: left (context label) and right (action buttons). Content changes by mode.
-4. **Content Panel** switches between Input mode and Display mode. The app drives mode transitions, not the user.
-5. **Two hard states:** Running (app doing work) and Waiting (needs input or showing results).
+4. **Content Panel** switches between Input mode and Display mode. The widget drives mode transitions, not the user.
+5. **Two hard states:** Running (widget doing work) and Waiting (needs input or showing results).
 6. **Running state overlay:** AbsorbPointer + dimming on Header + Content. Status Panel stays active.
-7. **App is a runner layer.** Can start, stop, provide inputs. Cannot modify workflow structure.
+7. **Widget is a runner layer.** Can start, stop, provide inputs. Cannot modify workflow structure.
 8. **Available control types** (exactly 11): dropdown, slider, range slider, toggle, number input, button, searchable input, text input, checkbox, radio, segmented button.
 9. **INFO section is mandatory.** Always at bottom of Status Panel.
-10. **No nesting.** No apps within apps, no sub-panels.
+10. **No nesting.** No widgets within widgets, no sub-panels.
 
 ---
 
-## Output Rules
+## Spec Template — Runner
 
-- The spec describes WHAT the app does, never HOW it is implemented.
-- No Dart code, no pseudo-code, no implementation approach.
-- No pixel values, spacing tokens, or colour codes (except domain-specific colours).
-- No references to Flutter widgets, Provider, GetIt, or any framework.
-- Mock data requirements describe WHAT data is needed, not how to load it.
-
----
-
-## Spec Template — Type 3
-
-Every Type 3 functional spec follows this structure. All 9 sections are required.
+Every runner functional spec follows this structure. All 9 sections are required.
 
 ```markdown
-# [App Name] - Functional Specification
+# [Widget Name] - Functional Specification
 
 **Version:** 1.0.0
 **Status:** Draft
 **Last Updated:** [Date]
-**App Type:** Type 3 (Workflow Manager)
+**Widget Kind:** Runner (Workflow Manager)
 **Reference**: [Source material — workflow, screenshots, description, etc.]
 
 ---
@@ -58,10 +39,10 @@ Every Type 3 functional spec follows this structure. All 9 sections are required
 ## 1. Overview
 
 ### 1.1 Purpose
-[What problem does this app solve? What workflow does it wrap?]
+[What problem does this widget solve? What workflow does it wrap?]
 
 ### 1.2 Users
-[Who uses this app?]
+[Who uses this widget?]
 
 ### 1.3 Scope
 
@@ -83,7 +64,7 @@ Every Type 3 functional spec follows this structure. All 9 sections are required
 ## 2. Domain Context
 
 ### 2.1 Background
-[Domain knowledge needed to understand this app.]
+[Domain knowledge needed to understand this widget.]
 
 ### 2.2 Workflow Template
 
@@ -119,7 +100,7 @@ Every Type 3 functional spec follows this structure. All 9 sections are required
 
 ## 4. User Interface Components
 
-### 4.1 App Structure
+### 4.1 Widget Structure
 
 [ASCII layout diagram. Example:]
 
@@ -168,7 +149,7 @@ Icon: [icon description]
 
 #### Section 5: INFO
 Icon: info icon
-GitHub repository link. App name and version.
+GitHub repository link. Widget name and version.
 
 ### 4.3 Header Panel
 
@@ -219,7 +200,7 @@ GitHub repository link. App name and version.
 - Running overlay with animation
 - Status Panel shows progress
 - Stop button active
-- [Any app-specific running behaviour]
+- [Any widget-specific running behaviour]
 
 ---
 
@@ -265,7 +246,7 @@ GitHub repository link. App name and version.
 - [Multiple run datasets for history browsing (2-3 runs)]
 
 **How mock data maps to workflow steps:**
-- Step 1 output → [where it appears in the app]
+- Step 1 output → [where it appears in the widget]
 - Step 2 output → [where it appears]
 
 ---
@@ -285,7 +266,7 @@ Gather information in this order. Adapt to the input source.
 
 ### Round 1: Purpose and Workflow
 
-- What does this app do? Who uses it?
+- What does this widget do? Who uses it?
 - What Tercen workflow template does it wrap?
 - What are the workflow steps? Which need user input?
 - What are the workflow inputs and outputs?
@@ -328,15 +309,6 @@ If the Tercen MCP server (`tercenctl mcp`) is available:
 2. Use MCP tools to inspect the workflow: steps, operators, properties
 3. Present the workflow structure and ask which settings to expose
 4. Build Input mode specs from actual operator properties and outputs
-
----
-
-## Question Efficiency
-
-- Do NOT dump all questions at once. Ask 3-4 per round.
-- Skip questions already answered by provided material.
-- When reviewing existing code/workflows, proactively identify gaps.
-- Consolidate related questions.
 
 ---
 
