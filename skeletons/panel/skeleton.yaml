@@ -1,0 +1,4 @@
+kind: panel
+label: Panel Widget
+description: Two-panel layout. Left panel with controls, main content for display.
+design_reference: _references/panel-design.md
