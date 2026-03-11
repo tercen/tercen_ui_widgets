@@ -45,3 +45,8 @@
 - [fixed] Search icon alignment: prefixIcon and suffixIcon wrapped in SizedBox+Center for proper FaIcon centering within 36px height
 - [fixed] Filter bug: branch nodes returned true from _nodeMatchesFilter when type filter active, bypassing child filtering. Now branches return false when typeFilter != all, forcing recursive pruning of non-matching leaves.
 - [fixed] Click behaviour: all branch nodes (team/project/folder) now do both toggleExpanded + selectNode on single click
+## Session: 2026-03-11 — Phase 1
+- Writing workflow-viewer functional spec (window kind, sister to file-navigator)
+- [pattern] Followed file-navigator spec structure (20 sections) adapted for flowchart widget: replaced tree hierarchy with step type matrix, tree view with layout algorithm, upload with execution control
+- [pattern] Toolbar pattern differs from file-navigator: 2 controls (1 stateful action button + search) vs 6 controls. Action button has 6 states driven by focus target + step state.
+- Completed workflow-viewer-spec.md v1.0 with 20 sections, 11 step types, 4 states, full EventBus contract
