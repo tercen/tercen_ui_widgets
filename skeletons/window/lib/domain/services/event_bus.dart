@@ -1,24 +1,52 @@
-/// Abstract event bus interface for window–Frame communication.
-///
-/// The window emits intents and receives messages through this interface.
-/// The skeleton defines the contract only — implementation is provided
-/// at Frame integration time.
-///
-/// Outbound (window emits):
-///   - close: window requests to be closed
-///   - maximize / restore: window requests resize
-///   - openResource: user clicked something that should open elsewhere
-///   - contentChanged: window's label has changed
-///
-/// Inbound (window receives):
-///   - themeChanged: light/dark mode changed
-///   - focus: Frame is giving this window focus
-///   - blur: Frame is removing focus
-abstract class EventBus {
-  /// Emit an intent from this window to the Frame.
-  void emit(String intent, {Map<String, dynamic>? payload});
+import 'dart:async';
 
-  /// Subscribe to messages from the Frame.
-  /// Returns a dispose function to unsubscribe.
-  Function() on(String message, void Function(Map<String, dynamic>?) handler);
+import 'event_payload.dart';
+
+/// Unified event bus: publish/subscribe with channel-based routing.
+///
+/// Mirrors the orchestrator's EventBus exactly.
+/// See: tercen_ui_orchestrator/lib/sdui/event_bus/event_bus.dart
+///
+/// In production the orchestrator provides the singleton instance.
+/// In mock/standalone mode the skeleton creates its own local instance.
+class EventBus {
+  final Map<String, StreamController<EventPayload>> _channels = {};
+
+  /// Publish a payload to a channel.
+  void publish(String channel, EventPayload payload) {
+    _channels[channel]?.add(payload);
+  }
+
+  /// Subscribe to a channel. Creates the channel if it doesn't exist.
+  Stream<EventPayload> subscribe(String channel) {
+    return _getOrCreate(channel).stream;
+  }
+
+  /// Subscribe to all channels matching a prefix (e.g. "system.data.").
+  Stream<EventPayload> subscribePrefix(String prefix) {
+    final controller = StreamController<EventPayload>.broadcast();
+
+    // Forward existing matching channels
+    for (final entry in _channels.entries) {
+      if (entry.key.startsWith(prefix)) {
+        entry.value.stream.listen(controller.add);
+      }
+    }
+
+    return controller.stream;
+  }
+
+  StreamController<EventPayload> _getOrCreate(String channel) {
+    return _channels.putIfAbsent(
+      channel,
+      () => StreamController<EventPayload>.broadcast(),
+    );
+  }
+
+  void dispose() {
+    for (final controller in _channels.values) {
+      controller.close();
+    }
+    _channels.clear();
+  }
 }

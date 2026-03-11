@@ -63,7 +63,10 @@ class SkeletonWindowApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => ThemeProvider(prefs)),
         ChangeNotifierProvider(
-            create: (_) => WindowStateProvider(identity: identity)),
+            create: (_) => WindowStateProvider(
+                  identity: identity,
+                  windowId: 'skeleton-dev-01',
+                )),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {

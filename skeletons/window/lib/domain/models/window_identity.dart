@@ -3,8 +3,8 @@ import 'dart:ui';
 /// Identity properties that the window exposes to the Frame.
 ///
 /// The Frame reads these to populate the tab: type icon colour, label text.
-/// The window updates [label] as content changes and emits a
-/// `contentChanged` event via the event bus.
+/// When [label] changes, WindowStateProvider publishes a `contentChanged`
+/// intent on the `window.intent` EventBus channel.
 class WindowIdentity {
   /// Immutable type identifier (e.g. 'dataViewer', 'chat', 'workflow').
   final String typeId;
