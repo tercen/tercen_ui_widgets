@@ -262,7 +262,7 @@ class _TreeNodeRowState extends State<_TreeNodeRow> {
                     color: isDark
                         ? AppColorsDark.textPrimary
                         : AppColors.textPrimary,
-                    fontWeight: node.nodeType == NodeType.team
+                    fontWeight: widget.isSelected
                         ? FontWeight.w600
                         : FontWeight.w400,
                   ),
