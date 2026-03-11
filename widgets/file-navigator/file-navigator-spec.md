@@ -1,7 +1,8 @@
 # File Navigator — Functional Specification
 
-**Version:** 1.0 Review Draft
-**Date:** 2026-03-10
+**Version:** 1.1
+**Last Updated:** 2026-03-11
+**Reference:** Original specification
 **Window:** 1 (File/Folder Navigator)
 **App Type:** skeleton-window (Feature Window for Tercen Frame)
 **Status:** Ready for review
@@ -57,65 +58,7 @@ This window conforms to the **skeleton-window** pattern from `tercen-flutter-ski
 
 **Type 1 Feature Window** — rendered inside the Tercen Frame. The Frame provides tabs above this window. The navigator communicates with the Frame and other windows exclusively via the **EventBus**.
 
-### 3.2 Project structure
-
-```text
-lib/
-├── main.dart                           (entry point — rename class only)
-├── core/
-│   ├── theme/                          (DO NOT MODIFY — all design tokens)
-│   │   ├── app_colors.dart
-│   │   ├── app_colors_dark.dart
-│   │   ├── app_spacing.dart
-│   │   ├── app_text_styles.dart
-│   │   ├── app_line_weights.dart
-│   │   └── app_theme.dart
-│   ├── constants/
-│   │   └── window_constants.dart
-│   ├── widgets/
-│   └── utils/
-│       └── context_detector.dart
-├── domain/
-│   ├── services/
-│   │   ├── navigator_service.dart      (abstract)
-│   │   └── event_bus_service.dart      (abstract)
-│   └── models/
-│       ├── tree_node.dart              (base class)
-│       ├── team_node.dart
-│       ├── project_node.dart
-│       ├── folder_node.dart
-│       ├── file_node.dart
-│       ├── dataset_node.dart
-│       └── workflow_node.dart
-├── implementations/
-│   └── services/
-│       ├── mock_navigator_service.dart
-│       ├── tercen_navigator_service.dart
-│       ├── mock_event_bus_service.dart
-│       └── tercen_event_bus_service.dart
-├── di/
-│   └── service_locator.dart            (DO NOT MODIFY — GetIt pattern)
-└── presentation/
-    ├── providers/
-    │   ├── theme_provider.dart         (DO NOT MODIFY)
-    │   ├── window_state_provider.dart
-    │   └── tree_state_provider.dart
-    ├── screens/
-    │   └── navigator_screen.dart
-    └── widgets/
-        ├── toolbar/
-        │   └── navigator_toolbar.dart
-        └── tree/
-            ├── tree_view.dart
-            ├── team_node_tile.dart
-            ├── project_node_tile.dart
-            ├── folder_node_tile.dart
-            ├── file_node_tile.dart
-            ├── dataset_node_tile.dart
-            └── workflow_node_tile.dart
-```
-
-### 3.3 Four body states
+### 3.2 Four body states
 
 The window MUST implement all four body states per the skeleton-window pattern:
 
@@ -126,75 +69,46 @@ The window MUST implement all four body states per the skeleton-window pattern:
 | **Active** | Data loaded | Toolbar + Tree View |
 | **Error** | Tercen connection failed | Centred error icon + message + "Retry" button |
 
-### 3.4 Layout
+### 3.3 Layout
 
-Toolbar (48px fixed) + Body (flex). No left panel — this IS the navigator. No top bar — rendered inside Frame tabs. No preview panel — the Frame handles preview via EventBus events.
+Toolbar (fixed height) at top, Tree View (scrollable, fills remaining space) below. No left panel — this IS the navigator. No top bar — rendered inside Frame tabs. No preview panel — the Frame handles preview via EventBus events.
 
 ```text
 ┌──────────────────────────────────┐
-│ Toolbar (48px)                   │
+│ Toolbar                          │
 ├──────────────────────────────────┤
 │                                  │
-│ Tree View (flex, scrollable)     │
+│ Tree View (scrollable)           │
 │                                  │
 └──────────────────────────────────┘
 ```
 
-### 3.5 State management
+### 3.4 State
 
-Provider pattern with one-way data flow per skeleton-window rules:
+The widget tracks the following state:
 
-```text
-User interaction → Provider.setXxx() → notifyListeners() → Consumer rebuilds
-```
+| State | Purpose |
+|-------|---------|
+| Tree data | The full hierarchy of teams, projects, and their contents |
+| Expanded nodes | Which branch nodes are currently expanded |
+| Selected node | The currently focused node (single selection) |
+| Filter text | Active text search string |
+| Filter type | Active type filter (All, File, Data Set, or Workflow) |
+| Upload target | Which project/folder has an upload in progress |
+| Window state | Current body state (loading, empty, active, or error) |
+| Error message | Detail text when in the error state |
 
-**TreeStateProvider** fields:
+### 3.5 Theming
 
-| Field | Type | Purpose |
-|-------|------|---------|
-| `teams` | `List<TeamNode>` | Full tree data |
-| `expandedNodeIds` | `Set<String>` | Which nodes are expanded |
-| `selectedNodeId` | `String?` | Currently focused node |
-| `filterText` | `String` | Text search string |
-| `filterType` | `TercenDocType?` | Type filter (null = All) |
-| `uploadingToProjectId` | `String?` | Upload in progress target |
+- All UI chrome must be theme-aware (light and dark modes)
+- Use only the shared design token system — no hardcoded colours, font sizes, spacing, or stroke widths
 
-**WindowStateProvider** fields:
-
-| Field | Type | Purpose |
-|-------|------|---------|
-| `state` | `WindowState` | loading / empty / active / error |
-| `errorMessage` | `String?` | Error detail text |
-
-### 3.6 Mock/real switching
-
-```dart
-// Phase 2: Mock data for development
-const useMocks = bool.fromEnvironment('USE_MOCKS', defaultValue: true);
-setupServiceLocator(useMocks: true);
-
-// Phase 3: Real Tercen integration
-setupServiceLocator(useMocks: false, factory: factory, taskId: taskId);
-```
-
-### 3.7 Theming rules
-
-- All UI chrome is theme-aware (light + dark)
-- Use only design tokens: `AppColors.*`, `AppColorsDark.*`, `AppSpacing.*`, `AppTextStyles.*`, `AppLineWeights.*`
-- No hardcoded colours, font sizes, spacing, or stroke widths
-- Dark mode detection:
-
-```dart
-final isDark = context.watch<ThemeProvider>().isDarkMode;
-final color = isDark ? AppColorsDark.textSecondary : AppColors.textSecondary;
-```
-
-### 3.8 Window identity
+### 3.6 Window identity
 
 | Property | Value |
 |----------|-------|
 | Tab label | "Navigator" |
-| Tab icon | 8x8px coloured square (suggest `AppColors.primary`) |
+| Tab icon | Small coloured square, Yellow per feature-window-base-spec |
 
 ---
 
@@ -270,7 +184,7 @@ The navigator does not open windows, download files, or manage teams directly. I
 
 ## 6. Toolbar
 
-48px fixed height. Follows the skeleton-window toolbar pattern: left-aligned icon buttons.
+Fixed height. Follows the skeleton-window toolbar pattern: left-aligned icon buttons.
 
 ### 6.1 Buttons
 
@@ -296,17 +210,12 @@ The type filter is a dropdown button. Each option has hover text explaining what
 
 The type filter and text search work together. Type filter narrows by `subKind`, text search narrows further by name. Both are client-side filters applied to the already-loaded tree data.
 
-### 6.3 Toolbar styling
+### 6.3 Toolbar appearance
 
-| Property | Token |
-|----------|-------|
-| Height | `AppSpacing.headerHeight` (48px) |
-| Button spacing | `AppSpacing.sm` (8px) |
-| Button group dividers | `AppLineWeights.subtle` (1.0px) |
-| Text search border | `AppColors.neutral300` |
-| Text search font | `AppTextStyles.body` |
-| Upload button background | `AppColors.primary` |
-| Inactive buttons | `AppColors.textDisabled` |
+- Upload button uses the primary accent colour to draw attention
+- Inactive/disabled buttons are visually muted
+- Button groups are separated by subtle dividers
+- Text search field uses the standard body font
 
 ---
 
@@ -333,48 +242,43 @@ Each row in the tree follows this layout:
 [indent] [chevron] [type icon] [name] [status badges] [inline info]
 ```
 
-### 7.3 Node tile styling
+### 7.3 Node tile appearance
 
-| Property | Token |
-|----------|-------|
-| Row height | 28px |
-| Indentation per level | `AppSpacing.lg` (24px) |
-| Chevron size | 16x16px |
-| Chevron colour | `AppColors.textTertiary` |
-| Type icon size | 16x16px |
-| Name font | `AppTextStyles.body` |
-| Name colour | `AppColors.textPrimary` |
-| Hover background | `AppColors.neutral100` (light) / `AppColorsDark.neutral800` (dark) |
-| Selected background | `AppColors.primary` at 10% opacity |
-| Selected left border | 2px, `AppColors.primary` |
+- Rows are compact (single-line height) with indentation increasing per tree level
+- Chevron and type icon are small and inline with the node name
+- Node name uses the standard body font
+- Hovered rows show a subtle background highlight (theme-aware)
+- Selected row shows a tinted primary-colour background and a left accent border
 
 ### 7.4 Type icons
 
-| Icon | Node type | Colour |
-|------|-----------|--------|
-| `Icons.people` | Team | `AppColors.primary` |
-| `Icons.folder` | Project | `AppColors.warning` |
-| `Icons.folder_open` | Folder (`FolderDocument`) | `AppColors.textTertiary` |
-| `Icons.insert_drive_file` | File — generic | `AppColors.textSecondary` |
-| `Icons.science` | File — FCS | `AppColors.success` |
-| `Icons.archive` | File — ZIP | `AppColors.textSecondary` |
-| `Icons.description` | File — Markdown/text | `AppColors.textSecondary` |
-| `Icons.image` | File — PNG/SVG/JPEG | `AppColors.info` |
-| `Icons.table_chart` | Data Set (`TableSchema`) | `AppColors.info` |
-| `Icons.account_tree` | Workflow | `AppColors.primary` |
+Each node type has a distinct icon and colour to aid visual scanning:
+
+| Node type | Icon meaning | Colour meaning |
+|-----------|-------------|----------------|
+| Team | People/group | Primary |
+| Project | Folder | Warning/amber |
+| Folder | Open folder | Muted/tertiary |
+| File — generic | Document | Secondary |
+| File — FCS | Science/lab | Success/green |
+| File — ZIP | Archive | Secondary |
+| File — Markdown/text | Text document | Secondary |
+| File — PNG/SVG/JPEG | Image | Info/blue |
+| Data Set | Table/grid | Info/blue |
+| Workflow | Branching tree | Primary |
 
 ### 7.5 Status indicators
 
 Displayed inline after the node name:
 
-| Indicator | Where | Display | Tokens |
-|-----------|-------|---------|--------|
-| Workflow status | Workflow nodes | 8x8px coloured circle | idle: `neutral400`, running: `info`, complete: `success`, error: `error` |
-| Git version | Project nodes (git-backed) | Text in rounded chip | `AppTextStyles.labelSmall`, `AppColors.neutral200` background |
-| Git status | Project nodes (git-backed) | 8x8px dot | clean: `success`, modified: `warning` |
-| GitHub link | Project nodes (git-backed) | `Icons.open_in_new` (12px) | `AppColors.textTertiary`, opens browser |
-| Member count | Team nodes | Text in parentheses | `AppTextStyles.labelSmall`, `AppColors.textMuted` |
-| Public badge | Project nodes | `Icons.public` (12px) | `AppColors.info` |
+| Indicator | Where | Display |
+|-----------|-------|---------|
+| Workflow status | Workflow nodes | Small coloured dot — idle: neutral, running: info, complete: success, error: error |
+| Git version | Project nodes (git-backed) | Version text in a small rounded chip |
+| Git status | Project nodes (git-backed) | Small dot — clean: success, modified: warning |
+| GitHub link | Project nodes (git-backed) | Small external-link icon, opens browser |
+| Member count | Team nodes | Count in parentheses, muted text |
+| Public badge | Project nodes | Small globe/public icon, info colour |
 
 ---
 
@@ -384,8 +288,8 @@ Displayed inline after the node name:
 |--------|--------|
 | **Trigger** | Toolbar Upload button (when project or folder selected) or drag-and-drop from desktop |
 | **Valid targets** | Project nodes, folder nodes |
-| **Drop feedback** | Highlight target row: `AppColors.primary` at 15% opacity, dashed border `AppLineWeights.standard` |
-| **Progress** | Inline progress bar below target node, `AppColors.primary` |
+| **Drop feedback** | Highlight target row with a tinted primary background and dashed border |
+| **Progress** | Inline progress bar below the target node in the primary accent colour |
 | **File type detection** | Automatic on upload (FCS, CSV, ZIP detected by extension/content) |
 | **On completion** | Emits `contentChanged` on EventBus; tree refreshes to show the new file |
 
@@ -395,7 +299,7 @@ Displayed inline after the node name:
 
 Single-click on a project, folder, or file/dataset/workflow node:
 
-1. Updates `TreeStateProvider.selectedNodeId`
+1. Updates the widget's selected-node state
 2. Emits `focusChanged(nodeId, nodeType, nodeName, nodePath)` on EventBus
 3. The Chat window (Window 2) reads this event and updates its **Focus field**
 4. The LLM receives the focus context automatically with every subsequent message
@@ -473,138 +377,54 @@ For projects backed by a git repository, status is displayed inline on the proje
 
 ## 14. Domain Models
 
-### 14.1 TreeNode (base class)
+All tree nodes share a common set of properties: a unique identifier, a display name, a node type (team, project, folder, file, dataset, or workflow), an optional parent reference, a list of children, and whether the node is a leaf.
 
-```dart
-abstract class TreeNode {
-  String get id;
-  String get name;
-  TreeNodeType get nodeType;  // team, project, folder, file, dataset, workflow
-  String? get parentId;
-  List<TreeNode> get children;
-  bool get isLeaf;
-}
-```
+The filter has four options: All (no filter), File, Data Set, and Workflow.
 
-### 14.2 TercenDocType (filter enum)
+### 14.1 Node types and their properties
 
-```dart
-enum TercenDocType {
-  all,        // No filter — show everything
-  file,       // FileDocument
-  dataset,    // TableSchema
-  workflow,   // Workflow
-}
-```
+**TeamNode** — represents a Tercen team. Properties: member count, whether it is public, whether it is the user's personal team (listed first, auto-expanded), and a list of child projects.
 
-### 14.3 Concrete node types
+**ProjectNode** — represents a Tercen project within a team. Properties: optional description, whether it is public, optional GitHub URL (if git-backed), optional git version tag, optional git status (clean or modified), and a list of child items (files, datasets, workflows, folders).
 
-**TeamNode**
+**FolderNode** — a folder within a project. Properties: a list of child items.
 
-```dart
-class TeamNode extends TreeNode {
-  final String id;
-  final String name;
-  final int memberCount;
-  final bool isPublic;
-  final bool isPersonal;          // user's own team — listed first, auto-expanded
-  final List<ProjectNode> projects;
-}
-```
+**FileNode** — a raw file uploaded to a project. Properties: file type category (FCS, ZIP, CSV, markdown, image, or generic), optional file size, optional created date, optional last-modified date.
 
-**ProjectNode**
+**DatasetNode** — a structured data table imported into Tercen. Properties: optional description, optional row count, optional column count, optional created date.
 
-```dart
-class ProjectNode extends TreeNode {
-  final String id;
-  final String name;
-  final String? description;
-  final bool isPublic;
-  final String? gitUrl;            // GitHub repo URL (null if not git-backed)
-  final String? gitVersion;        // version tag
-  final GitStatus? gitStatus;      // clean / modified
-  final List<TreeNode> children;   // flat list of files, datasets, workflows, folders
-}
-```
-
-**FolderNode**
-
-```dart
-class FolderNode extends TreeNode {
-  final String id;
-  final String name;
-  final List<TreeNode> children;
-}
-```
-
-**FileNode**
-
-```dart
-class FileNode extends TreeNode {
-  final String id;
-  final String name;
-  final FileType fileType;         // fcs, zip, csv, markdown, image, generic
-  final int? sizeBytes;
-  final DateTime? createdDate;
-  final DateTime? lastModifiedDate;
-}
-```
-
-**DatasetNode**
-
-```dart
-class DatasetNode extends TreeNode {
-  final String id;
-  final String name;
-  final String? description;
-  final int? rowCount;
-  final int? columnCount;
-  final DateTime? createdDate;
-}
-```
-
-**WorkflowNode**
-
-```dart
-class WorkflowNode extends TreeNode {
-  final String id;
-  final String name;
-  final int stepCount;
-  final WorkflowStatus status;    // idle, running, complete, error
-  final DateTime? lastRunDate;
-}
-```
+**WorkflowNode** — an analysis pipeline. Properties: step count, execution status (idle, running, complete, or error), optional last-run date.
 
 ---
 
 ## 15. Service Interfaces
 
-### 15.1 NavigatorService
+The navigator depends on two services, which will have mock (Phase 2) and real (Phase 3) implementations.
 
-```dart
-abstract class NavigatorService {
-  Future<List<TeamNode>> fetchTeams();
-  Future<List<TreeNode>> fetchProjectContents(String projectId);
-  Future<void> uploadFile(String projectId, String? folderId, File file);
-}
-```
+### 15.1 Navigator data service
 
-### 15.2 EventBusService
+Responsible for fetching data from Tercen and uploading files:
 
-```dart
-abstract class EventBusService {
-  // Emit
-  void emitFocusChanged(String nodeId, TreeNodeType nodeType, String nodeName, String nodePath);
-  void emitOpenViewer(String nodeId, TreeNodeType nodeType);
-  void emitOpenTeamWidget(String teamId);
-  void emitDownloadFile(String fileId);
-  void emitContentChanged();
+- **Fetch teams** — returns the list of teams the current user belongs to, each with its projects
+- **Fetch project contents** — given a project, returns its child items (files, datasets, workflows, folders)
+- **Upload file** — uploads a file to a specified project and optionally into a folder
 
-  // Listen
-  Stream<NavigateToEvent> get onNavigateTo;
-  Stream<RefreshEvent> get onRefreshTree;
-}
-```
+### 15.2 Event bus service
+
+Responsible for communication with the Frame and other windows:
+
+**Emits:**
+
+- Focus changed (node id, type, name, path)
+- Open viewer (node id, type)
+- Open team widget (team id)
+- Download file (file id)
+- Content changed (no payload)
+
+**Listens to:**
+
+- Navigate to (node id or path)
+- Refresh tree (no payload)
 
 ---
 
@@ -630,7 +450,7 @@ abstract class EventBusService {
 
 ```text
 ┌──────────────────────────────────────────────┐
-│ [⬆ Upload] [⬇ Download] [↻] [👥]  [▾ All] 🔍 │  ← Toolbar (48px)
+│ [⬆ Upload] [⬇ Download] [↻] [👥]  [▾ All] 🔍 │  ← Toolbar
 ├──────────────────────────────────────────────┤
 │                                              │
 │ ▼  👤  Personal                              │  ← Auto-expanded
