@@ -93,6 +93,51 @@ All state flows through providers. No direct widget-to-widget communication.
 
 ---
 
+## Icon Library
+
+All widgets use **FontAwesome 6** icons (`font_awesome_flutter` package). Do not use Material Icons for UI elements.
+
+Icon colours must use theme palette tokens only — no custom hex values:
+
+| Context | Light token | Dark token |
+|---------|-------------|------------|
+| Primary/navigation | `AppColors.primary` | `AppColorsDark.primary` |
+| Documents/files | `AppColors.neutral700` | `AppColorsDark.neutral300` |
+| Data/tables | `AppColors.warning` | `AppColorsDark.warning` |
+| Workflows/pipelines | `AppColors.info` | `AppColorsDark.info` |
+| Muted/secondary | `AppColors.neutral500` | `AppColorsDark.neutral400` |
+| Default UI | `AppColors.neutral600` | `AppColorsDark.neutral400` |
+
+---
+
+## Text Overflow Convention
+
+Any item name in a list, tree, or table must use:
+
+```dart
+Flexible(
+  child: Text(
+    name,
+    overflow: TextOverflow.ellipsis,
+    maxLines: 1,
+  ),
+),
+```
+
+Never allow text to wrap or overflow its container.
+
+---
+
+## Inline Indicator Convention
+
+Status badges, chips, or icons displayed after an item name should:
+
+- Use `Flexible` (not `Expanded`) on the name text so indicators flow inline
+- Add `AppSpacing.sm` padding between the name and first indicator
+- NOT be pushed to the right edge with a `Spacer`
+
+---
+
 ## Theme Rules
 
 - Left panel and top bar / header panel: fully theme-aware (light + dark)

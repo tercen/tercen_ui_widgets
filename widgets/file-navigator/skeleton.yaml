@@ -1,0 +1,4 @@
+kind: window
+label: File Navigator
+description: File/folder navigator window for browsing the Tercen team/project/file hierarchy.
+design_reference: file-navigator-spec.md

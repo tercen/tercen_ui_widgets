@@ -6,20 +6,24 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'window_shell.dart';
 
-/// 48px toolbar with left-aligned action buttons.
+/// 48px toolbar with left-aligned action buttons and an optional trailing widget.
 ///
-/// All buttons flow left to right in a single group — no spacer split.
-/// Height matches the app header height (AppSpacing.headerHeight)
-/// for visual consistency.
+/// All buttons use primary accent styling per the Tercen style guide.
+/// Height matches the app header height (AppSpacing.headerHeight).
+///
+/// The optional [trailing] widget is placed after a spacer, right-aligned.
+/// Use it for search fields, dropdowns, or other non-button toolbar controls.
 class WindowToolbar extends StatelessWidget {
   final List<ToolbarAction> actions;
 
-  const WindowToolbar({super.key, required this.actions});
+  /// Optional widget placed after a flexible spacer (right-aligned).
+  /// Typically a [ToolbarSearchField] or similar control.
+  final Widget? trailing;
+
+  const WindowToolbar({super.key, required this.actions, this.trailing});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       height: WindowConstants.toolbarHeight,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
@@ -27,68 +31,35 @@ class WindowToolbar extends StatelessWidget {
         children: [
           for (int i = 0; i < actions.length; i++) ...[
             if (i > 0) const SizedBox(width: WindowConstants.toolbarGap),
-            _buildButton(context, actions[i], isDark),
+            actions[i].label != null
+                ? _LabeledToolbarButton(action: actions[i])
+                : _IconToolbarButton(action: actions[i]),
+          ],
+          if (trailing != null) ...[
+            const SizedBox(width: WindowConstants.toolbarGap),
+            const Spacer(),
+            trailing!,
           ],
         ],
       ),
     );
   }
-
-  Widget _buildButton(
-      BuildContext context, ToolbarAction action, bool isDark) {
-    final btnBg = action.isPrimary
-        ? (isDark ? AppColorsDark.primaryBg : AppColors.primaryBg)
-        : (isDark ? const Color(0xFF1F2937) : Colors.white);
-    final btnBorder = action.isPrimary
-        ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
-        : (isDark ? const Color(0xFF2D3343) : AppColors.neutral200);
-    final btnColor = action.isPrimary
-        ? (isDark ? AppColorsDark.primary : AppColors.primary)
-        : (isDark ? AppColorsDark.neutral400 : AppColors.neutral500);
-
-    if (action.label != null) {
-      return _LabeledToolbarButton(
-        icon: action.icon,
-        label: action.label!,
-        tooltip: action.tooltip,
-        onPressed: action.onPressed,
-        backgroundColor: btnBg,
-        borderColor: btnBorder,
-        foregroundColor: btnColor,
-        isDark: isDark,
-      );
-    }
-
-    return _IconToolbarButton(
-      icon: action.icon,
-      tooltip: action.tooltip,
-      onPressed: action.onPressed,
-      backgroundColor: btnBg,
-      borderColor: btnBorder,
-      foregroundColor: btnColor,
-      isDark: isDark,
-    );
-  }
 }
 
+/// Primary-accent icon-only toolbar button (36x36, 8px radius).
+///
+/// All buttons use primary accent styling (primaryBg background, primary icon,
+/// primarySurface border). The isPrimary field on ToolbarAction is retained for
+/// API compatibility but is effectively ignored — every button renders identically.
+///
+/// - Default: primaryBg background, primary icon, 1px primarySurface border
+/// - Disabled: transparent, neutral400/neutral600 icon, no hover
+/// - Hover: animated 150ms to primarySurface background
+/// - Focus: 2px primary ring with 2px offset
 class _IconToolbarButton extends StatefulWidget {
-  final IconData icon;
-  final String tooltip;
-  final VoidCallback? onPressed;
-  final Color backgroundColor;
-  final Color borderColor;
-  final Color foregroundColor;
-  final bool isDark;
+  final ToolbarAction action;
 
-  const _IconToolbarButton({
-    required this.icon,
-    required this.tooltip,
-    this.onPressed,
-    required this.backgroundColor,
-    required this.borderColor,
-    required this.foregroundColor,
-    required this.isDark,
-  });
+  const _IconToolbarButton({required this.action});
 
   @override
   State<_IconToolbarButton> createState() => _IconToolbarButtonState();
@@ -96,39 +67,92 @@ class _IconToolbarButton extends StatefulWidget {
 
 class _IconToolbarButtonState extends State<_IconToolbarButton> {
   bool _hovered = false;
+  late final FocusNode _focusNode;
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      if (mounted) setState(() => _focused = _focusNode.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final hoverBg = widget.isDark
-        ? const Color(0xFF2D3343)
-        : AppColors.neutral100;
-    final hoverColor = widget.isDark
-        ? AppColorsDark.neutral200
-        : AppColors.neutral700;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final action = widget.action;
+    final disabled = action.onPressed == null;
+
+    // Resolve colours based on variant and state.
+    final _ButtonColors colors = _resolveColors(
+      isDark: isDark,
+      isPrimary: action.isPrimary,
+      isDisabled: disabled,
+      isHovered: _hovered,
+    );
 
     return Tooltip(
-      message: widget.tooltip,
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onPressed,
-          child: Container(
-            width: WindowConstants.toolbarButtonSize,
-            height: WindowConstants.toolbarButtonSize,
-            decoration: BoxDecoration(
-              color: _hovered ? hoverBg : widget.backgroundColor,
-              border: Border.all(
-                color: widget.borderColor,
-                width: WindowConstants.toolbarButtonBorderWidth,
+      message: action.tooltip,
+      child: Focus(
+        focusNode: _focusNode,
+        child: MouseRegion(
+          cursor: disabled
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.click,
+          onEnter: disabled ? null : (_) => setState(() => _hovered = true),
+          onExit: disabled ? null : (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: action.onPressed,
+            child: Container(
+              width: WindowConstants.toolbarButtonSize,
+              height: WindowConstants.toolbarButtonSize,
+              decoration: _focused
+                  ? BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                          WindowConstants.toolbarButtonRadius + 2),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColorsDark.primary
+                            : AppColors.primary,
+                        width: 2.0,
+                      ),
+                    )
+                  : null,
+              padding: _focused ? const EdgeInsets.all(2.0) : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.ease,
+                width: _focused
+                    ? WindowConstants.toolbarButtonSize - 8
+                    : WindowConstants.toolbarButtonSize,
+                height: _focused
+                    ? WindowConstants.toolbarButtonSize - 8
+                    : WindowConstants.toolbarButtonSize,
+                decoration: BoxDecoration(
+                  color: colors.background,
+                  border: colors.borderColor != null
+                      ? Border.all(
+                          color: colors.borderColor!,
+                          width: WindowConstants.toolbarButtonBorderWidth,
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(
+                      WindowConstants.toolbarButtonRadius),
+                ),
+                child: Icon(
+                  action.icon,
+                  size: WindowConstants.toolbarButtonIconSize,
+                  color: colors.foreground,
+                ),
               ),
-              borderRadius: BorderRadius.circular(
-                  WindowConstants.toolbarButtonRadius),
-            ),
-            child: Icon(
-              widget.icon,
-              size: WindowConstants.toolbarButtonIconSize,
-              color: _hovered ? hoverColor : widget.foregroundColor,
             ),
           ),
         ),
@@ -137,26 +161,11 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
   }
 }
 
+/// Primary-accent labeled toolbar button (36px height, 8px radius, icon + text).
 class _LabeledToolbarButton extends StatefulWidget {
-  final IconData icon;
-  final String label;
-  final String tooltip;
-  final VoidCallback? onPressed;
-  final Color backgroundColor;
-  final Color borderColor;
-  final Color foregroundColor;
-  final bool isDark;
+  final ToolbarAction action;
 
-  const _LabeledToolbarButton({
-    required this.icon,
-    required this.label,
-    required this.tooltip,
-    this.onPressed,
-    required this.backgroundColor,
-    required this.borderColor,
-    required this.foregroundColor,
-    required this.isDark,
-  });
+  const _LabeledToolbarButton({required this.action});
 
   @override
   State<_LabeledToolbarButton> createState() => _LabeledToolbarButtonState();
@@ -164,55 +173,147 @@ class _LabeledToolbarButton extends StatefulWidget {
 
 class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
   bool _hovered = false;
+  late final FocusNode _focusNode;
+  bool _focused = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode = FocusNode();
+    _focusNode.addListener(() {
+      if (mounted) setState(() => _focused = _focusNode.hasFocus);
+    });
+  }
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final hoverBg = widget.isDark
-        ? const Color(0xFF2D3343)
-        : AppColors.neutral100;
-    final hoverColor = widget.isDark
-        ? AppColorsDark.neutral200
-        : AppColors.neutral700;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final action = widget.action;
+    final disabled = action.onPressed == null;
+
+    final _ButtonColors colors = _resolveColors(
+      isDark: isDark,
+      isPrimary: action.isPrimary,
+      isDisabled: disabled,
+      isHovered: _hovered,
+    );
 
     return Tooltip(
-      message: widget.tooltip,
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hovered = true),
-        onExit: (_) => setState(() => _hovered = false),
-        child: GestureDetector(
-          onTap: widget.onPressed,
-          child: Container(
-            height: WindowConstants.toolbarButtonSize,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            decoration: BoxDecoration(
-              color: _hovered ? hoverBg : widget.backgroundColor,
-              border: Border.all(
-                color: widget.borderColor,
-                width: WindowConstants.toolbarButtonBorderWidth,
+      message: action.tooltip,
+      child: Focus(
+        focusNode: _focusNode,
+        child: MouseRegion(
+          cursor: disabled
+              ? SystemMouseCursors.basic
+              : SystemMouseCursors.click,
+          onEnter: disabled ? null : (_) => setState(() => _hovered = true),
+          onExit: disabled ? null : (_) => setState(() => _hovered = false),
+          child: GestureDetector(
+            onTap: action.onPressed,
+            child: Container(
+              decoration: _focused
+                  ? BoxDecoration(
+                      borderRadius: BorderRadius.circular(
+                          WindowConstants.toolbarButtonRadius + 2),
+                      border: Border.all(
+                        color: isDark
+                            ? AppColorsDark.primary
+                            : AppColors.primary,
+                        width: 2.0,
+                      ),
+                    )
+                  : null,
+              padding: _focused ? const EdgeInsets.all(2.0) : null,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.ease,
+                height: _focused
+                    ? WindowConstants.toolbarButtonSize - 8
+                    : WindowConstants.toolbarButtonSize,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: colors.background,
+                  border: colors.borderColor != null
+                      ? Border.all(
+                          color: colors.borderColor!,
+                          width: WindowConstants.toolbarButtonBorderWidth,
+                        )
+                      : null,
+                  borderRadius: BorderRadius.circular(
+                      WindowConstants.toolbarButtonRadius),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      action.icon,
+                      size: WindowConstants.toolbarButtonIconSize,
+                      color: colors.foreground,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Text(
+                      action.label!,
+                      style: AppTextStyles.labelSmall.copyWith(
+                        color: colors.foreground,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              borderRadius: BorderRadius.circular(
-                  WindowConstants.toolbarButtonRadius),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  widget.icon,
-                  size: WindowConstants.toolbarButtonIconSize,
-                  color: _hovered ? hoverColor : widget.foregroundColor,
-                ),
-                const SizedBox(width: AppSpacing.xs),
-                Text(
-                  widget.label,
-                  style: AppTextStyles.labelSmall.copyWith(
-                    color: _hovered ? hoverColor : widget.foregroundColor,
-                  ),
-                ),
-              ],
             ),
           ),
         ),
       ),
     );
   }
+}
+
+// ── Colour resolution helper ──────────────────────────────────────────────────
+
+class _ButtonColors {
+  final Color background;
+  final Color foreground;
+  final Color? borderColor;
+
+  const _ButtonColors({
+    required this.background,
+    required this.foreground,
+    this.borderColor,
+  });
+}
+
+_ButtonColors _resolveColors({
+  required bool isDark,
+  // isPrimary is accepted for API compatibility but ignored — all buttons
+  // render with primary accent styling. See ToolbarAction.isPrimary comment.
+  required bool isPrimary,
+  required bool isDisabled,
+  required bool isHovered,
+}) {
+  // Disabled
+  if (isDisabled) {
+    return _ButtonColors(
+      background: Colors.transparent,
+      foreground: isDark ? AppColorsDark.neutral600 : AppColors.neutral400,
+      borderColor: null,
+    );
+  }
+
+  // All enabled buttons use primary accent styling.
+  final bg = isHovered
+      ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
+      : (isDark ? AppColorsDark.primaryBg : AppColors.primaryBg);
+  return _ButtonColors(
+    background: bg,
+    foreground: isDark ? AppColorsDark.primary : AppColors.primary,
+    borderColor:
+        isDark ? AppColorsDark.primarySurface : AppColors.primarySurface,
+  );
 }

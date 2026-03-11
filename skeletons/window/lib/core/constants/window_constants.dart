@@ -23,11 +23,18 @@ class WindowConstants {
 
   // ── Toolbar ──
   static const double toolbarHeight = AppSpacing.headerHeight; // 48px
-  static const double toolbarButtonSize = 32.0;
-  static const double toolbarButtonIconSize = 14.0;
-  static const double toolbarButtonRadius = AppSpacing.radiusSm;
+  static const double toolbarButtonSize = AppSpacing.controlHeight; // 36px
+  static const double toolbarButtonIconSize = 16.0;
+  static const double toolbarButtonRadius = AppSpacing.radiusMd; // 8px
   static const double toolbarButtonBorderWidth = AppLineWeights.lineSubtle;
   static const double toolbarGap = AppSpacing.sm;
+
+  // ── Widget size ──
+
+  /// Minimum widget width. Prevents layout overflow when embedded in narrow containers.
+  /// Derived from: 5 standard toolbar controls (5 * toolbarButtonSize) + 4 gaps (4 * toolbarGap) + toolbar padding (2 * sm).
+  /// Individual windows may override this if they have fewer/more toolbar controls.
+  static const double minWidgetWidth = 240.0;
 
   // ── Body ──
   static const double bodyStateIconSize = 32.0;

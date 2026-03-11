@@ -49,9 +49,85 @@ Skeleton at `skeletons/window/`. Key files:
 
 ---
 
-## Design Details
+## Toolbar Conventions
 
-To be defined as the window widget matures. Key areas to document:
+All toolbar buttons use primary accent styling (no ghost/secondary distinction). This ensures visual consistency across the toolbar.
+
+- **Button size:** 36px (`WindowConstants.toolbarButtonSize` = `AppSpacing.controlHeight`)
+- **Icon size:** 16px (`WindowConstants.toolbarButtonIconSize`)
+- **Border radius:** 8px (`WindowConstants.toolbarButtonRadius` = `AppSpacing.radiusMd`)
+- **Gap between buttons:** 8px (`WindowConstants.toolbarGap` = `AppSpacing.sm`)
+- **Toolbar height:** 48px (`WindowConstants.toolbarHeight` = `AppSpacing.headerHeight`)
+- **Minimum widget width:** 240px (`WindowConstants.minWidgetWidth`)
+- **Hover transition:** 150ms ease via `AnimatedContainer`
+- **Disabled buttons:** `onPressed: null`, muted icon colour, no hover effect
+
+### Toolbar layout
+
+```
+[Button] [Button] [Button] ...  [Trailing widgets (search, filter)]
+```
+
+Action buttons flow left-to-right. Non-button controls (search field, dropdowns) go in the trailing slot, pushed right by a Spacer.
+
+### Reusable search field
+
+The skeleton provides `ToolbarSearchField` — a responsive text field for toolbars:
+
+- Collapses to 36px (icon only) when narrow, expands up to configurable max width
+- FontAwesome magnifying glass prefix, xmark clear button
+- Accepts `onChanged` and optional `onClear` callbacks
+- See `lib/presentation/widgets/toolbar_search_field.dart`
+
+---
+
+## Icon Conventions
+
+All widgets use **FontAwesome 6** icons (`font_awesome_flutter` package), not Material Icons. This aligns with the Tercen style guide.
+
+### Icon colours
+
+Icons must use theme palette tokens only — no custom hex colours.
+
+| Context | Light | Dark |
+|---------|-------|------|
+| Navigation/structural | `AppColors.primary` | `AppColorsDark.primary` |
+| Files/documents | `AppColors.neutral700` | `AppColorsDark.neutral300` |
+| Data/tables | `AppColors.warning` | `AppColorsDark.warning` |
+| Workflows/pipelines | `AppColors.info` | `AppColorsDark.info` |
+| Muted/secondary | `AppColors.neutral500` | `AppColorsDark.neutral400` |
+
+---
+
+## Content Area Conventions
+
+### Text overflow
+
+Any item name in a list, tree, or table must use `Flexible` + `TextOverflow.ellipsis` + `maxLines: 1`. Never allow text to wrap or overflow.
+
+### Inline indicators
+
+Status badges, chips, and icons displayed after an item name should:
+
+- Use `Flexible` (not `Expanded`) on the name text
+- Flow inline after the name with `AppSpacing.sm` padding
+- NOT be pushed to the right edge with a `Spacer`
+
+### Toolbar text styling
+
+Text within toolbar controls (filter labels, search placeholder) must use `AppTextStyles.body` consistently.
+
+### Toolbar control tooltips
+
+All toolbar controls must have a `Tooltip`. For filter/dropdown controls, use "Filter" as the tooltip message. For action buttons, use the action name (e.g. "Upload", "Download").
+
+**Important:** For `PopupMenuButton`, pass the tooltip via the widget's own `tooltip` parameter — do NOT wrap it in a separate `Tooltip` widget. `PopupMenuButton` has an internal gesture detector that blocks external `Tooltip` widgets from receiving hover events.
+
+---
+
+## Design Details (Pending)
+
+Key areas still to document:
 
 - Orchestrator communication protocol (postMessage events)
 - LLM instruction interface

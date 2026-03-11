@@ -13,6 +13,7 @@ dependencies:
   get_it: ^8.0.3
   shared_preferences: ^2.2.2
   web: ^0.5.1
+  font_awesome_flutter: ^10.6.0
   # Tercen context API — required for Phase 3 (real data integration)
   # Provides R/Python-style ctx object: ctx.select(), ctx.cselect(), ctx.rselect()
   # Always use the latest version tag from https://github.com/tercen/sci_tercen_client
