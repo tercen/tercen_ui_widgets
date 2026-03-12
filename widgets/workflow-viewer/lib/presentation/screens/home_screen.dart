@@ -66,6 +66,28 @@ class HomeScreen extends StatelessWidget {
                           isPrimary: true,
                           onPressed: () => provider.executeAction(),
                         ),
+                        ToolbarAction(
+                          icon: FontAwesomeIcons.magnifyingGlassMinus,
+                          tooltip: 'Zoom out',
+                          onPressed: () => provider.zoomOut(),
+                        ),
+                        ToolbarAction(
+                          icon: FontAwesomeIcons.magnifyingGlassPlus,
+                          tooltip: 'Zoom in',
+                          onPressed: () => provider.zoomIn(),
+                        ),
+                        ToolbarAction(
+                          icon: FontAwesomeIcons.expand,
+                          tooltip: 'Fit to window',
+                          onPressed: () {
+                            final box =
+                                context.findRenderObject() as RenderBox?;
+                            if (box != null) {
+                              provider.zoomToFit(
+                                  box.size.width, box.size.height);
+                            }
+                          },
+                        ),
                       ],
                       toolbarTrailing: [
                         ToolbarSearchField(

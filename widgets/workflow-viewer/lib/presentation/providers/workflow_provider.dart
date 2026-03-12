@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'dart:ui' as ui;
 
-import 'package:flutter/foundation.dart';
-import 'package:flutter/painting.dart';
+import 'package:flutter/widgets.dart';
 import '../../di/service_locator.dart';
 import '../../domain/models/content_state.dart';
 import '../../domain/models/layout_node.dart';
@@ -65,6 +64,11 @@ class WorkflowProvider extends ChangeNotifier {
 
   Set<String> _searchMatches = {};
   Set<String> get searchMatches => _searchMatches;
+
+  // -- Zoom / pan --
+  final TransformationController transformController =
+      TransformationController();
+  bool initialFitApplied = false;
 
   // -- Inline rename --
   String? _editingNodeId;
@@ -1286,8 +1290,64 @@ class WorkflowProvider extends ChangeNotifier {
     );
   }
 
+  // -- Zoom controls --
+
+  static const double _zoomStep = 1.25;
+  static const double _minScale = 0.1;
+  static const double _maxScale = 5.0;
+
+  double get currentScale => transformController.value.getMaxScaleOnAxis();
+
+  void zoomIn() {
+    final scale = (currentScale * _zoomStep).clamp(_minScale, _maxScale);
+    _applyScale(scale);
+  }
+
+  void zoomOut() {
+    final scale = (currentScale / _zoomStep).clamp(_minScale, _maxScale);
+    _applyScale(scale);
+  }
+
+  void zoomToFit(double viewportWidth, double viewportHeight) {
+    if (_layoutNodes.isEmpty) return;
+
+    double maxX = 0;
+    double maxY = 0;
+    for (final node in _layoutNodes) {
+      final nw = node.width > 0 ? node.width : 40.0;
+      final nh = node.shapeHeight > 0 ? node.shapeHeight : 36.0;
+      final right = node.x + nw + 32;
+      final bottom = node.y + nh + 48;
+      if (right > maxX) maxX = right;
+      if (bottom > maxY) maxY = bottom;
+    }
+
+    if (maxX <= 0 || maxY <= 0) return;
+    final scaleX = viewportWidth / maxX;
+    final scaleY = viewportHeight / maxY;
+    final fitScale = (scaleX < scaleY ? scaleX : scaleY).clamp(_minScale, 1.0);
+    transformController.value = Matrix4.diagonal3Values(fitScale, fitScale, 1.0);
+    notifyListeners();
+  }
+
+  void _applyScale(double newScale) {
+    final matrix = transformController.value;
+    final oldScale = matrix.getMaxScaleOnAxis();
+    if (oldScale == 0) return;
+    final ratio = newScale / oldScale;
+    // Preserve current pan offset, only change scale
+    final tx = matrix.storage[12] * ratio;
+    final ty = matrix.storage[13] * ratio;
+    final m = Matrix4.diagonal3Values(newScale, newScale, 1.0);
+    m.storage[12] = tx;
+    m.storage[13] = ty;
+    transformController.value = m;
+    notifyListeners();
+  }
+
   @override
   void dispose() {
+    transformController.dispose();
     _commandSub?.cancel();
     _openWorkflowSub?.cancel();
     _stepStateSub?.cancel();

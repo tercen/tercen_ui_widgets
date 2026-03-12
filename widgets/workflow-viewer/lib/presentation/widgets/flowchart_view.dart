@@ -23,15 +23,7 @@ class _FlowchartViewState extends State<FlowchartView> {
   /// GlobalKeys for measuring each node's shape after layout.
   final Map<String, GlobalKey> _shapeKeys = {};
 
-  /// Ensures we only schedule one fitting callback per frame.
   bool _fittingScheduled = false;
-
-  /// Controller for InteractiveViewer zoom/pan.
-  final TransformationController _transformController =
-      TransformationController();
-
-  /// Track whether we've set the initial zoom-to-fit.
-  bool _initialFitApplied = false;
 
   GlobalKey _shapeKeyFor(String nodeId) {
     return _shapeKeys.putIfAbsent(nodeId, () => GlobalKey());
@@ -56,12 +48,6 @@ class _FlowchartViewState extends State<FlowchartView> {
         provider.fitMeasuredSizes(measured);
       }
     });
-  }
-
-  @override
-  void dispose() {
-    _transformController.dispose();
-    super.dispose();
   }
 
   @override
@@ -132,23 +118,21 @@ class _FlowchartViewState extends State<FlowchartView> {
           builder: (context, constraints) {
             // Calculate fit-to-window scale (only when fitted and content is known)
             if (provider.fitted &&
-                !_initialFitApplied &&
+                !provider.initialFitApplied &&
                 contentWidth > 0 &&
                 contentHeight > 0 &&
                 constraints.maxWidth > 0 &&
                 constraints.maxHeight > 0) {
-              final scaleX = constraints.maxWidth / contentWidth;
-              final scaleY = constraints.maxHeight / contentHeight;
-              final fitScale = (scaleX < scaleY ? scaleX : scaleY).clamp(0.2, 1.0);
-              _transformController.value = Matrix4.diagonal3Values(fitScale, fitScale, 1.0);
-              _initialFitApplied = true;
+              provider.zoomToFit(constraints.maxWidth, constraints.maxHeight);
+              provider.initialFitApplied = true;
             }
 
             return InteractiveViewer(
-              transformationController: _transformController,
+              transformationController: provider.transformController,
               boundaryMargin: const EdgeInsets.all(double.infinity),
-              minScale: 0.2,
-              maxScale: 2.0,
+              minScale: 0.1,
+              maxScale: 5.0,
+              scaleFactor: 800.0,
               constrained: false,
               child: SizedBox(
                 width: contentWidth,
@@ -298,6 +282,8 @@ class _ConnectorPainter extends CustomPainter {
       ..strokeWidth = AppLineWeights.vizHighlight
       ..style = PaintingStyle.stroke;
 
+    // Two-pass rendering: default connectors first, highlighted on top
+    for (final pass in [false, true]) {
     for (final link in links) {
       final from = nodeMap[link.outputStepId];
       final to = nodeMap[link.inputStepId];
@@ -305,6 +291,7 @@ class _ConnectorPainter extends CustomPainter {
 
       final isHighlighted =
           focusedPath.contains(from.id) && focusedPath.contains(to.id);
+      if (isHighlighted != pass) continue;
       final paint = isHighlighted ? highlightPaint : defaultPaint;
 
       // Get exit port from source
@@ -377,6 +364,7 @@ class _ConnectorPainter extends CustomPainter {
 
       canvas.drawPath(path, paint);
     }
+    } // end pass loop
   }
 
   @override

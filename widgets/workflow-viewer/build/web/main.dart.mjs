@@ -652,9 +652,9 @@ class CompiledApp {
       _1569: Function.prototype.call.bind(BigInt.prototype.toString),
       _1570: Function.prototype.call.bind(Number.prototype.toString),
       _1571: (d, digits) => d.toFixed(digits),
-      _3374: () => globalThis.window,
-      _3709: x0 => x0.localStorage,
-      _4142: x0 => x0.length,
+      _3378: () => globalThis.window,
+      _3713: x0 => x0.localStorage,
+      _4146: x0 => x0.length,
 
     };
 
