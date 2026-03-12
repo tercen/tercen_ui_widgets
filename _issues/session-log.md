@@ -50,3 +50,14 @@
 - [pattern] Followed file-navigator spec structure (20 sections) adapted for flowchart widget: replaced tree hierarchy with step type matrix, tree view with layout algorithm, upload with execution control
 - [pattern] Toolbar pattern differs from file-navigator: 2 controls (1 stateful action button + search) vs 6 controls. Action button has 6 states driven by focus target + step state.
 - Completed workflow-viewer-spec.md v1.0 with 20 sections, 11 step types, 4 states, full EventBus contract
+## Session: 2026-03-11 — Phase 2 (workflow-viewer)
+
+- Starting Phase 2 mock build for workflow-viewer window widget
+- [fixed] StepState name collision with Flutter's material.dart StepState -- used `hide StepState` on material import in flowchart_node.dart
+- [pattern] Flowchart rendered via Stack of positioned widgets + CustomPaint for elbow connectors, inside nested SingleChildScrollView (X+Y)
+- [pattern] Layout algorithm: topological sort on links, row assignment by step kind rules, ViewSteps share parent row, JoinSteps at half-space
+- [pattern] Mock data service builds 65-step reference workflow matching stage.tercen.com spec (5 groups, 2 tables, 1 join, ~30 data steps, ~15 views, export)
+- [workaround] Hexagon shape uses ClipPath + custom painter for border since BoxDecoration border does not follow clip
+- [pattern] Action button state derived from aggregate step states when workflow root focused, individual step state when step focused
+- [pattern] Slow double-click rename: tracks lastClickTime, triggers edit if 500-2000ms between clicks on already-focused node
+- Build verified: flutter build web --wasm succeeded
