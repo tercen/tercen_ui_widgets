@@ -42,6 +42,15 @@ class LayoutNode {
   double x;
   double y;
 
+  /// Estimated width in pixels (set during layout, includes labels).
+  double width = 0;
+
+  /// Shape-only width for connector attachment points.
+  double shapeWidth = 0;
+
+  /// Shape-only height for connector attachment points.
+  double shapeHeight = 0;
+
   LayoutNode({
     required this.step,
     required this.displayStyle,

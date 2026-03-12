@@ -68,7 +68,6 @@ class HomeScreen extends StatelessWidget {
                         ),
                       ],
                       toolbarTrailing: [
-                        const Spacer(),
                         ToolbarSearchField(
                           hintText: 'Search steps...',
                           onChanged: (value) =>

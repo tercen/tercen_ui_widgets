@@ -16,8 +16,9 @@ import '../providers/workflow_provider.dart';
 /// click interactions, hover tooltips, and inline rename.
 class FlowchartNode extends StatefulWidget {
   final LayoutNode node;
+  final GlobalKey? shapeKey;
 
-  const FlowchartNode({super.key, required this.node});
+  const FlowchartNode({super.key, required this.node, this.shapeKey});
 
   @override
   State<FlowchartNode> createState() => _FlowchartNodeState();
@@ -113,34 +114,49 @@ class _FlowchartNodeState extends State<FlowchartNode> {
         break;
     }
 
-    // Wrap with label outside for icon display style
+    // Wrap shape with measurement key if provided
+    if (widget.shapeKey != null) {
+      shapeWidget = KeyedSubtree(key: widget.shapeKey!, child: shapeWidget);
+    }
+
+    // Wrap with label for icon display style
     Widget result;
     if (node.displayStyle == DisplayStyle.icon &&
         node.nameDisplay == NameDisplay.labelOutside) {
+      final isWorkflowRoot = node.kind == StepKind.workflow ||
+          node.kind == StepKind.groupStep;
       final textColor = isDark
-          ? AppColorsDark.textSecondary
-          : AppColors.textSecondary;
-      result = Column(
+          ? (isWorkflowRoot
+              ? AppColorsDark.textPrimary
+              : AppColorsDark.textSecondary)
+          : (isWorkflowRoot
+              ? AppColors.textPrimary
+              : AppColors.textSecondary);
+      final textStyle = isWorkflowRoot
+          ? AppTextStyles.h3.copyWith(
+              color: textColor,
+              fontWeight: isFocused ? FontWeight.w700 : FontWeight.w600,
+            )
+          : AppTextStyles.bodySmall.copyWith(
+              color: textColor,
+              fontWeight: isFocused ? FontWeight.w600 : FontWeight.w400,
+            );
+
+      // All labelOutside steps: label to the right of shape
+      result = Row(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           shapeWidget,
-          const SizedBox(height: 2),
+          const SizedBox(width: 6),
           if (isEditing)
             _buildInlineEditor(node, provider, isDark)
           else
-            ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 120),
-              child: Text(
-                node.name,
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: textColor,
-                  fontWeight:
-                      isFocused ? FontWeight.w600 : FontWeight.w400,
-                ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+            Text(
+              node.name,
+              style: textStyle,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
             ),
         ],
       );
@@ -148,8 +164,16 @@ class _FlowchartNodeState extends State<FlowchartNode> {
       result = shapeWidget;
     }
 
-    // Tooltip for hover-only names
-    if (node.nameDisplay == NameDisplay.hoverOnly) {
+    // Tooltip when name may be truncated (box display with constrained width)
+    // or for any labelOutside that could overflow
+    final needsTooltip = node.nameDisplay == NameDisplay.hoverOnly ||
+        (node.displayStyle == DisplayStyle.box &&
+            node.shape == NodeShape.roundedRect &&
+            node.name.length > 18) ||
+        (node.displayStyle == DisplayStyle.box &&
+            node.shape == NodeShape.hexagon90 &&
+            node.name.length > 30);
+    if (needsTooltip) {
       result = Tooltip(
         message: node.name,
         child: result,
@@ -243,8 +267,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     final isRunning = node.state == StepState.running;
 
     return Container(
-      width: 36,
-      height: 36,
+      width: 48,
+      height: 48,
       decoration: BoxDecoration(
         color: fill,
         shape: BoxShape.circle,
@@ -253,14 +277,14 @@ class _FlowchartNodeState extends State<FlowchartNode> {
       child: Center(
         child: isRunning
             ? SizedBox(
-                width: 16,
-                height: 16,
+                width: 20,
+                height: 20,
                 child: CircularProgressIndicator(
                   strokeWidth: AppLineWeights.lineEmphasis,
                   valueColor: AlwaysStoppedAnimation<Color>(iconColor),
                 ),
               )
-            : FaIcon(icon, size: 14, color: iconColor),
+            : FaIcon(icon, size: 18, color: iconColor),
       ),
     );
   }
@@ -283,7 +307,7 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     return Container(
       height: 36,
       constraints: const BoxConstraints(minWidth: 80, maxWidth: 180),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: fill,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -335,8 +359,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     final isRunning = node.state == StepState.running;
 
     return Container(
-      width: 28,
-      height: 28,
+      width: 36,
+      height: 36,
       decoration: BoxDecoration(
         color: fill,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -345,14 +369,14 @@ class _FlowchartNodeState extends State<FlowchartNode> {
       child: Center(
         child: isRunning
             ? SizedBox(
-                width: 12,
-                height: 12,
+                width: 14,
+                height: 14,
                 child: CircularProgressIndicator(
                   strokeWidth: AppLineWeights.lineEmphasis,
                   valueColor: AlwaysStoppedAnimation<Color>(iconColor),
                 ),
               )
-            : FaIcon(icon, size: 12, color: iconColor),
+            : FaIcon(icon, size: 14, color: iconColor),
       ),
     );
   }
@@ -374,58 +398,56 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     final showName = node.displayStyle == DisplayStyle.box &&
         node.nameDisplay == NameDisplay.alwaysVisible;
 
-    return ClipPath(
-      clipper: _Hexagon90Clipper(),
-      child: Container(
-        height: 40,
-        constraints: BoxConstraints(
-          minWidth: showName ? 80 : 40,
-          maxWidth: showName ? 180 : 40,
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: fill,
-        ),
-        foregroundDecoration: BoxDecoration(
-          border: Border.all(color: borderColor, width: borderWidth),
-          // The border won't clip to the hexagon, so we draw it via the painter
-          color: Colors.transparent,
-        ),
-        child: CustomPaint(
-          painter: _HexagonBorderPainter(
-            color: borderColor,
-            strokeWidth: borderWidth,
+    return SizedBox(
+      height: 36,
+      child: IntrinsicWidth(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minWidth: showName ? 60 : 36,
           ),
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                if (isRunning)
-                  SizedBox(
-                    width: 14,
-                    height: 14,
-                    child: CircularProgressIndicator(
-                      strokeWidth: AppLineWeights.lineEmphasis,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(iconColor),
-                    ),
-                  )
-                else
-                  FaIcon(icon, size: 14, color: iconColor),
-                if (showName) ...[
-                  const SizedBox(width: AppSpacing.xs),
-                  Flexible(
-                    child: Text(
-                      node.name,
-                      style: AppTextStyles.bodySmall
-                          .copyWith(color: textColor),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+          child: CustomPaint(
+            painter: _HexagonFillPainter(
+              fill: fill,
+              borderColor: borderColor,
+              borderWidth: borderWidth,
+            ),
+            child: ClipPath(
+              clipper: _Hexagon90Clipper(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: showName ? 14.0 : 4.0,
+                ),
+                child: Center(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if (isRunning)
+                        SizedBox(
+                          width: 14,
+                          height: 14,
+                          child: CircularProgressIndicator(
+                            strokeWidth: AppLineWeights.lineEmphasis,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(iconColor),
+                          ),
+                        )
+                      else
+                        FaIcon(icon, size: 14, color: iconColor),
+                      if (showName) ...[
+                        const SizedBox(width: 4),
+                        Text(
+                          node.name,
+                          style: AppTextStyles.bodySmall
+                              .copyWith(color: textColor),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ],
                   ),
-                ],
-              ],
+                ),
+              ),
             ),
           ),
         ),
@@ -498,20 +520,23 @@ class _Hexagon90Clipper extends CustomClipper<Path> {
   bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
 }
 
-/// Paints a hexagon border (since BoxDecoration border doesn't follow ClipPath).
-class _HexagonBorderPainter extends CustomPainter {
-  final Color color;
-  final double strokeWidth;
+/// Paints a hexagon with fill and border (avoids ClipPath bleed on web).
+class _HexagonFillPainter extends CustomPainter {
+  final Color fill;
+  final Color borderColor;
+  final double borderWidth;
 
-  _HexagonBorderPainter({required this.color, required this.strokeWidth});
+  _HexagonFillPainter({
+    required this.fill,
+    required this.borderColor,
+    required this.borderWidth,
+  });
 
-  @override
-  void paint(Canvas canvas, Size size) {
+  Path _hexPath(Size size) {
     final w = size.width;
     final h = size.height;
     final pointOffset = h * 0.25;
-
-    final path = Path()
+    return Path()
       ..moveTo(w / 2, 0)
       ..lineTo(w, pointOffset)
       ..lineTo(w, h - pointOffset)
@@ -519,16 +544,29 @@ class _HexagonBorderPainter extends CustomPainter {
       ..lineTo(0, h - pointOffset)
       ..lineTo(0, pointOffset)
       ..close();
-
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = strokeWidth
-      ..style = PaintingStyle.stroke;
-
-    canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(_HexagonBorderPainter oldDelegate) =>
-      oldDelegate.color != color || oldDelegate.strokeWidth != strokeWidth;
+  void paint(Canvas canvas, Size size) {
+    final path = _hexPath(size);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = fill
+        ..style = PaintingStyle.fill,
+    );
+    canvas.drawPath(
+      path,
+      Paint()
+        ..color = borderColor
+        ..strokeWidth = borderWidth
+        ..style = PaintingStyle.stroke,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_HexagonFillPainter oldDelegate) =>
+      oldDelegate.fill != fill ||
+      oldDelegate.borderColor != borderColor ||
+      oldDelegate.borderWidth != borderWidth;
 }

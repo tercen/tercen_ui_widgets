@@ -1,6 +1,9 @@
 import 'dart:async';
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 import '../../di/service_locator.dart';
 import '../../domain/models/content_state.dart';
 import '../../domain/models/layout_node.dart';
@@ -139,8 +142,8 @@ class WorkflowProvider extends ChangeNotifier {
 
     try {
       _workflow = await _dataService.fetchWorkflow(
-        'abefdbb9bafdfd191f735d19689d53d1',
-        'bdd5a7d79e8808876678026cd3001c46',
+        '2cdf2d2d4f0adbadc5f95636b10e2cd9',
+        '2cdf2d2d4f0adbadc5f95636b10e6b08',
       );
       if (_workflow == null || _workflow!.steps.isEmpty) {
         _contentState = ContentState.empty;
@@ -161,12 +164,55 @@ class WorkflowProvider extends ChangeNotifier {
 
   // -- Layout computation --
 
+  /// Meta layout types that drive positioning rules.
+  /// - entrypoint: always col 1, row +1
+  /// - pathway: diagonal (+1 row, +1 col)
+  /// - connector: diagonal (+1 row, +1 col), connect-back from secondary chains
+  /// - output: same row as parent, +1 col
+  static _LayoutMeta _metaType(StepKind kind) {
+    switch (kind) {
+      case StepKind.workflow:
+      case StepKind.tableStep:
+      case StepKind.inStep:
+        return _LayoutMeta.entrypoint;
+      case StepKind.dataStep:
+      case StepKind.meltStep:
+      case StepKind.wizardStep:
+        return _LayoutMeta.pathway;
+      case StepKind.joinStep:
+        return _LayoutMeta.connector;
+      case StepKind.groupStep:
+      case StepKind.viewStep:
+      case StepKind.outStep:
+      case StepKind.exportStep:
+        return _LayoutMeta.output;
+    }
+  }
+
   void _buildLayout() {
     if (_workflow == null) return;
-
+    _fitted = false;
     _layoutNodes = [];
 
-    // Add workflow root at col 0, row 0
+    final steps = _workflow!.steps;
+    final links = _workflow!.links;
+
+    // Build adjacency: parentMap[id] = steps feeding INTO id
+    //                   childMap[id] = steps consuming FROM id
+    final parentMap = <String, List<String>>{};
+    final childMap = <String, List<String>>{};
+    final stepMap = <String, StepModel>{};
+    for (final s in steps) {
+      parentMap[s.id] = [];
+      childMap[s.id] = [];
+      stepMap[s.id] = s;
+    }
+    for (final link in links) {
+      parentMap[link.inputStepId]?.add(link.outputStepId);
+      childMap[link.outputStepId]?.add(link.inputStepId);
+    }
+
+    // 1. Synthetic workflow root at (0, 0)
     final rootStep = StepModel(
       id: 'workflow-root',
       name: _workflow!.name,
@@ -174,205 +220,409 @@ class WorkflowProvider extends ChangeNotifier {
       kind: StepKind.workflow,
       state: _deriveWorkflowState(),
     );
-
+    final rootConfig = _getDisplayConfig(StepKind.workflow);
     _layoutNodes.add(LayoutNode(
       step: rootStep,
-      displayStyle: DisplayStyle.icon,
-      shape: NodeShape.circleBadge,
-      nameDisplay: NameDisplay.labelOutside,
-      editableName: true,
+      displayStyle: rootConfig.displayStyle,
+      shape: rootConfig.shape,
+      nameDisplay: rootConfig.nameDisplay,
+      editableName: rootConfig.editableName,
       row: 0,
-      col: 0,
+      col: 0, // Header row, outside the grid columns
     ));
 
-    // Get top-level steps in pipeline order (following links)
-    final topLevelSteps = _workflow!.steps
-        .where((s) => s.groupId.isEmpty)
-        .toList();
+    // 2. Find main spine (longest entry→terminal path)
+    final mainSpine = _findMainSpine(steps, stepMap, parentMap, childMap);
+    final placed = <String>{};
 
-    final processed = <String>{};
-    final ordered = _topologicalSort(topLevelSteps, _workflow!.links);
+    // 3. Layout main spine diagonally
+    double maxRow = 0;
+    for (int i = 0; i < mainSpine.length; i++) {
+      final step = mainSpine[i];
+      final config = _getDisplayConfig(step.kind);
 
-    // Layout top-level steps in col 1, each on the next available row
-    int nextRow = 1;
-    for (final step in ordered) {
-      if (processed.contains(step.id)) continue;
-      nextRow = _layoutStep(step, nextRow, 1, processed);
+      double row = 0;
+      double col = 0;
+
+      if (i == 0) {
+        row = 1;
+        col = 1;
+      } else {
+        final prevNode = _findLayoutNode(mainSpine[i - 1].id)!;
+        final meta = _metaType(step.kind);
+        if (meta == _LayoutMeta.entrypoint) {
+          row = prevNode.row + 1;
+          col = 1;
+        } else {
+          // All non-entrypoint steps: diagonal +1 row, +1 col
+          row = prevNode.row + 1;
+          col = prevNode.col + 1;
+        }
+      }
+
+      _layoutNodes.add(LayoutNode(
+        step: step,
+        displayStyle: config.displayStyle,
+        shape: config.shape,
+        nameDisplay: config.nameDisplay,
+        editableName: config.editableName,
+        row: row,
+        col: col,
+      ));
+      placed.add(step.id);
+      if (row > maxRow) maxRow = row;
     }
 
-    // Compute pixel positions from grid
+    // 4. Layout secondary chains (for each join on spine, find non-spine inputs)
+    double nextRow = maxRow + 1;
+    for (final step in mainSpine) {
+      if (_metaType(step.kind) != _LayoutMeta.connector) continue;
+      final inputIds = parentMap[step.id] ?? [];
+      for (final inputId in inputIds) {
+        if (placed.contains(inputId)) continue;
+        final chain =
+            _walkChainBackward(inputId, stepMap, parentMap, placed);
+        _layoutChain(chain, nextRow, placed);
+        nextRow += chain.length;
+      }
+    }
+
+    // 5. Place remaining unplaced steps (ViewSteps, isolated nodes, etc.)
+    for (final step in steps) {
+      if (placed.contains(step.id)) continue;
+      final config = _getDisplayConfig(step.kind);
+
+      if (step.kind == StepKind.viewStep) {
+        final parentIds = parentMap[step.id] ?? [];
+        if (parentIds.isNotEmpty) {
+          final parentNode = _findLayoutNode(parentIds.first);
+          if (parentNode != null) {
+            final existingViews = _layoutNodes
+                .where((n) =>
+                    n.kind == StepKind.viewStep &&
+                    (n.row - parentNode.row).abs() < 0.5)
+                .length;
+            _layoutNodes.add(LayoutNode(
+              step: step,
+              displayStyle: config.displayStyle,
+              shape: config.shape,
+              nameDisplay: config.nameDisplay,
+              editableName: config.editableName,
+              row: parentNode.row,
+              col: parentNode.col + 1 + existingViews,
+            ));
+            placed.add(step.id);
+            continue;
+          }
+        }
+      }
+
+      // Fallback for any unplaced step
+      _layoutNodes.add(LayoutNode(
+        step: step,
+        displayStyle: config.displayStyle,
+        shape: config.shape,
+        nameDisplay: config.nameDisplay,
+        editableName: config.editableName,
+        row: nextRow,
+        col: 1,
+      ));
+      placed.add(step.id);
+      nextRow++;
+    }
+
     _computePixelPositions();
   }
 
-  List<StepModel> _topologicalSort(
-      List<StepModel> steps, List<LinkModel> links) {
-    final stepMap = {for (final s in steps) s.id: s};
-    final inDegree = <String, int>{};
-    final adjacency = <String, List<String>>{};
+  /// Find the longest path from any entry to any terminal node.
+  /// This becomes the main spine that is laid out first.
+  List<StepModel> _findMainSpine(
+    List<StepModel> steps,
+    Map<String, StepModel> stepMap,
+    Map<String, List<String>> parentMap,
+    Map<String, List<String>> childMap,
+  ) {
+    // Terminal nodes have no children
+    final terminals =
+        steps.where((s) => childMap[s.id]?.isEmpty ?? true).toList();
+    if (terminals.isEmpty) return steps;
 
-    for (final s in steps) {
-      inDegree[s.id] = 0;
-      adjacency[s.id] = [];
+    List<StepModel> longest = [];
+    for (final terminal in terminals) {
+      final path = _longestPathTo(terminal.id, stepMap, parentMap);
+      if (path.length > longest.length) longest = path;
     }
-
-    for (final link in links) {
-      if (stepMap.containsKey(link.inputStepId) &&
-          stepMap.containsKey(link.outputStepId)) {
-        adjacency[link.outputStepId]!.add(link.inputStepId);
-        inDegree[link.inputStepId] =
-            (inDegree[link.inputStepId] ?? 0) + 1;
-      }
-    }
-
-    final queue = <String>[];
-    for (final entry in inDegree.entries) {
-      if (entry.value == 0) queue.add(entry.key);
-    }
-
-    final result = <StepModel>[];
-    while (queue.isNotEmpty) {
-      final id = queue.removeAt(0);
-      if (stepMap.containsKey(id)) {
-        result.add(stepMap[id]!);
-      }
-      for (final next in (adjacency[id] ?? [])) {
-        inDegree[next] = (inDegree[next] ?? 1) - 1;
-        if (inDegree[next] == 0) queue.add(next);
-      }
-    }
-
-    // Add any remaining steps not in sort (isolated nodes)
-    for (final s in steps) {
-      if (!result.any((r) => r.id == s.id)) {
-        result.add(s);
-      }
-    }
-
-    return result;
+    return longest;
   }
 
-  /// Layout a step on the grid. Returns the next available row.
-  ///
-  /// Grid rules:
-  /// - Sequential steps stack downward (row + 1), same column.
-  /// - GroupStep header on its own row; children indented one column right.
-  /// - ViewSteps placed to the right of their parent on the SAME row.
-  /// - JoinStep occupies its own row at the current column.
-  int _layoutStep(
-      StepModel step, int currentRow, int col, Set<String> processed) {
-    if (processed.contains(step.id)) return currentRow;
-    processed.add(step.id);
+  /// Recursively find the longest path ending at [stepId],
+  /// choosing the longest branch at each join.
+  List<StepModel> _longestPathTo(
+    String stepId,
+    Map<String, StepModel> stepMap,
+    Map<String, List<String>> parentMap,
+  ) {
+    final step = stepMap[stepId];
+    if (step == null) return [];
 
-    final config = _getDisplayConfig(step.kind);
+    final parentIds = parentMap[stepId] ?? [];
+    if (parentIds.isEmpty) return [step];
 
-    // ── ViewSteps: same row as parent, column to the right ──
-    if (step.kind == StepKind.viewStep) {
-      // Find the parent node (the outputStepId in the link to this view)
-      final parentLink = _workflow!.links
-          .where((l) => l.inputStepId == step.id)
-          .toList();
-      if (parentLink.isNotEmpty) {
-        final parentNode = _findLayoutNode(parentLink.first.outputStepId);
-        if (parentNode != null) {
-          // Count how many views are already attached to this parent
-          final existingViews = _layoutNodes
-              .where((n) =>
-                  n.kind == StepKind.viewStep &&
-                  n.row == parentNode.row)
-              .length;
+    List<StepModel> longestParent = [];
+    for (final pid in parentIds) {
+      final path = _longestPathTo(pid, stepMap, parentMap);
+      if (path.length > longestParent.length) longestParent = path;
+    }
+    return [...longestParent, step];
+  }
 
-          _layoutNodes.add(LayoutNode(
-            step: step,
-            displayStyle: config.displayStyle,
-            shape: config.shape,
-            nameDisplay: config.nameDisplay,
-            editableName: config.editableName,
-            row: parentNode.row.toDouble(),
-            col: parentNode.col + 1 + existingViews,
-          ));
-          return currentRow; // Views don't consume a row
+  /// Walk backward from [startId] collecting unplaced steps
+  /// until reaching an entry point or an already-placed step.
+  List<StepModel> _walkChainBackward(
+    String startId,
+    Map<String, StepModel> stepMap,
+    Map<String, List<String>> parentMap,
+    Set<String> alreadyPlaced,
+  ) {
+    final chain = <StepModel>[];
+    String? currentId = startId;
+
+    while (currentId != null) {
+      if (alreadyPlaced.contains(currentId)) break;
+      final step = stepMap[currentId];
+      if (step == null) break;
+      chain.add(step);
+      final pids = parentMap[currentId] ?? [];
+      currentId = pids.isEmpty ? null : pids.first;
+    }
+
+    return chain.reversed.toList();
+  }
+
+  /// Layout a chain of steps starting at [startRow], col 1.
+  void _layoutChain(
+    List<StepModel> chain,
+    double startRow,
+    Set<String> placed,
+  ) {
+    for (int i = 0; i < chain.length; i++) {
+      final step = chain[i];
+      if (placed.contains(step.id)) continue;
+
+      final config = _getDisplayConfig(step.kind);
+
+      double row = 0;
+      double col = 0;
+
+      if (i == 0) {
+        row = startRow;
+        col = 1;
+      } else {
+        final prev = _findLayoutNode(chain[i - 1].id)!;
+        final meta = _metaType(step.kind);
+        if (meta == _LayoutMeta.entrypoint) {
+          row = prev.row + 1;
+          col = 1;
+        } else {
+          // All non-entrypoint steps: diagonal +1 row, +1 col
+          row = prev.row + 1;
+          col = prev.col + 1;
         }
       }
-      // Fallback if no parent found
+
       _layoutNodes.add(LayoutNode(
         step: step,
         displayStyle: config.displayStyle,
         shape: config.shape,
         nameDisplay: config.nameDisplay,
         editableName: config.editableName,
-        row: currentRow.toDouble(),
-        col: col.toDouble() + 1,
+        row: row,
+        col: col,
       ));
-      return currentRow;
+      placed.add(step.id);
     }
-
-    // ── GroupStep: header row, then children indented one column ──
-    if (step.kind == StepKind.groupStep) {
-      _layoutNodes.add(LayoutNode(
-        step: step,
-        displayStyle: config.displayStyle,
-        shape: config.shape,
-        nameDisplay: config.nameDisplay,
-        editableName: config.editableName,
-        row: currentRow.toDouble(),
-        col: col.toDouble(),
-      ));
-      int nextRow = currentRow + 1;
-
-      // Layout children inside this group, indented one column
-      final children = _workflow!.steps
-          .where((s) => s.groupId == step.id)
-          .toList();
-      final orderedChildren =
-          _topologicalSort(children, _workflow!.links);
-
-      for (final child in orderedChildren) {
-        if (processed.contains(child.id)) continue;
-        nextRow = _layoutStep(child, nextRow, col + 1, processed);
-      }
-
-      return nextRow;
-    }
-
-    // ── JoinStep: own row, same column ──
-    // (accepts inputs from left, output goes down)
-    if (step.kind == StepKind.joinStep) {
-      _layoutNodes.add(LayoutNode(
-        step: step,
-        displayStyle: config.displayStyle,
-        shape: config.shape,
-        nameDisplay: config.nameDisplay,
-        editableName: config.editableName,
-        row: currentRow.toDouble(),
-        col: col.toDouble(),
-      ));
-      return currentRow + 1;
-    }
-
-    // ── Default (TableStep, DataStep, InStep, OutStep, etc.) ──
-    _layoutNodes.add(LayoutNode(
-      step: step,
-      displayStyle: config.displayStyle,
-      shape: config.shape,
-      nameDisplay: config.nameDisplay,
-      editableName: config.editableName,
-      row: currentRow.toDouble(),
-      col: col.toDouble(),
-    ));
-
-    return currentRow + 1;
   }
 
   void _computePixelPositions() {
-    const double rowHeight = 56.0;
-    const double colWidth = 200.0;
-    const double marginX = 40.0;
-    const double marginY = 24.0;
+    const double gap = 16.0;
+    const double rowHeight = 48.0;
+    const double marginX = 8.0;
+    const double marginY = 8.0;
+    const double headerHeight = 56.0; // Height of workflow header row
+
+    // Estimate each node's width and shape dimensions
+    for (final node in _layoutNodes) {
+      node.width = _estimateNodeWidth(node);
+      final shapeDims = _shapeSize(node);
+      node.shapeWidth = shapeDims.$1;
+      node.shapeHeight = shapeDims.$2;
+    }
+
+    // Find max column (exclude col 0 which is the header)
+    int maxCol = 0;
+    for (final node in _layoutNodes) {
+      final c = node.col.toInt();
+      if (c > maxCol) maxCol = c;
+    }
+
+    // Compute column widths using shapeWidth (exclude header col 0)
+    final colWidths = List.filled(maxCol + 1, 36.0);
+    for (final node in _layoutNodes) {
+      if (node.col.toInt() == 0) continue; // Skip header
+      final c = node.col.toInt();
+      final w = node.shapeWidth > 0 ? node.shapeWidth : 36.0;
+      if (w > colWidths[c]) colWidths[c] = w;
+    }
+
+    // Cumulative x positions per column
+    final colX = List.filled(maxCol + 1, 0.0);
+    colX[0] = marginX;
+    for (int c = 1; c <= maxCol; c++) {
+      colX[c] = colX[c - 1] + colWidths[c - 1] + gap;
+    }
 
     for (final node in _layoutNodes) {
-      node.x = marginX + node.col * colWidth;
-      node.y = marginY + node.row * rowHeight;
+      if (node.kind == StepKind.workflow) {
+        // Header row: left-aligned with grid col 1, vertically centered
+        node.x = colX.length > 1 ? colX[1] : marginX;
+        node.y = marginY + (headerHeight - node.shapeHeight) / 2;
+      } else {
+        node.x = colX[node.col.toInt()];
+        node.y = headerHeight + node.row * rowHeight;
+      }
     }
+  }
+
+  /// Whether a fitting pass has already been applied for the current layout.
+  bool _fitted = false;
+  bool get fitted => _fitted;
+
+  /// Apply measured sizes from the rendered widgets and recompute positions.
+  /// Called by FlowchartView after the first frame to correct estimates.
+  void fitMeasuredSizes(Map<String, Size> measuredSizes) {
+    bool changed = false;
+    for (final node in _layoutNodes) {
+      final measured = measuredSizes[node.id];
+      if (measured == null) continue;
+      final mw = measured.width;
+      final mh = measured.height;
+      if ((mw - node.shapeWidth).abs() > 1 ||
+          (mh - node.shapeHeight).abs() > 1) {
+        node.shapeWidth = mw;
+        node.shapeHeight = mh;
+        changed = true;
+      }
+    }
+    if (changed) {
+      _recomputePixelPositions();
+    }
+    _fitted = true;
+    notifyListeners();
+  }
+
+  /// Recompute only pixel positions (not row/col assignments) using
+  /// current shapeWidth/shapeHeight values.
+  void _recomputePixelPositions() {
+    const double gap = 16.0;
+    const double rowHeight = 48.0;
+    const double marginX = 8.0;
+    const double marginY = 8.0;
+    const double headerHeight = 56.0;
+
+    int maxCol = 0;
+    for (final node in _layoutNodes) {
+      final c = node.col.toInt();
+      if (c > maxCol) maxCol = c;
+    }
+
+    final colWidths = List.filled(maxCol + 1, 36.0);
+    for (final node in _layoutNodes) {
+      if (node.col.toInt() == 0) continue; // Skip header
+      final c = node.col.toInt();
+      final w = node.shapeWidth > 0 ? node.shapeWidth : 36.0;
+      if (w > colWidths[c]) colWidths[c] = w;
+    }
+
+    final colX = List.filled(maxCol + 1, 0.0);
+    colX[0] = marginX;
+    for (int c = 1; c <= maxCol; c++) {
+      colX[c] = colX[c - 1] + colWidths[c - 1] + gap;
+    }
+
+    for (final node in _layoutNodes) {
+      if (node.kind == StepKind.workflow) {
+        node.x = colX.length > 1 ? colX[1] : marginX;
+        node.y = marginY + (headerHeight - node.shapeHeight) / 2;
+      } else {
+        node.x = colX[node.col.toInt()];
+        node.y = headerHeight + node.row * rowHeight;
+      }
+    }
+  }
+
+  /// Measure text width using TextPainter for accurate shape sizing.
+  static double _measureText(String text, double fontSize) {
+    final tp = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(fontSize: fontSize),
+      ),
+      maxLines: 1,
+      textDirection: ui.TextDirection.ltr,
+    )..layout();
+    final w = tp.width;
+    tp.dispose();
+    return w;
+  }
+
+  /// Returns (shapeWidth, shapeHeight) — the actual shape dimensions
+  /// for connector attachment, NOT including external labels.
+  static (double, double) _shapeSize(LayoutNode node) {
+    switch (node.shape) {
+      case NodeShape.circleBadge:
+        return (48.0, 48.0);
+      case NodeShape.roundedSquare:
+        return (36.0, 36.0);
+      case NodeShape.hexagon90:
+        if (node.displayStyle == DisplayStyle.box) {
+          // icon(14) + gap(4) + text + horizontal padding(14*2=28)
+          final textW = _measureText(node.name, 12.0);
+          final w = (textW + 36).clamp(60.0, 300.0);
+          return (w, 36.0);
+        }
+        return (36.0, 36.0);
+      case NodeShape.roundedRect:
+        if (node.nameDisplay == NameDisplay.alwaysVisible) {
+          // padding(4) + icon(14) + gap(4) + text + padding(4) = 26 + text
+          final textW = _measureText(node.name, 12.0);
+          final w = (textW + 26).clamp(80.0, 180.0);
+          return (w, 36.0);
+        }
+        return (80.0, 36.0);
+    }
+  }
+
+  /// Estimate rendered width of a node for column sizing (includes labels).
+  static double _estimateNodeWidth(LayoutNode node) {
+    if (node.displayStyle == DisplayStyle.icon) {
+      if (node.shape == NodeShape.roundedSquare) return 36.0;
+      if (node.shape == NodeShape.hexagon90) return 36.0;
+      // circleBadge: workflow/group has label to the right (Row)
+      if (node.nameDisplay == NameDisplay.labelOutside) {
+        if (node.kind == StepKind.workflow ||
+            node.kind == StepKind.groupStep) {
+          // Circle(48) + gap(8) + text (h3 = 16px)
+          final textW = _measureText(node.name, 16.0);
+          return 56 + textW;
+        }
+        // Other circleBadges: label below, column width = max(circle, text)
+        final textW = _measureText(node.name, 12.0);
+        return textW > 48 ? textW : 48.0;
+      }
+      return 48.0;
+    }
+    // Box display: use shape width
+    return _shapeSize(node).$1;
   }
 
   _DisplayConfig _getDisplayConfig(StepKind kind) {
@@ -402,7 +652,7 @@ class WorkflowProvider extends ChangeNotifier {
         return _DisplayConfig(
           displayStyle: DisplayStyle.icon,
           shape: NodeShape.hexagon90,
-          nameDisplay: NameDisplay.alwaysVisible,
+          nameDisplay: NameDisplay.labelOutside,
           editableName: true,
         );
       case StepKind.dataStep:
@@ -416,7 +666,7 @@ class WorkflowProvider extends ChangeNotifier {
         return _DisplayConfig(
           displayStyle: DisplayStyle.icon,
           shape: NodeShape.circleBadge,
-          nameDisplay: NameDisplay.hoverOnly,
+          nameDisplay: NameDisplay.labelOutside,
           editableName: true,
         );
       case StepKind.inStep:
@@ -430,7 +680,7 @@ class WorkflowProvider extends ChangeNotifier {
         return _DisplayConfig(
           displayStyle: DisplayStyle.icon,
           shape: NodeShape.roundedSquare,
-          nameDisplay: NameDisplay.hoverOnly,
+          nameDisplay: NameDisplay.labelOutside,
           editableName: false,
         );
       case StepKind.meltStep:
@@ -442,9 +692,9 @@ class WorkflowProvider extends ChangeNotifier {
         );
       case StepKind.exportStep:
         return _DisplayConfig(
-          displayStyle: DisplayStyle.box,
-          shape: NodeShape.roundedRect,
-          nameDisplay: NameDisplay.alwaysVisible,
+          displayStyle: DisplayStyle.icon,
+          shape: NodeShape.roundedSquare,
+          nameDisplay: NameDisplay.labelOutside,
           editableName: true,
         );
       case StepKind.wizardStep:
@@ -692,9 +942,13 @@ class WorkflowProvider extends ChangeNotifier {
         .where((l) => l.inputStepId == targetId)
         .toList();
 
+    bool found = false;
+    // Follow ALL parent links (not just the first match) so that
+    // join steps highlight every incoming branch.
     for (final link in parentLinks) {
-      if (_buildPathToNode(link.outputStepId, path)) return true;
+      if (_buildPathToNode(link.outputStepId, path)) found = true;
     }
+    if (found) return true;
 
     // Also check if this step is inside a group
     final node = _findLayoutNode(targetId);
@@ -791,6 +1045,8 @@ class WorkflowProvider extends ChangeNotifier {
     super.dispose();
   }
 }
+
+enum _LayoutMeta { entrypoint, pathway, connector, output }
 
 class _DisplayConfig {
   final DisplayStyle displayStyle;
