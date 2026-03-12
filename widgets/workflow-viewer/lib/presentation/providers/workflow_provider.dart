@@ -250,33 +250,59 @@ class WorkflowProvider extends ChangeNotifier {
       final meta = _metaType(step.kind);
 
       // Before placing this spine step (except the first), check if the
-      // previous spine step has output-type children (View, Output, Export)
-      // not on the spine. Place those first so they appear above pathway
-      // continuations.
+      // previous spine step has non-spine children. Place them first,
+      // sorted by: output-type first, then ascending descendant count.
+      // This ensures leaf branches appear above deep spine continuations.
       if (i > 0) {
         final prevStep = mainSpine[i - 1];
         final prevChildren = childMap[prevStep.id] ?? [];
-        final outputSiblings = prevChildren.where((cid) {
+        final nonSpineSiblings = prevChildren.where((cid) {
           if (placed.contains(cid)) return false;
           if (spineIds.contains(cid)) return false;
-          final s = stepMap[cid];
-          return s != null && _metaType(s.kind) == _LayoutMeta.output;
+          return stepMap.containsKey(cid);
         }).toList();
-        for (final sibId in outputSiblings) {
-          final sib = stepMap[sibId]!;
-          final sibConfig = _getDisplayConfig(sib.kind);
-          final prevNode = _findLayoutNode(prevStep.id)!;
-          _layoutNodes.add(LayoutNode(
-            step: sib,
-            displayStyle: sibConfig.displayStyle,
-            shape: sibConfig.shape,
-            nameDisplay: sibConfig.nameDisplay,
-            editableName: sibConfig.editableName,
-            row: nextRow,
-            col: prevNode.col + 1,
-          ));
-          placed.add(sibId);
-          nextRow++;
+
+        // Sort: output-type first, then by ascending descendant count
+        nonSpineSiblings.sort((a, b) {
+          final metaA = _metaType(stepMap[a]!.kind);
+          final metaB = _metaType(stepMap[b]!.kind);
+          final isOutputA = metaA == _LayoutMeta.output ? 0 : 1;
+          final isOutputB = metaB == _LayoutMeta.output ? 0 : 1;
+          if (isOutputA != isOutputB) return isOutputA.compareTo(isOutputB);
+          final da = _countDescendants(a, childMap, {});
+          final db = _countDescendants(b, childMap, {});
+          return da.compareTo(db);
+        });
+
+        final prevNode = _findLayoutNode(prevStep.id)!;
+        for (final sibId in nonSpineSiblings) {
+          if (placed.contains(sibId)) continue;
+          // Walk the forward chain from this sibling
+          final chain =
+              _walkChainForward(sibId, stepMap, childMap, placed);
+          for (int ci = 0; ci < chain.length; ci++) {
+            final chainStep = chain[ci];
+            if (placed.contains(chainStep.id)) continue;
+            final cConfig = _getDisplayConfig(chainStep.kind);
+            double col;
+            if (ci == 0) {
+              col = prevNode.col + 1;
+            } else {
+              final prev = _findLayoutNode(chain[ci - 1].id)!;
+              col = prev.col + 1;
+            }
+            _layoutNodes.add(LayoutNode(
+              step: chainStep,
+              displayStyle: cConfig.displayStyle,
+              shape: cConfig.shape,
+              nameDisplay: cConfig.nameDisplay,
+              editableName: cConfig.editableName,
+              row: nextRow,
+              col: col,
+            ));
+            placed.add(chainStep.id);
+            nextRow++;
+          }
         }
       }
 

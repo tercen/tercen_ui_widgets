@@ -11,7 +11,8 @@ class MockDataService implements DataService {
   /// 'rnaseq'     = RNAseq Data Connector (11 steps, 2 joins)
   /// 'crabs'      = Crabs Workflow (5 steps, fan-out, no joins)
   /// 'cluster'    = Cluster Interpretation (11 steps, deep fan-out, InStep entry)
-  static const String _activeWorkflow = 'cluster';
+  /// 'test22'     = test 22 (22 steps, 8-way fan-out, join, melt, views)
+  static const String _activeWorkflow = 'test22';
 
   @override
   Future<WorkflowModel> fetchWorkflow(
@@ -23,6 +24,9 @@ class MockDataService implements DataService {
         break;
       case 'cluster':
         _cached = _buildClusterInterpretation();
+        break;
+      case 'test22':
+        _cached = _buildTest22Workflow();
         break;
       default:
         _cached = _buildRnaseqWorkflow();
@@ -281,6 +285,184 @@ class MockDataService implements DataService {
       id: '4acc795d-f726-4538-8f3f-d3682b4c80c4',
       name: 'Cluster Interpretation',
       projectId: '6056012f5d0da9ea7fe076190c3244b4',
+      steps: steps,
+      links: links,
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // test 22 — from stage.tercen.com (martin.english personal)
+  // ID: 333e3ae3f7953437b6431c61f802eea5
+  //
+  // 22 steps, 2 entrypoints, 1 join, 1 melt, 3 views, 8-way fan-out from PCA:
+  //
+  //   Cell Ranger Data → QC step → QC filters → Find variable → PCA ──→ View PCA Results → View 3
+  //                                                                   ├──→ SNN Clustering ──→ View clusters
+  //                                                                   │                   └──→ Diff analysis ──→ View DE Markers
+  //                                                                   │                                       └──→ Join (← README.md) → Gather → Data step 5 → View 5
+  //                                                                   ├──→ Data step
+  //                                                                   ├──→ Data step 1
+  //                                                                   ├──→ Data step 2 → View 4
+  //                                                                   ├──→ Data step 3
+  //                                                                   └──→ Data step 4
+  // ═══════════════════════════════════════════════════════════════════
+
+  WorkflowModel _buildTest22Workflow() {
+    final steps = <StepModel>[];
+    final links = <LinkModel>[];
+
+    // ── Entrypoints ──
+
+    steps.add(StepModel(
+      id: '1c782532', name: 'Cell Ranger Data', groupId: '',
+      kind: StepKind.tableStep, state: StepState.done,
+    ));
+    steps.add(StepModel(
+      id: '3cbbfaa7', name: 'README.md', groupId: '',
+      kind: StepKind.tableStep, state: StepState.done,
+    ));
+
+    // ── Main spine: Cell Ranger → QC → ... → PCA ──
+
+    steps.add(StepModel(
+      id: 'c45b2c6d', name: 'QC step', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'c45b2c6d', outputStepId: '1c782532'));
+
+    steps.add(StepModel(
+      id: 'b576ee55', name: 'QC filters and normalization', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'b576ee55', outputStepId: 'c45b2c6d'));
+
+    steps.add(StepModel(
+      id: 'cbc89c44', name: 'Find variable features', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'cbc89c44', outputStepId: 'b576ee55'));
+
+    steps.add(StepModel(
+      id: '571e2a12', name: 'PCA on 2K most variable genes', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: '571e2a12', outputStepId: 'cbc89c44'));
+
+    // ── Fan-out from PCA (8 children) ──
+
+    steps.add(StepModel(
+      id: 'c8c16d44', name: 'View PCA Results', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'c8c16d44', outputStepId: '571e2a12'));
+
+    steps.add(StepModel(
+      id: 'ca1777ef', name: 'SNN Graph Clustering', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'ca1777ef', outputStepId: '571e2a12'));
+
+    steps.add(StepModel(
+      id: 'a1b9e796', name: 'Data step', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'a1b9e796', outputStepId: '571e2a12'));
+
+    steps.add(StepModel(
+      id: 'd707d3b1', name: 'Data step 1', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'd707d3b1', outputStepId: '571e2a12'));
+
+    steps.add(StepModel(
+      id: 'e79df6d6', name: 'Data step 2', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'e79df6d6', outputStepId: '571e2a12'));
+
+    steps.add(StepModel(
+      id: 'fd8e47f4', name: 'Data step 3', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'fd8e47f4', outputStepId: '571e2a12'));
+
+    steps.add(StepModel(
+      id: 'c1aac962', name: 'Data step 4', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'c1aac962', outputStepId: '571e2a12'));
+
+    // ── View PCA Results → View 3 (ViewStep) ──
+
+    steps.add(StepModel(
+      id: '3cae27c9', name: 'View 3', groupId: '',
+      kind: StepKind.viewStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: '3cae27c9', outputStepId: 'c8c16d44'));
+
+    // ── SNN Clustering fan-out ──
+
+    steps.add(StepModel(
+      id: '2a1cf509', name: 'View clusters', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: '2a1cf509', outputStepId: 'ca1777ef'));
+
+    steps.add(StepModel(
+      id: 'bf643020', name: 'Differential analysis - find markers', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'bf643020', outputStepId: 'ca1777ef'));
+
+    // ── Diff analysis fan-out ──
+
+    steps.add(StepModel(
+      id: '6279eddd', name: 'View Differentially Expressed Markers', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: '6279eddd', outputStepId: 'bf643020'));
+
+    // ── Join: Diff analysis + README.md ──
+
+    steps.add(StepModel(
+      id: '6b29c369', name: 'Join', groupId: '',
+      kind: StepKind.joinStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: '6b29c369', outputStepId: 'bf643020'));
+    links.add(const LinkModel(inputStepId: '6b29c369', outputStepId: '3cbbfaa7'));
+
+    // ── Join → Gather → Data step 5 → View 5 ──
+
+    steps.add(StepModel(
+      id: 'e0c6c7a6', name: 'Gather', groupId: '',
+      kind: StepKind.meltStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'e0c6c7a6', outputStepId: '6b29c369'));
+
+    steps.add(StepModel(
+      id: '1f581e6c', name: 'Data step 5', groupId: '',
+      kind: StepKind.dataStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: '1f581e6c', outputStepId: 'e0c6c7a6'));
+
+    steps.add(StepModel(
+      id: 'f57359f8', name: 'View 5', groupId: '',
+      kind: StepKind.viewStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'f57359f8', outputStepId: '1f581e6c'));
+
+    // ── Data step 2 → View 4 ──
+
+    steps.add(StepModel(
+      id: 'd0f092e2', name: 'View 4', groupId: '',
+      kind: StepKind.viewStep, state: StepState.done,
+    ));
+    links.add(const LinkModel(inputStepId: 'd0f092e2', outputStepId: 'e79df6d6'));
+
+    return WorkflowModel(
+      id: '333e3ae3f7953437b6431c61f802eea5',
+      name: 'test 22',
+      projectId: 'martin-english-personal',
       steps: steps,
       links: links,
     );

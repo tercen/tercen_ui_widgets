@@ -26,6 +26,13 @@ class _FlowchartViewState extends State<FlowchartView> {
   /// Ensures we only schedule one fitting callback per frame.
   bool _fittingScheduled = false;
 
+  /// Controller for InteractiveViewer zoom/pan.
+  final TransformationController _transformController =
+      TransformationController();
+
+  /// Track whether we've set the initial zoom-to-fit.
+  bool _initialFitApplied = false;
+
   GlobalKey _shapeKeyFor(String nodeId) {
     return _shapeKeys.putIfAbsent(nodeId, () => GlobalKey());
   }
@@ -52,6 +59,12 @@ class _FlowchartViewState extends State<FlowchartView> {
   }
 
   @override
+  void dispose() {
+    _transformController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final provider = context.watch<WorkflowProvider>();
     final nodes = provider.layoutNodes;
@@ -74,6 +87,9 @@ class _FlowchartViewState extends State<FlowchartView> {
       if (right > maxX) maxX = right;
       if (bottom > maxY) maxY = bottom;
     }
+
+    final contentWidth = maxX;
+    final contentHeight = maxY;
 
     return Focus(
       autofocus: true,
@@ -112,14 +128,31 @@ class _FlowchartViewState extends State<FlowchartView> {
       },
       child: GestureDetector(
         onTap: () => provider.clearFocus(),
-        child: Align(
-          alignment: Alignment.topLeft,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SingleChildScrollView(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate fit-to-window scale (only when fitted and content is known)
+            if (provider.fitted &&
+                !_initialFitApplied &&
+                contentWidth > 0 &&
+                contentHeight > 0 &&
+                constraints.maxWidth > 0 &&
+                constraints.maxHeight > 0) {
+              final scaleX = constraints.maxWidth / contentWidth;
+              final scaleY = constraints.maxHeight / contentHeight;
+              final fitScale = (scaleX < scaleY ? scaleX : scaleY).clamp(0.2, 1.0);
+              _transformController.value = Matrix4.diagonal3Values(fitScale, fitScale, 1.0);
+              _initialFitApplied = true;
+            }
+
+            return InteractiveViewer(
+              transformationController: _transformController,
+              boundaryMargin: const EdgeInsets.all(double.infinity),
+              minScale: 0.2,
+              maxScale: 2.0,
+              constrained: false,
               child: SizedBox(
-                width: maxX,
-                height: maxY,
+                width: contentWidth,
+                height: contentHeight,
                 child: CustomPaint(
                   painter: _ConnectorPainter(
                     nodes: nodes,
@@ -142,8 +175,8 @@ class _FlowchartViewState extends State<FlowchartView> {
                   ),
                 ),
               ),
-            ),
-          ),
+            );
+          },
         ),
       ),
     );
