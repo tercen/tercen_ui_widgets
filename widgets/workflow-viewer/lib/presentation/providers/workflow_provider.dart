@@ -235,55 +235,85 @@ class WorkflowProvider extends ChangeNotifier {
     final mainSpine = _findMainSpine(steps, stepMap, parentMap, childMap);
     final placed = <String>{};
 
-    // 3. Layout main spine diagonally
-    double maxRow = 0;
+    // 3. Interleaved layout: walk the main spine, but when we hit a join,
+    //    lay out its secondary chains first, then place the join below them.
+    //    This ensures all connectors flow downward.
+    double nextRow = 1;
+    // Track the primary-pipeline column for each spine step
+    double nextCol = 1;
+
     for (int i = 0; i < mainSpine.length; i++) {
       final step = mainSpine[i];
       final config = _getDisplayConfig(step.kind);
+      final meta = _metaType(step.kind);
 
-      double row = 0;
-      double col = 0;
-
-      if (i == 0) {
-        row = 1;
-        col = 1;
-      } else {
-        final prevNode = _findLayoutNode(mainSpine[i - 1].id)!;
-        final meta = _metaType(step.kind);
-        if (meta == _LayoutMeta.entrypoint) {
-          row = prevNode.row + 1;
-          col = 1;
-        } else {
-          // All non-entrypoint steps: diagonal +1 row, +1 col
-          row = prevNode.row + 1;
-          col = prevNode.col + 1;
+      if (meta == _LayoutMeta.connector) {
+        // This is a join step. Before placing it, lay out secondary chains.
+        final inputIds = parentMap[step.id] ?? [];
+        for (final inputId in inputIds) {
+          if (placed.contains(inputId)) continue;
+          final chain =
+              _walkChainBackward(inputId, stepMap, parentMap, placed);
+          _layoutChain(chain, nextRow, placed);
+          nextRow += chain.length;
         }
-      }
-
-      _layoutNodes.add(LayoutNode(
-        step: step,
-        displayStyle: config.displayStyle,
-        shape: config.shape,
-        nameDisplay: config.nameDisplay,
-        editableName: config.editableName,
-        row: row,
-        col: col,
-      ));
-      placed.add(step.id);
-      if (row > maxRow) maxRow = row;
-    }
-
-    // 4. Layout secondary chains (for each join on spine, find non-spine inputs)
-    double nextRow = maxRow + 1;
-    for (final step in mainSpine) {
-      if (_metaType(step.kind) != _LayoutMeta.connector) continue;
-      final inputIds = parentMap[step.id] ?? [];
-      for (final inputId in inputIds) {
-        if (placed.contains(inputId)) continue;
-        final chain =
-            _walkChainBackward(inputId, stepMap, parentMap, placed);
-        _layoutChain(chain, nextRow, placed);
-        nextRow += chain.length;
+        // Place the join below the deepest secondary parent
+        _layoutNodes.add(LayoutNode(
+          step: step,
+          displayStyle: config.displayStyle,
+          shape: config.shape,
+          nameDisplay: config.nameDisplay,
+          editableName: config.editableName,
+          row: nextRow,
+          col: nextCol,
+        ));
+        placed.add(step.id);
+        nextRow++;
+        nextCol++;
+      } else if (i == 0) {
+        // First step on spine
+        _layoutNodes.add(LayoutNode(
+          step: step,
+          displayStyle: config.displayStyle,
+          shape: config.shape,
+          nameDisplay: config.nameDisplay,
+          editableName: config.editableName,
+          row: nextRow,
+          col: nextCol,
+        ));
+        placed.add(step.id);
+        nextRow++;
+        nextCol++;
+      } else {
+        // Non-join spine step
+        if (meta == _LayoutMeta.entrypoint) {
+          // Entrypoints reset to col 1
+          _layoutNodes.add(LayoutNode(
+            step: step,
+            displayStyle: config.displayStyle,
+            shape: config.shape,
+            nameDisplay: config.nameDisplay,
+            editableName: config.editableName,
+            row: nextRow,
+            col: 1,
+          ));
+          placed.add(step.id);
+          nextRow++;
+          nextCol = 2; // Next non-entrypoint will be col 2
+        } else {
+          _layoutNodes.add(LayoutNode(
+            step: step,
+            displayStyle: config.displayStyle,
+            shape: config.shape,
+            nameDisplay: config.nameDisplay,
+            editableName: config.editableName,
+            row: nextRow,
+            col: nextCol,
+          ));
+          placed.add(step.id);
+          nextRow++;
+          nextCol++;
+        }
       }
     }
 
@@ -605,8 +635,22 @@ class WorkflowProvider extends ChangeNotifier {
   /// Estimate rendered width of a node for column sizing (includes labels).
   static double _estimateNodeWidth(LayoutNode node) {
     if (node.displayStyle == DisplayStyle.icon) {
-      if (node.shape == NodeShape.roundedSquare) return 36.0;
-      if (node.shape == NodeShape.hexagon90) return 36.0;
+      if (node.shape == NodeShape.roundedSquare) {
+        if (node.nameDisplay == NameDisplay.labelOutside) {
+          // Square(36) + gap(6) + text
+          final textW = _measureText(node.name, 12.0);
+          return 42 + textW;
+        }
+        return 36.0;
+      }
+      if (node.shape == NodeShape.hexagon90) {
+        if (node.nameDisplay == NameDisplay.labelOutside) {
+          // Hexagon(36) + gap(6) + text
+          final textW = _measureText(node.name, 12.0);
+          return 42 + textW;
+        }
+        return 36.0;
+      }
       // circleBadge: workflow/group has label to the right (Row)
       if (node.nameDisplay == NameDisplay.labelOutside) {
         if (node.kind == StepKind.workflow ||
