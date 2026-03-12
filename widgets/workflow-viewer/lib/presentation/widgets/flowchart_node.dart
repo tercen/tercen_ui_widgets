@@ -265,10 +265,14 @@ class _FlowchartNodeState extends State<FlowchartNode> {
   }) {
     final icon = _iconForKind(node.kind);
     final isRunning = node.state == StepState.running;
+    // Header (workflow) badge is 48px; all others are 36px
+    final isHeader = node.kind == StepKind.workflow;
+    final size = isHeader ? 48.0 : 36.0;
+    final iconSize = isHeader ? 18.0 : 14.0;
 
     return Container(
-      width: 48,
-      height: 48,
+      width: size,
+      height: size,
       decoration: BoxDecoration(
         color: fill,
         shape: BoxShape.circle,
@@ -284,7 +288,7 @@ class _FlowchartNodeState extends State<FlowchartNode> {
                   valueColor: AlwaysStoppedAnimation<Color>(iconColor),
                 ),
               )
-            : FaIcon(icon, size: 18, color: iconColor),
+            : FaIcon(icon, size: iconSize, color: iconColor),
       ),
     );
   }

@@ -242,10 +242,43 @@ class WorkflowProvider extends ChangeNotifier {
     // Track the primary-pipeline column for each spine step
     double nextCol = 1;
 
+    final spineIds = mainSpine.map((s) => s.id).toSet();
+
     for (int i = 0; i < mainSpine.length; i++) {
       final step = mainSpine[i];
       final config = _getDisplayConfig(step.kind);
       final meta = _metaType(step.kind);
+
+      // Before placing this spine step (except the first), check if the
+      // previous spine step has output-type children (View, Output, Export)
+      // not on the spine. Place those first so they appear above pathway
+      // continuations.
+      if (i > 0) {
+        final prevStep = mainSpine[i - 1];
+        final prevChildren = childMap[prevStep.id] ?? [];
+        final outputSiblings = prevChildren.where((cid) {
+          if (placed.contains(cid)) return false;
+          if (spineIds.contains(cid)) return false;
+          final s = stepMap[cid];
+          return s != null && _metaType(s.kind) == _LayoutMeta.output;
+        }).toList();
+        for (final sibId in outputSiblings) {
+          final sib = stepMap[sibId]!;
+          final sibConfig = _getDisplayConfig(sib.kind);
+          final prevNode = _findLayoutNode(prevStep.id)!;
+          _layoutNodes.add(LayoutNode(
+            step: sib,
+            displayStyle: sibConfig.displayStyle,
+            shape: sibConfig.shape,
+            nameDisplay: sibConfig.nameDisplay,
+            editableName: sibConfig.editableName,
+            row: nextRow,
+            col: prevNode.col + 1,
+          ));
+          placed.add(sibId);
+          nextRow++;
+        }
+      }
 
       if (meta == _LayoutMeta.connector) {
         // This is a join step. Before placing it, lay out secondary chains.
@@ -553,8 +586,16 @@ class WorkflowProvider extends ChangeNotifier {
             children.where((cid) => !placed.contains(cid)).toList();
         if (unplacedChildren.isEmpty) continue;
 
-        // Sort: leaf nodes first (0 descendants), then by ascending depth
+        // Sort: output-type children (View, Output, Export) first,
+        // then by ascending descendant count (leaf nodes before deep chains)
         unplacedChildren.sort((a, b) {
+          final stepA = stepMap[a]!;
+          final stepB = stepMap[b]!;
+          final metaA = _metaType(stepA.kind);
+          final metaB = _metaType(stepB.kind);
+          final isOutputA = metaA == _LayoutMeta.output ? 0 : 1;
+          final isOutputB = metaB == _LayoutMeta.output ? 0 : 1;
+          if (isOutputA != isOutputB) return isOutputA.compareTo(isOutputB);
           final da = _countDescendants(a, childMap, {});
           final db = _countDescendants(b, childMap, {});
           return da.compareTo(db);
@@ -747,7 +788,9 @@ class WorkflowProvider extends ChangeNotifier {
   static (double, double) _shapeSize(LayoutNode node) {
     switch (node.shape) {
       case NodeShape.circleBadge:
-        return (48.0, 48.0);
+        // Header (workflow) badge is 48px; all others are 36px
+        if (node.kind == StepKind.workflow) return (48.0, 48.0);
+        return (36.0, 36.0);
       case NodeShape.roundedSquare:
         return (36.0, 36.0);
       case NodeShape.hexagon90:
@@ -796,11 +839,12 @@ class WorkflowProvider extends ChangeNotifier {
           final textW = _measureText(node.name, 16.0);
           return 56 + textW;
         }
-        // Other circleBadges: label below, column width = max(circle, text)
+        // Other circleBadges (36px): label below, column width = max(circle, text)
         final textW = _measureText(node.name, 12.0);
-        return textW > 48 ? textW : 48.0;
+        return textW > 36 ? textW : 36.0;
       }
-      return 48.0;
+      // Header badge 48, others 36
+      return (node.kind == StepKind.workflow) ? 48.0 : 36.0;
     }
     // Box display: use shape width
     return _shapeSize(node).$1;

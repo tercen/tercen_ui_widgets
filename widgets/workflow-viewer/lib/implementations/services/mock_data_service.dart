@@ -8,9 +8,10 @@ class MockDataService implements DataService {
   WorkflowModel? _cached;
 
   /// Which workflow to display.
-  /// 'rnaseq' = RNAseq Data Connector (11 steps, 2 joins)
-  /// 'crabs'  = Crabs Workflow (5 steps, fan-out, no joins)
-  static const String _activeWorkflow = 'crabs';
+  /// 'rnaseq'     = RNAseq Data Connector (11 steps, 2 joins)
+  /// 'crabs'      = Crabs Workflow (5 steps, fan-out, no joins)
+  /// 'cluster'    = Cluster Interpretation (11 steps, deep fan-out, InStep entry)
+  static const String _activeWorkflow = 'cluster';
 
   @override
   Future<WorkflowModel> fetchWorkflow(
@@ -19,6 +20,9 @@ class MockDataService implements DataService {
     switch (_activeWorkflow) {
       case 'crabs':
         _cached = _buildCrabsWorkflow();
+        break;
+      case 'cluster':
+        _cached = _buildClusterInterpretation();
         break;
       default:
         _cached = _buildRnaseqWorkflow();
@@ -110,6 +114,173 @@ class MockDataService implements DataService {
       id: 'f062cb164c337a519d8cf050c2f323f2',
       name: 'Crabs Workflow',
       projectId: 'b8bf50d6a3865a60a0bc0dd4e352ebcb',
+      steps: steps,
+      links: links,
+    );
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // Cluster Interpretation — group step from Flow Immunophenotyping
+  // Workflow: 6056012f5d0da9ea7fe076190c3244b4
+  // Group:    4acc795d-f726-4538-8f3f-d3682b4c80c4
+  //
+  // 11 steps, deep fan-out, InStep entry point:
+  //
+  //   Input ──→ Marker Enrichment Score ──→ Enrichment Heatmap ──→ Ordered Enrichment Heatmap ──→ View
+  //                                     │                                                      └──→ Cluster Markers ──→ View
+  //                                     │                                                                            └──→ Cluster Profiles ──→ Output
+  //                                     │                                                                                                   └──→ View
+  //                                     └──→ Marker expression per cluster
+  // ═══════════════════════════════════════════════════════════════════
+
+  WorkflowModel _buildClusterInterpretation() {
+    final steps = <StepModel>[];
+    final links = <LinkModel>[];
+
+    // ── Entry point (InStep) ──
+
+    steps.add(StepModel(
+      id: 'b7f8d18e',
+      name: 'Input',
+      groupId: '4acc795d',
+      kind: StepKind.inStep,
+      state: StepState.done,
+    ));
+
+    // ── Main spine ──
+
+    steps.add(StepModel(
+      id: 'd9faca40',
+      name: 'Marker Enrichment Score',
+      groupId: '4acc795d',
+      kind: StepKind.dataStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: 'd9faca40',
+      outputStepId: 'b7f8d18e',
+    ));
+
+    steps.add(StepModel(
+      id: '89e2c483',
+      name: 'Enrichment Heatmap',
+      groupId: '4acc795d',
+      kind: StepKind.dataStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '89e2c483',
+      outputStepId: 'd9faca40',
+    ));
+
+    steps.add(StepModel(
+      id: '50ba414c',
+      name: 'Ordered Enrichment Heatmap',
+      groupId: '4acc795d',
+      kind: StepKind.dataStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '50ba414c',
+      outputStepId: '89e2c483',
+    ));
+
+    // ── Fan-out from Ordered Enrichment Heatmap ──
+
+    steps.add(StepModel(
+      id: '7ee10b97',
+      name: 'View',
+      groupId: '4acc795d',
+      kind: StepKind.viewStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '7ee10b97',
+      outputStepId: '50ba414c',
+    ));
+
+    steps.add(StepModel(
+      id: '6418bff0',
+      name: 'Cluster Markers',
+      groupId: '4acc795d',
+      kind: StepKind.dataStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '6418bff0',
+      outputStepId: '50ba414c',
+    ));
+
+    // ── Fan-out from Cluster Markers ──
+
+    steps.add(StepModel(
+      id: '1405ab2c',
+      name: 'View',
+      groupId: '4acc795d',
+      kind: StepKind.viewStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '1405ab2c',
+      outputStepId: '6418bff0',
+    ));
+
+    steps.add(StepModel(
+      id: '56ccde5c',
+      name: 'Cluster Profiles',
+      groupId: '4acc795d',
+      kind: StepKind.dataStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '56ccde5c',
+      outputStepId: '6418bff0',
+    ));
+
+    // ── Fan-out from Cluster Profiles ──
+
+    steps.add(StepModel(
+      id: 'cf80bb7e',
+      name: 'Output',
+      groupId: '4acc795d',
+      kind: StepKind.outStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: 'cf80bb7e',
+      outputStepId: '56ccde5c',
+    ));
+
+    steps.add(StepModel(
+      id: 'fb1eb205',
+      name: 'View',
+      groupId: '4acc795d',
+      kind: StepKind.viewStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: 'fb1eb205',
+      outputStepId: '56ccde5c',
+    ));
+
+    // ── Branch from Marker Enrichment Score ──
+
+    steps.add(StepModel(
+      id: '67df0de4',
+      name: 'Marker expression per cluster',
+      groupId: '4acc795d',
+      kind: StepKind.dataStep,
+      state: StepState.done,
+    ));
+    links.add(const LinkModel(
+      inputStepId: '67df0de4',
+      outputStepId: 'd9faca40',
+    ));
+
+    return WorkflowModel(
+      id: '4acc795d-f726-4538-8f3f-d3682b4c80c4',
+      name: 'Cluster Interpretation',
+      projectId: '6056012f5d0da9ea7fe076190c3244b4',
       steps: steps,
       links: links,
     );
