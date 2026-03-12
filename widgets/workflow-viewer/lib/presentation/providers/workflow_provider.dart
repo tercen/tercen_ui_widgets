@@ -317,6 +317,15 @@ class WorkflowProvider extends ChangeNotifier {
       }
     }
 
+    // 4. Fan-out branches: for each placed node, find unplaced children
+    //    and lay them out. Leaf children first, then by ascending chain depth.
+    //    This handles cases where one parent feeds multiple parallel branches.
+    _placeFanOutBranches(placed, stepMap, childMap, parentMap, nextRow);
+    // Update nextRow after fan-out placement
+    for (final node in _layoutNodes) {
+      if (node.row >= nextRow) nextRow = node.row + 1;
+    }
+
     // 5. Place remaining unplaced steps (ViewSteps, isolated nodes, etc.)
     for (final step in steps) {
       if (placed.contains(step.id)) continue;
@@ -470,6 +479,134 @@ class WorkflowProvider extends ChangeNotifier {
         col: col,
       ));
       placed.add(step.id);
+    }
+  }
+
+  /// Count total descendants of a step (for fan-out ordering).
+  int _countDescendants(
+    String stepId,
+    Map<String, List<String>> childMap,
+    Set<String> visited,
+  ) {
+    if (visited.contains(stepId)) return 0;
+    visited.add(stepId);
+    final children = childMap[stepId] ?? [];
+    int count = children.length;
+    for (final cid in children) {
+      count += _countDescendants(cid, childMap, visited);
+    }
+    return count;
+  }
+
+  /// Walk forward from [startId] collecting unplaced steps until reaching
+  /// a terminal or an already-placed step.
+  List<StepModel> _walkChainForward(
+    String startId,
+    Map<String, StepModel> stepMap,
+    Map<String, List<String>> childMap,
+    Set<String> alreadyPlaced,
+  ) {
+    final chain = <StepModel>[];
+    String? currentId = startId;
+
+    while (currentId != null) {
+      if (alreadyPlaced.contains(currentId)) break;
+      final step = stepMap[currentId];
+      if (step == null) break;
+      chain.add(step);
+      // Follow the first unplaced child (linear chain)
+      final children = childMap[currentId] ?? [];
+      currentId = null;
+      for (final cid in children) {
+        if (!alreadyPlaced.contains(cid)) {
+          currentId = cid;
+          break;
+        }
+      }
+    }
+
+    return chain;
+  }
+
+  /// Place fan-out branches: for each already-placed node that has unplaced
+  /// children, lay them out. Leaf branches first, then by ascending depth.
+  void _placeFanOutBranches(
+    Set<String> placed,
+    Map<String, StepModel> stepMap,
+    Map<String, List<String>> childMap,
+    Map<String, List<String>> parentMap,
+    double startRow,
+  ) {
+    double nextRow = startRow;
+    bool progress = true;
+
+    // Iterate until no more unplaced fan-out branches remain
+    while (progress) {
+      progress = false;
+
+      // Snapshot of currently placed nodes (to avoid modifying while iterating)
+      final placedSnapshot = _layoutNodes.toList();
+
+      for (final parentNode in placedSnapshot) {
+        final children = childMap[parentNode.id] ?? [];
+        final unplacedChildren =
+            children.where((cid) => !placed.contains(cid)).toList();
+        if (unplacedChildren.isEmpty) continue;
+
+        // Sort: leaf nodes first (0 descendants), then by ascending depth
+        unplacedChildren.sort((a, b) {
+          final da = _countDescendants(a, childMap, {});
+          final db = _countDescendants(b, childMap, {});
+          return da.compareTo(db);
+        });
+
+        for (final childId in unplacedChildren) {
+          if (placed.contains(childId)) continue;
+
+          // Walk forward to build the branch chain
+          final chain = _walkChainForward(childId, stepMap, childMap, placed);
+          if (chain.isEmpty) continue;
+
+          // Place the chain: first step at parent's col + 1, then diagonal
+          for (int i = 0; i < chain.length; i++) {
+            final step = chain[i];
+            if (placed.contains(step.id)) continue;
+
+            final config = _getDisplayConfig(step.kind);
+            double row;
+            double col;
+
+            if (i == 0) {
+              row = nextRow;
+              col = parentNode.col + 1;
+            } else {
+              final prev = _findLayoutNode(chain[i - 1].id)!;
+              final meta = _metaType(step.kind);
+              if (meta == _LayoutMeta.entrypoint) {
+                row = prev.row + 1;
+                col = 1;
+              } else {
+                row = prev.row + 1;
+                col = prev.col + 1;
+              }
+            }
+
+            _layoutNodes.add(LayoutNode(
+              step: step,
+              displayStyle: config.displayStyle,
+              shape: config.shape,
+              nameDisplay: config.nameDisplay,
+              editableName: config.editableName,
+              row: row,
+              col: col,
+            ));
+            placed.add(step.id);
+            if (row >= nextRow) nextRow = row + 1;
+          }
+
+          progress = true;
+        }
+      }
     }
   }
 
