@@ -82,33 +82,36 @@ class AppTheme {
           return AppColors.neutral300;
         }),
       ),
-      // Elevated button
+      // Elevated button (Primary variant: 36px default, 20×10 padding)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          minimumSize: const Size(0, AppSpacing.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
         ),
       ),
-      // Outlined button
+      // Outlined button (Secondary variant: 36px default, 20×10 padding)
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.primary, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          minimumSize: const Size(0, AppSpacing.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
         ),
       ),
-      // Text button (ghost)
+      // Text button (Ghost variant: 36px default, 20×10 padding)
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          minimumSize: const Size(0, AppSpacing.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
@@ -229,33 +232,36 @@ class AppTheme {
           return AppColorsDark.neutral700;
         }),
       ),
-      // Elevated button
+      // Elevated button (Primary variant: 36px default, 20×10 padding)
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColorsDark.primary,
           foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          minimumSize: const Size(0, AppSpacing.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
         ),
       ),
-      // Outlined button
+      // Outlined button (Secondary variant: 36px default, 20×10 padding)
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           foregroundColor: AppColorsDark.primary,
           side: const BorderSide(color: AppColorsDark.primary, width: 1.5),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          minimumSize: const Size(0, AppSpacing.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
         ),
       ),
-      // Text button (ghost)
+      // Text button (Ghost variant: 36px default, 20×10 padding)
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColorsDark.primary,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          minimumSize: const Size(0, AppSpacing.controlHeight),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),

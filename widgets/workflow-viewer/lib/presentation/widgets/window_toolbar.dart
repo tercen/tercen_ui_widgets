@@ -8,7 +8,7 @@ import 'window_shell.dart';
 
 /// 48px toolbar with left-aligned action buttons and optional trailing widgets.
 ///
-/// Buttons use Ghost (default) or Primary styling per the Tercen style guide.
+/// Buttons use Ghost, Secondary, or Primary styling per the Tercen style guide.
 /// Height matches the app header height (AppSpacing.headerHeight).
 class WindowToolbar extends StatelessWidget {
   final List<ToolbarAction> actions;
@@ -88,7 +88,7 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
     // Resolve colours based on variant and state.
     final _ButtonColors colors = _resolveColors(
       isDark: isDark,
-      isPrimary: action.isPrimary,
+      variant: action.variant,
       isDisabled: disabled,
       isHovered: _hovered,
     );
@@ -193,7 +193,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
 
     final _ButtonColors colors = _resolveColors(
       isDark: isDark,
-      isPrimary: action.isPrimary,
+      variant: action.variant,
       isDisabled: disabled,
       isHovered: _hovered,
     );
@@ -251,7 +251,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
                       size: WindowConstants.toolbarButtonIconSize,
                       color: colors.foreground,
                     ),
-                    const SizedBox(width: AppSpacing.xs),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       action.label!,
                       style: AppTextStyles.labelSmall.copyWith(
@@ -285,11 +285,11 @@ class _ButtonColors {
 
 _ButtonColors _resolveColors({
   required bool isDark,
-  required bool isPrimary,
+  required ToolbarButtonVariant variant,
   required bool isDisabled,
   required bool isHovered,
 }) {
-  // Disabled
+  // Disabled — same for all variants.
   if (isDisabled) {
     return _ButtonColors(
       background: Colors.transparent,
@@ -298,31 +298,36 @@ _ButtonColors _resolveColors({
     );
   }
 
-  // Primary variant
-  if (isPrimary) {
-    final bg = isHovered
-        ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
-        : (isDark ? AppColorsDark.primaryBg : AppColors.primaryBg);
-    return _ButtonColors(
-      background: bg,
-      foreground: isDark ? AppColorsDark.primary : AppColors.primary,
-      borderColor:
-          isDark ? AppColorsDark.primarySurface : AppColors.primarySurface,
-    );
-  }
+  final primary = isDark ? AppColorsDark.primary : AppColors.primary;
+  final primaryDarker = isDark ? AppColorsDark.primaryDarker : AppColors.primaryDarker;
 
-  // Ghost variant (default)
-  if (isHovered) {
-    return _ButtonColors(
-      background: isDark ? AppColorsDark.neutral700 : AppColors.neutral200,
-      foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
-      borderColor: null,
-    );
-  }
+  switch (variant) {
+    // Filled blue background, white text.
+    case ToolbarButtonVariant.primary:
+      return _ButtonColors(
+        background: isHovered ? primaryDarker : primary,
+        foreground: Colors.white,
+        borderColor: null,
+      );
 
-  return _ButtonColors(
-    background: Colors.transparent,
-    foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
-    borderColor: null,
-  );
+    // Transparent bg, primary border & text. Hover: primarySurface bg.
+    case ToolbarButtonVariant.secondary:
+      return _ButtonColors(
+        background: isHovered
+            ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
+            : Colors.transparent,
+        foreground: primary,
+        borderColor: primary,
+      );
+
+    // Transparent bg, neutral icon, no border. Hover: neutral bg.
+    case ToolbarButtonVariant.ghost:
+      return _ButtonColors(
+        background: isHovered
+            ? (isDark ? AppColorsDark.neutral700 : AppColors.neutral200)
+            : Colors.transparent,
+        foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
+        borderColor: null,
+      );
+  }
 }

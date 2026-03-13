@@ -89,7 +89,7 @@ void showAppSnackbar(
               ),
             ),
           ),
-          // Dismiss button
+          // Dismiss button (Ghost variant, sized to toolbar button spec)
           IconButton(
             icon: const FaIcon(
               FontAwesomeIcons.xmark,
@@ -99,9 +99,14 @@ void showAppSnackbar(
             onPressed: () {
               ScaffoldMessenger.of(context).hideCurrentSnackBar();
             },
-            splashRadius: 16,
             padding: const EdgeInsets.all(AppSpacing.sm),
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            style: IconButton.styleFrom(
+              highlightColor: Colors.white.withValues(alpha: 0.12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              ),
+            ),
           ),
         ],
       ),

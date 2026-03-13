@@ -82,14 +82,26 @@ class WindowShell extends StatelessWidget {
   }
 }
 
+/// Button variant for toolbar actions per the Tercen style guide.
+enum ToolbarButtonVariant {
+  /// Filled primary background, white foreground. Max one per view.
+  primary,
+
+  /// Transparent background, primary border, primary foreground.
+  secondary,
+
+  /// Transparent background, neutral foreground, no border.
+  ghost,
+}
+
 /// Describes a single toolbar action button.
 class ToolbarAction {
   final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
 
-  /// If true, uses primary accent styling.
-  final bool isPrimary;
+  /// Visual variant (primary, secondary, ghost). Defaults to ghost.
+  final ToolbarButtonVariant variant;
 
   /// Optional text label displayed beside the icon.
   final String? label;
@@ -98,7 +110,7 @@ class ToolbarAction {
     required this.icon,
     required this.tooltip,
     this.onPressed,
-    this.isPrimary = false,
+    this.variant = ToolbarButtonVariant.ghost,
     this.label,
   });
 }

@@ -64,20 +64,36 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(
                 onPressed: onAction,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primary,
-                  side: BorderSide(
+                style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all(primary),
+                  side: WidgetStateProperty.all(BorderSide(
                     color: primary,
                     width: AppLineWeights.lineStandard,
-                  ),
-                  shape: RoundedRectangleBorder(
+                  )),
+                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusMd),
+                  )),
+                  padding: WidgetStateProperty.all(
+                    const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm - 2,
+                  minimumSize: WidgetStateProperty.all(
+                    const Size(0, AppSpacing.controlHeightSm),
                   ),
+                  backgroundColor:
+                      WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.hovered)) {
+                      return isDark
+                          ? AppColorsDark.primarySurface
+                          : AppColors.primarySurface;
+                    }
+                    return Colors.transparent;
+                  }),
+                  overlayColor:
+                      WidgetStateProperty.all(Colors.transparent),
                 ),
                 child: Text(
                   actionLabel!,

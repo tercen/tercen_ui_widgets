@@ -53,20 +53,36 @@ class ErrorState extends StatelessWidget {
               const SizedBox(height: AppSpacing.md),
               OutlinedButton(
                 onPressed: onRetry,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: errorColor,
-                  side: BorderSide(
+                style: ButtonStyle(
+                  foregroundColor: WidgetStateProperty.all(errorColor),
+                  side: WidgetStateProperty.all(BorderSide(
                     color: errorColor,
                     width: AppLineWeights.lineStandard,
-                  ),
-                  shape: RoundedRectangleBorder(
+                  )),
+                  shape: WidgetStateProperty.all(RoundedRectangleBorder(
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusMd),
+                  )),
+                  padding: WidgetStateProperty.all(
+                    const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                   ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm - 2,
+                  minimumSize: WidgetStateProperty.all(
+                    const Size(0, AppSpacing.controlHeightSm),
                   ),
+                  backgroundColor:
+                      WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.hovered)) {
+                      return isDark
+                          ? errorColor.withValues(alpha: 0.12)
+                          : AppColors.errorLight;
+                    }
+                    return Colors.transparent;
+                  }),
+                  overlayColor:
+                      WidgetStateProperty.all(Colors.transparent),
                 ),
                 child: Text(
                   'Retry',

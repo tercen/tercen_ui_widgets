@@ -63,22 +63,25 @@ class HomeScreen extends StatelessWidget {
                           icon: actionIcon,
                           tooltip: actionConfig.tooltip,
                           label: actionConfig.label,
-                          isPrimary: true,
+                          variant: ToolbarButtonVariant.primary,
                           onPressed: () => provider.executeAction(),
                         ),
                         ToolbarAction(
                           icon: FontAwesomeIcons.magnifyingGlassMinus,
                           tooltip: 'Zoom out',
+                          variant: ToolbarButtonVariant.secondary,
                           onPressed: () => provider.zoomOut(),
                         ),
                         ToolbarAction(
                           icon: FontAwesomeIcons.magnifyingGlassPlus,
                           tooltip: 'Zoom in',
+                          variant: ToolbarButtonVariant.secondary,
                           onPressed: () => provider.zoomIn(),
                         ),
                         ToolbarAction(
                           icon: FontAwesomeIcons.expand,
                           tooltip: 'Fit to window',
+                          variant: ToolbarButtonVariant.secondary,
                           onPressed: () {
                             final box =
                                 context.findRenderObject() as RenderBox?;
