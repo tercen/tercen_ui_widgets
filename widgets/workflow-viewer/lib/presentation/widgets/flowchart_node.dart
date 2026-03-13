@@ -26,6 +26,7 @@ class FlowchartNode extends StatefulWidget {
 
 class _FlowchartNodeState extends State<FlowchartNode> {
   bool _hovered = false;
+  bool _dragging = false;
   DateTime? _lastClickTime;
 
   @override
@@ -181,12 +182,29 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     }
 
     return MouseRegion(
-      cursor: SystemMouseCursors.click,
+      cursor: _dragging ? SystemMouseCursors.grabbing : SystemMouseCursors.click,
       onEnter: (_) => setState(() => _hovered = true),
       onExit: (_) => setState(() => _hovered = false),
       child: GestureDetector(
         onTap: () => _handleTap(provider, node),
         onDoubleTap: () => provider.openStepViewer(node.id),
+        onPanStart: (_) {
+          setState(() => _dragging = true);
+          provider.startDrag(node.id);
+        },
+        onPanUpdate: (details) {
+          // Scale delta by inverse of current zoom so movement matches cursor
+          final scale = provider.currentScale;
+          provider.updateDrag(
+            node.id,
+            details.delta.dx / scale,
+            details.delta.dy / scale,
+          );
+        },
+        onPanEnd: (_) {
+          setState(() => _dragging = false);
+          provider.commitDrag(node.id);
+        },
         child: result,
       ),
     );
@@ -264,7 +282,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     required LayoutNode node,
   }) {
     final icon = _iconForKind(node.kind);
-    final isRunning = node.state == StepState.running;
+    final isRunning = node.state == StepState.running ||
+        node.state == StepState.runningDependent;
     // Header (workflow) badge is 48px; all others are 36px
     final isHeader = node.kind == StepKind.workflow;
     final size = isHeader ? 48.0 : 36.0;
@@ -304,7 +323,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     required WorkflowProvider provider,
   }) {
     final icon = _iconForKind(node.kind);
-    final isRunning = node.state == StepState.running;
+    final isRunning = node.state == StepState.running ||
+        node.state == StepState.runningDependent;
     final textColor =
         isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
 
@@ -360,7 +380,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     required LayoutNode node,
   }) {
     final icon = _iconForKind(node.kind);
-    final isRunning = node.state == StepState.running;
+    final isRunning = node.state == StepState.running ||
+        node.state == StepState.runningDependent;
 
     return Container(
       width: 36,
@@ -394,7 +415,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     required bool isDark,
   }) {
     final icon = _iconForKind(node.kind);
-    final isRunning = node.state == StepState.running;
+    final isRunning = node.state == StepState.running ||
+        node.state == StepState.runningDependent;
     final textColor =
         isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
 
@@ -492,12 +514,17 @@ class _FlowchartNodeState extends State<FlowchartNode> {
     switch (state) {
       case StepState.init:
         return isDark ? AppColorsDark.neutral400 : AppColors.neutral600;
-      case StepState.done:
-        return isDark ? AppColorsDark.success : AppColors.success;
+      case StepState.pending:
+      case StepState.runningDependent:
+        return isDark ? AppColorsDark.warning : AppColors.warning;
       case StepState.running:
         return isDark ? AppColorsDark.info : AppColors.info;
+      case StepState.done:
+        return isDark ? AppColorsDark.success : AppColors.success;
       case StepState.failed:
         return isDark ? AppColorsDark.error : AppColors.error;
+      case StepState.canceled:
+        return isDark ? AppColorsDark.neutral500 : AppColors.neutral500;
     }
   }
 }

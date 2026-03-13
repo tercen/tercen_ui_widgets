@@ -1,9 +1,12 @@
-/// Step execution state.
+/// Step execution state matching the Tercen task-state hierarchy.
 enum StepState {
   init,
-  done,
+  pending,
+  runningDependent,
   running,
+  done,
   failed,
+  canceled,
 }
 
 /// Step kind enumeration matching the Tercen type hierarchy.
@@ -21,6 +24,24 @@ enum StepKind {
   wizardStep,
 }
 
+/// Rectangle position from the Tercen model (topLeft + extent).
+class StepRectangle {
+  double x;
+  double y;
+  final double width;
+  final double height;
+
+  StepRectangle({
+    required this.x,
+    required this.y,
+    this.width = 120.0,
+    this.height = 55.0,
+  });
+
+  double get centerX => x + width / 2;
+  double get centerY => y + height / 2;
+}
+
 /// Represents a single step in the workflow.
 class StepModel {
   final String id;
@@ -30,6 +51,10 @@ class StepModel {
   StepState state;
   final String description;
 
+  /// Position and size from the Tercen model. When non-null, the widget
+  /// reads x/y directly instead of computing layout algorithmically.
+  StepRectangle? rectangle;
+
   StepModel({
     required this.id,
     required this.name,
@@ -37,6 +62,7 @@ class StepModel {
     required this.kind,
     this.state = StepState.init,
     this.description = '',
+    this.rectangle,
   });
 }
 

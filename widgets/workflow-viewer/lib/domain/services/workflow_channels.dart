@@ -33,6 +33,9 @@ class WorkflowChannels {
   /// Step renamed: inline rename confirmed.
   static const String stepRenamed = 'workflow.stepRenamed';
 
+  /// Step moved: drag-to-reposition completed.
+  static const String stepMoved = 'workflow.stepMoved';
+
   // -- Inbound (frame -> viewer) --
 
   /// Open a specific workflow.

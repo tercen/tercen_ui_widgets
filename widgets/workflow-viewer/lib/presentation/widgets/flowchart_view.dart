@@ -123,8 +123,10 @@ class _FlowchartViewState extends State<FlowchartView> {
                 contentHeight > 0 &&
                 constraints.maxWidth > 0 &&
                 constraints.maxHeight > 0) {
-              provider.zoomToFit(constraints.maxWidth, constraints.maxHeight);
               provider.initialFitApplied = true;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                provider.zoomToFit(constraints.maxWidth, constraints.maxHeight);
+              });
             }
 
             return InteractiveViewer(

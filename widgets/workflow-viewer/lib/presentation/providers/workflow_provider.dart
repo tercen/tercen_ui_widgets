@@ -70,6 +70,10 @@ class WorkflowProvider extends ChangeNotifier {
       TransformationController();
   bool initialFitApplied = false;
 
+  // -- Drag state --
+  String? _draggingNodeId;
+  String? get draggingNodeId => _draggingNodeId;
+
   // -- Inline rename --
   String? _editingNodeId;
   String? get editingNodeId => _editingNodeId;
@@ -720,7 +724,11 @@ class WorkflowProvider extends ChangeNotifier {
     }
 
     for (final node in _layoutNodes) {
-      if (node.kind == StepKind.workflow) {
+      // If the step has a persisted rectangle, use it directly
+      if (node.step.rectangle != null) {
+        node.x = node.step.rectangle!.x;
+        node.y = node.step.rectangle!.y;
+      } else if (node.kind == StepKind.workflow) {
         // Header row: left-aligned with grid col 1, vertically centered
         node.x = colX.length > 1 ? colX[1] : marginX;
         node.y = marginY + (headerHeight - node.shapeHeight) / 2;
@@ -788,7 +796,10 @@ class WorkflowProvider extends ChangeNotifier {
     }
 
     for (final node in _layoutNodes) {
-      if (node.kind == StepKind.workflow) {
+      if (node.step.rectangle != null) {
+        node.x = node.step.rectangle!.x;
+        node.y = node.step.rectangle!.y;
+      } else if (node.kind == StepKind.workflow) {
         node.x = colX.length > 1 ? colX[1] : marginX;
         node.y = marginY + (headerHeight - node.shapeHeight) / 2;
       } else {
@@ -965,8 +976,16 @@ class WorkflowProvider extends ChangeNotifier {
   StepState _deriveWorkflowState() {
     if (_workflow == null) return StepState.init;
     final steps = _workflow!.steps;
-    if (steps.any((s) => s.state == StepState.running)) return StepState.running;
-    if (steps.any((s) => s.state == StepState.init)) return StepState.init;
+    if (steps.any((s) =>
+        s.state == StepState.running ||
+        s.state == StepState.runningDependent)) return StepState.running;
+    if (steps.any((s) => s.state == StepState.failed)) return StepState.failed;
+    if (steps.any((s) => s.state == StepState.canceled)) {
+      return StepState.canceled;
+    }
+    if (steps.any((s) =>
+        s.state == StepState.pending ||
+        s.state == StepState.init)) return StepState.init;
     return StepState.done;
   }
 
@@ -1035,6 +1054,50 @@ class WorkflowProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // -- Drag-to-reposition --
+
+  /// Begin dragging a node. Called on pan start.
+  void startDrag(String nodeId) {
+    _draggingNodeId = nodeId;
+    focusNode(nodeId);
+  }
+
+  /// Update a node's position during drag. [dx]/[dy] are canvas-space deltas.
+  void updateDrag(String nodeId, double dx, double dy) {
+    final node = _findLayoutNode(nodeId);
+    if (node == null) return;
+    node.x += dx;
+    node.y += dy;
+    // Keep the step rectangle in sync (for persistence)
+    if (node.step.rectangle != null) {
+      node.step.rectangle!.x += dx;
+      node.step.rectangle!.y += dy;
+    }
+    notifyListeners();
+  }
+
+  /// Finish dragging: persist the new position.
+  Future<void> commitDrag(String nodeId) async {
+    _draggingNodeId = null;
+    final node = _findLayoutNode(nodeId);
+    if (node == null) return;
+
+    // Ensure rectangle is up to date
+    node.step.rectangle ??= StepRectangle(x: node.x, y: node.y);
+    node.step.rectangle!.x = node.x;
+    node.step.rectangle!.y = node.y;
+
+    await _dataService.moveStep(nodeId, node.x, node.y);
+
+    _publishIntent(WorkflowChannels.stepMoved, 'stepMoved', {
+      'stepId': nodeId,
+      'x': node.x,
+      'y': node.y,
+      'workflowId': _workflow?.id ?? '',
+    });
+    notifyListeners();
+  }
+
   // -- Search --
 
   void setSearchText(String text) {
@@ -1061,6 +1124,7 @@ class WorkflowProvider extends ChangeNotifier {
       final state = _deriveWorkflowState();
       switch (state) {
         case StepState.init:
+        case StepState.pending:
           return ActionButtonConfig(
             label: 'Run All',
             tooltip:
@@ -1068,6 +1132,7 @@ class WorkflowProvider extends ChangeNotifier {
             action: ActionButtonAction.runWorkflow,
           );
         case StepState.running:
+        case StepState.runningDependent:
           return ActionButtonConfig(
             label: 'Stop All',
             tooltip: 'Stop all running steps',
@@ -1075,6 +1140,7 @@ class WorkflowProvider extends ChangeNotifier {
           );
         case StepState.done:
         case StepState.failed:
+        case StepState.canceled:
           return ActionButtonConfig(
             label: 'Reset All',
             tooltip:
@@ -1093,12 +1159,14 @@ class WorkflowProvider extends ChangeNotifier {
       }
       switch (node.state) {
         case StepState.init:
+        case StepState.pending:
           return ActionButtonConfig(
             label: 'Run Step',
             tooltip: 'Run ${node.name}',
             action: ActionButtonAction.runStep,
           );
         case StepState.running:
+        case StepState.runningDependent:
           return ActionButtonConfig(
             label: 'Stop Step',
             tooltip: 'Stop ${node.name}',
@@ -1106,6 +1174,7 @@ class WorkflowProvider extends ChangeNotifier {
           );
         case StepState.done:
         case StepState.failed:
+        case StepState.canceled:
           return ActionButtonConfig(
             label: 'Reset Step',
             tooltip: 'Reset ${node.name}',

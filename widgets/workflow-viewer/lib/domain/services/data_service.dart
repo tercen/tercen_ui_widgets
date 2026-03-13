@@ -9,4 +9,7 @@ abstract class DataService {
 
   /// Rename a step (persists the change).
   Future<void> renameStep(String stepId, String newName);
+
+  /// Persist a step's new position after drag-to-reposition.
+  Future<void> moveStep(String stepId, double x, double y);
 }
