@@ -61,3 +61,16 @@
 - [pattern] Action button state derived from aggregate step states when workflow root focused, individual step state when step focused
 - [pattern] Slow double-click rename: tracks lastClickTime, triggers edit if 500-2000ms between clicks on already-focused node
 - Build verified: flutter build web --wasm succeeded
+## Session: 2026-03-12 — Phase 1
+- Writing chat-box functional spec (window kind, Window 2 in the platform)
+- [skill-gap] Window template (template-window.md) is a stub with no discovery process or spec structure — using workflow-viewer and file-navigator specs as structural references instead
+- [pattern] Chat Box spec follows 20-section structure from workflow-viewer and file-navigator: Purpose, Context, Architecture, Model, Toolbar, Message List, Markdown Rendering, Input Area, Sessions, Focus Context, Action Intents, EventBus, Services, Mock Data, Dependencies, Exclusions, Wireframe, LLM Integration, Decisions, Open Questions
+- Completed chat-box-spec.md v1.0 with 20 sections, 3 mock conversations, bidirectional EventBus contract, flutter_chat_ui + flutter_markdown dependencies
+
+## Session: 2026-03-12 — Phase 2
+
+- Starting Phase 2 mock build for chat-box window widget
+- [workaround] Spec recommends flutter_chat_ui for message list mechanics -- not used because its opinionated styling conflicts with design token system. Built custom ChatMessageList with auto-scroll suppression instead.
+- [fixed] Import paths: widgets in presentation/widgets/ used ../../providers/ (resolves to lib/providers/) instead of ../providers/ (resolves to lib/presentation/providers/)
+- [fixed] window_body.dart copied from skeleton referenced WindowStateProvider -- replaced with ChatProvider
+- [pattern] ChatProvider extends ChangeNotifier directly (not WindowStateProvider) because chat state model differs significantly from generic window state (sessions, messages, isSending, focusContext)
