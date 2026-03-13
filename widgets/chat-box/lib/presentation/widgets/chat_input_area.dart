@@ -12,6 +12,7 @@ import '../providers/chat_provider.dart';
 /// Uses the shared inputController from ChatProvider so the bottom bar
 /// can trigger send. Enter sends, Shift+Enter inserts newline.
 /// Starts at 4 visible lines for comfortable typing.
+/// Background is transparent — the compose container provides the fill colour.
 class ChatInputArea extends StatefulWidget {
   const ChatInputArea({super.key});
 
@@ -50,9 +51,11 @@ class _ChatInputAreaState extends State<ChatInputArea> {
     final hintColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
 
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm + 2,
-        vertical: AppSpacing.sm,
+      padding: const EdgeInsets.only(
+        left: AppSpacing.md,
+        right: AppSpacing.md,
+        top: AppSpacing.sm,
+        bottom: AppSpacing.sm,
       ),
       child: KeyboardListener(
         focusNode: FocusNode(),
@@ -69,14 +72,11 @@ class _ChatInputAreaState extends State<ChatInputArea> {
           decoration: InputDecoration(
             hintText: 'Type a message...',
             hintStyle: AppTextStyles.body.copyWith(color: hintColor),
-            filled: true,
-            fillColor: isDark
-                ? AppColorsDark.panelBackground
-                : AppColors.panelBackground,
+            filled: false,
             isDense: true,
             contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm + 2,
-              vertical: AppSpacing.sm,
+              horizontal: 0,
+              vertical: AppSpacing.xs,
             ),
             enabledBorder: InputBorder.none,
             focusedBorder: InputBorder.none,

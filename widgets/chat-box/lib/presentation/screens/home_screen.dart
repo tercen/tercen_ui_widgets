@@ -128,6 +128,8 @@ class _MockTabBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
+    final provider = context.watch<ChatProvider>();
+    final tabColor = provider.identity.typeColor;
     final bgColor = isDark ? AppColorsDark.surface : AppColors.neutral100;
     final borderColor =
         isDark ? AppColorsDark.borderSubtle : AppColors.borderSubtle;
@@ -165,7 +167,7 @@ class _MockTabBar extends StatelessWidget {
                   width: 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFEAB308),
+                    color: tabColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),

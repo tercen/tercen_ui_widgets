@@ -72,8 +72,8 @@ Let me know if you need anything else.''',
     required String messageText,
     FocusContext? focusContext,
   }) async {
-    // Simulate LLM response delay
-    await Future.delayed(const Duration(milliseconds: 1200));
+    // Simulate LLM response delay (10s for mock to show thinking animation)
+    await Future.delayed(const Duration(seconds: 10));
 
     // Pick a canned response or generate a default one
     String responseText;

@@ -2,13 +2,15 @@ import 'package:flutter/material.dart';
 import '../../core/constants/window_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_colors_dark.dart';
+import '../../core/theme/app_line_weights.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import 'window_shell.dart';
 
 /// 48px toolbar with left-aligned action buttons and an optional trailing widget.
 ///
-/// All buttons use primary accent styling per the Tercen style guide.
+/// Icon-only buttons use Secondary (outlined) styling; labeled buttons use
+/// Primary (filled, isPrimary) or Secondary (outlined) variant per the style guide.
 /// Height matches the app header height (AppSpacing.headerHeight).
 ///
 /// The optional [trailing] widget is placed after a spacer, right-aligned.
@@ -46,14 +48,10 @@ class WindowToolbar extends StatelessWidget {
   }
 }
 
-/// Primary-accent icon-only toolbar button (36x36, 8px radius).
+/// Secondary-styled icon-only toolbar button (36x36, 8px radius).
 ///
-/// All buttons use primary accent styling (primaryBg background, primary icon,
-/// primarySurface border). The isPrimary field on ToolbarAction is retained for
-/// API compatibility but is effectively ignored — every button renders identically.
-///
-/// - Default: primaryBg background, primary icon, 1px primarySurface border
-/// - Disabled: transparent, neutral400/neutral600 icon, no hover
+/// - Default: transparent background, primary icon, 1.5px primary border
+/// - Disabled: transparent, neutral icon, neutral border, no hover
 /// - Hover: animated 150ms to primarySurface background
 /// - Focus: 2px primary ring with 2px offset
 class _IconToolbarButton extends StatefulWidget {
@@ -92,9 +90,8 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
     final disabled = action.onPressed == null;
 
     // Resolve colours based on variant and state.
-    final _ButtonColors colors = _resolveColors(
+    final _ButtonColors colors = _resolveSecondaryColors(
       isDark: isDark,
-      isPrimary: action.isPrimary,
       isDisabled: disabled,
       isHovered: _hovered,
     );
@@ -141,7 +138,7 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
                   border: colors.borderColor != null
                       ? Border.all(
                           color: colors.borderColor!,
-                          width: WindowConstants.toolbarButtonBorderWidth,
+                          width: AppLineWeights.lineStandard,
                         )
                       : null,
                   borderRadius: BorderRadius.circular(
@@ -161,7 +158,7 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
   }
 }
 
-/// Primary-accent labeled toolbar button (36px height, 8px radius, icon + text).
+/// Labeled toolbar button: Primary (filled) or Secondary (outlined) variant.
 class _LabeledToolbarButton extends StatefulWidget {
   final ToolbarAction action;
 
@@ -197,7 +194,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
     final action = widget.action;
     final disabled = action.onPressed == null;
 
-    final _ButtonColors colors = _resolveColors(
+    final _ButtonColors colors = _resolveLabeledColors(
       isDark: isDark,
       isPrimary: action.isPrimary,
       isDisabled: disabled,
@@ -243,7 +240,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
                   border: colors.borderColor != null
                       ? Border.all(
                           color: colors.borderColor!,
-                          width: WindowConstants.toolbarButtonBorderWidth,
+                          width: AppLineWeights.lineStandard,
                         )
                       : null,
                   borderRadius: BorderRadius.circular(
@@ -257,7 +254,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
                       size: WindowConstants.toolbarButtonIconSize,
                       color: colors.foreground,
                     ),
-                    const SizedBox(width: AppSpacing.xs),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       action.label!,
                       style: AppTextStyles.labelSmall.copyWith(
@@ -275,7 +272,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
   }
 }
 
-// ── Colour resolution helper ──────────────────────────────────────────────────
+// ── Colour resolution helpers ─────────────────────────────────────────────────
 
 class _ButtonColors {
   final Color background;
@@ -289,31 +286,71 @@ class _ButtonColors {
   });
 }
 
-_ButtonColors _resolveColors({
+/// Secondary (outlined) styling for icon-only buttons.
+_ButtonColors _resolveSecondaryColors({
   required bool isDark,
-  // isPrimary is accepted for API compatibility but ignored — all buttons
-  // render with primary accent styling. See ToolbarAction.isPrimary comment.
-  required bool isPrimary,
   required bool isDisabled,
   required bool isHovered,
 }) {
-  // Disabled
   if (isDisabled) {
     return _ButtonColors(
       background: Colors.transparent,
       foreground: isDark ? AppColorsDark.neutral600 : AppColors.neutral400,
-      borderColor: null,
+      borderColor: isDark ? AppColorsDark.neutral600 : AppColors.neutral300,
     );
   }
 
-  // All enabled buttons use primary accent styling.
+  final primary = isDark ? AppColorsDark.primary : AppColors.primary;
   final bg = isHovered
       ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
-      : (isDark ? AppColorsDark.primaryBg : AppColors.primaryBg);
+      : Colors.transparent;
   return _ButtonColors(
     background: bg,
-    foreground: isDark ? AppColorsDark.primary : AppColors.primary,
-    borderColor:
-        isDark ? AppColorsDark.primarySurface : AppColors.primarySurface,
+    foreground: primary,
+    borderColor: primary,
+  );
+}
+
+/// Primary (filled) or Secondary (outlined) styling for labeled buttons.
+_ButtonColors _resolveLabeledColors({
+  required bool isDark,
+  required bool isPrimary,
+  required bool isDisabled,
+  required bool isHovered,
+}) {
+  if (isDisabled) {
+    if (isPrimary) {
+      return _ButtonColors(
+        background: isDark ? AppColorsDark.neutral700 : AppColors.neutral200,
+        foreground: isDark ? AppColorsDark.neutral500 : AppColors.neutral400,
+      );
+    }
+    return _ButtonColors(
+      background: Colors.transparent,
+      foreground: isDark ? AppColorsDark.neutral600 : AppColors.neutral400,
+      borderColor: isDark ? AppColorsDark.neutral600 : AppColors.neutral300,
+    );
+  }
+
+  if (isPrimary) {
+    // Primary filled button.
+    final bg = isHovered
+        ? (isDark ? AppColorsDark.primaryDarker : AppColors.primaryDarker)
+        : (isDark ? AppColorsDark.primary : AppColors.primary);
+    return _ButtonColors(
+      background: bg,
+      foreground: Colors.white,
+    );
+  }
+
+  // Secondary outlined button.
+  final primary = isDark ? AppColorsDark.primary : AppColors.primary;
+  final bg = isHovered
+      ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
+      : Colors.transparent;
+  return _ButtonColors(
+    background: bg,
+    foreground: primary,
+    borderColor: primary,
   );
 }

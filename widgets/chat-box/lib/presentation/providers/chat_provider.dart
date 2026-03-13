@@ -78,10 +78,13 @@ class ChatProvider extends WindowStateProvider {
 
       if (_sessions.isNotEmpty) {
         _currentSession = _sessions.first;
-        contentStateValue = ContentState.active;
       } else {
-        contentStateValue = ContentState.empty;
+        // No existing sessions — create one automatically
+        final session = await _chatService.createSession();
+        _sessions.insert(0, session);
+        _currentSession = session;
       }
+      contentStateValue = ContentState.active;
     } catch (e) {
       errorMessageValue = e.toString();
       contentStateValue = ContentState.error;
@@ -179,7 +182,7 @@ class ChatProvider extends WindowStateProvider {
       final session = await _chatService.createSession();
       _sessions.insert(0, session);
       _currentSession = session;
-      contentStateValue = ContentState.empty;
+      contentStateValue = ContentState.active;
       notifyListeners();
     } catch (e) {
       errorMessageValue = 'Failed to create session: $e';
@@ -195,8 +198,7 @@ class ChatProvider extends WindowStateProvider {
     try {
       final session = await _chatService.loadSession(sessionId);
       _currentSession = session;
-      contentStateValue =
-          session.messages.isEmpty ? ContentState.empty : ContentState.active;
+      contentStateValue = ContentState.active;
       notifyListeners();
     } catch (e) {
       errorMessageValue = 'Failed to load session: $e';

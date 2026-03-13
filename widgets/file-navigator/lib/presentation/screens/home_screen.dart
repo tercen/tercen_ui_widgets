@@ -62,7 +62,7 @@ class HomeScreen extends StatelessWidget {
                         ToolbarAction(
                           icon: FontAwesomeIcons.upload,
                           tooltip: 'Upload',
-                          isPrimary: true,
+                          isPrimary: provider.canUpload,
                           onPressed: provider.canUpload
                               ? () => _handleUpload(context)
                               : null,
@@ -70,7 +70,7 @@ class HomeScreen extends StatelessWidget {
                         ToolbarAction(
                           icon: FontAwesomeIcons.download,
                           tooltip: 'Download',
-                          isPrimary: true,
+                          isPrimary: provider.canDownload,
                           onPressed: provider.canDownload
                               ? () => provider.triggerDownload()
                               : null,
@@ -78,7 +78,7 @@ class HomeScreen extends StatelessWidget {
                         ToolbarAction(
                           icon: FontAwesomeIcons.userGroup,
                           tooltip: 'Teams',
-                          isPrimary: true,
+                          isPrimary: provider.canOpenTeam,
                           onPressed: provider.canOpenTeam
                               ? () => provider.triggerTeamWidget()
                               : null,

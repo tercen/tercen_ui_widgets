@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import '../../../core/constants/app_logo_colors.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -8,12 +9,21 @@ import '../../../domain/models/chat_message.dart';
 
 /// Renders a single chat message bubble.
 ///
-/// User messages: right-aligned with primary tint background.
-/// Assistant messages: left-aligned with panel background, markdown rendered.
+/// User messages: left-aligned with primary tint background.
+/// Assistant messages: left-aligned with panel background, markdown rendered,
+/// and a coloured square bullet from the Tercen App logo palette.
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
 
-  const ChatMessageBubble({super.key, required this.message});
+  /// Index of this message in the full message list — used to pick
+  /// the rotating palette colour for assistant bullet squares.
+  final int messageIndex;
+
+  const ChatMessageBubble({
+    super.key,
+    required this.message,
+    this.messageIndex = 0,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +33,11 @@ class ChatMessageBubble extends StatelessWidget {
     if (isUser) {
       return _UserBubble(message: message, isDark: isDark);
     } else {
-      return _AssistantBubble(message: message, isDark: isDark);
+      return _AssistantBubble(
+        message: message,
+        isDark: isDark,
+        messageIndex: messageIndex,
+      );
     }
   }
 }
@@ -82,8 +96,13 @@ class _UserBubble extends StatelessWidget {
 class _AssistantBubble extends StatelessWidget {
   final ChatMessage message;
   final bool isDark;
+  final int messageIndex;
 
-  const _AssistantBubble({required this.message, required this.isDark});
+  const _AssistantBubble({
+    required this.message,
+    required this.isDark,
+    required this.messageIndex,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +111,7 @@ class _AssistantBubble extends StatelessWidget {
     final borderColor =
         isDark ? AppColorsDark.borderSubtle : AppColors.borderSubtle;
     final timeColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
+    final bulletColor = AppLogoColors.atIndex(messageIndex);
 
     return Align(
       alignment: Alignment.centerLeft,
@@ -99,33 +119,54 @@ class _AssistantBubble extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.85,
         ),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.sm + 2),
-          decoration: BoxDecoration(
-            color: bgColor,
-            border: Border.all(color: borderColor, width: 1.0),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _MarkdownContent(
-                content: message.content,
-                isDark: isDark,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  _formatTime(message.timestamp),
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: timeColor,
-                    fontSize: 11,
-                  ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Coloured square bullet from App logo palette
+            Padding(
+              padding: const EdgeInsets.only(top: 6, right: AppSpacing.sm),
+              child: Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: bulletColor,
+                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
-            ],
-          ),
+            ),
+            // Message bubble
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  border: Border.all(color: borderColor, width: 1.0),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _MarkdownContent(
+                      content: message.content,
+                      isDark: isDark,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        _formatTime(message.timestamp),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: timeColor,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

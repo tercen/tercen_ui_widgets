@@ -298,16 +298,15 @@ _ButtonColors _resolveColors({
     );
   }
 
-  // Primary variant
+  // Primary variant – solid primary bg, white foreground (style guide)
   if (isPrimary) {
     final bg = isHovered
-        ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
-        : (isDark ? AppColorsDark.primaryBg : AppColors.primaryBg);
+        ? (isDark ? AppColorsDark.primaryDarker : AppColors.primaryDarker)
+        : (isDark ? AppColorsDark.primary : AppColors.primary);
     return _ButtonColors(
       background: bg,
-      foreground: isDark ? AppColorsDark.primary : AppColors.primary,
-      borderColor:
-          isDark ? AppColorsDark.primarySurface : AppColors.primarySurface,
+      foreground: const Color(0xFFFFFFFF),
+      borderColor: null,
     );
   }
 
