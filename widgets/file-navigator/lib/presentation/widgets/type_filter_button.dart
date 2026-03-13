@@ -29,11 +29,13 @@ class _TypeFilterButtonState extends State<TypeFilterButton> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<NavigatorProvider>();
 
-    // Ghost styling to match toolbar buttons (style guide)
+    // Secondary styling per Tercen style guide
+    final primary = isDark ? AppColorsDark.primary : AppColors.primary;
     final bgColor = _hovered
-        ? (isDark ? AppColorsDark.neutral700 : AppColors.neutral200)
+        ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
         : Colors.transparent;
-    final fgColor = isDark ? AppColorsDark.neutral400 : AppColors.neutral600;
+    final fgColor = primary;
+    final borderColor = primary;
 
     return MouseRegion(
       cursor: SystemMouseCursors.click,
@@ -63,6 +65,10 @@ class _TypeFilterButtonState extends State<TypeFilterButton> {
           height: WindowConstants.toolbarButtonSize,
           decoration: BoxDecoration(
             color: bgColor,
+            border: Border.all(
+              color: borderColor,
+              width: 1.5,
+            ),
             borderRadius:
                 BorderRadius.circular(WindowConstants.toolbarButtonRadius),
           ),

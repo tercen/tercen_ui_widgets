@@ -82,14 +82,17 @@ class WindowShell extends StatelessWidget {
   }
 }
 
+/// Button variant per the Tercen style guide.
+enum ButtonVariant { primary, secondary, ghost }
+
 /// Describes a single toolbar action button.
 class ToolbarAction {
   final IconData icon;
   final String tooltip;
   final VoidCallback? onPressed;
 
-  /// If true, uses primary accent styling.
-  final bool isPrimary;
+  /// Visual variant: primary (filled), secondary (outlined), ghost (text-only).
+  final ButtonVariant variant;
 
   /// Optional text label displayed beside the icon.
   final String? label;
@@ -98,7 +101,10 @@ class ToolbarAction {
     required this.icon,
     required this.tooltip,
     this.onPressed,
-    this.isPrimary = false,
+    this.variant = ButtonVariant.ghost,
     this.label,
   });
+
+  /// Convenience getter retained for backward compatibility.
+  bool get isPrimary => variant == ButtonVariant.primary;
 }

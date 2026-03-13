@@ -88,7 +88,7 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
     // Resolve colours based on variant and state.
     final _ButtonColors colors = _resolveColors(
       isDark: isDark,
-      isPrimary: action.isPrimary,
+      variant: action.variant,
       isDisabled: disabled,
       isHovered: _hovered,
     );
@@ -135,7 +135,7 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
                   border: colors.borderColor != null
                       ? Border.all(
                           color: colors.borderColor!,
-                          width: WindowConstants.toolbarButtonBorderWidth,
+                          width: 1.5,
                         )
                       : null,
                   borderRadius: BorderRadius.circular(
@@ -155,7 +155,7 @@ class _IconToolbarButtonState extends State<_IconToolbarButton> {
   }
 }
 
-/// Ghost-style labeled toolbar button (36px height, 8px radius, icon + text).
+/// Labeled toolbar button (36px height, 8px radius, icon + text).
 class _LabeledToolbarButton extends StatefulWidget {
   final ToolbarAction action;
 
@@ -193,7 +193,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
 
     final _ButtonColors colors = _resolveColors(
       isDark: isDark,
-      isPrimary: action.isPrimary,
+      variant: action.variant,
       isDisabled: disabled,
       isHovered: _hovered,
     );
@@ -237,7 +237,7 @@ class _LabeledToolbarButtonState extends State<_LabeledToolbarButton> {
                   border: colors.borderColor != null
                       ? Border.all(
                           color: colors.borderColor!,
-                          width: WindowConstants.toolbarButtonBorderWidth,
+                          width: 1.5,
                         )
                       : null,
                   borderRadius: BorderRadius.circular(
@@ -285,43 +285,64 @@ class _ButtonColors {
 
 _ButtonColors _resolveColors({
   required bool isDark,
-  required bool isPrimary,
+  required ButtonVariant variant,
   required bool isDisabled,
   required bool isHovered,
 }) {
-  // Disabled
-  if (isDisabled) {
-    return _ButtonColors(
-      background: Colors.transparent,
-      foreground: isDark ? AppColorsDark.neutral600 : AppColors.neutral400,
-      borderColor: null,
-    );
-  }
+  switch (variant) {
+    case ButtonVariant.primary:
+      if (isDisabled) {
+        return _ButtonColors(
+          background: isDark ? AppColorsDark.neutral700 : AppColors.neutral200,
+          foreground: isDark ? AppColorsDark.neutral500 : AppColors.neutral400,
+          borderColor: null,
+        );
+      }
+      final bg = isHovered
+          ? (isDark ? AppColorsDark.primaryDarker : AppColors.primaryDarker)
+          : (isDark ? AppColorsDark.primary : AppColors.primary);
+      return _ButtonColors(
+        background: bg,
+        foreground: const Color(0xFFFFFFFF),
+        borderColor: null,
+      );
 
-  // Primary variant – solid primary bg, white foreground (style guide)
-  if (isPrimary) {
-    final bg = isHovered
-        ? (isDark ? AppColorsDark.primaryDarker : AppColors.primaryDarker)
-        : (isDark ? AppColorsDark.primary : AppColors.primary);
-    return _ButtonColors(
-      background: bg,
-      foreground: const Color(0xFFFFFFFF),
-      borderColor: null,
-    );
-  }
+    case ButtonVariant.secondary:
+      if (isDisabled) {
+        return _ButtonColors(
+          background: Colors.transparent,
+          foreground: isDark ? AppColorsDark.neutral600 : AppColors.neutral400,
+          borderColor: isDark ? AppColorsDark.neutral600 : AppColors.neutral300,
+        );
+      }
+      final primary = isDark ? AppColorsDark.primary : AppColors.primary;
+      return _ButtonColors(
+        background: isHovered
+            ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
+            : Colors.transparent,
+        foreground: primary,
+        borderColor: primary,
+      );
 
-  // Ghost variant (default)
-  if (isHovered) {
-    return _ButtonColors(
-      background: isDark ? AppColorsDark.neutral700 : AppColors.neutral200,
-      foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
-      borderColor: null,
-    );
+    case ButtonVariant.ghost:
+      if (isDisabled) {
+        return _ButtonColors(
+          background: Colors.transparent,
+          foreground: isDark ? AppColorsDark.neutral600 : AppColors.neutral400,
+          borderColor: null,
+        );
+      }
+      if (isHovered) {
+        return _ButtonColors(
+          background: isDark ? AppColorsDark.neutral700 : AppColors.neutral200,
+          foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
+          borderColor: null,
+        );
+      }
+      return _ButtonColors(
+        background: Colors.transparent,
+        foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
+        borderColor: null,
+      );
   }
-
-  return _ButtonColors(
-    background: Colors.transparent,
-    foreground: isDark ? AppColorsDark.neutral400 : AppColors.neutral600,
-    borderColor: null,
-  );
 }
