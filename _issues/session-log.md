@@ -74,3 +74,23 @@
 - [fixed] Import paths: widgets in presentation/widgets/ used ../../providers/ (resolves to lib/providers/) instead of ../providers/ (resolves to lib/presentation/providers/)
 - [fixed] window_body.dart copied from skeleton referenced WindowStateProvider -- replaced with ChatProvider
 - [pattern] ChatProvider extends ChangeNotifier directly (not WindowStateProvider) because chat state model differs significantly from generic window state (sessions, messages, isSending, focusContext)
+
+## Session: 2026-03-16 — Phase 1
+- Writing document-editor functional spec (Window 4 in the platform)
+- [pattern] Dual-mode editor: Source mode (raw markdown like code editor) + Rendered mode (WYSIWYG with formatting toolbar). Content types: .md and .txt (view+edit). PDF deferred to separate widget.
+- [skill-gap] Window template (template-window.md) is still a stub -- used chat-box and workflow-viewer specs as structural references (same gap noted in 2026-03-12 session)
+- [pattern] No Empty body state for document-editor -- window only opens when a file is selected. Three states: Loading, Active, Error.
+- [pattern] Formatting toolbar fits inside standard 48px toolbar bar with visual group separators, avoiding a second toolbar row
+- Completed document-editor-spec.md v1.0 with 20 sections, dual-mode editing, 13 formatting controls, image-from-URL, explicit save
+- Updated to v1.2: resolved all 6 open questions, added toolbar responsive collapse (Section 5.9), image size selector in dialog (Section 5.6), 6 new decisions (15-20), zero open questions remaining
+- Updated to v1.3: fixed 4 reviewer non-conformance issues (pixel values, hex codes, Dart tokens)
+- Updated to v1.4: fixed 18 style violations -- removed ALL appearance language (fonts, colours, sizes, visual adjectives). Spec is now purely functional/behavioural. Copied final spec to _local.
+## Session: 2026-03-16 — Phase 2 (document-editor)
+- Starting Phase 2 mock build for document-editor window widget
+- [pattern] DocumentProvider extends ChangeNotifier directly (not WindowStateProvider) because document state model differs significantly from generic window state (content, editMode, dirty tracking, save flow) -- same pattern as ChatProvider
+- [workaround] flutter_markdown imageBuilder is deprecated in favour of sizedImageBuilder -- suppressed with ignore comment, sizedImageBuilder API not yet stable
+- [workaround] url_launcher not added as dependency -- used web package window.open() directly for link taps in mock
+- [pattern] Formatting toolbar collapses to FormatPopover dialog at narrow widths (<680px) preserving mode toggle and Save visibility
+- [workaround] Full WYSIWYG editing not implemented in Phase 2 mock -- rendered mode shows read-only markdown, editing done via source mode or toolbar formatting actions that modify underlying source
+- [fixed] Dollar sign in R code mock data caused Dart string interpolation -- used \${''}count escape pattern
+- Build verified: flutter build web --wasm succeeded
