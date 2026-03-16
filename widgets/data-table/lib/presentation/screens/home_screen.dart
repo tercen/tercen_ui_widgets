@@ -3,7 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../providers/data_table_provider.dart';
 import '../widgets/mock_tab_strip.dart';
-import '../widgets/toolbar_search_field.dart';
+import '../widgets/data_table_search_field.dart';
 import '../widgets/body_states/active_state.dart';
 import '../widgets/info_popover.dart';
 import '../../core/constants/window_constants.dart';
@@ -176,7 +176,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       const SizedBox(width: AppSpacing.sm),
-      const ToolbarSearchField(),
+      const DataTableSearchField(),
     ];
 
     return Scaffold(

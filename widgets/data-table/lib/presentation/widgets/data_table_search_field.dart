@@ -10,14 +10,14 @@ import '../providers/data_table_provider.dart';
 /// Compact search text field for the data table toolbar.
 ///
 /// Shows match count and next/prev navigation buttons when there are results.
-class ToolbarSearchField extends StatefulWidget {
-  const ToolbarSearchField({super.key});
+class DataTableSearchField extends StatefulWidget {
+  const DataTableSearchField({super.key});
 
   @override
-  State<ToolbarSearchField> createState() => _ToolbarSearchFieldState();
+  State<DataTableSearchField> createState() => _DataTableSearchFieldState();
 }
 
-class _ToolbarSearchFieldState extends State<ToolbarSearchField> {
+class _DataTableSearchFieldState extends State<DataTableSearchField> {
   late final TextEditingController _controller;
 
   @override

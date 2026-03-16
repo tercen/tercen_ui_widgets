@@ -1,209 +1,136 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:provider/provider.dart';
 import '../../core/constants/window_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_colors_dark.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
-import '../providers/data_table_provider.dart';
 
-/// Compact search text field for the data table toolbar.
+/// A general-purpose responsive search field for window toolbars.
 ///
-/// Shows match count and next/prev navigation buttons when there are results.
+/// Wraps itself in [Flexible] so it absorbs available toolbar space.
+/// Constrained between [toolbarButtonSize] (min) and [maxWidth] (max).
+/// Accepts a generic [onChanged] callback — not tied to any provider.
 class ToolbarSearchField extends StatefulWidget {
-  const ToolbarSearchField({super.key});
+  /// Called on every text change with the current value.
+  final ValueChanged<String> onChanged;
+
+  /// Optional callback when the clear button is pressed.
+  /// If null, the field is simply cleared and [onChanged] is called with ''.
+  final VoidCallback? onClear;
+
+  /// Placeholder text shown when the field is empty.
+  final String hintText;
+
+  /// Maximum width the field can grow to. Defaults to 440px.
+  final double maxWidth;
+
+  const ToolbarSearchField({
+    super.key,
+    required this.onChanged,
+    this.onClear,
+    this.hintText = 'Search...',
+    this.maxWidth = 440.0,
+  });
 
   @override
   State<ToolbarSearchField> createState() => _ToolbarSearchFieldState();
 }
 
 class _ToolbarSearchFieldState extends State<ToolbarSearchField> {
-  late final TextEditingController _controller;
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+    _controller.addListener(() {
+      // Rebuild to show/hide the clear button.
+      if (mounted) setState(() {});
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
+  }
+
+  void _onClear() {
+    _controller.clear();
+    widget.onChanged('');
+    widget.onClear?.call();
   }
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final provider = context.watch<DataTableProvider>();
+
+    final primaryColor = isDark ? AppColorsDark.primary : AppColors.primary;
     final borderColor = isDark ? AppColorsDark.border : AppColors.border;
     final hintColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
     final textColor =
         isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
-    final fillColor = isDark ? AppColorsDark.surface : AppColors.white;
-    final primary = isDark ? AppColorsDark.primary : AppColors.primary;
-
-    final hasMatches = provider.searchMatches.isNotEmpty;
-    final matchText = provider.searchText.isNotEmpty
-        ? (provider.isSearching
-            ? '...'
-            : '${hasMatches ? provider.currentMatchIndex + 1 : 0}/${provider.searchMatches.length}')
-        : null;
+    final bgColor = isDark ? AppColorsDark.surface : AppColors.surface;
 
     return Flexible(
       child: ConstrainedBox(
-        constraints: const BoxConstraints(
+        constraints: BoxConstraints(
           minWidth: WindowConstants.toolbarButtonSize,
-          maxWidth: 320,
+          maxWidth: widget.maxWidth,
         ),
         child: SizedBox(
           height: WindowConstants.toolbarButtonSize,
-          child: Center(
-            child: TextField(
-              controller: _controller,
-              onChanged: (value) {
-                context.read<DataTableProvider>().search(value);
-                setState(() {});
-              },
-              style: AppTextStyles.body.copyWith(
-                color: textColor,
-                height: 1.0,
+          child: TextField(
+            controller: _controller,
+            focusNode: _focusNode,
+            style: AppTextStyles.body.copyWith(color: textColor),
+            onChanged: widget.onChanged,
+            decoration: InputDecoration(
+              hintText: widget.hintText,
+              hintStyle: AppTextStyles.body.copyWith(color: hintColor),
+              filled: true,
+              fillColor: bgColor,
+              isDense: true,
+              contentPadding: const EdgeInsets.symmetric(
+                vertical: AppSpacing.sm,
+                horizontal: AppSpacing.sm,
               ),
-              textAlignVertical: TextAlignVertical.center,
-              decoration: InputDecoration(
-                hintText: 'Search...',
-                hintStyle: AppTextStyles.body.copyWith(
-                  color: hintColor,
-                  height: 1.0,
-                ),
-                prefixIcon: SizedBox(
-                  width: 36,
-                  height: WindowConstants.toolbarButtonSize,
-                  child: Center(
-                    child: provider.isSearching
-                        ? SizedBox(
-                            width: 14,
-                            height: 14,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 1.5,
-                              valueColor:
-                                  AlwaysStoppedAnimation<Color>(primary),
-                            ),
-                          )
-                        : FaIcon(
-                            FontAwesomeIcons.magnifyingGlass,
-                            size: 14,
-                            color: hintColor,
-                          ),
+              prefixIcon: SizedBox(
+                width: WindowConstants.toolbarButtonSize,
+                child: Center(
+                  child: FaIcon(
+                    FontAwesomeIcons.magnifyingGlass,
+                    size: WindowConstants.toolbarButtonIconSize,
+                    color: hintColor,
                   ),
                 ),
-                prefixIconConstraints: const BoxConstraints(
-                  minWidth: 36,
-                  maxWidth: 36,
-                  minHeight: WindowConstants.toolbarButtonSize,
-                  maxHeight: WindowConstants.toolbarButtonSize,
-                ),
-                suffixIcon: _controller.text.isNotEmpty
-                    ? Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (matchText != null)
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(right: 4),
-                              child: Text(
-                                matchText,
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  color: hintColor,
-                                  height: 1.0,
-                                ),
-                              ),
-                            ),
-                          if (hasMatches) ...[
-                            GestureDetector(
-                              onTap: () => provider.previousMatch(),
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 2),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.chevronUp,
-                                    size: 10,
-                                    color: hintColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            GestureDetector(
-                              onTap: () => provider.nextMatch(),
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 2),
-                                  child: FaIcon(
-                                    FontAwesomeIcons.chevronDown,
-                                    size: 10,
-                                    color: hintColor,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                          GestureDetector(
-                            onTap: () {
-                              _controller.clear();
-                              context
-                                  .read<DataTableProvider>()
-                                  .search('');
-                              setState(() {});
-                            },
-                            child: SizedBox(
-                              width: 24,
-                              height: WindowConstants.toolbarButtonSize,
-                              child: Center(
-                                child: FaIcon(
-                                  FontAwesomeIcons.xmark,
-                                  size: 12,
-                                  color: hintColor,
-                                ),
-                              ),
-                            ),
+              ),
+              suffixIcon: _controller.text.isNotEmpty
+                  ? GestureDetector(
+                      onTap: _onClear,
+                      child: SizedBox(
+                        width: WindowConstants.toolbarButtonSize,
+                        child: Center(
+                          child: FaIcon(
+                            FontAwesomeIcons.xmark,
+                            size: WindowConstants.toolbarButtonIconSize,
+                            color: hintColor,
                           ),
-                        ],
-                      )
-                    : null,
-                suffixIconConstraints: BoxConstraints(
-                  minWidth: 24,
-                  maxWidth: hasMatches ? 140 : 80,
-                  minHeight: WindowConstants.toolbarButtonSize,
-                  maxHeight: WindowConstants.toolbarButtonSize,
-                ),
-                filled: true,
-                fillColor: fillColor,
-                isDense: true,
-                isCollapsed: true,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical:
-                      (WindowConstants.toolbarButtonSize - 14) / 2,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                      WindowConstants.toolbarButtonRadius),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                      WindowConstants.toolbarButtonRadius),
-                  borderSide: BorderSide(color: borderColor),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(
-                      WindowConstants.toolbarButtonRadius),
-                  borderSide: BorderSide(color: primary, width: 2),
-                ),
+                        ),
+                      ),
+                    )
+                  : null,
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    WindowConstants.toolbarButtonRadius),
+                borderSide: BorderSide(color: borderColor, width: 1.0),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(
+                    WindowConstants.toolbarButtonRadius),
+                borderSide: BorderSide(color: primaryColor, width: 2.0),
               ),
             ),
           ),
