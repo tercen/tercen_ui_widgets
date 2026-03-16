@@ -194,11 +194,11 @@ _PortMeta _portMeta(StepKind kind) {
 
 /// Paints elbow connector lines between nodes using a port-based system.
 ///
-/// Port rules per meta-type:
-/// - Entrypoint: no input port, exit from RIGHT-center
-/// - Pathway: input LEFT-center, exit BOTTOM-center
-/// - Connector (Join): 2 inputs LEFT (NW, SW vertices), exit BOTTOM (S point)
-/// - Output: input LEFT-center, no exit port
+/// Top-to-bottom flow port rules per meta-type:
+/// - Entrypoint: no input port, exit from BOTTOM-center
+/// - Pathway: input TOP-center, exit BOTTOM-center
+/// - Connector (Join): 2 inputs at NW/NE vertices, exit BOTTOM (S point)
+/// - Output: input TOP-center, no exit port
 class _ConnectorPainter extends CustomPainter {
   final List<LayoutNode> nodes;
   final List<LinkModel> links;
@@ -213,6 +213,7 @@ class _ConnectorPainter extends CustomPainter {
   });
 
   /// Get the exit port position for a node (where connectors leave from).
+  /// Top-to-bottom flow: all exits from BOTTOM-center.
   /// Returns null if the meta-type has no exit port.
   (double, double)? _exitPort(LayoutNode n) {
     final sw = n.shapeWidth > 0 ? n.shapeWidth : 36.0;
@@ -220,13 +221,9 @@ class _ConnectorPainter extends CustomPainter {
     final meta = _portMeta(n.kind);
     switch (meta) {
       case _PortMeta.entrypoint:
-        // Exit from RIGHT-center
-        return (n.x + sw, n.y + sh / 2);
       case _PortMeta.pathway:
-        // Exit from BOTTOM-center
-        return (n.x + sw / 2, n.y + sh);
       case _PortMeta.connector:
-        // Exit from BOTTOM (S point of hexagon)
+        // Exit from BOTTOM-center
         return (n.x + sw / 2, n.y + sh);
       case _PortMeta.output:
         // No exit port
@@ -235,9 +232,11 @@ class _ConnectorPainter extends CustomPainter {
   }
 
   /// Get the input port position for a node (where connectors arrive).
-  /// For connector (JoinStep), uses inputIdx to pick NW (0) or SW (1) vertex.
+  /// Top-to-bottom flow: inputs arrive at TOP-center.
+  /// For connector (JoinStep), uses inputIdx to pick NW (0) or NE (1) vertex.
   /// Returns null if the meta-type has no input port.
   (double, double)? _inputPort(LayoutNode n, {int inputIdx = 0}) {
+    final sw = n.shapeWidth > 0 ? n.shapeWidth : 36.0;
     final sh = n.shapeHeight > 0 ? n.shapeHeight : 36.0;
     final meta = _portMeta(n.kind);
     switch (meta) {
@@ -246,15 +245,15 @@ class _ConnectorPainter extends CustomPainter {
         return null;
       case _PortMeta.pathway:
       case _PortMeta.output:
-        // Input on LEFT-center
-        return (n.x, n.y + sh / 2);
+        // Input on TOP-center
+        return (n.x + sw / 2, n.y);
       case _PortMeta.connector:
-        // Hexagon NW/SW vertices: pointOffset = h * 0.25
+        // Hexagon NW/NE vertices (top-left / top-right)
         final pointOffset = sh * 0.25;
         if (inputIdx == 0) {
-          return (n.x, n.y + pointOffset); // NW vertex
+          return (n.x, n.y + pointOffset); // NW vertex (left-top)
         } else {
-          return (n.x, n.y + sh - pointOffset); // SW vertex
+          return (n.x + sw, n.y + pointOffset); // NE vertex (right-top)
         }
     }
   }
@@ -307,61 +306,26 @@ class _ConnectorPainter extends CustomPainter {
       if (entry == null) continue;
       final (endX, endY) = entry;
 
-      // Draw elbow connector from exit → entry
-      final fromMeta = _portMeta(from.kind);
+      // Draw elbow connector from exit (BOTTOM) → entry (TOP)
+      // Top-to-bottom flow: vertical down, horizontal elbow, vertical down
       final path = Path()..moveTo(startX, startY);
 
-      if (fromMeta == _PortMeta.entrypoint) {
-        // Exit RIGHT: go right, then elbow down/up to target input
-        if ((startY - endY).abs() < 2) {
-          // Nearly same height: straight horizontal
-          path.lineTo(endX, endY);
-        } else {
-          // Right then down/up to target
-          final midX = startX + (endX - startX) / 2;
-          path.lineTo(midX, startY);
-          path.lineTo(midX, endY);
-          path.lineTo(endX, endY);
-        }
+      if ((startX - endX).abs() < 2) {
+        // Same column: straight vertical line
+        path.lineTo(endX, endY);
+      } else if (endY > startY) {
+        // Target below source: down to midpoint, horizontal, then down
+        final midY = (startY + endY) / 2;
+        path.lineTo(startX, midY);
+        path.lineTo(endX, midY);
+        path.lineTo(endX, endY);
       } else {
-        // Exit BOTTOM (pathway or connector)
-        final toMeta = _portMeta(to.kind);
-        // Minimum horizontal approach for join inputs
-        const minApproach = 16.0;
-
-        if (endY >= startY) {
-          if (toMeta == _PortMeta.connector &&
-              (startX - endX).abs() < minApproach) {
-            // Connector target nearly same column: route left then horizontal
-            final approachX = endX - minApproach;
-            path.lineTo(startX, endY);
-            path.lineTo(approachX, endY);
-            path.lineTo(approachX, endY);
-            path.lineTo(endX, endY);
-          } else if ((startX - endX).abs() < 2) {
-            // Same column, target below: straight vertical
-            path.lineTo(endX, endY);
-          } else {
-            // Down then horizontal to target
-            path.lineTo(startX, endY);
-            path.lineTo(endX, endY);
-          }
-        } else {
-          // Target is ABOVE: multi-turn routing to avoid crossing nodes
-          // Down from bottom exit → horizontal to target column → up to target
-          const routeGap = 20.0;
-          final routeY = startY + routeGap;
-          path.lineTo(startX, routeY);
-          if (toMeta == _PortMeta.connector) {
-            // Ensure horizontal approach from left
-            final approachX = endX - minApproach;
-            path.lineTo(approachX, routeY);
-            path.lineTo(approachX, endY);
-          } else {
-            path.lineTo(endX, routeY);
-          }
-          path.lineTo(endX, endY);
-        }
+        // Target above source (rare): horizontal first, then up
+        const routeGap = 12.0;
+        final routeY = startY + routeGap;
+        path.lineTo(startX, routeY);
+        path.lineTo(endX, routeY);
+        path.lineTo(endX, endY);
       }
 
       canvas.drawPath(path, paint);

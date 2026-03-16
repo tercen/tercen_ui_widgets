@@ -1,11 +1,17 @@
+import 'dart:math';
+
 import '../../domain/models/workflow_models.dart';
 import '../../domain/services/data_service.dart';
 
 /// Mock implementation with multiple test workflows.
 ///
 /// Toggle [_activeWorkflow] to switch between them.
+/// All steps start in [StepState.init] — the mock execution engine
+/// handles state progression via EventBus when run/stop/reset are invoked.
 class MockDataService implements DataService {
   WorkflowModel? _cached;
+  final _rng = Random();
+  bool _firstLoad = true;
 
   /// Which workflow to display.
   /// 'rnaseq'     = RNAseq Data Connector (11 steps, 2 joins)
@@ -14,10 +20,20 @@ class MockDataService implements DataService {
   /// 'test22'     = test 22 (22 steps, 8-way fan-out, join, melt, views)
   static const String _activeWorkflow = 'test22';
 
+  Future<void> _jitteredDelay(int minMs, int maxMs) async {
+    final ms = minMs + _rng.nextInt(maxMs - minMs + 1);
+    await Future.delayed(Duration(milliseconds: ms));
+  }
+
   @override
   Future<WorkflowModel> fetchWorkflow(
       String workflowId, String projectId) async {
-    await Future.delayed(const Duration(milliseconds: 400));
+    if (_firstLoad) {
+      _firstLoad = false;
+      await _jitteredDelay(800, 1800); // Cold start
+    } else {
+      await _jitteredDelay(300, 800); // Warm cache
+    }
     switch (_activeWorkflow) {
       case 'crabs':
         _cached = _buildCrabsWorkflow();
@@ -36,7 +52,7 @@ class MockDataService implements DataService {
 
   @override
   Future<void> renameStep(String stepId, String newName) async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await _jitteredDelay(150, 400);
     if (_cached != null) {
       final step = _cached!.steps.firstWhere((s) => s.id == stepId);
       step.name = newName;
@@ -45,7 +61,7 @@ class MockDataService implements DataService {
 
   @override
   Future<void> moveStep(String stepId, double x, double y) async {
-    await Future.delayed(const Duration(milliseconds: 100));
+    await _jitteredDelay(80, 200);
     if (_cached != null) {
       final step = _cached!.steps.firstWhere((s) => s.id == stepId);
       step.rectangle?.x = x;
@@ -73,7 +89,6 @@ class MockDataService implements DataService {
       name: 'Crabs Data',
       groupId: '',
       kind: StepKind.tableStep,
-      state: StepState.done,
     ));
 
     steps.add(StepModel(
@@ -81,7 +96,6 @@ class MockDataService implements DataService {
       name: 'Heatmap',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-heatmap',
@@ -93,7 +107,6 @@ class MockDataService implements DataService {
       name: 'Multi Pairwise',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-multi-pairwise',
@@ -105,7 +118,6 @@ class MockDataService implements DataService {
       name: 'PCA',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-pca',
@@ -117,7 +129,6 @@ class MockDataService implements DataService {
       name: 'Multi Pairwise PC view',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-multi-pc-view',
@@ -151,24 +162,18 @@ class MockDataService implements DataService {
     final steps = <StepModel>[];
     final links = <LinkModel>[];
 
-    // ── Entry point (InStep) ──
-
     steps.add(StepModel(
       id: 'b7f8d18e',
       name: 'Input',
       groupId: '4acc795d',
       kind: StepKind.inStep,
-      state: StepState.done,
     ));
-
-    // ── Main spine ──
 
     steps.add(StepModel(
       id: 'd9faca40',
       name: 'Marker Enrichment Score',
       groupId: '4acc795d',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'd9faca40',
@@ -180,7 +185,6 @@ class MockDataService implements DataService {
       name: 'Enrichment Heatmap',
       groupId: '4acc795d',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '89e2c483',
@@ -192,21 +196,17 @@ class MockDataService implements DataService {
       name: 'Ordered Enrichment Heatmap',
       groupId: '4acc795d',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '50ba414c',
       outputStepId: '89e2c483',
     ));
 
-    // ── Fan-out from Ordered Enrichment Heatmap ──
-
     steps.add(StepModel(
       id: '7ee10b97',
       name: 'View',
       groupId: '4acc795d',
       kind: StepKind.viewStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '7ee10b97',
@@ -218,21 +218,17 @@ class MockDataService implements DataService {
       name: 'Cluster Markers',
       groupId: '4acc795d',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '6418bff0',
       outputStepId: '50ba414c',
     ));
 
-    // ── Fan-out from Cluster Markers ──
-
     steps.add(StepModel(
       id: '1405ab2c',
       name: 'View',
       groupId: '4acc795d',
       kind: StepKind.viewStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '1405ab2c',
@@ -244,21 +240,17 @@ class MockDataService implements DataService {
       name: 'Cluster Profiles',
       groupId: '4acc795d',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '56ccde5c',
       outputStepId: '6418bff0',
     ));
 
-    // ── Fan-out from Cluster Profiles ──
-
     steps.add(StepModel(
       id: 'cf80bb7e',
       name: 'Output',
       groupId: '4acc795d',
       kind: StepKind.outStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'cf80bb7e',
@@ -270,21 +262,17 @@ class MockDataService implements DataService {
       name: 'View',
       groupId: '4acc795d',
       kind: StepKind.viewStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'fb1eb205',
       outputStepId: '56ccde5c',
     ));
 
-    // ── Branch from Marker Enrichment Score ──
-
     steps.add(StepModel(
       id: '67df0de4',
       name: 'Marker expression per cluster',
       groupId: '4acc795d',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: '67df0de4',
@@ -304,26 +292,12 @@ class MockDataService implements DataService {
   // test 22 — from stage.tercen.com (martin.english personal)
   // ID: 333e3ae3f7953437b6431c61f802eea5
   //
-  // 22 steps, 2 entrypoints, 1 join, 1 melt, 3 views, 8-way fan-out from PCA:
-  //
-  //   Cell Ranger Data → QC step → QC filters → Find variable → PCA ──→ View PCA Results → View 3
-  //                                                                   ├──→ SNN Clustering ──→ View clusters
-  //                                                                   │                   └──→ Diff analysis ──→ View DE Markers
-  //                                                                   │                                       └──→ Join (← README.md) → Gather → Data step 5 → View 5
-  //                                                                   ├──→ Data step
-  //                                                                   ├──→ Data step 1
-  //                                                                   ├──→ Data step 2 → View 4
-  //                                                                   ├──→ Data step 3
-  //                                                                   └──→ Data step 4
+  // 22 steps, 2 entrypoints, 1 join, 1 melt, 3 views, 8-way fan-out from PCA
   // ═══════════════════════════════════════════════════════════════════
 
-  /// Helper to create a step rectangle using the layout agent's coordinate system.
-  /// lane/depth are 0-based grid positions; converts to topLeft using:
-  ///   center.x = lane * 180 + 100, center.y = depth * 120 + 100
-  ///   topLeft.x = center.x - 60, topLeft.y = center.y - 27.5
   static StepRectangle _rect(int lane, int depth) {
     final cx = lane * 180.0 + 100.0;
-    final cy = depth * 120.0 + 100.0;
+    final cy = depth * 60.0 + 100.0;
     return StepRectangle(x: cx - 60, y: cy - 27.5);
   }
 
@@ -331,172 +305,154 @@ class MockDataService implements DataService {
     final steps = <StepModel>[];
     final links = <LinkModel>[];
 
-    // ── Entrypoints ──
-    //                       lane, depth
     steps.add(StepModel(
       id: '1c782532', name: 'Cell Ranger Data', groupId: '',
-      kind: StepKind.tableStep, state: StepState.done,
+      kind: StepKind.tableStep,
       rectangle: _rect(0, 0),
     ));
     steps.add(StepModel(
       id: '3cbbfaa7', name: 'README.md', groupId: '',
-      kind: StepKind.tableStep, state: StepState.done,
+      kind: StepKind.tableStep,
       rectangle: _rect(4, 0),
     ));
 
-    // ── Main spine: Cell Ranger → QC → ... → PCA ──
-
     steps.add(StepModel(
       id: 'c45b2c6d', name: 'QC step', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(0, 1),
     ));
     links.add(const LinkModel(inputStepId: 'c45b2c6d', outputStepId: '1c782532'));
 
     steps.add(StepModel(
       id: 'b576ee55', name: 'QC filters and normalization', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(0, 2),
     ));
     links.add(const LinkModel(inputStepId: 'b576ee55', outputStepId: 'c45b2c6d'));
 
     steps.add(StepModel(
       id: 'cbc89c44', name: 'Find variable features', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(0, 3),
     ));
     links.add(const LinkModel(inputStepId: 'cbc89c44', outputStepId: 'b576ee55'));
 
     steps.add(StepModel(
       id: '571e2a12', name: 'PCA on 2K most variable genes', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(0, 4),
     ));
     links.add(const LinkModel(inputStepId: '571e2a12', outputStepId: 'cbc89c44'));
 
-    // ── Fan-out from PCA (8 children) — spread across lanes ──
-
     steps.add(StepModel(
       id: 'c8c16d44', name: 'View PCA Results', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(0, 5),
     ));
     links.add(const LinkModel(inputStepId: 'c8c16d44', outputStepId: '571e2a12'));
 
     steps.add(StepModel(
       id: 'ca1777ef', name: 'SNN Graph Clustering', groupId: '',
-      kind: StepKind.dataStep, state: StepState.running,
+      kind: StepKind.dataStep,
       rectangle: _rect(1, 5),
     ));
     links.add(const LinkModel(inputStepId: 'ca1777ef', outputStepId: '571e2a12'));
 
     steps.add(StepModel(
       id: 'a1b9e796', name: 'Data step', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(2, 5),
     ));
     links.add(const LinkModel(inputStepId: 'a1b9e796', outputStepId: '571e2a12'));
 
     steps.add(StepModel(
       id: 'd707d3b1', name: 'Data step 1', groupId: '',
-      kind: StepKind.dataStep, state: StepState.pending,
+      kind: StepKind.dataStep,
       rectangle: _rect(3, 5),
     ));
     links.add(const LinkModel(inputStepId: 'd707d3b1', outputStepId: '571e2a12'));
 
     steps.add(StepModel(
       id: 'e79df6d6', name: 'Data step 2', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(5, 5),
     ));
     links.add(const LinkModel(inputStepId: 'e79df6d6', outputStepId: '571e2a12'));
 
     steps.add(StepModel(
       id: 'fd8e47f4', name: 'Data step 3', groupId: '',
-      kind: StepKind.dataStep, state: StepState.canceled,
+      kind: StepKind.dataStep,
       rectangle: _rect(6, 5),
     ));
     links.add(const LinkModel(inputStepId: 'fd8e47f4', outputStepId: '571e2a12'));
 
     steps.add(StepModel(
       id: 'c1aac962', name: 'Data step 4', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(7, 5),
     ));
     links.add(const LinkModel(inputStepId: 'c1aac962', outputStepId: '571e2a12'));
 
-    // ── View PCA Results → View 3 (ViewStep) ──
-
     steps.add(StepModel(
       id: '3cae27c9', name: 'View 3', groupId: '',
-      kind: StepKind.viewStep, state: StepState.done,
+      kind: StepKind.viewStep,
       rectangle: _rect(0, 6),
     ));
     links.add(const LinkModel(inputStepId: '3cae27c9', outputStepId: 'c8c16d44'));
 
-    // ── SNN Clustering fan-out ──
-
     steps.add(StepModel(
       id: '2a1cf509', name: 'View clusters', groupId: '',
-      kind: StepKind.dataStep, state: StepState.runningDependent,
+      kind: StepKind.dataStep,
       rectangle: _rect(1, 6),
     ));
     links.add(const LinkModel(inputStepId: '2a1cf509', outputStepId: 'ca1777ef'));
 
     steps.add(StepModel(
       id: 'bf643020', name: 'Differential analysis - find markers', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(2, 6),
     ));
     links.add(const LinkModel(inputStepId: 'bf643020', outputStepId: 'ca1777ef'));
 
-    // ── Diff analysis fan-out ──
-
     steps.add(StepModel(
       id: '6279eddd', name: 'View Differentially Expressed Markers', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(2, 7),
     ));
     links.add(const LinkModel(inputStepId: '6279eddd', outputStepId: 'bf643020'));
 
-    // ── Join: Diff analysis + README.md ──
-
     steps.add(StepModel(
       id: '6b29c369', name: 'Join', groupId: '',
-      kind: StepKind.joinStep, state: StepState.done,
+      kind: StepKind.joinStep,
       rectangle: _rect(3, 7),
     ));
     links.add(const LinkModel(inputStepId: '6b29c369', outputStepId: 'bf643020'));
     links.add(const LinkModel(inputStepId: '6b29c369', outputStepId: '3cbbfaa7'));
 
-    // ── Join → Gather → Data step 5 → View 5 ──
-
     steps.add(StepModel(
       id: 'e0c6c7a6', name: 'Gather', groupId: '',
-      kind: StepKind.meltStep, state: StepState.done,
+      kind: StepKind.meltStep,
       rectangle: _rect(3, 8),
     ));
     links.add(const LinkModel(inputStepId: 'e0c6c7a6', outputStepId: '6b29c369'));
 
     steps.add(StepModel(
       id: '1f581e6c', name: 'Data step 5', groupId: '',
-      kind: StepKind.dataStep, state: StepState.done,
+      kind: StepKind.dataStep,
       rectangle: _rect(3, 9),
     ));
     links.add(const LinkModel(inputStepId: '1f581e6c', outputStepId: 'e0c6c7a6'));
 
     steps.add(StepModel(
       id: 'f57359f8', name: 'View 5', groupId: '',
-      kind: StepKind.viewStep, state: StepState.done,
+      kind: StepKind.viewStep,
       rectangle: _rect(3, 10),
     ));
     links.add(const LinkModel(inputStepId: 'f57359f8', outputStepId: '1f581e6c'));
 
-    // ── Data step 2 → View 4 ──
-
     steps.add(StepModel(
       id: 'd0f092e2', name: 'View 4', groupId: '',
-      kind: StepKind.viewStep, state: StepState.done,
+      kind: StepKind.viewStep,
       rectangle: _rect(5, 6),
     ));
     links.add(const LinkModel(inputStepId: 'd0f092e2', outputStepId: 'e79df6d6'));
@@ -514,27 +470,18 @@ class MockDataService implements DataService {
   // RNAseq Data Connector — from stage.tercen.com
   // ID: 2cdf2d2d4f0adbadc5f95636b10e2cd9
   //
-  // 11 steps, 3 source chains merging through 2 JoinSteps:
-  //
-  //   Chain A: GDS5037_full.soft → CSV Import → Gather → Median Expression
-  //                                                                ↓
-  //   Chain B: Sample_Metadata.csv → CSV Import ──────────→ Join (1)
-  //                                                                ↓
-  //   Chain C: hallmark_pathways.gmt → Parse GMT Hallmark → Join (2) → Output
+  // 11 steps, 3 source chains merging through 2 JoinSteps
   // ═══════════════════════════════════════════════════════════════════
 
   WorkflowModel _buildRnaseqWorkflow() {
     final steps = <StepModel>[];
     final links = <LinkModel>[];
 
-    // ── Chain A: Gene expression data ──
-
     steps.add(StepModel(
       id: 'ts-gds5037',
       name: 'GDS5037_full.soft',
       groupId: '',
       kind: StepKind.tableStep,
-      state: StepState.done,
     ));
 
     steps.add(StepModel(
@@ -542,7 +489,6 @@ class MockDataService implements DataService {
       name: 'CSV Import',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-csv-import-1',
@@ -554,7 +500,6 @@ class MockDataService implements DataService {
       name: 'Gather',
       groupId: '',
       kind: StepKind.meltStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ms-gather',
@@ -566,21 +511,17 @@ class MockDataService implements DataService {
       name: 'Median Expression Per Gene',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-median',
       outputStepId: 'ms-gather',
     ));
 
-    // ── Chain B: Sample metadata ──
-
     steps.add(StepModel(
       id: 'ts-metadata',
       name: 'Sample_Metadata.csv',
       groupId: '',
       kind: StepKind.tableStep,
-      state: StepState.done,
     ));
 
     steps.add(StepModel(
@@ -588,21 +529,17 @@ class MockDataService implements DataService {
       name: 'CSV Import',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-csv-import-2',
       outputStepId: 'ts-metadata',
     ));
 
-    // ── Join 1: Median + Sample metadata ──
-
     steps.add(StepModel(
       id: 'js-join-1',
       name: 'Join',
       groupId: '',
       kind: StepKind.joinStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'js-join-1',
@@ -613,14 +550,11 @@ class MockDataService implements DataService {
       outputStepId: 'ds-csv-import-2',
     ));
 
-    // ── Chain C: Pathway data ──
-
     steps.add(StepModel(
       id: 'ts-hallmark',
       name: 'hallmark_pathways.gmt',
       groupId: '',
       kind: StepKind.tableStep,
-      state: StepState.done,
     ));
 
     steps.add(StepModel(
@@ -628,21 +562,17 @@ class MockDataService implements DataService {
       name: 'Parse GMT Hallmark',
       groupId: '',
       kind: StepKind.dataStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'ds-parse-gmt',
       outputStepId: 'ts-hallmark',
     ));
 
-    // ── Join 2: Join 1 + Parse GMT ──
-
     steps.add(StepModel(
       id: 'js-join-2',
       name: 'Join',
       groupId: '',
       kind: StepKind.joinStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'js-join-2',
@@ -653,14 +583,11 @@ class MockDataService implements DataService {
       outputStepId: 'ds-parse-gmt',
     ));
 
-    // ── Output ──
-
     steps.add(StepModel(
       id: 'os-output',
       name: 'Output',
       groupId: '',
       kind: StepKind.outStep,
-      state: StepState.done,
     ));
     links.add(const LinkModel(
       inputStepId: 'os-output',

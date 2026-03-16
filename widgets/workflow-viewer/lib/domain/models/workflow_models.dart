@@ -60,7 +60,7 @@ class StepModel {
     required this.name,
     required this.groupId,
     required this.kind,
-    this.state = StepState.init,
+    this.state = StepState.done,
     this.description = '',
     this.rectangle,
   });

@@ -513,8 +513,8 @@ class _FlowchartNodeState extends State<FlowchartNode> {
   Color _iconColorForState(StepState state, bool isDark) {
     switch (state) {
       case StepState.init:
-        return isDark ? AppColorsDark.neutral400 : AppColors.neutral600;
       case StepState.pending:
+        return isDark ? AppColorsDark.neutral400 : AppColors.neutral600;
       case StepState.runningDependent:
         return isDark ? AppColorsDark.warning : AppColors.warning;
       case StepState.running:

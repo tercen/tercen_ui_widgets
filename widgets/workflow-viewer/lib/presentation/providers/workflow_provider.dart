@@ -13,11 +13,13 @@ import '../../domain/services/event_bus.dart';
 import '../../domain/services/event_payload.dart';
 import '../../domain/services/window_channels.dart';
 import '../../domain/services/workflow_channels.dart';
+import '../../implementations/services/mock_execution_engine.dart';
 
 /// Manages workflow viewer state: workflow data, layout, focus, search.
 class WorkflowProvider extends ChangeNotifier {
   final DataService _dataService = serviceLocator<DataService>();
   final EventBus _eventBus = serviceLocator<EventBus>();
+  late final MockExecutionEngine _executionEngine;
 
   final WindowIdentity identity;
   final String windowId;
@@ -89,6 +91,10 @@ class WorkflowProvider extends ChangeNotifier {
     required this.identity,
     required this.windowId,
   }) {
+    _executionEngine = MockExecutionEngine(
+      eventBus: _eventBus,
+      sourceWidgetId: windowId,
+    );
     _commandSub = _eventBus
         .subscribe(WindowChannels.commandChannel(windowId))
         .listen(_handleCommand);
@@ -686,8 +692,8 @@ class WorkflowProvider extends ChangeNotifier {
   }
 
   void _computePixelPositions() {
-    const double gap = 16.0;
-    const double rowHeight = 48.0;
+    const double colGap = 16.0;
+    const double rowGap = 12.0;
     const double marginX = 8.0;
     const double marginY = 8.0;
     const double headerHeight = 56.0; // Height of workflow header row
@@ -700,42 +706,110 @@ class WorkflowProvider extends ChangeNotifier {
       node.shapeHeight = shapeDims.$2;
     }
 
-    // Find max column (exclude col 0 which is the header)
+    // For agent-provided rectangles, extract lane/depth grid indices
+    // so all nodes go through the same column-width system.
+    _extractGridFromRectangles();
+
+    // Find max column and max row
     int maxCol = 0;
+    int maxRow = 0;
     for (final node in _layoutNodes) {
       final c = node.col.toInt();
+      final r = node.row.toInt();
       if (c > maxCol) maxCol = c;
+      if (r > maxRow) maxRow = r;
     }
 
     // Compute column widths using shapeWidth (exclude header col 0)
     final colWidths = List.filled(maxCol + 1, 36.0);
     for (final node in _layoutNodes) {
-      if (node.col.toInt() == 0) continue; // Skip header
+      if (node.col.toInt() == 0) continue;
       final c = node.col.toInt();
       final w = node.shapeWidth > 0 ? node.shapeWidth : 36.0;
       if (w > colWidths[c]) colWidths[c] = w;
     }
 
-    // Cumulative x positions per column
+    // Cumulative x positions per column (left edge of each column)
     final colX = List.filled(maxCol + 1, 0.0);
     colX[0] = marginX;
     for (int c = 1; c <= maxCol; c++) {
-      colX[c] = colX[c - 1] + colWidths[c - 1] + gap;
+      colX[c] = colX[c - 1] + colWidths[c - 1] + colGap;
+    }
+
+    // Compute row heights from max shapeHeight in each row
+    final rowHeights = List.filled(maxRow + 1, 36.0);
+    for (final node in _layoutNodes) {
+      if (node.kind == StepKind.workflow) continue;
+      final r = node.row.toInt();
+      final h = node.shapeHeight > 0 ? node.shapeHeight : 36.0;
+      if (h > rowHeights[r]) rowHeights[r] = h;
+    }
+
+    // Cumulative y positions per row (top edge)
+    final rowY = List.filled(maxRow + 1, 0.0);
+    rowY[0] = headerHeight;
+    for (int r = 1; r <= maxRow; r++) {
+      rowY[r] = rowY[r - 1] + rowHeights[r - 1] + rowGap;
     }
 
     for (final node in _layoutNodes) {
-      // If the step has a persisted rectangle, use it directly
-      if (node.step.rectangle != null) {
-        node.x = node.step.rectangle!.x;
-        node.y = node.step.rectangle!.y;
-      } else if (node.kind == StepKind.workflow) {
-        // Header row: left-aligned with grid col 1, vertically centered
-        node.x = colX.length > 1 ? colX[1] : marginX;
+      if (node.kind == StepKind.workflow) {
+        // Header row: center-aligned with grid col 1
+        final col1Center = colX.length > 1
+            ? colX[1] + colWidths[1] / 2
+            : marginX;
+        node.x = col1Center - node.shapeWidth / 2;
         node.y = marginY + (headerHeight - node.shapeHeight) / 2;
       } else {
-        node.x = colX[node.col.toInt()];
-        node.y = headerHeight + node.row * rowHeight;
+        // All nodes: center within their column and row
+        final c = node.col.toInt();
+        final r = node.row.toInt();
+        node.x = colX[c] + (colWidths[c] - node.shapeWidth) / 2;
+        node.y = rowY[r] + (rowHeights[r] - node.shapeHeight) / 2;
       }
+    }
+  }
+
+  /// Extract lane/depth grid indices from agent-provided rectangles.
+  /// Clusters x-centers into columns and y-centers into rows by sorting
+  /// unique positions, so the widget controls spacing regardless of the
+  /// agent's pixel coordinates.
+  void _extractGridFromRectangles() {
+    // Check if any non-header nodes have rectangles
+    final rectNodes = _layoutNodes.where(
+      (n) => n.step.rectangle != null && n.kind != StepKind.workflow,
+    ).toList();
+    if (rectNodes.isEmpty) return;
+
+    // Collect unique x-centers and y-centers (rounded to avoid float issues)
+    final xSet = <int>{};
+    final ySet = <int>{};
+    for (final node in rectNodes) {
+      final cx = (node.step.rectangle!.x + 60).round(); // recover center
+      final cy = (node.step.rectangle!.y + 27.5).round();
+      xSet.add(cx);
+      ySet.add(cy);
+    }
+
+    final sortedX = xSet.toList()..sort();
+    final sortedY = ySet.toList()..sort();
+
+    // Map positions to 1-based indices (col/row 0 is the header)
+    final xToCol = <int, int>{};
+    for (int i = 0; i < sortedX.length; i++) {
+      xToCol[sortedX[i]] = i + 1;
+    }
+    final yToRow = <int, int>{};
+    for (int i = 0; i < sortedY.length; i++) {
+      yToRow[sortedY[i]] = i + 1;
+    }
+
+    // Override row/col for nodes with rectangles
+    for (final node in rectNodes) {
+      final cx = (node.step.rectangle!.x + 60).round();
+      final cy = (node.step.rectangle!.y + 27.5).round();
+      node.col = (xToCol[cx] ?? 1).toDouble();
+      node.row = (yToRow[cy] ?? 1).toDouble();
     }
   }
 
@@ -769,21 +843,24 @@ class WorkflowProvider extends ChangeNotifier {
   /// Recompute only pixel positions (not row/col assignments) using
   /// current shapeWidth/shapeHeight values.
   void _recomputePixelPositions() {
-    const double gap = 16.0;
-    const double rowHeight = 48.0;
+    const double colGap = 16.0;
+    const double rowGap = 12.0;
     const double marginX = 8.0;
     const double marginY = 8.0;
     const double headerHeight = 56.0;
 
     int maxCol = 0;
+    int maxRow = 0;
     for (final node in _layoutNodes) {
       final c = node.col.toInt();
+      final r = node.row.toInt();
       if (c > maxCol) maxCol = c;
+      if (r > maxRow) maxRow = r;
     }
 
     final colWidths = List.filled(maxCol + 1, 36.0);
     for (final node in _layoutNodes) {
-      if (node.col.toInt() == 0) continue; // Skip header
+      if (node.col.toInt() == 0) continue;
       final c = node.col.toInt();
       final w = node.shapeWidth > 0 ? node.shapeWidth : 36.0;
       if (w > colWidths[c]) colWidths[c] = w;
@@ -792,19 +869,35 @@ class WorkflowProvider extends ChangeNotifier {
     final colX = List.filled(maxCol + 1, 0.0);
     colX[0] = marginX;
     for (int c = 1; c <= maxCol; c++) {
-      colX[c] = colX[c - 1] + colWidths[c - 1] + gap;
+      colX[c] = colX[c - 1] + colWidths[c - 1] + colGap;
+    }
+
+    final rowHeights = List.filled(maxRow + 1, 36.0);
+    for (final node in _layoutNodes) {
+      if (node.kind == StepKind.workflow) continue;
+      final r = node.row.toInt();
+      final h = node.shapeHeight > 0 ? node.shapeHeight : 36.0;
+      if (h > rowHeights[r]) rowHeights[r] = h;
+    }
+
+    final rowY = List.filled(maxRow + 1, 0.0);
+    rowY[0] = headerHeight;
+    for (int r = 1; r <= maxRow; r++) {
+      rowY[r] = rowY[r - 1] + rowHeights[r - 1] + rowGap;
     }
 
     for (final node in _layoutNodes) {
-      if (node.step.rectangle != null) {
-        node.x = node.step.rectangle!.x;
-        node.y = node.step.rectangle!.y;
-      } else if (node.kind == StepKind.workflow) {
-        node.x = colX.length > 1 ? colX[1] : marginX;
+      if (node.kind == StepKind.workflow) {
+        final col1Center = colX.length > 1
+            ? colX[1] + colWidths[1] / 2
+            : marginX;
+        node.x = col1Center - node.shapeWidth / 2;
         node.y = marginY + (headerHeight - node.shapeHeight) / 2;
       } else {
-        node.x = colX[node.col.toInt()];
-        node.y = headerHeight + node.row * rowHeight;
+        final c = node.col.toInt();
+        final r = node.row.toInt();
+        node.x = colX[c] + (colWidths[c] - node.shapeWidth) / 2;
+        node.y = rowY[r] + (rowHeights[r] - node.shapeHeight) / 2;
       }
     }
   }
@@ -1185,39 +1278,38 @@ class WorkflowProvider extends ChangeNotifier {
   }
 
   void executeAction() {
+    if (_workflow == null) return;
     final config = actionButtonConfig;
+
+    // Publish the intent to the frame (orchestrator will handle in production)
     switch (config.action) {
       case ActionButtonAction.runWorkflow:
         _publishIntent(WorkflowChannels.runWorkflow, 'runWorkflow', {
-          'workflowId': _workflow?.id ?? '',
+          'workflowId': _workflow!.id,
         });
+        // Mock: execution engine drives state via stepStateChanged events
+        _executionEngine.runWorkflow(_workflow!);
         break;
       case ActionButtonAction.stopWorkflow:
         _publishIntent(WorkflowChannels.stopWorkflow, 'stopWorkflow', {
-          'workflowId': _workflow?.id ?? '',
+          'workflowId': _workflow!.id,
         });
+        _executionEngine.stopWorkflow(_workflow!);
         break;
       case ActionButtonAction.resetWorkflow:
-        _publishIntent(
-            WorkflowChannels.resetWorkflow, 'resetWorkflow', {
-          'workflowId': _workflow?.id ?? '',
+        _publishIntent(WorkflowChannels.resetWorkflow, 'resetWorkflow', {
+          'workflowId': _workflow!.id,
         });
-        // Mock: reset all steps to init
-        for (final node in _layoutNodes) {
-          node.step.state = StepState.init;
-        }
-        notifyListeners();
+        _executionEngine.resetWorkflow(_workflow!);
         break;
       case ActionButtonAction.runStep:
         final node = focusedNode;
         if (node != null) {
           _publishIntent(WorkflowChannels.runStep, 'runStep', {
             'stepId': node.id,
-            'workflowId': _workflow?.id ?? '',
+            'workflowId': _workflow!.id,
           });
-          // Mock: set step to running
-          node.step.state = StepState.running;
-          notifyListeners();
+          _executionEngine.runStep(node.id, _workflow!);
         }
         break;
       case ActionButtonAction.stopStep:
@@ -1225,11 +1317,9 @@ class WorkflowProvider extends ChangeNotifier {
         if (node != null) {
           _publishIntent(WorkflowChannels.stopStep, 'stopStep', {
             'stepId': node.id,
-            'workflowId': _workflow?.id ?? '',
+            'workflowId': _workflow!.id,
           });
-          // Mock: set step to failed
-          node.step.state = StepState.failed;
-          notifyListeners();
+          _executionEngine.stopStep(node.id, _workflow!);
         }
         break;
       case ActionButtonAction.resetStep:
@@ -1237,11 +1327,9 @@ class WorkflowProvider extends ChangeNotifier {
         if (node != null) {
           _publishIntent(WorkflowChannels.resetStep, 'resetStep', {
             'stepId': node.id,
-            'workflowId': _workflow?.id ?? '',
+            'workflowId': _workflow!.id,
           });
-          // Mock: set step to init
-          node.step.state = StepState.init;
-          notifyListeners();
+          _executionEngine.resetStep(node.id, _workflow!);
         }
         break;
     }
@@ -1416,6 +1504,7 @@ class WorkflowProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _executionEngine.dispose();
     transformController.dispose();
     _commandSub?.cancel();
     _openWorkflowSub?.cancel();
