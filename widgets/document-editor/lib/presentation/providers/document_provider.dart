@@ -57,6 +57,16 @@ class DocumentProvider extends ChangeNotifier {
   String? _saveError;
   String? get saveError => _saveError;
 
+  /// Briefly true after a successful save (auto-clears after 2 s).
+  bool _saveSuccess = false;
+  bool get saveSuccess => _saveSuccess;
+
+  /// Wall-clock time of the last successful save.
+  DateTime? _lastSavedAt;
+  DateTime? get lastSavedAt => _lastSavedAt;
+
+  Timer? _saveSuccessTimer;
+
   // ── Text editing controller (shared between source and rendered) ──
 
   late TextEditingController textController;
@@ -220,6 +230,7 @@ class DocumentProvider extends ChangeNotifier {
 
     _isSaving = true;
     _saveError = null;
+    _saveSuccess = false;
     notifyListeners();
 
     try {
@@ -228,6 +239,14 @@ class DocumentProvider extends ChangeNotifier {
       if (success) {
         _originalContent = _content;
         _document = _document!.copyWith(content: _content);
+        _lastSavedAt = DateTime.now();
+        _saveSuccess = true;
+        // Auto-clear the success flag after 2 seconds.
+        _saveSuccessTimer?.cancel();
+        _saveSuccessTimer = Timer(const Duration(seconds: 2), () {
+          _saveSuccess = false;
+          notifyListeners();
+        });
       } else {
         _saveError = 'Save failed -- please try again';
       }
@@ -560,6 +579,7 @@ class DocumentProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    _saveSuccessTimer?.cancel();
     _commandSubscription?.cancel();
     textController.removeListener(_onControllerChanged);
     textController.dispose();

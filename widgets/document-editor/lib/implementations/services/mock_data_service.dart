@@ -1,9 +1,18 @@
+import 'dart:math';
+
 import '../../domain/models/document_model.dart';
 import '../../domain/services/data_service.dart';
 
 /// Mock document service with three sample documents.
+///
+/// Simulates realistic network latency with random jitter:
+/// - Load: 600–1500 ms (first load slower at 1200–2500 ms to simulate cold start)
+/// - Save: 800–2000 ms
+/// - Second save always fails (simulates server-side conflict).
 class MockDataService implements DataService {
   int _saveCallCount = 0;
+  int _loadCallCount = 0;
+  final _rng = Random();
 
   static const String _projectId = 'proj-001';
 
@@ -34,9 +43,21 @@ class MockDataService implements DataService {
   @override
   List<String> get availableDocumentIds => _documents.keys.toList();
 
+  /// Random delay in [minMs, maxMs] range to simulate network jitter.
+  Future<void> _jitteredDelay(int minMs, int maxMs) async {
+    final ms = minMs + _rng.nextInt(maxMs - minMs + 1);
+    await Future.delayed(Duration(milliseconds: ms));
+  }
+
   @override
   Future<DocumentModel> loadDocument(String fileId, String projectId) async {
-    await Future.delayed(const Duration(milliseconds: 800));
+    _loadCallCount++;
+    // First load is slower (cold start). Subsequent loads are faster (warm cache).
+    if (_loadCallCount == 1) {
+      await _jitteredDelay(1200, 2500);
+    } else {
+      await _jitteredDelay(600, 1500);
+    }
 
     final doc = _documents[fileId];
     if (doc == null) {
@@ -47,7 +68,7 @@ class MockDataService implements DataService {
 
   @override
   Future<bool> saveDocument(String fileId, String content) async {
-    await Future.delayed(const Duration(milliseconds: 1200));
+    await _jitteredDelay(800, 2000);
 
     _saveCallCount++;
 
