@@ -54,15 +54,15 @@ class _HomeScreenState extends State<HomeScreen> {
         if (provider.isDirty) provider.save();
         return KeyEventResult.handled;
       }
-      // Ctrl+B: Bold (rendered mode).
+      // Ctrl+B: Bold (source mode).
       if (event.logicalKey == LogicalKeyboardKey.keyB &&
-          provider.editMode == EditMode.rendered) {
+          provider.editMode == EditMode.source) {
         provider.wrapSelection('**', '**');
         return KeyEventResult.handled;
       }
-      // Ctrl+I: Italic (rendered mode).
+      // Ctrl+I: Italic (source mode).
       if (event.logicalKey == LogicalKeyboardKey.keyI &&
-          provider.editMode == EditMode.rendered) {
+          provider.editMode == EditMode.source) {
         provider.wrapSelection('*', '*');
         return KeyEventResult.handled;
       }
@@ -85,7 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<DocumentProvider>();
 
+    final bgColor = isDark ? const Color(0xFF181A20) : Colors.white;
+
     return Scaffold(
+      backgroundColor: bgColor,
       body: Focus(
         focusNode: _keyboardFocusNode,
         onKeyEvent: _handleKeyEvent,

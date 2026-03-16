@@ -8,15 +8,12 @@ import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../providers/document_provider.dart';
 
-/// Rendered mode: live-edit WYSIWYG experience.
+/// Rendered mode: read-only markdown preview.
 ///
-/// For the Phase 2 mock, this shows a split view: an editable text area
-/// (the same TextField as source mode) and a live-rendered markdown preview.
-/// The user edits in the text area and sees the formatted result update
-/// in real time below. Toolbar formatting actions insert markdown syntax
-/// into the text area.
+/// Displays the document content as fully rendered markdown.
+/// Editing is done in source mode; this view is for previewing the result.
 ///
-/// For .txt files, displays plain editable text with no markdown formatting.
+/// For .txt files, displays plain text (read-only).
 class RenderedEditor extends StatelessWidget {
   const RenderedEditor({super.key});
 
@@ -29,78 +26,28 @@ class RenderedEditor extends StatelessWidget {
     if (doc == null) return const SizedBox.shrink();
 
     final bgColor = isDark ? AppColorsDark.surface : AppColors.surface;
-    final borderColor =
-        isDark ? AppColorsDark.borderSubtle : AppColors.borderSubtle;
 
-    // Plain text files: editable text, no markdown rendering.
+    // Plain text files: read-only display.
     if (doc.isPlainText) {
-      return _PlainTextEditor(provider: provider);
+      return _PlainTextPreview(provider: provider);
     }
 
-    // Markdown files: editable text area + live rendered preview.
+    // Markdown files: rendered preview.
     return Container(
       color: bgColor,
-      child: Column(
-        children: [
-          // Editable text area (compact, resizable via drag).
-          Container(
-            constraints: const BoxConstraints(
-              minHeight: 80,
-              maxHeight: 200,
-            ),
-            decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: borderColor)),
-            ),
-            child: TextField(
-              controller: provider.textController,
-              maxLines: null,
-              expands: true,
-              textAlignVertical: TextAlignVertical.top,
-              style: TextStyle(
-                fontFamily: 'monospace',
-                fontSize: 12,
-                height: 1.5,
-                color: isDark
-                    ? AppColorsDark.textSecondary
-                    : AppColors.textSecondary,
-              ),
-              decoration: InputDecoration(
-                border: InputBorder.none,
-                enabledBorder: InputBorder.none,
-                focusedBorder: InputBorder.none,
-                contentPadding: const EdgeInsets.all(AppSpacing.sm),
-                fillColor: isDark
-                    ? AppColorsDark.surfaceElevated
-                    : AppColors.panelBackground,
-                filled: true,
-                hintText: 'Edit markdown source here...',
-                hintStyle: TextStyle(
-                  fontSize: 12,
-                  color: isDark
-                      ? AppColorsDark.textMuted
-                      : AppColors.textMuted,
-                ),
-              ),
-            ),
-          ),
-          // Live rendered preview.
-          Expanded(
-            child: Markdown(
-              data: provider.content,
-              selectable: true,
-              softLineBreak: true,
-              padding: const EdgeInsets.all(AppSpacing.md),
-              onTapLink: (text, href, title) {
-                if (href != null) _launchUrl(href);
-              },
-              styleSheet: _buildStyleSheet(context, isDark),
-              // ignore: deprecated_member_use
-              imageBuilder: (uri, title, alt) {
-                return _MarkdownImage(uri: uri, alt: alt);
-              },
-            ),
-          ),
-        ],
+      child: Markdown(
+        data: provider.content,
+        selectable: true,
+        softLineBreak: true,
+        padding: const EdgeInsets.all(AppSpacing.md),
+        onTapLink: (text, href, title) {
+          if (href != null) _launchUrl(href);
+        },
+        styleSheet: _buildStyleSheet(context, isDark),
+        // ignore: deprecated_member_use
+        imageBuilder: (uri, title, alt) {
+          return _MarkdownImage(uri: uri, alt: alt);
+        },
       ),
     );
   }
@@ -181,11 +128,11 @@ class RenderedEditor extends StatelessWidget {
   }
 }
 
-/// Plain text editable display for .txt files.
-class _PlainTextEditor extends StatelessWidget {
+/// Read-only plain text preview for .txt files in rendered mode.
+class _PlainTextPreview extends StatelessWidget {
   final DocumentProvider provider;
 
-  const _PlainTextEditor({required this.provider});
+  const _PlainTextPreview({required this.provider});
 
   @override
   Widget build(BuildContext context) {
@@ -196,20 +143,10 @@ class _PlainTextEditor extends StatelessWidget {
 
     return Container(
       color: bgColor,
-      child: TextField(
-        controller: provider.textController,
-        maxLines: null,
-        expands: true,
-        textAlignVertical: TextAlignVertical.top,
+      padding: const EdgeInsets.all(AppSpacing.md),
+      child: SelectableText(
+        provider.content,
         style: AppTextStyles.body.copyWith(color: textColor, height: 1.6),
-        decoration: InputDecoration(
-          border: InputBorder.none,
-          enabledBorder: InputBorder.none,
-          focusedBorder: InputBorder.none,
-          contentPadding: const EdgeInsets.all(AppSpacing.md),
-          fillColor: bgColor,
-          filled: true,
-        ),
       ),
     );
   }

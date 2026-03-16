@@ -11,6 +11,7 @@ import '../providers/document_provider.dart';
 import 'link_dialog.dart';
 import 'image_dialog.dart';
 import 'format_popover.dart';
+import 'print_helper.dart';
 
 /// Custom toolbar for the document editor.
 ///
@@ -29,7 +30,7 @@ class DocumentToolbar extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final doc = provider.document;
     final isMarkdown = doc?.isMarkdown ?? false;
-    final isRenderedMode = provider.editMode == EditMode.rendered;
+    final isSourceMode = provider.editMode == EditMode.source;
 
     return Container(
       height: WindowConstants.toolbarHeight,
@@ -40,14 +41,24 @@ class DocumentToolbar extends StatelessWidget {
 
           return Row(
             children: [
-              // Mode toggle segmented button.
-              _ModeToggle(
-                editMode: provider.editMode,
-                onChanged: (mode) => provider.setEditMode(mode),
+              // Save button (leading).
+              _SaveButton(
+                isDirty: provider.isDirty,
+                isSaving: provider.isSaving,
+                onSave: () => provider.save(),
               ),
 
-              // Formatting controls (rendered mode only, markdown files only).
-              if (isRenderedMode && isMarkdown) ...[
+              // Mode toggle segmented button (markdown files only).
+              if (isMarkdown) ...[
+                const SizedBox(width: WindowConstants.toolbarGap),
+                _ModeToggle(
+                  editMode: provider.editMode,
+                  onChanged: (mode) => provider.setEditMode(mode),
+                ),
+              ],
+
+              // Formatting controls (source mode only, markdown files only).
+              if (isSourceMode && isMarkdown) ...[
                 if (isNarrow) ...[
                   const SizedBox(width: WindowConstants.toolbarGap),
                   _FormatPopoverButton(provider: provider),
@@ -59,11 +70,20 @@ class DocumentToolbar extends StatelessWidget {
 
               const Spacer(),
 
-              // Save button (trailing).
-              _SaveButton(
-                isDirty: provider.isDirty,
-                isSaving: provider.isSaving,
-                onSave: () => provider.save(),
+              // Print button (trailing).
+              _FormattingButton(
+                icon: FontAwesomeIcons.print,
+                tooltip: 'Print',
+                onPressed: () {
+                  final p = provider;
+                  final d = p.document;
+                  if (d == null) return;
+                  if (d.isMarkdown) {
+                    PrintHelper.printMarkdown(p.content, d.name);
+                  } else {
+                    PrintHelper.printPlainText(p.content, d.name);
+                  }
+                },
               ),
             ],
           );
@@ -148,11 +168,6 @@ class DocumentToolbar extends StatelessWidget {
         tooltip: 'Inline Code',
         onPressed: () => provider.wrapSelection('`', '`'),
       ),
-      _FormattingButton(
-        icon: FontAwesomeIcons.laptopCode,
-        tooltip: 'Code Block',
-        onPressed: () => provider.wrapSelection('\n```\n', '\n```\n'),
-      ),
       _ToolbarSeparator(),
 
       // Divider group.
@@ -194,37 +209,117 @@ class DocumentToolbar extends StatelessWidget {
 
 // ── Mode Toggle ──────────────────────────────────────────────────────────────
 
-class _ModeToggle extends StatelessWidget {
+/// Custom two-segment toggle built to Tercen style guide specs.
+///
+/// Exactly `toolbarButtonSize` (36px) tall including border.
+/// Selected: primary fill, white icon. Unselected: transparent, primary icon.
+class _ModeToggle extends StatefulWidget {
   final EditMode editMode;
   final ValueChanged<EditMode> onChanged;
 
   const _ModeToggle({required this.editMode, required this.onChanged});
 
   @override
+  State<_ModeToggle> createState() => _ModeToggleState();
+}
+
+class _ModeToggleState extends State<_ModeToggle> {
+  bool _editHovered = false;
+  bool _viewHovered = false;
+
+  @override
   Widget build(BuildContext context) {
-    return SegmentedButton<EditMode>(
-      segments: const [
-        ButtonSegment(
-          value: EditMode.source,
-          label: Text('Source', style: TextStyle(fontSize: 12)),
-          icon: Icon(FontAwesomeIcons.code, size: 12),
-        ),
-        ButtonSegment(
-          value: EditMode.rendered,
-          label: Text('Rendered', style: TextStyle(fontSize: 12)),
-          icon: Icon(FontAwesomeIcons.eye, size: 12),
-        ),
-      ],
-      selected: {editMode},
-      onSelectionChanged: (selected) {
-        onChanged(selected.first);
-      },
-      showSelectedIcon: false,
-      style: ButtonStyle(
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        padding: WidgetStateProperty.all(
-          const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final primary = isDark ? AppColorsDark.primary : AppColors.primary;
+    final borderColor = isDark ? AppColorsDark.border : AppColors.border;
+    final hoverBg = isDark ? AppColorsDark.primarySurface : AppColors.primarySurface;
+    final selectedFg = isDark ? Colors.black : Colors.white;
+    const double size = WindowConstants.toolbarButtonSize;
+    const double iconSize = WindowConstants.toolbarButtonIconSize;
+    const double radius = WindowConstants.toolbarButtonRadius;
+
+    final editSelected = widget.editMode == EditMode.source;
+    final viewSelected = widget.editMode == EditMode.rendered;
+
+    return Container(
+      height: size,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(radius),
+        border: Border.all(color: borderColor, width: 1),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          // Edit segment
+          _segment(
+            icon: FontAwesomeIcons.code,
+            tooltip: 'Edit',
+            isSelected: editSelected,
+            isHovered: _editHovered,
+            onTap: () => widget.onChanged(EditMode.source),
+            onHover: (h) => setState(() => _editHovered = h),
+            primary: primary,
+            selectedFg: selectedFg,
+            hoverBg: hoverBg,
+            iconSize: iconSize,
+          ),
+          // Divider
+          Container(width: 1, color: borderColor),
+          // View segment
+          _segment(
+            icon: FontAwesomeIcons.book,
+            tooltip: 'View',
+            isSelected: viewSelected,
+            isHovered: _viewHovered,
+            onTap: () => widget.onChanged(EditMode.rendered),
+            onHover: (h) => setState(() => _viewHovered = h),
+            primary: primary,
+            selectedFg: selectedFg,
+            hoverBg: hoverBg,
+            iconSize: iconSize,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _segment({
+    required IconData icon,
+    required String tooltip,
+    required bool isSelected,
+    required bool isHovered,
+    required VoidCallback onTap,
+    required ValueChanged<bool> onHover,
+    required Color primary,
+    required Color selectedFg,
+    required Color hoverBg,
+    required double iconSize,
+  }) {
+    final bg = isSelected
+        ? primary
+        : isHovered
+            ? hoverBg
+            : Colors.transparent;
+    final fg = isSelected ? selectedFg : primary;
+
+    return Tooltip(
+      message: tooltip,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => onHover(true),
+        onExit: (_) => onHover(false),
+        child: GestureDetector(
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: const EdgeInsets.symmetric(horizontal: 14),
+            color: bg,
+            child: Center(
+              child: FaIcon(icon, size: iconSize, color: fg),
+            ),
+          ),
         ),
       ),
     );
@@ -288,15 +383,15 @@ class _FormattingButtonState extends State<_FormattingButton> {
           onTap: disabled ? null : widget.onPressed,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            width: 30,
-            height: 30,
+            width: WindowConstants.toolbarButtonSize,
+            height: WindowConstants.toolbarButtonSize,
             decoration: BoxDecoration(
               color: bg,
               borderRadius:
-                  BorderRadius.circular(AppSpacing.radiusSm),
+                  BorderRadius.circular(WindowConstants.toolbarButtonRadius),
             ),
             child: Center(
-              child: FaIcon(widget.icon, size: 13, color: iconColor),
+              child: FaIcon(widget.icon, size: WindowConstants.toolbarButtonIconSize, color: iconColor),
             ),
           ),
         ),
@@ -347,22 +442,22 @@ class _HeadingButtonState extends State<_HeadingButton> {
           onTap: widget.onPressed,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 150),
-            width: 30,
-            height: 30,
+            width: WindowConstants.toolbarButtonSize,
+            height: WindowConstants.toolbarButtonSize,
             decoration: BoxDecoration(
               color: bg,
               borderRadius:
-                  BorderRadius.circular(AppSpacing.radiusSm),
+                  BorderRadius.circular(WindowConstants.toolbarButtonRadius),
             ),
             child: Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  FaIcon(FontAwesomeIcons.heading, size: 11, color: primary),
+                  FaIcon(FontAwesomeIcons.heading, size: 13, color: primary),
                   Text(
                     '${widget.level}',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 12,
                       fontWeight: FontWeight.w700,
                       color: primary,
                     ),
@@ -492,13 +587,18 @@ class _SaveButtonState extends State<_SaveButton> {
         isDark ? AppColorsDark.neutral600 : AppColors.neutral400;
     final disabledBorder =
         isDark ? AppColorsDark.neutral600 : AppColors.neutral300;
-    final hoverBg = isDark
-        ? AppColorsDark.primarySurface
-        : AppColors.primarySurface;
+    final onPrimary = isDark ? Colors.black : Colors.white;
+    final hoverPrimaryBg = isDark
+        ? AppColorsDark.primary.withValues(alpha: 0.85)
+        : AppColors.primary.withValues(alpha: 0.85);
 
-    final fg = disabled ? disabledColor : primary;
+    // When dirty: primary filled button. When clean/disabled: ghost style.
+    final isDirtyAndEnabled = !disabled;
+    final fg = disabled ? disabledColor : (isDirtyAndEnabled ? onPrimary : primary);
     final border = disabled ? disabledBorder : primary;
-    final bg = (!disabled && _hovered) ? hoverBg : Colors.transparent;
+    final bg = isDirtyAndEnabled
+        ? (_hovered ? hoverPrimaryBg : primary)
+        : Colors.transparent;
 
     return Tooltip(
       message: 'Save',

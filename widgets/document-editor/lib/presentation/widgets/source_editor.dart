@@ -47,6 +47,7 @@ class SourceEditor extends StatelessWidget {
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,
+              hoverColor: Colors.transparent,
               contentPadding: const EdgeInsets.all(AppSpacing.md),
               fillColor: bgColor,
               filled: true,

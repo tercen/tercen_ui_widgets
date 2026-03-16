@@ -141,6 +141,12 @@ class AppTheme {
             if (states.contains(WidgetState.selected)) return AppColors.white;
             return AppColors.textPrimary;
           }),
+          iconColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return AppColors.white;
+            return AppColors.primary;
+          }),
+          iconSize: WidgetStateProperty.all(16),
+          minimumSize: WidgetStateProperty.all(const Size(36, 36)),
           side: WidgetStateProperty.all(
             const BorderSide(color: AppColors.border),
           ),
@@ -148,6 +154,11 @@ class AppTheme {
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
+          ),
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
           ),
         ),
       ),
@@ -288,6 +299,12 @@ class AppTheme {
             if (states.contains(WidgetState.selected)) return Colors.white;
             return AppColorsDark.textPrimary;
           }),
+          iconColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.selected)) return Colors.white;
+            return AppColorsDark.primary;
+          }),
+          iconSize: WidgetStateProperty.all(16),
+          minimumSize: WidgetStateProperty.all(const Size(36, 36)),
           side: WidgetStateProperty.all(
             const BorderSide(color: AppColorsDark.border),
           ),
@@ -295,6 +312,11 @@ class AppTheme {
             RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
+          ),
+          visualDensity: VisualDensity.compact,
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          padding: WidgetStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 0),
           ),
         ),
       ),
