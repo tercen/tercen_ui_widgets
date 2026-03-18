@@ -1,0 +1,643 @@
+{
+  "widgets": [
+    {
+      "metadata": {
+        "type": "WorkflowViewer",
+        "tier": 2,
+        "description": "Interactive flowchart viewer for Tercen workflows. Displays steps as a DAG with connectors, supports selection, inline rename, run/stop/reset actions, and step state visualization. Publishes focus events when steps are selected and action events for run/stop/reset. Subscribes to step state changes from the server.",
+        "props": {
+          "workflowId": {
+            "type": "string",
+            "required": true,
+            "description": "ID of the workflow to display"
+          },
+          "projectId": {
+            "type": "string",
+            "required": true,
+            "description": "ID of the project containing the workflow"
+          }
+        },
+        "emittedEvents": [
+          "workflow.focusChanged",
+          "workflow.openStepViewer",
+          "workflow.runWorkflow",
+          "workflow.stopWorkflow",
+          "workflow.resetWorkflow",
+          "workflow.runStep",
+          "workflow.stopStep",
+          "workflow.resetStep",
+          "workflow.stepRenamed",
+          "workflow.stepMoved"
+        ],
+        "acceptedActions": ["onTap", "onDoubleTap"]
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Workflow Viewer", "fontSize": 13, "fontWeight": "bold", "color": "#10B981" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-id-label",
+                    "props": { "text": "{{props.workflowId}}", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "workflowService",
+                  "method": "get",
+                  "args": ["{{props.workflowId}}"]
+                },
+                "children": [
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
+                    "props": { "visible": "{{loading}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": { "variant": "skeleton", "text": "Loading workflow…" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": { "visible": "{{error}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-err-text",
+                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": { "visible": "{{ready}}" },
+                    "children": [
+                      {
+                        "type": "Column",
+                        "id": "{{widgetId}}-wf-col",
+                        "props": { "crossAxisAlignment": "center" },
+                        "children": [
+                          {
+                            "type": "Padding",
+                            "id": "{{widgetId}}-wf-pad",
+                            "props": { "padding": 16 },
+                            "children": [
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-wf-name",
+                                "props": { "text": "{{data.name}}", "fontSize": 16, "fontWeight": "bold" }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-step-count",
+                            "props": { "text": "Workflow loaded — use native viewer for full flowchart", "fontSize": 12, "color": "grey" }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "DataTableViewer",
+        "tier": 2,
+        "description": "Tabular data viewer for Tercen tables and computed results. Displays rows and columns with sorting, search, cell annotation editing, and CSV export. Publishes table selection events when a table is loaded and annotation save events when edits are committed.",
+        "props": {
+          "tableId": {
+            "type": "string",
+            "required": true,
+            "description": "ID of the table to display"
+          },
+          "tableName": {
+            "type": "string",
+            "required": false,
+            "default": "",
+            "description": "Display name for the table"
+          },
+          "tableKind": {
+            "type": "string",
+            "required": false,
+            "default": "tableSchema",
+            "values": ["tableSchema", "computedTable", "joinOperator"],
+            "description": "Kind of table schema to fetch"
+          }
+        },
+        "emittedEvents": [
+          "system.selection.table",
+          "system.data.annotationSaved"
+        ],
+        "acceptedActions": ["onTap"]
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "{{props.tableName}}", "fontSize": 13, "fontWeight": "bold", "color": "#F59E0B" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-kind-label",
+                    "props": { "text": "{{props.tableKind}}", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "tableSchemaService",
+                  "method": "get",
+                  "args": ["{{props.tableId}}"]
+                },
+                "children": [
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
+                    "props": { "visible": "{{loading}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": { "variant": "skeleton", "text": "Loading table…" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": { "visible": "{{error}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-err-text",
+                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": { "visible": "{{ready}}" },
+                    "children": [
+                      {
+                        "type": "ListView",
+                        "id": "{{widgetId}}-lv",
+                        "props": { "padding": 4 },
+                        "children": [
+                          {
+                            "type": "Padding",
+                            "id": "{{widgetId}}-header-pad",
+                            "props": { "padding": 8 },
+                            "children": [
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-header",
+                                "props": { "text": "Table loaded — use native viewer for full grid", "fontSize": 12, "color": "grey" }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "ChatBox",
+        "tier": 2,
+        "description": "LLM chat interface for Tercen. Displays a message thread with markdown-rich responses, syntax-highlighted code blocks, and session management. Sends user messages with focus context to the LLM and emits action intents on the EventBus (create step, open file, navigate workflows). Receives focus context from other widgets to provide situational awareness to the AI.",
+        "props": {},
+        "emittedEvents": [
+          "createStep",
+          "openFile",
+          "openWorkflow",
+          "navigateToStep",
+          "navigateTo",
+          "refreshTree",
+          "workflowUpdated"
+        ],
+        "acceptedActions": []
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Chat", "fontSize": 13, "fontWeight": "bold", "color": "#EAB308" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-status",
+                    "props": { "text": "Ready", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "Center",
+                "id": "{{widgetId}}-placeholder",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-msg",
+                    "props": { "text": "Chat — use native widget for full LLM interaction", "fontSize": 12, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "DocumentEditor",
+        "tier": 2,
+        "description": "Markdown and plain-text file viewer/editor with dual modes (Source and Rendered). Supports WYSIWYG formatting controls (bold, italic, headings, lists, links, images, code blocks), undo/redo, and save. Publishes content-changed events when the document is saved.",
+        "props": {
+          "fileId": {
+            "type": "string",
+            "required": true,
+            "description": "Tercen file ID to load and edit"
+          },
+          "projectId": {
+            "type": "string",
+            "required": true,
+            "description": "Project ID containing the file"
+          }
+        },
+        "emittedEvents": [
+          "system.document.dirty"
+        ],
+        "acceptedActions": []
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Document Editor", "fontSize": 13, "fontWeight": "bold", "color": "#6366F1" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-file-label",
+                    "props": { "text": "{{props.fileId}}", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "fileService",
+                  "method": "get",
+                  "args": ["{{props.fileId}}"]
+                },
+                "children": [
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
+                    "props": { "visible": "{{loading}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": { "variant": "skeleton", "text": "Loading document…" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": { "visible": "{{error}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-err-text",
+                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": { "visible": "{{ready}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-ready-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-ready-text",
+                            "props": { "text": "Document loaded — use native editor for full editing", "fontSize": 12, "color": "grey" }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "FileNavigator",
+        "tier": 2,
+        "description": "Hierarchical file browser for Tercen (teams, projects, folders, files, datasets, workflows). Supports expand/collapse navigation, single-click focus context (published to chat), double-click to open viewers, file upload via drag-and-drop, search filtering, and type filtering. Does not perform file CRUD — those are LLM operations.",
+        "props": {},
+        "emittedEvents": [
+          "navigator.focusChanged",
+          "navigator.openViewer",
+          "navigator.openTeamWidget",
+          "navigator.downloadFile",
+          "navigator.contentChanged"
+        ],
+        "acceptedActions": ["onTap", "onDoubleTap"]
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Navigator", "fontSize": 13, "fontWeight": "bold", "color": "#F59E0B" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-filter-label",
+                    "props": { "text": "All types", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "teamService",
+                  "method": "findByOwner",
+                  "args": [[""]]
+                },
+                "children": [
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
+                    "props": { "visible": "{{loading}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": { "variant": "skeleton", "text": "Loading navigator…" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": { "visible": "{{error}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-err-text",
+                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": { "visible": "{{ready}}" },
+                    "children": [
+                      {
+                        "type": "ListView",
+                        "id": "{{widgetId}}-lv",
+                        "props": { "padding": 4 },
+                        "children": [
+                          {
+                            "type": "ForEach",
+                            "id": "{{widgetId}}-fe",
+                            "props": { "items": "{{data}}" },
+                            "children": [
+                              {
+                                "type": "Action",
+                                "id": "tap-{{item.id}}",
+                                "props": {
+                                  "gesture": "onTap",
+                                  "channel": "navigator.focusChanged",
+                                  "payload": {
+                                    "nodeId": "{{item.id}}",
+                                    "nodeType": "team",
+                                    "nodeName": "{{item.name}}"
+                                  }
+                                },
+                                "children": [
+                                  {
+                                    "type": "ReactTo",
+                                    "id": "rt-{{item.id}}",
+                                    "props": {
+                                      "channel": "navigator.focusChanged",
+                                      "match": { "nodeId": "{{item.id}}" },
+                                      "overrideProps": { "color": "#F59E0B" }
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Padding",
+                                        "id": "pad-{{item.id}}",
+                                        "props": { "padding": 8 },
+                                        "children": [
+                                          {
+                                            "type": "Text",
+                                            "id": "name-{{item.id}}",
+                                            "props": { "text": "{{item.name}}", "fontSize": 13 }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}
