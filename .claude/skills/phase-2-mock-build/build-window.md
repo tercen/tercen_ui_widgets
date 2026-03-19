@@ -10,7 +10,7 @@ For shared patterns: `_references/global-rules.md` and `_references/window-desig
 
 ## Step 2: Define Domain Models
 
-Read spec **Section 14** (Domain Models) and **Section 4** (Hierarchy Model) or equivalent.
+Read the spec's domain descriptions — typically found in the **Active** body state (Section 2.4) and **Data Source** (Section 1.4).
 
 Create model classes in `lib/domain/models/` from the spec's domain descriptions. Keep `content_state.dart` and `window_identity.dart` unchanged — add new model files alongside them.
 
@@ -20,7 +20,7 @@ Update `lib/domain/services/data_service.dart` — replace the placeholder `Map<
 
 ## Step 3: Build Mock Service
 
-Read the spec's service interface section (e.g. Section 15).
+Read the spec's **Data Source** (Section 1.4) and **Mock Data** (Section 3).
 
 1. Replace `mock_data_service.dart` — implement all methods from the updated `DataService` interface.
 2. Return realistic mock data that exercises the full UI: multiple items, varied states, edge cases.
@@ -31,7 +31,7 @@ Read the spec's service interface section (e.g. Section 15).
 
 ## Step 4: Build Provider
 
-Read the spec's **State** section (e.g. Section 3.4) — every state field becomes a provider field.
+Read the spec's **Body States** (Section 2.4) and **Active** state description — every state field becomes a provider field.
 
 **Option A: Extend `WindowStateProvider`** — if the window has simple state, extend the base class and add domain-specific fields.
 
@@ -47,7 +47,7 @@ Wiring: `control.onChanged → provider.setXxx(value) → notifyListeners() → 
 
 ## Step 5: Build Toolbar
 
-Read the spec's **Toolbar** section (e.g. Section 6).
+Read the spec's **Toolbar** section (Section 2.3).
 
 The skeleton provides `WindowShell` which accepts a `toolbarActions` list. Each `ToolbarAction` has: `icon`, `tooltip`, `onPressed`, optional `label`. All buttons render with primary accent styling (there is no primary/secondary distinction).
 
@@ -67,7 +67,7 @@ Disable buttons based on state (pass `onPressed: null` when the action is unavai
 
 ## Step 6: Build Active Content
 
-Read the spec's main content description (e.g. Section 7 for tree view, Section 17 for wireframe).
+Read the spec's **Active** body state (Section 2.4) and the **Window Structure** diagram (Section 2.1).
 
 Replace the placeholder `ActiveState` widget in `lib/presentation/widgets/body_states/active_state.dart` with the window's actual content.
 
@@ -92,7 +92,7 @@ Configure the error state: wire `onRetry` to trigger a data reload.
 
 ## Step 7: Wire EventBus Communication
 
-Read the spec's **EventBus Communication** section (e.g. Section 13).
+Read the spec's **EventBus Communication** section (Section 2.5).
 
 ### Emitted events
 

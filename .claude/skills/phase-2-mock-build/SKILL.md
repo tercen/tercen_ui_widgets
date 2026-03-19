@@ -22,7 +22,7 @@ Reference: `_references/global-rules.md`
 1. **Functional spec** — Phase 1 output (markdown)
 2. **Skeleton** — `skeletons/{kind}/` from tercen-flutter-skills
 3. **Target directory** — new project location
-4. **Mock data** — files described in spec Section 7.3
+4. **Mock data** — files described in spec Section 3 (Mock Data)
 
 ---
 

@@ -86,7 +86,7 @@ No hex codes ("#1E40AF"), RGB values, or theme tokens ("AppColors.primary"). Exc
 No Dart file paths ("lib/domain/models/"), imports, or package names.
 
 ### Mock data describes WHAT not HOW
-Section 7.3: no loading mechanisms (`rootBundle`, `loadString()`, `CsvToListConverter`). Only describe what data is needed and where it comes from.
+Mock Data section: no loading mechanisms (`rootBundle`, `loadString()`, `CsvToListConverter`). Only describe what data is needed and where it comes from.
 
 ---
 
