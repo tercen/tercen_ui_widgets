@@ -638,7 +638,7 @@
                 "id": "{{widgetId}}-ds",
                 "props": {
                   "service": "teamService",
-                  "method": "findByOwner",
+                  "method": "findTeamByOwner",
                   "args": [[""]]
                 },
                 "children": [
