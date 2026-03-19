@@ -5,13 +5,13 @@ import '../../core/constants/window_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_colors_dark.dart';
 import '../../core/theme/app_line_weights.dart';
+import '../../core/theme/app_spacing.dart';
 import '../../domain/models/annotation_model.dart';
 import '../../domain/models/content_state.dart';
 import '../providers/png_viewer_provider.dart';
 import '../providers/window_state_provider.dart';
 import '../widgets/body_states/active_state.dart';
 import '../widgets/window_shell.dart';
-import '../widgets/window_toolbar.dart';
 
 /// Home screen for the PNG Viewer window.
 ///
@@ -36,11 +36,12 @@ class HomeScreen extends StatelessWidget {
           color: isDark ? const Color(0xFF181A20) : Colors.white,
           child: Column(
             children: [
-              // Toolbar with drawing tools and zoom controls.
-              WindowToolbar(
-                actions: _buildToolbarActions(provider, isActive, hasAnnotations),
-                trailing: _buildTrailingZoomControls(
-                    context, provider, isActive, isDark),
+              // Custom toolbar with tool toggles, actions, and zoom controls.
+              _PngViewerToolbar(
+                provider: provider,
+                isActive: isActive,
+                hasAnnotations: hasAnnotations,
+                isDark: isDark,
               ),
               Divider(
                 height: AppLineWeights.lineSubtle,
@@ -65,158 +66,205 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  List<ToolbarAction> _buildToolbarActions(
-    PngViewerProvider provider,
-    bool isActive,
-    bool hasAnnotations,
-  ) {
-    return [
-      // Drawing tool toggles.
-      ToolbarAction(
-        icon: FontAwesomeIcons.drawPolygon,
-        tooltip: 'Polygon',
-        isPrimary: provider.activeTool == DrawingTool.polygon,
-        onPressed: isActive
-            ? () => provider.setActiveTool(DrawingTool.polygon)
-            : null,
-      ),
-      ToolbarAction(
-        icon: FontAwesomeIcons.borderAll,
-        tooltip: 'Rectangle',
-        isPrimary: provider.activeTool == DrawingTool.rectangle,
-        onPressed: isActive
-            ? () => provider.setActiveTool(DrawingTool.rectangle)
-            : null,
-      ),
-      ToolbarAction(
-        icon: FontAwesomeIcons.circle,
-        tooltip: 'Circle',
-        isPrimary: provider.activeTool == DrawingTool.circle,
-        onPressed: isActive
-            ? () => provider.setActiveTool(DrawingTool.circle)
-            : null,
-      ),
-      ToolbarAction(
-        icon: FontAwesomeIcons.arrowRight,
-        tooltip: 'Arrow',
-        isPrimary: provider.activeTool == DrawingTool.arrow,
-        onPressed: isActive
-            ? () => provider.setActiveTool(DrawingTool.arrow)
-            : null,
-      ),
-      ToolbarAction(
-        icon: FontAwesomeIcons.penFancy,
-        tooltip: 'Freehand',
-        isPrimary: provider.activeTool == DrawingTool.freehand,
-        onPressed: isActive
-            ? () => provider.setActiveTool(DrawingTool.freehand)
-            : null,
-      ),
-      ToolbarAction(
-        icon: FontAwesomeIcons.font,
-        tooltip: 'Text',
-        isPrimary: provider.activeTool == DrawingTool.text,
-        onPressed: isActive
-            ? () => provider.setActiveTool(DrawingTool.text)
-            : null,
-      ),
-      // Clear All.
-      ToolbarAction(
-        icon: FontAwesomeIcons.trashCan,
-        tooltip: 'Clear All',
-        onPressed: isActive && hasAnnotations
-            ? () => provider.clearAllAnnotations()
-            : null,
-      ),
-      // Send to Chat.
-      ToolbarAction(
-        icon: FontAwesomeIcons.paperPlane,
-        tooltip: 'Send to Chat',
-        onPressed: isActive && hasAnnotations
-            ? () => provider.sendToChat()
-            : null,
-      ),
-    ];
-  }
+/// Custom toolbar that renders annotation tool toggles with primary/secondary
+/// visual distinction, plus action buttons and trailing zoom controls.
+class _PngViewerToolbar extends StatelessWidget {
+  final PngViewerProvider provider;
+  final bool isActive;
+  final bool hasAnnotations;
+  final bool isDark;
 
-  Widget _buildTrailingZoomControls(
-    BuildContext context,
-    PngViewerProvider provider,
-    bool isActive,
-    bool isDark,
-  ) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        _ZoomButton(
-          icon: FontAwesomeIcons.magnifyingGlassPlus,
-          tooltip: 'Zoom In',
-          onPressed: isActive ? () => provider.zoomIn() : null,
-          isDark: isDark,
-        ),
-        const SizedBox(width: WindowConstants.toolbarGap),
-        _ZoomButton(
-          icon: FontAwesomeIcons.magnifyingGlassMinus,
-          tooltip: 'Zoom Out',
-          onPressed: isActive ? () => provider.zoomOut() : null,
-          isDark: isDark,
-        ),
-        const SizedBox(width: WindowConstants.toolbarGap),
-        _ZoomButton(
-          icon: FontAwesomeIcons.expand,
-          tooltip: 'Fit to Window',
-          onPressed: isActive
-              ? () {
-                  provider.setZoomLevel(1.0);
-                  provider.setPanOffset(Offset.zero);
-                }
-              : null,
-          isDark: isDark,
-        ),
-      ],
+  const _PngViewerToolbar({
+    required this.provider,
+    required this.isActive,
+    required this.hasAnnotations,
+    required this.isDark,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: WindowConstants.toolbarHeight,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+      child: Row(
+        children: [
+          // 6 drawing tool toggles — primary filled when active.
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.drawPolygon,
+            tooltip: 'Polygon',
+            isActive: provider.activeTool == DrawingTool.polygon,
+            onPressed: isActive
+                ? () => provider.setActiveTool(DrawingTool.polygon)
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.borderAll,
+            tooltip: 'Rectangle',
+            isActive: provider.activeTool == DrawingTool.rectangle,
+            onPressed: isActive
+                ? () => provider.setActiveTool(DrawingTool.rectangle)
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.circle,
+            tooltip: 'Circle',
+            isActive: provider.activeTool == DrawingTool.circle,
+            onPressed: isActive
+                ? () => provider.setActiveTool(DrawingTool.circle)
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.arrowRight,
+            tooltip: 'Arrow',
+            isActive: provider.activeTool == DrawingTool.arrow,
+            onPressed: isActive
+                ? () => provider.setActiveTool(DrawingTool.arrow)
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.penFancy,
+            tooltip: 'Freehand',
+            isActive: provider.activeTool == DrawingTool.freehand,
+            onPressed: isActive
+                ? () => provider.setActiveTool(DrawingTool.freehand)
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.font,
+            tooltip: 'Text',
+            isActive: provider.activeTool == DrawingTool.text,
+            onPressed: isActive
+                ? () => provider.setActiveTool(DrawingTool.text)
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          // Clear All — secondary style (never toggled).
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.trashCan,
+            tooltip: 'Clear All',
+            isActive: false,
+            onPressed: isActive && hasAnnotations
+                ? () => provider.clearAllAnnotations()
+                : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          // Send to Chat — secondary style.
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.paperPlane,
+            tooltip: 'Send to Chat',
+            isActive: false,
+            onPressed: isActive && hasAnnotations
+                ? () => provider.sendToChat()
+                : null,
+            isDark: isDark,
+          ),
+          // Spacer pushes zoom controls to the right.
+          const SizedBox(width: WindowConstants.toolbarGap),
+          const Spacer(),
+          // Trailing zoom controls.
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.magnifyingGlassPlus,
+            tooltip: 'Zoom In',
+            isActive: false,
+            onPressed: isActive ? () => provider.zoomIn() : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.magnifyingGlassMinus,
+            tooltip: 'Zoom Out',
+            isActive: false,
+            onPressed: isActive ? () => provider.zoomOut() : null,
+            isDark: isDark,
+          ),
+          const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.expand,
+            tooltip: 'Fit to Window',
+            isActive: false,
+            onPressed: isActive
+                ? () {
+                    provider.setZoomLevel(1.0);
+                    provider.setPanOffset(Offset.zero);
+                  }
+                : null,
+            isDark: isDark,
+          ),
+        ],
+      ),
     );
   }
 }
 
-/// Icon button for the trailing zoom controls area.
-class _ZoomButton extends StatefulWidget {
+/// Toolbar button that switches between primary (filled) and secondary
+/// (outlined) styling based on [isActive].
+class _ToolToggleButton extends StatefulWidget {
   final IconData icon;
   final String tooltip;
+  final bool isActive;
   final VoidCallback? onPressed;
   final bool isDark;
 
-  const _ZoomButton({
+  const _ToolToggleButton({
     required this.icon,
     required this.tooltip,
+    required this.isActive,
     this.onPressed,
     required this.isDark,
   });
 
   @override
-  State<_ZoomButton> createState() => _ZoomButtonState();
+  State<_ToolToggleButton> createState() => _ToolToggleButtonState();
 }
 
-class _ZoomButtonState extends State<_ZoomButton> {
+class _ToolToggleButtonState extends State<_ToolToggleButton> {
   bool _hovered = false;
 
   @override
   Widget build(BuildContext context) {
     final disabled = widget.onPressed == null;
     final isDark = widget.isDark;
+    final active = widget.isActive;
 
     final Color iconColor;
     final Color bgColor;
+    final Color? borderColor;
 
     if (disabled) {
+      // Disabled: muted icon, muted border, transparent bg.
       iconColor = isDark ? AppColorsDark.neutral600 : AppColors.neutral400;
       bgColor = Colors.transparent;
-    } else if (_hovered) {
-      iconColor = isDark ? AppColorsDark.primary : AppColors.primary;
-      bgColor = isDark ? AppColorsDark.primarySurface : AppColors.primarySurface;
+      borderColor = isDark ? AppColorsDark.neutral600 : AppColors.neutral300;
+    } else if (active) {
+      // Active (ON): primary filled background, white icon, no border.
+      final primary = isDark ? AppColorsDark.primary : AppColors.primary;
+      bgColor = _hovered
+          ? (isDark ? AppColorsDark.primaryDarker : AppColors.primaryDarker)
+          : primary;
+      iconColor = Colors.white;
+      borderColor = null;
     } else {
-      iconColor = isDark ? AppColorsDark.primary : AppColors.primary;
-      bgColor = Colors.transparent;
+      // Inactive (OFF): secondary outlined, primary icon + border.
+      final primary = isDark ? AppColorsDark.primary : AppColors.primary;
+      iconColor = primary;
+      bgColor = _hovered
+          ? (isDark ? AppColorsDark.primarySurface : AppColors.primarySurface)
+          : Colors.transparent;
+      borderColor = primary;
     }
 
     return Tooltip(
@@ -234,14 +282,12 @@ class _ZoomButtonState extends State<_ZoomButton> {
             height: WindowConstants.toolbarButtonSize,
             decoration: BoxDecoration(
               color: bgColor,
-              border: Border.all(
-                color: disabled
-                    ? (isDark
-                        ? AppColorsDark.neutral600
-                        : AppColors.neutral300)
-                    : iconColor,
-                width: AppLineWeights.lineStandard,
-              ),
+              border: borderColor != null
+                  ? Border.all(
+                      color: borderColor,
+                      width: AppLineWeights.lineStandard,
+                    )
+                  : null,
               borderRadius:
                   BorderRadius.circular(WindowConstants.toolbarButtonRadius),
             ),

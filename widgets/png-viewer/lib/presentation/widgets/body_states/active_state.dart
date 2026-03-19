@@ -30,6 +30,13 @@ class _ActiveStateState extends State<ActiveState> {
   // For tracking polygon vertices during construction.
   List<ImagePoint> _polygonVertices = [];
 
+  // Current mouse position in image-pixel space (for polygon rubber-band line).
+  ImagePoint? _mouseImagePoint;
+
+  // Drag-based drawing for rectangle, circle, arrow, freehand.
+  ImagePoint? _dragStart;
+  List<ImagePoint> _freehandPoints = [];
+
   @override
   void dispose() {
     _textController.dispose();
@@ -97,6 +104,9 @@ class _ActiveStateState extends State<ActiveState> {
                     provider.activeTool == DrawingTool.polygon
                         ? _polygonVertices
                         : [],
+                mousePoint: provider.activeTool == DrawingTool.polygon
+                    ? _mouseImagePoint
+                    : null,
               ),
             ),
           ),
@@ -136,8 +146,9 @@ class _ActiveStateState extends State<ActiveState> {
             : null,
         onPanUpdate: provider.activeTool == null
             ? (details) {
+                // Fix: read current panOffset, not stale closure value.
                 provider.setPanOffset(
-                  pan + details.delta,
+                  provider.panOffset + details.delta,
                 );
               }
             : _getDrawingPanUpdate(provider),
@@ -159,6 +170,22 @@ class _ActiveStateState extends State<ActiveState> {
           cursor: provider.activeTool == null
               ? SystemMouseCursors.grab
               : SystemMouseCursors.precise,
+          // Track mouse position for polygon rubber-band line.
+          onHover: provider.activeTool == DrawingTool.polygon &&
+                  _polygonVertices.isNotEmpty
+              ? (event) {
+                  final imgPt = _screenToImage(
+                    event.localPosition,
+                    provider.zoomLevel,
+                    provider.panOffset,
+                    viewportCenterX,
+                    viewportCenterY,
+                    imageCenterX,
+                    imageCenterY,
+                  );
+                  setState(() => _mouseImagePoint = imgPt);
+                }
+              : null,
           child: Container(
             width: constraints.maxWidth,
             height: constraints.maxHeight,
@@ -221,7 +248,10 @@ class _ActiveStateState extends State<ActiveState> {
               type: DrawingTool.polygon,
               points: List.from(_polygonVertices),
             ));
-            setState(() => _polygonVertices = []);
+            setState(() {
+              _polygonVertices = [];
+              _mouseImagePoint = null;
+            });
             return;
           }
         }
@@ -229,6 +259,8 @@ class _ActiveStateState extends State<ActiveState> {
         break;
 
       case DrawingTool.text:
+        // If there's already a text input showing, confirm it first.
+        _confirmTextInput(provider);
         setState(() {
           _textAnchor = imgPt;
           _showTextInput = true;
@@ -240,8 +272,7 @@ class _ActiveStateState extends State<ActiveState> {
         break;
 
       case DrawingTool.circle:
-        // Single click sets centre; will need drag for radius.
-        // Handled via pan gestures instead.
+        // Handled via pan gestures (click-drag).
         break;
 
       default:
@@ -268,13 +299,12 @@ class _ActiveStateState extends State<ActiveState> {
         type: DrawingTool.polygon,
         points: List.from(_polygonVertices),
       ));
-      setState(() => _polygonVertices = []);
+      setState(() {
+        _polygonVertices = [];
+        _mouseImagePoint = null;
+      });
     }
   }
-
-  // Drag-based drawing for rectangle, circle, arrow, freehand.
-  ImagePoint? _dragStart;
-  List<ImagePoint> _freehandPoints = [];
 
   void Function(DragUpdateDetails)? _getDrawingPanUpdate(
       PngViewerProvider provider) {
@@ -381,6 +411,23 @@ class _ActiveStateState extends State<ActiveState> {
     };
   }
 
+  /// Confirm and save text input if non-empty.
+  void _confirmTextInput(PngViewerProvider provider) {
+    if (_showTextInput &&
+        _textAnchor != null &&
+        _textController.text.trim().isNotEmpty) {
+      provider.addAnnotation(AnnotationModel(
+        type: DrawingTool.text,
+        points: [_textAnchor!],
+        label: _textController.text.trim(),
+      ));
+    }
+    setState(() {
+      _showTextInput = false;
+      _textAnchor = null;
+    });
+  }
+
   Widget _buildTextInput(BuildContext context, PngViewerProvider provider) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -405,23 +452,11 @@ class _ActiveStateState extends State<ActiveState> {
             ),
           ),
           onSubmitted: (value) {
-            if (value.trim().isNotEmpty && _textAnchor != null) {
-              provider.addAnnotation(AnnotationModel(
-                type: DrawingTool.text,
-                points: [_textAnchor!],
-                label: value.trim(),
-              ));
-            }
-            setState(() {
-              _showTextInput = false;
-              _textAnchor = null;
-            });
+            _confirmTextInput(provider);
           },
+          // Click outside confirms the text (saves if non-empty).
           onTapOutside: (_) {
-            setState(() {
-              _showTextInput = false;
-              _textAnchor = null;
-            });
+            _confirmTextInput(provider);
           },
         ),
       ),
@@ -435,12 +470,14 @@ class _AnnotationPainter extends CustomPainter {
   final List<ImagePoint>? inProgressPoints;
   final DrawingTool? inProgressTool;
   final List<ImagePoint> polygonVertices;
+  final ImagePoint? mousePoint;
 
   _AnnotationPainter({
     required this.annotations,
     this.inProgressPoints,
     this.inProgressTool,
     this.polygonVertices = const [],
+    this.mousePoint,
   });
 
   @override
@@ -462,12 +499,16 @@ class _AnnotationPainter extends CustomPainter {
       _drawAnnotation(canvas, ann, paint, fillPaint);
     }
 
-    // Draw in-progress polygon vertices.
+    // Draw in-progress polygon vertices + rubber-band line to mouse.
     if (polygonVertices.isNotEmpty) {
       final path = Path();
       path.moveTo(polygonVertices.first.x, polygonVertices.first.y);
       for (int i = 1; i < polygonVertices.length; i++) {
         path.lineTo(polygonVertices[i].x, polygonVertices[i].y);
+      }
+      // Rubber-band line from last vertex to current mouse position.
+      if (mousePoint != null) {
+        path.lineTo(mousePoint!.x, mousePoint!.y);
       }
       canvas.drawPath(path, paint);
 
