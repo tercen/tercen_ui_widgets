@@ -1,5 +1,8 @@
 # Session Log
 
+## Session: 2026-03-19 — Phase 1
+- Starting Phase 1 functional spec for a new window widget (kind TBD by user)
+
 2026-03-11 [skill-gap] checks-window.md contains no window-specific checks ("will be added as the window widget design matures"), leaving EventBus contract completeness, identity/tab-colour assignment, four body states, toolbar definition, and hierarchy model coverage entirely unverified by the review skill for window kind specs.
 ## Session: 2026-03-11 — Phase 2
 - [skill-gap] Window skeleton missing version_info.dart and operator.json — created from panel skeleton template
@@ -94,3 +97,7 @@
 - [workaround] Full WYSIWYG editing not implemented in Phase 2 mock -- rendered mode shows read-only markdown, editing done via source mode or toolbar formatting actions that modify underlying source
 - [fixed] Dollar sign in R code mock data caused Dart string interpolation -- used \${''}count escape pattern
 - Build verified: flutter build web --wasm succeeded
+## Session: 2026-03-19 — Phase 1
+- Writing png-viewer functional spec (window kind, Visualization type, Window 6)
+- All decisions pre-made in approved plan (sharded-gliding-stearns.md) -- no discovery rounds needed
+- [skill-gap] "No colour codes" rule in SKILL.md (No Implementation Detail group) conflicts with W1/W8 checks that explicitly require a hex colour from the colour table in the identity section. The template itself instructs authors to include the hex value. The rule should carve out an exception for window type colour in the identity table, analogous to the "domain-level colour descriptions" exception.
