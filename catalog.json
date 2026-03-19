@@ -314,7 +314,7 @@
           {
             "type": "Container",
             "id": "{{widgetId}}-toolbar",
-            "props": { "color": "#1E1E1E", "padding": 8 },
+            "props": { "color": "surfaceContainerHigh", "padding": "sm" },
             "children": [
               {
                 "type": "Row",
@@ -322,18 +322,40 @@
                 "props": { "mainAxisAlignment": "spaceBetween" },
                 "children": [
                   {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": { "text": "Chat", "fontSize": 13, "fontWeight": "bold", "color": "#EAB308" }
+                    "type": "IconButton",
+                    "id": "{{widgetId}}-new-session",
+                    "props": {
+                      "icon": "add",
+                      "channel": "chat.newSession",
+                      "tooltip": "New Session",
+                      "size": 18,
+                      "color": "primary"
+                    }
                   },
                   {
                     "type": "Text",
-                    "id": "{{widgetId}}-status",
-                    "props": { "text": "Ready", "fontSize": 11, "color": "grey" }
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Chat", "textStyle": "labelMedium", "color": "onSurface" }
+                  },
+                  {
+                    "type": "IconButton",
+                    "id": "{{widgetId}}-history",
+                    "props": {
+                      "icon": "schedule",
+                      "channel": "chat.showHistory",
+                      "tooltip": "Chat History",
+                      "size": 18,
+                      "color": "onSurfaceVariant"
+                    }
                   }
                 ]
               }
             ]
+          },
+          {
+            "type": "Divider",
+            "id": "{{widgetId}}-divider-top",
+            "props": { "height": 1, "color": "outlineVariant" }
           },
           {
             "type": "Expanded",
@@ -341,12 +363,95 @@
             "children": [
               {
                 "type": "Center",
-                "id": "{{widgetId}}-placeholder",
+                "id": "{{widgetId}}-empty",
                 "children": [
                   {
-                    "type": "Text",
-                    "id": "{{widgetId}}-msg",
-                    "props": { "text": "Chat — use native widget for full LLM interaction", "fontSize": 12, "color": "grey" }
+                    "type": "Column",
+                    "id": "{{widgetId}}-empty-col",
+                    "props": { "mainAxisAlignment": "center" },
+                    "children": [
+                      {
+                        "type": "Icon",
+                        "id": "{{widgetId}}-empty-icon",
+                        "props": { "icon": "chat", "size": 48, "color": "onSurfaceMuted" }
+                      },
+                      {
+                        "type": "SizedBox",
+                        "id": "{{widgetId}}-empty-spacer",
+                        "props": { "height": 12 }
+                      },
+                      {
+                        "type": "Text",
+                        "id": "{{widgetId}}-empty-msg",
+                        "props": { "text": "Start a conversation", "textStyle": "titleMedium", "color": "onSurfaceVariant" }
+                      },
+                      {
+                        "type": "SizedBox",
+                        "id": "{{widgetId}}-empty-spacer2",
+                        "props": { "height": 4 }
+                      },
+                      {
+                        "type": "Text",
+                        "id": "{{widgetId}}-empty-detail",
+                        "props": { "text": "Ask a question or give an instruction", "textStyle": "bodySmall", "color": "onSurfaceMuted" }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Divider",
+            "id": "{{widgetId}}-divider-bottom",
+            "props": { "height": 1, "color": "outlineVariant" }
+          },
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-compose",
+            "props": { "color": "surface", "padding": "sm" },
+            "children": [
+              {
+                "type": "Column",
+                "id": "{{widgetId}}-compose-col",
+                "props": { "crossAxisAlignment": "stretch" },
+                "children": [
+                  {
+                    "type": "TextField",
+                    "id": "{{widgetId}}-input",
+                    "props": {
+                      "hint": "Type a message...",
+                      "maxLines": 4,
+                      "autofocus": true
+                    }
+                  },
+                  {
+                    "type": "SizedBox",
+                    "id": "{{widgetId}}-input-spacer",
+                    "props": { "height": 4 }
+                  },
+                  {
+                    "type": "Row",
+                    "id": "{{widgetId}}-bottom-bar",
+                    "props": { "mainAxisAlignment": "end" },
+                    "children": [
+                      {
+                        "type": "Spacer",
+                        "id": "{{widgetId}}-bar-spacer",
+                        "props": {}
+                      },
+                      {
+                        "type": "IconButton",
+                        "id": "{{widgetId}}-send",
+                        "props": {
+                          "icon": "send",
+                          "channel": "chat.send",
+                          "tooltip": "Send",
+                          "size": 20,
+                          "color": "primary"
+                        }
+                      }
+                    ]
                   }
                 ]
               }
