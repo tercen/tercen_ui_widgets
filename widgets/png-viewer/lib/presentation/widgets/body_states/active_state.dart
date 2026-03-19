@@ -3,11 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_colors_dark.dart';
 import '../../../core/theme/app_line_weights.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../domain/models/annotation_model.dart';
 import '../../providers/png_viewer_provider.dart';
 import '../../providers/window_state_provider.dart';
@@ -36,6 +32,13 @@ class _ActiveStateState extends State<ActiveState> {
   // Drag-based drawing for rectangle, circle, arrow, freehand.
   ImagePoint? _dragStart;
   List<ImagePoint> _freehandPoints = [];
+
+  // Drag-to-move: index of annotation being dragged, and last image point.
+  int? _movingAnnotationIndex;
+  ImagePoint? _moveLastPoint;
+
+  // Whether the mouse is currently hovering over an annotation (pan mode).
+  bool _hoveringAnnotation = false;
 
   @override
   void dispose() {
@@ -107,6 +110,7 @@ class _ActiveStateState extends State<ActiveState> {
                 mousePoint: provider.activeTool == DrawingTool.polygon
                     ? _mouseImagePoint
                     : null,
+                movingAnnotationIndex: _movingAnnotationIndex,
               ),
             ),
           ),
@@ -140,20 +144,62 @@ class _ActiveStateState extends State<ActiveState> {
         }
       },
       child: GestureDetector(
-        // Pan mode (no tool active): drag to pan.
+        // Pan mode (no tool active): drag to pan canvas OR drag to move annotation.
         onPanStart: provider.activeTool == null
-            ? (_) {}
+            ? (details) {
+                // Hit-test annotations — if we hit one, start moving it.
+                final imgPt = _screenToImage(
+                  details.localPosition,
+                  provider.zoomLevel,
+                  provider.panOffset,
+                  viewportCenterX,
+                  viewportCenterY,
+                  imageCenterX,
+                  imageCenterY,
+                );
+                final hitIndex = _hitTestAnnotation(
+                    provider.annotations, imgPt, provider.zoomLevel);
+                if (hitIndex != null) {
+                  setState(() {
+                    _movingAnnotationIndex = hitIndex;
+                    _moveLastPoint = imgPt;
+                  });
+                }
+              }
             : null,
         onPanUpdate: provider.activeTool == null
             ? (details) {
-                // Fix: read current panOffset, not stale closure value.
-                provider.setPanOffset(
-                  provider.panOffset + details.delta,
-                );
+                if (_movingAnnotationIndex != null && _moveLastPoint != null) {
+                  // Moving an annotation.
+                  final imgPt = _screenToImage(
+                    details.localPosition,
+                    provider.zoomLevel,
+                    provider.panOffset,
+                    viewportCenterX,
+                    viewportCenterY,
+                    imageCenterX,
+                    imageCenterY,
+                  );
+                  final dx = imgPt.x - _moveLastPoint!.x;
+                  final dy = imgPt.y - _moveLastPoint!.y;
+                  provider.translateAnnotation(
+                      _movingAnnotationIndex!, dx, dy);
+                  _moveLastPoint = imgPt;
+                } else {
+                  // Panning the canvas.
+                  provider.setPanOffset(
+                    provider.panOffset + details.delta,
+                  );
+                }
               }
             : _getDrawingPanUpdate(provider),
         onPanEnd: provider.activeTool == null
-            ? null
+            ? (_) {
+                setState(() {
+                  _movingAnnotationIndex = null;
+                  _moveLastPoint = null;
+                });
+              }
             : _getDrawingPanEnd(provider),
         onTapUp: provider.activeTool != null
             ? (details) => _handleTap(provider, details, zoom, pan,
@@ -167,25 +213,43 @@ class _ActiveStateState extends State<ActiveState> {
             ? () {}
             : null,
         child: MouseRegion(
-          cursor: provider.activeTool == null
-              ? SystemMouseCursors.grab
-              : SystemMouseCursors.precise,
-          // Track mouse position for polygon rubber-band line.
-          onHover: provider.activeTool == DrawingTool.polygon &&
-                  _polygonVertices.isNotEmpty
-              ? (event) {
-                  final imgPt = _screenToImage(
-                    event.localPosition,
-                    provider.zoomLevel,
-                    provider.panOffset,
-                    viewportCenterX,
-                    viewportCenterY,
-                    imageCenterX,
-                    imageCenterY,
-                  );
-                  setState(() => _mouseImagePoint = imgPt);
-                }
-              : null,
+          cursor: _movingAnnotationIndex != null
+              ? SystemMouseCursors.move
+              : provider.activeTool == null
+                  ? (_hoveringAnnotation
+                      ? SystemMouseCursors.move
+                      : SystemMouseCursors.grab)
+                  : SystemMouseCursors.precise,
+          onHover: (event) {
+            final imgPt = _screenToImage(
+              event.localPosition,
+              provider.zoomLevel,
+              provider.panOffset,
+              viewportCenterX,
+              viewportCenterY,
+              imageCenterX,
+              imageCenterY,
+            );
+            // Polygon rubber-band tracking.
+            if (provider.activeTool == DrawingTool.polygon &&
+                _polygonVertices.isNotEmpty) {
+              setState(() => _mouseImagePoint = imgPt);
+            }
+            // Annotation hover detection (pan mode only).
+            if (provider.activeTool == null) {
+              final hit = _hitTestAnnotation(
+                  provider.annotations, imgPt, provider.zoomLevel);
+              final hovering = hit != null;
+              if (hovering != _hoveringAnnotation) {
+                setState(() => _hoveringAnnotation = hovering);
+              }
+            }
+          },
+          onExit: (_) {
+            if (_hoveringAnnotation) {
+              setState(() => _hoveringAnnotation = false);
+            }
+          },
           child: Container(
             width: constraints.maxWidth,
             height: constraints.maxHeight,
@@ -220,6 +284,99 @@ class _ActiveStateState extends State<ActiveState> {
     final imgX = (screenPos.dx - translateX) / zoom;
     final imgY = (screenPos.dy - translateY) / zoom;
     return ImagePoint(imgX, imgY);
+  }
+
+  /// Hit-test annotations in reverse order (top-most first).
+  /// Returns the index of the hit annotation, or null.
+  int? _hitTestAnnotation(
+      List<AnnotationModel> annotations, ImagePoint point, double zoom) {
+    // Threshold in image pixels — 15 screen pixels converted to image space.
+    final threshold = 15.0 / zoom;
+
+    for (int i = annotations.length - 1; i >= 0; i--) {
+      final ann = annotations[i];
+      switch (ann.type) {
+        case DrawingTool.rectangle:
+          if (ann.points.length >= 2) {
+            final r = Rect.fromPoints(
+              Offset(ann.points[0].x, ann.points[0].y),
+              Offset(ann.points[1].x, ann.points[1].y),
+            ).inflate(threshold);
+            if (r.contains(Offset(point.x, point.y))) return i;
+          }
+          break;
+        case DrawingTool.circle:
+          if (ann.points.isNotEmpty && ann.radius != null) {
+            final dx = point.x - ann.points[0].x;
+            final dy = point.y - ann.points[0].y;
+            if (math.sqrt(dx * dx + dy * dy) <= ann.radius! + threshold) {
+              return i;
+            }
+          }
+          break;
+        case DrawingTool.polygon:
+          if (ann.points.length >= 3) {
+            // Simple bounding-box hit test.
+            double minX = ann.points.first.x, maxX = ann.points.first.x;
+            double minY = ann.points.first.y, maxY = ann.points.first.y;
+            for (final p in ann.points) {
+              if (p.x < minX) minX = p.x;
+              if (p.x > maxX) maxX = p.x;
+              if (p.y < minY) minY = p.y;
+              if (p.y > maxY) maxY = p.y;
+            }
+            final r = Rect.fromLTRB(minX, minY, maxX, maxY).inflate(threshold);
+            if (r.contains(Offset(point.x, point.y))) return i;
+          }
+          break;
+        case DrawingTool.arrow:
+          if (ann.points.length >= 2) {
+            // Distance from point to line segment.
+            final dist = _distToSegment(
+                point, ann.points[0], ann.points[1]);
+            if (dist <= threshold) return i;
+          }
+          break;
+        case DrawingTool.freehand:
+          if (ann.points.length >= 2) {
+            for (int j = 0; j < ann.points.length - 1; j++) {
+              final dist =
+                  _distToSegment(point, ann.points[j], ann.points[j + 1]);
+              if (dist <= threshold) return i;
+            }
+          }
+          break;
+        case DrawingTool.text:
+          if (ann.points.isNotEmpty) {
+            // Approximate text bounding box.
+            final textRect = Rect.fromLTWH(
+                ann.points[0].x, ann.points[0].y - 16, 100, 20)
+                .inflate(threshold);
+            if (textRect.contains(Offset(point.x, point.y))) return i;
+          }
+          break;
+      }
+    }
+    return null;
+  }
+
+  /// Distance from a point to a line segment.
+  double _distToSegment(ImagePoint p, ImagePoint a, ImagePoint b) {
+    final dx = b.x - a.x;
+    final dy = b.y - a.y;
+    final lenSq = dx * dx + dy * dy;
+    if (lenSq == 0) {
+      final ex = p.x - a.x;
+      final ey = p.y - a.y;
+      return math.sqrt(ex * ex + ey * ey);
+    }
+    var t = ((p.x - a.x) * dx + (p.y - a.y) * dy) / lenSq;
+    t = t.clamp(0.0, 1.0);
+    final projX = a.x + t * dx;
+    final projY = a.y + t * dy;
+    final ex = p.x - projX;
+    final ey = p.y - projY;
+    return math.sqrt(ex * ex + ey * ey);
   }
 
   void _handleTap(
@@ -429,32 +586,43 @@ class _ActiveStateState extends State<ActiveState> {
   }
 
   Widget _buildTextInput(BuildContext context, PngViewerProvider provider) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Annotation-coloured inline text field with transparent background.
+    // No Material wrapper — avoids theme bleed-through.
+    const annotationColor = Color(0xFFFF5722);
 
     return Material(
-      elevation: 2,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      color: Colors.transparent,
       child: SizedBox(
         width: 160,
-        height: 32,
         child: TextField(
           controller: _textController,
           focusNode: _textFocusNode,
-          style: AppTextStyles.body.copyWith(
-            color: isDark ? AppColorsDark.textPrimary : AppColors.textPrimary,
+          style: const TextStyle(
+            color: annotationColor,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
           ),
-          decoration: InputDecoration(
-            hintText: 'Type label...',
-            isDense: true,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.sm,
-              vertical: AppSpacing.xs,
+          cursorColor: annotationColor,
+          decoration: const InputDecoration(
+            hintText: 'Text',
+            hintStyle: TextStyle(
+              color: Color(0x88FF5722),
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
             ),
+            isDense: true,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 2,
+              vertical: 2,
+            ),
+            filled: false,
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
           ),
           onSubmitted: (value) {
             _confirmTextInput(provider);
           },
-          // Click outside confirms the text (saves if non-empty).
           onTapOutside: (_) {
             _confirmTextInput(provider);
           },
@@ -471,6 +639,7 @@ class _AnnotationPainter extends CustomPainter {
   final DrawingTool? inProgressTool;
   final List<ImagePoint> polygonVertices;
   final ImagePoint? mousePoint;
+  final int? movingAnnotationIndex;
 
   _AnnotationPainter({
     required this.annotations,
@@ -478,6 +647,7 @@ class _AnnotationPainter extends CustomPainter {
     this.inProgressTool,
     this.polygonVertices = const [],
     this.mousePoint,
+    this.movingAnnotationIndex,
   });
 
   @override
@@ -495,8 +665,22 @@ class _AnnotationPainter extends CustomPainter {
       ..style = PaintingStyle.fill;
 
     // Draw completed annotations.
-    for (final ann in annotations) {
-      _drawAnnotation(canvas, ann, paint, fillPaint);
+    for (int i = 0; i < annotations.length; i++) {
+      final isMoving = i == movingAnnotationIndex;
+      final strokePaint = isMoving
+          ? (Paint()
+            ..color = const Color(0xFF2196F3)
+            ..strokeWidth = AppLineWeights.vizData
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round
+            ..strokeJoin = StrokeJoin.round)
+          : paint;
+      final fill = isMoving
+          ? (Paint()
+            ..color = const Color(0x332196F3)
+            ..style = PaintingStyle.fill)
+          : fillPaint;
+      _drawAnnotation(canvas, annotations[i], strokePaint, fill);
     }
 
     // Draw in-progress polygon vertices + rubber-band line to mouse.
@@ -628,8 +812,8 @@ class _AnnotationPainter extends CustomPainter {
         if (ann.points.isEmpty || ann.label == null) return;
         final textSpan = TextSpan(
           text: ann.label!,
-          style: const TextStyle(
-            color: Color(0xFFFF5722),
+          style: TextStyle(
+            color: paint.color,
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
@@ -659,7 +843,7 @@ class _AnnotationPainter extends CustomPainter {
     final right = base - normal * headWidth;
 
     final arrowFill = Paint()
-      ..color = const Color(0xFFFF5722)
+      ..color = paint.color
       ..style = PaintingStyle.fill;
 
     final path = Path()

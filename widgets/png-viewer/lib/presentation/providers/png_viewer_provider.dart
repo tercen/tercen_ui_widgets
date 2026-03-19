@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:web/web.dart' as web;
 import '../../di/service_locator.dart';
 import '../../domain/models/annotation_model.dart';
 import '../../domain/models/content_state.dart';
@@ -152,6 +155,14 @@ class PngViewerProvider extends WindowStateProvider {
     notifyListeners();
   }
 
+  /// Translate an annotation by index.
+  void translateAnnotation(int index, double dx, double dy) {
+    if (index >= 0 && index < _annotations.length) {
+      _annotations[index].translate(dx, dy);
+      notifyListeners();
+    }
+  }
+
   void clearAllAnnotations() {
     _annotations.clear();
     _inProgressPoints = null;
@@ -226,6 +237,160 @@ class PngViewerProvider extends WindowStateProvider {
         data: payload,
       ),
     );
+  }
+
+  // -- Save to Project (mock: exports annotated PNG as browser download) --
+
+  Future<void> saveToProject() async {
+    if (_image == null) return;
+
+    try {
+      // 1. Decode original image bytes to ui.Image.
+      final codec = await ui.instantiateImageCodec(_image!.imageBytes);
+      final frame = await codec.getNextFrame();
+      final baseImage = frame.image;
+
+      // 2. Create a recording canvas at image dimensions.
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder,
+          Rect.fromLTWH(0, 0, baseImage.width.toDouble(),
+              baseImage.height.toDouble()));
+
+      // 3. Draw the base image.
+      canvas.drawImage(baseImage, Offset.zero, Paint());
+
+      // 4. Draw annotations on top.
+      _paintAnnotations(canvas);
+
+      // 5. Convert to PNG.
+      final picture = recorder.endRecording();
+      final rendered = await picture.toImage(
+          baseImage.width, baseImage.height);
+      final byteData =
+          await rendered.toByteData(format: ui.ImageByteFormat.png);
+
+      if (byteData == null) {
+        debugPrint('Save failed: could not encode PNG');
+        return;
+      }
+
+      final pngBytes = byteData.buffer.asUint8List();
+      final b64 = base64Encode(pngBytes);
+
+      // 6. Trigger browser download.
+      final dataUrl = 'data:image/png;base64,$b64';
+      final anchor = web.document.createElement('a') as web.HTMLAnchorElement;
+      anchor.href = dataUrl;
+      anchor.download = '${_image!.name}_annotated.png';
+      anchor.click();
+
+      debugPrint(
+          '=== Saved annotated PNG (${pngBytes.length} bytes, ${_annotations.length} annotations) ===');
+    } catch (e) {
+      debugPrint('Save to project failed: $e');
+    }
+  }
+
+  /// Paint all annotations onto a canvas (used by saveToProject).
+  void _paintAnnotations(Canvas canvas) {
+    final paint = Paint()
+      ..color = const Color(0xFFFF5722)
+      ..strokeWidth = 2.0
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final fillPaint = Paint()
+      ..color = const Color(0x33FF5722)
+      ..style = PaintingStyle.fill;
+
+    for (final ann in _annotations) {
+      switch (ann.type) {
+        case DrawingTool.polygon:
+          if (ann.points.length < 3) continue;
+          final path = Path();
+          path.moveTo(ann.points.first.x, ann.points.first.y);
+          for (int i = 1; i < ann.points.length; i++) {
+            path.lineTo(ann.points[i].x, ann.points[i].y);
+          }
+          path.close();
+          canvas.drawPath(path, fillPaint);
+          canvas.drawPath(path, paint);
+          break;
+
+        case DrawingTool.rectangle:
+          if (ann.points.length < 2) continue;
+          final rect = Rect.fromPoints(
+            Offset(ann.points[0].x, ann.points[0].y),
+            Offset(ann.points[1].x, ann.points[1].y),
+          );
+          canvas.drawRect(rect, fillPaint);
+          canvas.drawRect(rect, paint);
+          break;
+
+        case DrawingTool.circle:
+          if (ann.points.isEmpty || ann.radius == null) continue;
+          final centre = Offset(ann.points[0].x, ann.points[0].y);
+          canvas.drawCircle(centre, ann.radius!, fillPaint);
+          canvas.drawCircle(centre, ann.radius!, paint);
+          break;
+
+        case DrawingTool.arrow:
+          if (ann.points.length < 2) continue;
+          final start = Offset(ann.points[0].x, ann.points[0].y);
+          final end = Offset(ann.points[1].x, ann.points[1].y);
+          canvas.drawLine(start, end, paint);
+          // Arrowhead.
+          final dir = end - start;
+          final len = dir.distance;
+          if (len > 1) {
+            final unit = dir / len;
+            final headLen = math.min(20.0, len * 0.3);
+            final headW = headLen * 0.5;
+            final normal = Offset(-unit.dy, unit.dx);
+            final base = end - unit * headLen;
+            final arrowPath = Path()
+              ..moveTo(end.dx, end.dy)
+              ..lineTo((base + normal * headW).dx, (base + normal * headW).dy)
+              ..lineTo((base - normal * headW).dx, (base - normal * headW).dy)
+              ..close();
+            canvas.drawPath(
+                arrowPath,
+                Paint()
+                  ..color = const Color(0xFFFF5722)
+                  ..style = PaintingStyle.fill);
+          }
+          break;
+
+        case DrawingTool.freehand:
+          if (ann.points.length < 2) continue;
+          final path = Path();
+          path.moveTo(ann.points.first.x, ann.points.first.y);
+          for (int i = 1; i < ann.points.length; i++) {
+            path.lineTo(ann.points[i].x, ann.points[i].y);
+          }
+          canvas.drawPath(path, paint);
+          break;
+
+        case DrawingTool.text:
+          if (ann.points.isEmpty || ann.label == null) continue;
+          final textSpan = TextSpan(
+            text: ann.label!,
+            style: const TextStyle(
+              color: Color(0xFFFF5722),
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+            ),
+          );
+          final tp = TextPainter(
+            text: textSpan,
+            textDirection: TextDirection.ltr,
+          );
+          tp.layout();
+          tp.paint(canvas, Offset(ann.points[0].x, ann.points[0].y));
+          break;
+      }
+    }
   }
 
   @override

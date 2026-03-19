@@ -9,8 +9,10 @@ import '../../core/theme/app_spacing.dart';
 import '../../domain/models/annotation_model.dart';
 import '../../domain/models/content_state.dart';
 import '../providers/png_viewer_provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/window_state_provider.dart';
 import '../widgets/body_states/active_state.dart';
+import '../widgets/mock_tab_strip.dart';
 import '../widgets/window_shell.dart';
 
 /// Home screen for the PNG Viewer window.
@@ -24,6 +26,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final provider = context.watch<WindowStateProvider>() as PngViewerProvider;
+    final themeProvider = context.watch<ThemeProvider>();
     final isActive = provider.contentState == ContentState.active;
     final hasAnnotations = provider.hasAnnotations;
 
@@ -36,7 +39,9 @@ class HomeScreen extends StatelessWidget {
           color: isDark ? const Color(0xFF181A20) : Colors.white,
           child: Column(
             children: [
-              // Custom toolbar with tool toggles, actions, and zoom controls.
+              // Mock tab strip (not part of widget — dev harness).
+              const MockTabStrip(),
+              // Custom toolbar with 3-zone layout.
               _PngViewerToolbar(
                 provider: provider,
                 isActive: isActive,
@@ -64,12 +69,43 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
+      // DEV controls: theme toggle (mock only).
+      floatingActionButton: Opacity(
+        opacity: 0.5,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton.small(
+              onPressed: () => themeProvider.toggleTheme(),
+              tooltip: 'Toggle theme (DEV)',
+              child: Icon(
+                themeProvider.isDarkMode
+                    ? FontAwesomeIcons.sun
+                    : FontAwesomeIcons.moon,
+                size: 16,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'DEV',
+              style: TextStyle(
+                fontSize: 9,
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white38 : Colors.black26,
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }
 
-/// Custom toolbar that renders annotation tool toggles with primary/secondary
-/// visual distinction, plus action buttons and trailing zoom controls.
+/// Custom toolbar with 3-zone layout:
+///   Left: 6 drawing tool toggles
+///   Centre: Clear All + Send to Chat
+///   Right: Zoom controls
 class _PngViewerToolbar extends StatelessWidget {
   final PngViewerProvider provider;
   final bool isActive;
@@ -90,7 +126,7 @@ class _PngViewerToolbar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
       child: Row(
         children: [
-          // 6 drawing tool toggles — primary filled when active.
+          // ── LEFT ZONE: 6 drawing tool toggles ──
           _ToolToggleButton(
             icon: FontAwesomeIcons.drawPolygon,
             tooltip: 'Polygon',
@@ -102,7 +138,7 @@ class _PngViewerToolbar extends StatelessWidget {
           ),
           const SizedBox(width: WindowConstants.toolbarGap),
           _ToolToggleButton(
-            icon: FontAwesomeIcons.borderAll,
+            icon: FontAwesomeIcons.square,
             tooltip: 'Rectangle',
             isActive: provider.activeTool == DrawingTool.rectangle,
             onPressed: isActive
@@ -132,7 +168,7 @@ class _PngViewerToolbar extends StatelessWidget {
           ),
           const SizedBox(width: WindowConstants.toolbarGap),
           _ToolToggleButton(
-            icon: FontAwesomeIcons.penFancy,
+            icon: FontAwesomeIcons.pencil,
             tooltip: 'Freehand',
             isActive: provider.activeTool == DrawingTool.freehand,
             onPressed: isActive
@@ -150,8 +186,11 @@ class _PngViewerToolbar extends StatelessWidget {
                 : null,
             isDark: isDark,
           ),
-          const SizedBox(width: WindowConstants.toolbarGap),
-          // Clear All — secondary style (never toggled).
+
+          // ── Spacer between left and centre ──
+          const Spacer(),
+
+          // ── CENTRE ZONE: Clear All + Send to Chat ──
           _ToolToggleButton(
             icon: FontAwesomeIcons.trashCan,
             tooltip: 'Clear All',
@@ -162,7 +201,6 @@ class _PngViewerToolbar extends StatelessWidget {
             isDark: isDark,
           ),
           const SizedBox(width: WindowConstants.toolbarGap),
-          // Send to Chat — secondary style.
           _ToolToggleButton(
             icon: FontAwesomeIcons.paperPlane,
             tooltip: 'Send to Chat',
@@ -172,10 +210,21 @@ class _PngViewerToolbar extends StatelessWidget {
                 : null,
             isDark: isDark,
           ),
-          // Spacer pushes zoom controls to the right.
           const SizedBox(width: WindowConstants.toolbarGap),
+          _ToolToggleButton(
+            icon: FontAwesomeIcons.floppyDisk,
+            tooltip: 'Save to Project',
+            isActive: false,
+            onPressed: isActive
+                ? () => provider.saveToProject()
+                : null,
+            isDark: isDark,
+          ),
+
+          // ── Spacer between centre and right ──
           const Spacer(),
-          // Trailing zoom controls.
+
+          // ── RIGHT ZONE: Zoom controls ──
           _ToolToggleButton(
             icon: FontAwesomeIcons.magnifyingGlassPlus,
             tooltip: 'Zoom In',
