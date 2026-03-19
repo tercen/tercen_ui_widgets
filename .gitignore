@@ -3,6 +3,7 @@
 !.claude/skills/
 !.claude/agents/
 _feedback/
+_issues/
 .dart_tool/
 .flutter-plugins-dependencies
 *.cache.dill.track.dill
