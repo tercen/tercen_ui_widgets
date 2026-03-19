@@ -639,7 +639,7 @@
                 "props": {
                   "service": "teamService",
                   "method": "findTeamByOwner",
-                  "args": [[""]]
+                  "args": [["{{context.username}}"]]
                 },
                 "children": [
                   {
