@@ -7,6 +7,7 @@ import '../../core/theme/app_line_weights.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../../domain/models/table_schema.dart';
+import 'app_snackbar.dart';
 
 /// Shows table metadata: name, ID, kind, row/column count, column list.
 class InfoPopover extends StatelessWidget {
@@ -104,11 +105,11 @@ class InfoPopover extends StatelessWidget {
                   GestureDetector(
                     onTap: () {
                       Clipboard.setData(ClipboardData(text: schema.id));
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('ID copied to clipboard'),
-                          duration: Duration(seconds: 1),
-                        ),
+                      showAppSnackbar(
+                        context,
+                        type: SnackbarType.success,
+                        message: 'ID copied to clipboard',
+                        duration: const Duration(seconds: 2),
                       );
                     },
                     child: MouseRegion(

@@ -189,17 +189,16 @@ class _MarkdownContent extends StatelessWidget {
         isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
     final secondaryColor =
         isDark ? AppColorsDark.textSecondary : AppColors.textSecondary;
-    final mutedColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
     final linkColor = isDark ? AppColorsDark.link : AppColors.link;
     final codeBlockBg = isDark
-        ? const Color(0xFF1A1D24)
-        : const Color(0xFFF1F3F5);
-    final inlineCodeBg = isDark
-        ? const Color(0xFF252830)
-        : const Color(0xFFE8EAED);
-    final tableBorderColor =
+        ? AppColorsDark.surfaceElevated
+        : AppColors.panelBackground;
+    final codeBg = isDark
+        ? AppColorsDark.surfaceElevated
+        : const Color(0xFFF1F5F9);
+    final borderColor =
         isDark ? AppColorsDark.borderSubtle : AppColors.borderSubtle;
-    final blockQuoteBorderColor =
+    final blockquoteBorder =
         isDark ? AppColorsDark.primary : AppColors.primary;
 
     return MarkdownBody(
@@ -207,61 +206,53 @@ class _MarkdownContent extends StatelessWidget {
       selectable: true,
       softLineBreak: true,
       styleSheet: MarkdownStyleSheet(
-        // Paragraphs
-        p: AppTextStyles.body.copyWith(color: textColor),
         // Headings
         h1: AppTextStyles.h1.copyWith(color: textColor),
         h2: AppTextStyles.h2.copyWith(color: textColor),
         h3: AppTextStyles.h3.copyWith(color: textColor),
-        h4: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          height: 1.25,
-          color: textColor,
-        ),
-        // Bold / italic
-        strong: TextStyle(fontWeight: FontWeight.w700, color: textColor),
-        em: TextStyle(fontStyle: FontStyle.italic, color: textColor),
+        // Paragraphs
+        p: AppTextStyles.body.copyWith(color: textColor),
         // Links
-        a: TextStyle(color: linkColor, decoration: TextDecoration.underline),
+        a: AppTextStyles.body.copyWith(color: linkColor),
+        // Bold / italic
+        strong: AppTextStyles.body
+            .copyWith(color: textColor, fontWeight: FontWeight.w700),
+        em: AppTextStyles.body
+            .copyWith(color: textColor, fontStyle: FontStyle.italic),
+        // Strikethrough
+        del: AppTextStyles.body.copyWith(
+          color: secondaryColor,
+          decoration: TextDecoration.lineThrough,
+        ),
         // Inline code
         code: TextStyle(
           fontFamily: 'monospace',
           fontSize: 13,
-          color: secondaryColor,
-          backgroundColor: inlineCodeBg,
+          color: textColor,
+          backgroundColor: codeBg,
         ),
         // Fenced code blocks
         codeblockDecoration: BoxDecoration(
           color: codeBlockBg,
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+          border: Border.all(color: borderColor),
         ),
-        codeblockPadding: const EdgeInsets.all(AppSpacing.sm + 2),
-        codeblockAlign: WrapAlignment.start,
-        // Lists
-        listBullet: AppTextStyles.body.copyWith(color: textColor),
+        codeblockPadding: const EdgeInsets.all(AppSpacing.md),
         // Block quotes
-        blockquote: AppTextStyles.body.copyWith(
-          color: secondaryColor,
-          fontStyle: FontStyle.italic,
-        ),
         blockquoteDecoration: BoxDecoration(
           border: Border(
             left: BorderSide(
-              color: blockQuoteBorderColor,
+              color: blockquoteBorder,
               width: 3.0,
             ),
           ),
         ),
-        blockquotePadding: const EdgeInsets.only(
-          left: AppSpacing.sm + 2,
-          top: AppSpacing.xs,
-          bottom: AppSpacing.xs,
-        ),
+        blockquotePadding:
+            const EdgeInsets.only(left: AppSpacing.md, top: 4, bottom: 4),
         // Tables
+        tableBorder: TableBorder.all(color: borderColor, width: 1.0),
         tableHead: AppTextStyles.label.copyWith(color: textColor),
         tableBody: AppTextStyles.body.copyWith(color: textColor),
-        tableBorder: TableBorder.all(color: tableBorderColor, width: 1.0),
         tableCellsPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.sm,
           vertical: AppSpacing.xs,
@@ -269,12 +260,11 @@ class _MarkdownContent extends StatelessWidget {
         // Horizontal rule
         horizontalRuleDecoration: BoxDecoration(
           border: Border(
-            top: BorderSide(
-              color: tableBorderColor,
-              width: 1.0,
-            ),
+            top: BorderSide(color: borderColor, width: 1.0),
           ),
         ),
+        // Lists
+        listBullet: AppTextStyles.body.copyWith(color: textColor),
         // Spacing
         h1Padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),
         h2Padding: const EdgeInsets.only(top: AppSpacing.sm, bottom: AppSpacing.xs),

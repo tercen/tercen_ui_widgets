@@ -11,6 +11,7 @@ import '../../core/theme/app_colors_dark.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/theme/app_text_styles.dart';
 import '../providers/audit_trail_provider.dart';
+import 'app_snackbar.dart';
 import 'window_toolbar.dart';
 
 /// Toolbar for the Audit Trail window.
@@ -63,15 +64,11 @@ class _AuditToolbarState extends State<AuditToolbar> {
     provider.sendToChat();
     setState(() => _sendConfirmation = true);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Sent ${provider.multiSelectedCount} events to Chat',
-        ),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        width: 300,
-      ),
+    showAppSnackbar(
+      context,
+      type: SnackbarType.success,
+      message: 'Sent ${provider.multiSelectedCount} events to Chat',
+      duration: const Duration(seconds: 2),
     );
 
     Future.delayed(const Duration(seconds: 2), () {
@@ -97,13 +94,11 @@ class _AuditToolbarState extends State<AuditToolbar> {
     web.document.body!.removeChild(anchor);
     web.URL.revokeObjectURL(url);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Exported $filename'),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-        width: 300,
-      ),
+    showAppSnackbar(
+      context,
+      type: SnackbarType.success,
+      message: 'Exported $filename',
+      duration: const Duration(seconds: 2),
     );
   }
 

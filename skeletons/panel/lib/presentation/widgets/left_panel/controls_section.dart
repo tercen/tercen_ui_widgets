@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -265,7 +266,7 @@ class _ControlsSectionState extends State<ControlsSection> {
                   focusNode: focusNode,
                   decoration: const InputDecoration(
                     hintText: 'Search...',
-                    prefixIcon: Icon(Icons.search, size: 18),
+                    prefixIcon: Icon(FontAwesomeIcons.magnifyingGlass, size: 16),
                   ),
                   onChanged: provider.setSearchableInputValue,
                 );

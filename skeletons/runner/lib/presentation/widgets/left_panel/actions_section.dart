@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
@@ -26,9 +27,9 @@ class ActionsSection extends StatelessWidget {
       children: [
         SizedBox(
           height: AppSpacing.controlHeight,
-          child: FilledButton.icon(
+          child: ElevatedButton.icon(
             onPressed: canRun ? () => provider.startRun() : null,
-            icon: const Icon(Icons.play_arrow, size: 16),
+            icon: const FaIcon(FontAwesomeIcons.play, size: 14),
             label: const Text('Run'),
           ),
         ),
@@ -37,7 +38,7 @@ class ActionsSection extends StatelessWidget {
           height: AppSpacing.controlHeight,
           child: OutlinedButton.icon(
             onPressed: canStop ? () => provider.stopRun() : null,
-            icon: const Icon(Icons.stop, size: 16),
+            icon: const FaIcon(FontAwesomeIcons.stop, size: 14),
             label: const Text('Stop'),
           ),
         ),
@@ -48,9 +49,9 @@ class ActionsSection extends StatelessWidget {
             onPressed: provider.isRunning
                 ? null
                 : () => provider.resetApp(),
-            icon: Icon(
-              Icons.refresh,
-              size: 16,
+            icon: FaIcon(
+              FontAwesomeIcons.arrowsRotate,
+              size: 14,
               color: provider.isRunning
                   ? null
                   : (isDark ? AppColorsDark.textSecondary : AppColors.textSecondary),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
 import '../../../core/theme/app_spacing.dart';
@@ -63,10 +64,10 @@ class LeftPanelHeader extends StatelessWidget {
         ),
         // Theme toggle
         IconButton(
-          icon: Icon(
-            themeProvider.isDarkMode ? Icons.wb_sunny : Icons.dark_mode,
-            color: Colors.white,
+          icon: FaIcon(
+            themeProvider.isDarkMode ? FontAwesomeIcons.solidSun : FontAwesomeIcons.solidMoon,
             size: 16,
+            color: Colors.white,
           ),
           onPressed: themeProvider.toggleTheme,
           padding: EdgeInsets.zero,
@@ -75,7 +76,7 @@ class LeftPanelHeader extends StatelessWidget {
         ),
         // Collapse chevron
         IconButton(
-          icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
+          icon: const FaIcon(FontAwesomeIcons.chevronLeft, size: 16, color: Colors.white),
           onPressed: onToggleCollapse,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
