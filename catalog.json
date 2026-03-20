@@ -4,147 +4,113 @@
       "metadata": {
         "type": "WorkflowViewer",
         "tier": 2,
-        "description": "Interactive flowchart viewer for Tercen workflows. Displays steps as a DAG with connectors, supports selection, inline rename, run/stop/reset actions, and step state visualization. Publishes focus events when steps are selected and action events for run/stop/reset. Subscribes to step state changes from the server.",
+        "description": "Interactive directed graph viewer for Tercen workflows. Displays steps as shaped nodes (rounded rects, circles, hexagons) with elbow connectors, state-colored icons, zoom/pan, and selection with path highlighting. Publishes selection events when steps are clicked.",
         "props": {
           "workflowId": {
             "type": "string",
-            "required": true,
-            "description": "ID of the workflow to display"
-          },
-          "projectId": {
-            "type": "string",
-            "required": true,
-            "description": "ID of the project containing the workflow"
+            "required": false,
+            "description": "Workflow ID. If omitted, prompts user."
           }
         },
-        "emittedEvents": [
-          "workflow.focusChanged",
-          "workflow.openStepViewer",
-          "workflow.runWorkflow",
-          "workflow.stopWorkflow",
-          "workflow.resetWorkflow",
-          "workflow.runStep",
-          "workflow.stopStep",
-          "workflow.resetStep",
-          "workflow.stepRenamed",
-          "workflow.stepMoved"
-        ],
-        "acceptedActions": ["onTap", "onDoubleTap"]
+        "emittedEvents": ["workflow.selection"],
+        "acceptedActions": ["onTap"]
       },
       "template": {
-        "type": "Column",
-        "id": "{{widgetId}}-root",
-        "props": { "crossAxisAlignment": "stretch" },
-        "children": [
-          {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": { "color": "#1E1E1E", "padding": 8 },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": { "mainAxisAlignment": "spaceBetween" },
-                "children": [
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": { "text": "Workflow Viewer", "fontSize": 13, "fontWeight": "bold", "color": "#10B981" }
-                  },
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-id-label",
-                    "props": { "text": "{{props.workflowId}}", "fontSize": 11, "color": "grey" }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body",
-            "children": [
-              {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {"name": "workflowId", "label": "Workflow ID", "default": "28e3c9888e9935f667aed6f07c007c7c"}
+          ]
+        },
+        "children": [{
+          "type": "Column",
+          "id": "{{widgetId}}-root",
+          "props": {"crossAxisAlignment": "stretch"},
+          "children": [
+            {
+              "type": "Expanded",
+              "id": "{{widgetId}}-body",
+              "children": [{
                 "type": "DataSource",
                 "id": "{{widgetId}}-ds",
                 "props": {
                   "service": "workflowService",
-                  "method": "get",
-                  "args": ["{{props.workflowId}}"]
+                  "method": "getWorkflowGraph",
+                  "args": ["{{workflowId}}"]
                 },
                 "children": [
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
-                    "props": { "visible": "{{loading}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-spinner",
-                        "children": [
-                          {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-li",
-                            "props": { "variant": "skeleton", "text": "Loading workflow…" }
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "Conditional", "id": "{{widgetId}}-loading",
+                    "props": {"visible": "{{loading}}"},
+                    "children": [{"type": "Center", "id": "{{widgetId}}-spinner", "children": [{"type": "LoadingIndicator", "id": "{{widgetId}}-li", "props": {"variant": "skeleton", "text": "Loading workflow…"}}]}]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-error",
-                    "props": { "visible": "{{error}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-err-center",
+                    "type": "Conditional", "id": "{{widgetId}}-error",
+                    "props": {"visible": "{{error}}"},
+                    "children": [{
+                      "type": "Center", "id": "{{widgetId}}-err-center",
+                      "children": [{
+                        "type": "Column", "id": "{{widgetId}}-err-col", "props": {"mainAxisAlignment": "center"},
                         "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-err-text",
-                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
-                          }
+                          {"type": "Icon", "id": "{{widgetId}}-err-icon", "props": {"icon": "error_outline", "size": 32, "color": "error"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-err-gap", "props": {"height": 8}},
+                          {"type": "Text", "id": "{{widgetId}}-err-text", "props": {"text": "{{errorMessage}}", "textStyle": "bodySmall", "color": "error"}}
                         ]
-                      }
-                    ]
+                      }]
+                    }]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
-                    "props": { "visible": "{{ready}}" },
-                    "children": [
-                      {
-                        "type": "Column",
-                        "id": "{{widgetId}}-wf-col",
-                        "props": { "crossAxisAlignment": "center" },
-                        "children": [
-                          {
-                            "type": "Padding",
-                            "id": "{{widgetId}}-wf-pad",
-                            "props": { "padding": 16 },
+                    "type": "Conditional", "id": "{{widgetId}}-ready",
+                    "props": {"visible": "{{ready}}"},
+                    "children": [{
+                      "type": "Column",
+                      "id": "{{widgetId}}-content",
+                      "props": {"crossAxisAlignment": "stretch"},
+                      "children": [
+                        {
+                          "type": "Container",
+                          "id": "{{widgetId}}-toolbar",
+                          "props": {"color": "surfaceContainerHigh", "padding": "sm"},
+                          "children": [{
+                            "type": "Row",
+                            "id": "{{widgetId}}-toolbar-row",
+                            "props": {"mainAxisAlignment": "spaceBetween"},
                             "children": [
                               {
-                                "type": "Text",
-                                "id": "{{widgetId}}-wf-name",
-                                "props": { "text": "{{data.name}}", "fontSize": 16, "fontWeight": "bold" }
-                              }
+                                "type": "Row", "id": "{{widgetId}}-toolbar-left",
+                                "children": [
+                                  {"type": "Icon", "id": "{{widgetId}}-icon", "props": {"icon": "account_tree", "size": 16, "color": "primary"}},
+                                  {"type": "SizedBox", "id": "{{widgetId}}-icon-gap", "props": {"width": 8}},
+                                  {"type": "Text", "id": "{{widgetId}}-title", "props": {"text": "{{data.name}}", "textStyle": "labelMedium", "color": "onSurface"}}
+                                ]
+                              },
+                              {"type": "Text", "id": "{{widgetId}}-count", "props": {"text": "{{data.nodes.length}} steps", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
                             ]
-                          },
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-step-count",
-                            "props": { "text": "Workflow loaded — use native viewer for full flowchart", "fontSize": 12, "color": "grey" }
-                          }
-                        ]
-                      }
-                    ]
+                          }]
+                        },
+                        {"type": "Divider", "id": "{{widgetId}}-div", "props": {"height": 1, "color": "outlineVariant"}},
+                        {
+                          "type": "Expanded",
+                          "id": "{{widgetId}}-graph-area",
+                          "children": [{
+                            "type": "DirectedGraph",
+                            "id": "{{widgetId}}-graph",
+                            "props": {
+                              "nodes": "{{data.nodes}}",
+                              "edges": "{{data.edges}}",
+                              "channel": "workflow.selection"
+                            }
+                          }]
+                        }
+                      ]
+                    }]
                   }
                 ]
-              }
-            ]
-          }
-        ]
+              }]
+            }
+          ]
+        }]
       }
     },
     {
@@ -181,7 +147,7 @@
           "fields": [
             {"name": "workflowId", "label": "Workflow ID", "default": "28e3c9888e9935f667aed6f07c007c7c"},
             {"name": "stepId", "label": "Step ID", "default": "73ab0d32-cd1a-4ee5-bdec-b744b3767b32"},
-            {"name": "tableType", "label": "Table type (input or output)", "default": "output"}
+            {"name": "tableType", "label": "Table type", "default": "output", "values": ["output", "input"]}
           ]
         },
         "children": [{
