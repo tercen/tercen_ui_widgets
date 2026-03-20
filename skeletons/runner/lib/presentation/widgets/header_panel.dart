@@ -78,7 +78,7 @@ class HeaderPanel extends StatelessWidget {
               onPressed: onToggleTheme,
               icon: Icon(
                 isDark ? Icons.light_mode : Icons.dark_mode,
-                size: 18,
+                size: 16,
                 color: textSecondary,
               ),
               tooltip: isDark ? 'Light mode' : 'Dark mode',
@@ -95,7 +95,7 @@ class HeaderPanel extends StatelessWidget {
           ),
           IconButton(
             onPressed: onExit,
-            icon: Icon(Icons.close, size: 18, color: textSecondary),
+            icon: Icon(Icons.close, size: 16, color: textSecondary),
             tooltip: 'Exit',
             visualDensity: VisualDensity.compact,
           ),

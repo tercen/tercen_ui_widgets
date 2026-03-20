@@ -211,7 +211,7 @@ class DocumentToolbar extends StatelessWidget {
 
 /// Custom two-segment toggle built to Tercen style guide specs.
 ///
-/// Exactly `toolbarButtonSize` (36px) tall including border.
+/// Exactly `toolbarButtonSize` (32px) tall including border.
 /// Selected: primary fill, white icon. Unselected: transparent, primary icon.
 class _ModeToggle extends StatefulWidget {
   final EditMode editMode;

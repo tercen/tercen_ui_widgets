@@ -64,8 +64,8 @@ class ErrorState extends StatelessWidget {
                         BorderRadius.circular(AppSpacing.radiusMd),
                   ),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 10,
+                    horizontal: 16,
+                    vertical: 8,
                   ),
                 ),
                 child: Text(

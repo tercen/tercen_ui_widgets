@@ -28,7 +28,7 @@ class ActionsSection extends StatelessWidget {
           height: AppSpacing.controlHeight,
           child: FilledButton.icon(
             onPressed: canRun ? () => provider.startRun() : null,
-            icon: const Icon(Icons.play_arrow, size: 18),
+            icon: const Icon(Icons.play_arrow, size: 16),
             label: const Text('Run'),
           ),
         ),
@@ -37,7 +37,7 @@ class ActionsSection extends StatelessWidget {
           height: AppSpacing.controlHeight,
           child: OutlinedButton.icon(
             onPressed: canStop ? () => provider.stopRun() : null,
-            icon: const Icon(Icons.stop, size: 18),
+            icon: const Icon(Icons.stop, size: 16),
             label: const Text('Stop'),
           ),
         ),
@@ -50,7 +50,7 @@ class ActionsSection extends StatelessWidget {
                 : () => provider.resetApp(),
             icon: Icon(
               Icons.refresh,
-              size: 18,
+              size: 16,
               color: provider.isRunning
                   ? null
                   : (isDark ? AppColorsDark.textSecondary : AppColors.textSecondary),

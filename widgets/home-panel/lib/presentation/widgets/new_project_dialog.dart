@@ -145,11 +145,11 @@ class _NewProjectDialogState extends State<_NewProjectDialog> {
         isDark ? AppColorsDark.borderSubtle : AppColors.borderSubtle;
 
     final inputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       borderSide: BorderSide(color: borderColor),
     );
     final focusedInputBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       borderSide: BorderSide(color: primary, width: 1.5),
     );
     const inputPadding = EdgeInsets.symmetric(
@@ -435,7 +435,7 @@ class _NewProjectDialogState extends State<_NewProjectDialog> {
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius:
-                            BorderRadius.circular(AppSpacing.radiusSm),
+                            BorderRadius.circular(AppSpacing.radiusMd),
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: AppSpacing.lg,
@@ -639,7 +639,7 @@ class _SearchableTeamDropdown extends StatelessWidget {
                   width: isOpen ? 1.5 : 1.0,
                 ),
                 borderRadius:
-                    BorderRadius.circular(AppSpacing.radiusSm),
+                    BorderRadius.circular(AppSpacing.radiusMd),
               ),
               child: Row(
                 children: [
@@ -669,7 +669,7 @@ class _SearchableTeamDropdown extends StatelessWidget {
               color: dropdownBg,
               border: Border.all(color: borderColor),
               borderRadius:
-                  BorderRadius.circular(AppSpacing.radiusSm),
+                  BorderRadius.circular(AppSpacing.radiusMd),
               boxShadow: isDark
                   ? null
                   : const [
@@ -705,19 +705,19 @@ class _SearchableTeamDropdown extends StatelessWidget {
                                 horizontal: AppSpacing.sm),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm),
+                              AppSpacing.radiusMd),
                           borderSide:
                               BorderSide(color: borderColor),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm),
+                              AppSpacing.radiusMd),
                           borderSide:
                               BorderSide(color: borderColor),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(
-                              AppSpacing.radiusSm),
+                              AppSpacing.radiusMd),
                           borderSide: BorderSide(
                               color: primary, width: 1.5),
                         ),

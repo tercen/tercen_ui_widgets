@@ -96,8 +96,8 @@ class _HistoryPopoverButtonState extends State<HistoryPopoverButton> {
           child: GestureDetector(
             onTap: _toggle,
             child: Container(
-              width: 36,
-              height: 36,
+              width: 32,
+              height: 32,
               decoration: BoxDecoration(
                 color: Colors.transparent,
                 border: Border.all(color: primaryColor, width: 1.5),
@@ -213,7 +213,7 @@ class _HistoryDropdownState extends State<_HistoryDropdown> {
                       padding: const EdgeInsets.only(left: 8, right: 4),
                       child: FaIcon(
                         FontAwesomeIcons.magnifyingGlass,
-                        size: 12,
+                        size: 16,
                         color: hintColor,
                       ),
                     ),

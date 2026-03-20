@@ -66,7 +66,7 @@ class LeftPanelHeader extends StatelessWidget {
           icon: Icon(
             themeProvider.isDarkMode ? Icons.wb_sunny : Icons.dark_mode,
             color: Colors.white,
-            size: 20,
+            size: 16,
           ),
           onPressed: themeProvider.toggleTheme,
           padding: EdgeInsets.zero,
@@ -75,7 +75,7 @@ class LeftPanelHeader extends StatelessWidget {
         ),
         // Collapse chevron
         IconButton(
-          icon: const Icon(Icons.chevron_left, color: Colors.white, size: 20),
+          icon: const Icon(Icons.chevron_left, color: Colors.white, size: 16),
           onPressed: onToggleCollapse,
           padding: EdgeInsets.zero,
           constraints: const BoxConstraints(minWidth: 32, minHeight: 32),

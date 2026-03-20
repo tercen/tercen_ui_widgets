@@ -207,7 +207,7 @@ class _MockTabBar extends StatelessWidget {
     final mutedColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
 
     return Container(
-      height: 36,
+      height: 32,
       decoration: BoxDecoration(
         color: bgColor,
         border: Border(
