@@ -151,7 +151,7 @@
       "metadata": {
         "type": "DataTableViewer",
         "tier": 2,
-        "description": "Tabular data viewer for Tercen workflow step computed results. Fetches all computed tables for a step and displays them stacked with headers showing table name, kind, and row count. Each table is a scrollable DataTable with column headers and selectable cell values.",
+        "description": "Tabular data viewer for Tercen workflow step tables. Fetches input or output tables for a step and displays them in browser-style tabs. Each tab shows a scrollable data table with column headers, types, and selectable cell values.",
         "props": {
           "workflowId": {
             "type": "string",
@@ -162,6 +162,13 @@
             "type": "string",
             "required": false,
             "description": "Step ID within the workflow. If omitted, prompts user."
+          },
+          "tableType": {
+            "type": "string",
+            "required": false,
+            "default": "output",
+            "values": ["input", "output"],
+            "description": "Whether to show input or output tables for the step."
           }
         },
         "emittedEvents": ["system.selection.table"],
@@ -173,7 +180,8 @@
         "props": {
           "fields": [
             {"name": "workflowId", "label": "Workflow ID", "default": "28e3c9888e9935f667aed6f07c007c7c"},
-            {"name": "stepId", "label": "Step ID", "default": "73ab0d32-cd1a-4ee5-bdec-b744b3767b32"}
+            {"name": "stepId", "label": "Step ID", "default": "73ab0d32-cd1a-4ee5-bdec-b744b3767b32"},
+            {"name": "tableType", "label": "Table type (input or output)", "default": "output"}
           ]
         },
         "children": [{
@@ -190,7 +198,7 @@
                 "props": {
                   "service": "workflowService",
                   "method": "getStepTables",
-                  "args": ["{{workflowId}}", "{{stepId}}"]
+                  "args": ["{{workflowId}}", "{{stepId}}", "{{tableType}}"]
                 },
                 "children": [
                   {
@@ -238,7 +246,7 @@
                                   {"type": "Text", "id": "{{widgetId}}-title", "props": {"text": "{{data.stepName}}", "textStyle": "labelMedium", "color": "onSurface"}}
                                 ]
                               },
-                              {"type": "Text", "id": "{{widgetId}}-count", "props": {"text": "{{data.tables.length}} tables", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
+                              {"type": "Text", "id": "{{widgetId}}-type-label", "props": {"text": "{{data.tableType}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
                             ]
                           }]
                         },
@@ -247,56 +255,12 @@
                           "type": "Expanded",
                           "id": "{{widgetId}}-tables-area",
                           "children": [{
-                            "type": "ListView",
-                            "id": "{{widgetId}}-tables-list",
-                            "children": [{
-                              "type": "ForEach",
-                              "id": "{{widgetId}}-fe",
-                              "props": {"items": "{{data.tables}}"},
-                              "children": [{
-                                "type": "Column",
-                                "id": "tbl-col-{{item.schemaId}}",
-                                "props": {"crossAxisAlignment": "stretch"},
-                                "children": [
-                                  {
-                                    "type": "Container",
-                                    "id": "tbl-hdr-{{item.schemaId}}",
-                                    "props": {"color": "surfaceContainerLow", "padding": "sm"},
-                                    "children": [{
-                                      "type": "Row",
-                                      "id": "tbl-hdr-row-{{item.schemaId}}",
-                                      "props": {"mainAxisAlignment": "spaceBetween"},
-                                      "children": [
-                                        {
-                                          "type": "Row", "id": "tbl-hdr-left-{{item.schemaId}}",
-                                          "children": [
-                                            {"type": "Icon", "id": "tbl-ico-{{item.schemaId}}", "props": {"icon": "grid_on", "size": 14, "color": "onSurfaceVariant"}},
-                                            {"type": "SizedBox", "id": "tbl-gap-{{item.schemaId}}", "props": {"width": 6}},
-                                            {"type": "Text", "id": "tbl-kind-{{item.schemaId}}", "props": {"text": "{{item.kind}}", "textStyle": "labelSmall", "color": "onSurfaceVariant"}}
-                                          ]
-                                        },
-                                        {"type": "Text", "id": "tbl-rows-{{item.schemaId}}", "props": {"text": "{{item.nRows}} rows", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
-                                      ]
-                                    }]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "tbl-box-{{item.schemaId}}",
-                                    "props": {"height": 300},
-                                    "children": [{
-                                      "type": "DataTable",
-                                      "id": "tbl-dt-{{item.schemaId}}",
-                                      "props": {
-                                        "columns": "{{item.columns}}",
-                                        "nRows": "{{item.nRows}}",
-                                        "maxRows": 100
-                                      }
-                                    }]
-                                  },
-                                  {"type": "SizedBox", "id": "tbl-sep-{{item.schemaId}}", "props": {"height": 8}}
-                                ]
-                              }]
-                            }]
+                            "type": "TabbedDataTable",
+                            "id": "{{widgetId}}-tdt",
+                            "props": {
+                              "tables": "{{data.tables}}",
+                              "maxRows": 100
+                            }
                           }]
                         }
                       ]
