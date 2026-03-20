@@ -13,7 +13,13 @@
           }
         },
         "emittedEvents": ["workflow.selection"],
-        "acceptedActions": ["onTap"]
+        "acceptedActions": ["onTap"],
+        "handlesIntent": {
+          "intent": "openWorkflow",
+          "propsMap": {"workflowId": "workflowId"},
+          "windowTitle": "Workflow: {{workflowName}}",
+          "windowSize": "large"
+        }
       },
       "template": {
         "type": "PromptRequired",
@@ -138,7 +144,13 @@
           }
         },
         "emittedEvents": ["system.selection.table"],
-        "acceptedActions": []
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openStepTables",
+          "propsMap": {"workflowId": "workflowId", "stepId": "stepId"},
+          "windowTitle": "Tables: {{stepName}}",
+          "windowSize": "large"
+        }
       },
       "template": {
         "type": "PromptRequired",
@@ -423,7 +435,13 @@
           }
         },
         "emittedEvents": ["system.selection.file"],
-        "acceptedActions": []
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openFile",
+          "propsMap": {"fileId": "fileId"},
+          "windowTitle": "{{fileName}}",
+          "windowSize": "medium"
+        }
       },
       "template": {
         "type": "PromptRequired",
@@ -570,7 +588,13 @@
           }
         },
         "emittedEvents": ["navigator.focusChanged"],
-        "acceptedActions": ["onTap"]
+        "acceptedActions": ["onTap"],
+        "handlesIntent": {
+          "intent": "openFileNavigator",
+          "propsMap": {"projectId": "projectId"},
+          "windowTitle": "Files: {{projectName}}",
+          "windowSize": "medium"
+        }
       },
       "template": {
         "type": "PromptRequired",
@@ -736,7 +760,13 @@
           }
         },
         "emittedEvents": [],
-        "acceptedActions": []
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openStepImages",
+          "propsMap": {"workflowId": "workflowId", "stepId": "stepId"},
+          "windowTitle": "Images: {{stepName}}",
+          "windowSize": "large"
+        }
       },
       "template": {
         "type": "PromptRequired",
