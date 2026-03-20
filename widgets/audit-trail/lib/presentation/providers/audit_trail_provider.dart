@@ -225,16 +225,89 @@ class AuditTrailProvider extends ChangeNotifier {
   }
 
   void _handleCommand(EventPayload payload) {
-    if (payload.type == 'openAuditTrail') {
-      final scopeType = payload.data['scopeType'] as String?;
-      final scopeId = payload.data['scopeId'] as String?;
-      if (scopeType != null && scopeId != null) {
-        final scope = _availableScopes.firstWhere(
-          (s) => s.scopeType.name == scopeType && s.scopeId == scopeId,
-          orElse: () => _availableScopes.first,
-        );
-        setScope(scope);
-      }
+    switch (payload.type) {
+      // Set scope: { scopeType: "project"|"team"|"user", scopeId: "..." }
+      case 'openAuditTrail':
+        final scopeType = payload.data['scopeType'] as String?;
+        final scopeId = payload.data['scopeId'] as String?;
+        if (scopeType != null && scopeId != null) {
+          final scope = _availableScopes.firstWhere(
+            (s) => s.scopeType.name == scopeType && s.scopeId == scopeId,
+            orElse: () => _availableScopes.first,
+          );
+          setScope(scope);
+        }
+        break;
+
+      // Column filter: { column: "project", values: ["Name1", "Name2"] }
+      case 'setAuditFilter':
+        final column = payload.data['column'] as String?;
+        final values = payload.data['values'] as List<dynamic>?;
+        if (column != null && values != null) {
+          setColumnFilter(column, values.cast<String>().toSet());
+        }
+        break;
+
+      // Clear column filter: { column: "project" }
+      case 'clearAuditFilter':
+        final column = payload.data['column'] as String?;
+        if (column != null) {
+          clearColumnFilter(column);
+        }
+        break;
+
+      // Date range: { column: "date", from: "2026-03-01T00:00:00Z", to: "2026-03-15T23:59:59Z" }
+      case 'setAuditDateRange':
+        final column = payload.data['column'] as String?;
+        final fromStr = payload.data['from'] as String?;
+        final toStr = payload.data['to'] as String?;
+        if (column != null && fromStr != null && toStr != null) {
+          final from = DateTime.tryParse(fromStr);
+          final to = DateTime.tryParse(toStr);
+          if (from != null && to != null) {
+            setDateRangeFilter(column, DateTimeRange(start: from, end: to));
+          }
+        }
+        break;
+
+      // Clear date range: { column: "date" }
+      case 'clearAuditDateRange':
+        final column = payload.data['column'] as String?;
+        if (column != null) {
+          clearDateRangeFilter(column);
+        }
+        break;
+
+      // Column visibility: { visible: ["date", "type", "user", "action"] }
+      case 'setAuditColumns':
+        final visible = payload.data['visible'] as List<dynamic>?;
+        if (visible != null) {
+          final desired = visible.cast<String>().toSet();
+          for (final col in allColumns) {
+            final isVisible = _visibleColumns.contains(col.key);
+            final shouldBeVisible = desired.contains(col.key);
+            if (isVisible != shouldBeVisible) {
+              toggleColumnVisibility(col.key);
+            }
+          }
+        }
+        break;
+
+      // Search text: { query: "some text" }
+      case 'setAuditSearch':
+        final query = payload.data['query'] as String?;
+        if (query != null) {
+          setSearchText(query);
+        }
+        break;
+
+      // Sort: { newestFirst: true|false }
+      case 'setAuditSort':
+        final newest = payload.data['newestFirst'] as bool?;
+        if (newest != null && newest != _newestFirst) {
+          toggleSort();
+        }
+        break;
     }
   }
 
