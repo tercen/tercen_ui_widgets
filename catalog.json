@@ -151,142 +151,162 @@
       "metadata": {
         "type": "DataTableViewer",
         "tier": 2,
-        "description": "Tabular data viewer for Tercen tables and computed results. Displays rows and columns with sorting, search, cell annotation editing, and CSV export. Publishes table selection events when a table is loaded and annotation save events when edits are committed.",
+        "description": "Tabular data viewer for Tercen workflow step computed results. Fetches all computed tables for a step and displays them stacked with headers showing table name, kind, and row count. Each table is a scrollable DataTable with column headers and selectable cell values.",
         "props": {
-          "tableId": {
-            "type": "string",
-            "required": true,
-            "description": "ID of the table to display"
-          },
-          "tableName": {
+          "workflowId": {
             "type": "string",
             "required": false,
-            "default": "",
-            "description": "Display name for the table"
+            "description": "Workflow ID. If omitted, prompts user."
           },
-          "tableKind": {
+          "stepId": {
             "type": "string",
             "required": false,
-            "default": "tableSchema",
-            "values": ["tableSchema", "computedTable", "joinOperator"],
-            "description": "Kind of table schema to fetch"
+            "description": "Step ID within the workflow. If omitted, prompts user."
           }
         },
-        "emittedEvents": [
-          "system.selection.table",
-          "system.data.annotationSaved"
-        ],
-        "acceptedActions": ["onTap"]
+        "emittedEvents": ["system.selection.table"],
+        "acceptedActions": []
       },
       "template": {
-        "type": "Column",
-        "id": "{{widgetId}}-root",
-        "props": { "crossAxisAlignment": "stretch" },
-        "children": [
-          {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": { "color": "#1E1E1E", "padding": 8 },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": { "mainAxisAlignment": "spaceBetween" },
-                "children": [
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": { "text": "{{props.tableName}}", "fontSize": 13, "fontWeight": "bold", "color": "#F59E0B" }
-                  },
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-kind-label",
-                    "props": { "text": "{{props.tableKind}}", "fontSize": 11, "color": "grey" }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body",
-            "children": [
-              {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {"name": "workflowId", "label": "Workflow ID", "default": "28e3c9888e9935f667aed6f07c007c7c"},
+            {"name": "stepId", "label": "Step ID", "default": "73ab0d32-cd1a-4ee5-bdec-b744b3767b32"}
+          ]
+        },
+        "children": [{
+          "type": "Column",
+          "id": "{{widgetId}}-root",
+          "props": {"crossAxisAlignment": "stretch"},
+          "children": [
+            {
+              "type": "Expanded",
+              "id": "{{widgetId}}-body",
+              "children": [{
                 "type": "DataSource",
                 "id": "{{widgetId}}-ds",
                 "props": {
-                  "service": "tableSchemaService",
-                  "method": "get",
-                  "args": ["{{props.tableId}}"]
+                  "service": "workflowService",
+                  "method": "getStepTables",
+                  "args": ["{{workflowId}}", "{{stepId}}"]
                 },
                 "children": [
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
-                    "props": { "visible": "{{loading}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-spinner",
-                        "children": [
-                          {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-li",
-                            "props": { "variant": "skeleton", "text": "Loading table…" }
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "Conditional", "id": "{{widgetId}}-loading",
+                    "props": {"visible": "{{loading}}"},
+                    "children": [{"type": "Center", "id": "{{widgetId}}-spinner", "children": [{"type": "LoadingIndicator", "id": "{{widgetId}}-li", "props": {"variant": "skeleton", "text": "Loading step tables…"}}]}]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-error",
-                    "props": { "visible": "{{error}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-err-center",
+                    "type": "Conditional", "id": "{{widgetId}}-error",
+                    "props": {"visible": "{{error}}"},
+                    "children": [{
+                      "type": "Center", "id": "{{widgetId}}-err-center",
+                      "children": [{
+                        "type": "Column", "id": "{{widgetId}}-err-col", "props": {"mainAxisAlignment": "center"},
                         "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-err-text",
-                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
-                          }
+                          {"type": "Icon", "id": "{{widgetId}}-err-icon", "props": {"icon": "error_outline", "size": 32, "color": "error"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-err-gap", "props": {"height": 8}},
+                          {"type": "Text", "id": "{{widgetId}}-err-text", "props": {"text": "{{errorMessage}}", "textStyle": "bodySmall", "color": "error"}}
                         ]
-                      }
-                    ]
+                      }]
+                    }]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
-                    "props": { "visible": "{{ready}}" },
-                    "children": [
-                      {
-                        "type": "ListView",
-                        "id": "{{widgetId}}-lv",
-                        "props": { "padding": 4 },
-                        "children": [
-                          {
-                            "type": "Padding",
-                            "id": "{{widgetId}}-header-pad",
-                            "props": { "padding": 8 },
+                    "type": "Conditional", "id": "{{widgetId}}-ready",
+                    "props": {"visible": "{{ready}}"},
+                    "children": [{
+                      "type": "Column",
+                      "id": "{{widgetId}}-content",
+                      "props": {"crossAxisAlignment": "stretch"},
+                      "children": [
+                        {
+                          "type": "Container",
+                          "id": "{{widgetId}}-toolbar",
+                          "props": {"color": "surfaceContainerHigh", "padding": "sm"},
+                          "children": [{
+                            "type": "Row",
+                            "id": "{{widgetId}}-toolbar-row",
+                            "props": {"mainAxisAlignment": "spaceBetween"},
                             "children": [
                               {
-                                "type": "Text",
-                                "id": "{{widgetId}}-header",
-                                "props": { "text": "Table loaded — use native viewer for full grid", "fontSize": 12, "color": "grey" }
-                              }
+                                "type": "Row", "id": "{{widgetId}}-toolbar-left",
+                                "children": [
+                                  {"type": "Icon", "id": "{{widgetId}}-icon", "props": {"icon": "table_chart", "size": 16, "color": "primary"}},
+                                  {"type": "SizedBox", "id": "{{widgetId}}-icon-gap", "props": {"width": 8}},
+                                  {"type": "Text", "id": "{{widgetId}}-title", "props": {"text": "{{data.stepName}}", "textStyle": "labelMedium", "color": "onSurface"}}
+                                ]
+                              },
+                              {"type": "Text", "id": "{{widgetId}}-count", "props": {"text": "{{data.tables.length}} tables", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
                             ]
-                          }
-                        ]
-                      }
-                    ]
+                          }]
+                        },
+                        {"type": "Divider", "id": "{{widgetId}}-div", "props": {"height": 1, "color": "outlineVariant"}},
+                        {
+                          "type": "Expanded",
+                          "id": "{{widgetId}}-tables-area",
+                          "children": [{
+                            "type": "ListView",
+                            "id": "{{widgetId}}-tables-list",
+                            "children": [{
+                              "type": "ForEach",
+                              "id": "{{widgetId}}-fe",
+                              "props": {"items": "{{data.tables}}"},
+                              "children": [{
+                                "type": "Column",
+                                "id": "tbl-col-{{item.schemaId}}",
+                                "props": {"crossAxisAlignment": "stretch"},
+                                "children": [
+                                  {
+                                    "type": "Container",
+                                    "id": "tbl-hdr-{{item.schemaId}}",
+                                    "props": {"color": "surfaceContainerLow", "padding": "sm"},
+                                    "children": [{
+                                      "type": "Row",
+                                      "id": "tbl-hdr-row-{{item.schemaId}}",
+                                      "props": {"mainAxisAlignment": "spaceBetween"},
+                                      "children": [
+                                        {
+                                          "type": "Row", "id": "tbl-hdr-left-{{item.schemaId}}",
+                                          "children": [
+                                            {"type": "Icon", "id": "tbl-ico-{{item.schemaId}}", "props": {"icon": "grid_on", "size": 14, "color": "onSurfaceVariant"}},
+                                            {"type": "SizedBox", "id": "tbl-gap-{{item.schemaId}}", "props": {"width": 6}},
+                                            {"type": "Text", "id": "tbl-kind-{{item.schemaId}}", "props": {"text": "{{item.kind}}", "textStyle": "labelSmall", "color": "onSurfaceVariant"}}
+                                          ]
+                                        },
+                                        {"type": "Text", "id": "tbl-rows-{{item.schemaId}}", "props": {"text": "{{item.nRows}} rows", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
+                                      ]
+                                    }]
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "tbl-box-{{item.schemaId}}",
+                                    "props": {"height": 300},
+                                    "children": [{
+                                      "type": "DataTable",
+                                      "id": "tbl-dt-{{item.schemaId}}",
+                                      "props": {
+                                        "columns": "{{item.columns}}",
+                                        "nRows": "{{item.nRows}}",
+                                        "maxRows": 100
+                                      }
+                                    }]
+                                  },
+                                  {"type": "SizedBox", "id": "tbl-sep-{{item.schemaId}}", "props": {"height": 8}}
+                                ]
+                              }]
+                            }]
+                          }]
+                        }
+                      ]
+                    }]
                   }
                 ]
-              }
-            ]
-          }
-        ]
+              }]
+            }
+          ]
+        }]
       }
     },
     {
