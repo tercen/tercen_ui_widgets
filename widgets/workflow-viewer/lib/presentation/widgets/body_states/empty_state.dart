@@ -76,8 +76,8 @@ class EmptyState extends StatelessWidget {
                   )),
                   padding: WidgetStateProperty.all(
                     const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                      horizontal: 16,
+                      vertical: 8,
                     ),
                   ),
                   minimumSize: WidgetStateProperty.all(

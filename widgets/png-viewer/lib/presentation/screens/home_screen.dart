@@ -40,7 +40,10 @@ class HomeScreen extends StatelessWidget {
           child: Column(
             children: [
               // Mock tab strip (not part of widget — dev harness).
-              const MockTabStrip(),
+              MockTabStrip(
+                isDark: isDark,
+                onToggleTheme: () => themeProvider.toggleTheme(),
+              ),
               // Custom toolbar with 3-zone layout.
               _PngViewerToolbar(
                 provider: provider,
@@ -69,35 +72,6 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
       ),
-      // DEV controls: theme toggle (mock only).
-      floatingActionButton: Opacity(
-        opacity: 0.5,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            FloatingActionButton.small(
-              onPressed: () => themeProvider.toggleTheme(),
-              tooltip: 'Toggle theme (DEV)',
-              child: Icon(
-                themeProvider.isDarkMode
-                    ? FontAwesomeIcons.sun
-                    : FontAwesomeIcons.moon,
-                size: 16,
-              ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              'DEV',
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w600,
-                color: isDark ? Colors.white38 : Colors.black26,
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

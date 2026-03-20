@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
@@ -246,7 +247,7 @@ class _LeftPanelState extends State<LeftPanel> {
           width: double.infinity,
           color: bgColor,
           child: const Center(
-            child: Icon(Icons.chevron_right, color: Colors.white, size: 20),
+            child: FaIcon(FontAwesomeIcons.chevronRight, color: Colors.white, size: 16),
           ),
         ),
       ),

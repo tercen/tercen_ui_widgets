@@ -58,7 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
           title: const Text('Error'),
           content: Text(error),
           actions: [
-            FilledButton(
+            ElevatedButton(
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('OK'),
             ),
@@ -152,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
             onPressed: () => Navigator.of(ctx).pop(),
             child: const Text('Cancel'),
           ),
-          FilledButton(
+          ElevatedButton(
             onPressed: () {
               Navigator.of(ctx).pop();
               provider.deleteRun(runId);

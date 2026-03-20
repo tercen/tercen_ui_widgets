@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_colors_dark.dart';
@@ -76,9 +77,9 @@ class HeaderPanel extends StatelessWidget {
           if (onToggleTheme != null) ...[
             IconButton(
               onPressed: onToggleTheme,
-              icon: Icon(
-                isDark ? Icons.light_mode : Icons.dark_mode,
-                size: 18,
+              icon: FaIcon(
+                isDark ? FontAwesomeIcons.solidSun : FontAwesomeIcons.solidMoon,
+                size: 16,
                 color: textSecondary,
               ),
               tooltip: isDark ? 'Light mode' : 'Dark mode',
@@ -95,7 +96,7 @@ class HeaderPanel extends StatelessWidget {
           ),
           IconButton(
             onPressed: onExit,
-            icon: Icon(Icons.close, size: 18, color: textSecondary),
+            icon: FaIcon(FontAwesomeIcons.xmark, size: 16, color: textSecondary),
             tooltip: 'Exit',
             visualDensity: VisualDensity.compact,
           ),
@@ -111,7 +112,7 @@ class HeaderPanel extends StatelessWidget {
   ) {
     if (provider.contentMode == ContentMode.input) {
       return [
-        FilledButton(
+        ElevatedButton(
           onPressed: onPrimaryAction,
           child: Text(provider.headerActionLabel),
         ),
@@ -123,19 +124,19 @@ class HeaderPanel extends StatelessWidget {
     return [
       OutlinedButton.icon(
         onPressed: onReRun,
-        icon: Icon(Icons.replay, size: 16, color: outlineColor),
+        icon: FaIcon(FontAwesomeIcons.arrowsRotate, size: 14, color: outlineColor),
         label: Text('Re-Run', style: TextStyle(color: outlineColor)),
       ),
       const SizedBox(width: AppSpacing.sm),
       OutlinedButton.icon(
         onPressed: onExport,
-        icon: Icon(Icons.download, size: 16, color: outlineColor),
+        icon: FaIcon(FontAwesomeIcons.download, size: 14, color: outlineColor),
         label: Text('Export', style: TextStyle(color: outlineColor)),
       ),
       const SizedBox(width: AppSpacing.sm),
       OutlinedButton.icon(
         onPressed: onDelete,
-        icon: Icon(Icons.delete_outline, size: 16, color: isDark ? AppColorsDark.error : AppColors.error),
+        icon: FaIcon(FontAwesomeIcons.trash, size: 14, color: isDark ? AppColorsDark.error : AppColors.error),
         label: Text('Delete', style: TextStyle(color: isDark ? AppColorsDark.error : AppColors.error)),
       ),
     ];

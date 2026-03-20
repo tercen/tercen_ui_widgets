@@ -75,7 +75,7 @@ class _ToolbarSearchFieldState extends State<ToolbarSearchField> {
                   child: Center(
                     child: FaIcon(
                       FontAwesomeIcons.magnifyingGlass,
-                      size: 14,
+                      size: 16,
                       color: hintColor,
                     ),
                   ),
@@ -101,7 +101,7 @@ class _ToolbarSearchFieldState extends State<ToolbarSearchField> {
                           child: Center(
                             child: FaIcon(
                               FontAwesomeIcons.xmark,
-                              size: 12,
+                              size: 16,
                               color: hintColor,
                             ),
                           ),

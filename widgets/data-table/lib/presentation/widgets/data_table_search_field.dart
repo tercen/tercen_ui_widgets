@@ -94,7 +94,7 @@ class _DataTableSearchFieldState extends State<DataTableSearchField> {
                           )
                         : FaIcon(
                             FontAwesomeIcons.magnifyingGlass,
-                            size: 14,
+                            size: 16,
                             color: hintColor,
                           ),
                   ),

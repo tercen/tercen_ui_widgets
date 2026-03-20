@@ -189,12 +189,12 @@ class _DateRangeFilterPopupState extends State<DateRangeFilterPopup> {
                       horizontal: 6, vertical: 4),
                   enabledBorder: OutlineInputBorder(
                     borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                        BorderRadius.circular(AppSpacing.radiusMd),
                     borderSide: BorderSide(color: borderColor),
                   ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius:
-                        BorderRadius.circular(AppSpacing.radiusSm),
+                        BorderRadius.circular(AppSpacing.radiusMd),
                     borderSide: BorderSide(
                       color: isDark
                           ? AppColorsDark.primary
@@ -223,12 +223,12 @@ class _DateRangeFilterPopupState extends State<DateRangeFilterPopup> {
                     const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
                 enabledBorder: OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusSm),
+                      BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide(color: borderColor),
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusSm),
+                      BorderRadius.circular(AppSpacing.radiusMd),
                   borderSide: BorderSide(
                     color: isDark
                         ? AppColorsDark.primary
