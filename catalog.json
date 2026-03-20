@@ -462,127 +462,149 @@
     },
     {
       "metadata": {
-        "type": "DocumentEditor",
+        "type": "DocumentViewer",
         "tier": 2,
-        "description": "Markdown and plain-text file viewer/editor with dual modes (Source and Rendered). Supports WYSIWYG formatting controls (bold, italic, headings, lists, links, images, code blocks), undo/redo, and save. Publishes content-changed events when the document is saved.",
+        "description": "Document viewer for Tercen files. Fetches file metadata (name, owner, size, dates) and downloads file content as selectable text. If fileId is not provided, prompts the user.",
         "props": {
           "fileId": {
             "type": "string",
-            "required": true,
-            "description": "Tercen file ID to load and edit"
-          },
-          "projectId": {
-            "type": "string",
-            "required": true,
-            "description": "Project ID containing the file"
+            "required": false,
+            "description": "Tercen file ID to view. If omitted, prompts user."
           }
         },
-        "emittedEvents": [
-          "system.document.dirty"
-        ],
+        "emittedEvents": ["system.selection.file"],
         "acceptedActions": []
       },
       "template": {
-        "type": "Column",
-        "id": "{{widgetId}}-root",
-        "props": { "crossAxisAlignment": "stretch" },
-        "children": [
-          {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": { "color": "#1E1E1E", "padding": 8 },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": { "mainAxisAlignment": "spaceBetween" },
-                "children": [
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": { "text": "Document Editor", "fontSize": 13, "fontWeight": "bold", "color": "#6366F1" }
-                  },
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-file-label",
-                    "props": { "text": "{{props.fileId}}", "fontSize": 11, "color": "grey" }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body",
-            "children": [
-              {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {"name": "fileId", "label": "File ID", "default": "2076952ae523bb4d472e283b9e001298"}
+          ]
+        },
+        "children": [{
+          "type": "Column",
+          "id": "{{widgetId}}-root",
+          "props": {"crossAxisAlignment": "stretch"},
+          "children": [
+            {
+              "type": "DataSource",
+              "id": "{{widgetId}}-meta-ds",
+              "props": {
+                "service": "fileService",
+                "method": "get",
+                "args": ["{{fileId}}"]
+              },
+              "children": [{
+                "type": "Container",
+                "id": "{{widgetId}}-toolbar",
+                "props": {"color": "surfaceContainerHigh", "padding": "sm"},
+                "children": [{
+                  "type": "Row",
+                  "id": "{{widgetId}}-toolbar-row",
+                  "props": {"mainAxisAlignment": "spaceBetween"},
+                  "children": [
+                    {
+                      "type": "Row",
+                      "id": "{{widgetId}}-toolbar-left",
+                      "children": [
+                        {"type": "Icon", "id": "{{widgetId}}-icon", "props": {"icon": "description", "size": 16, "color": "primary"}},
+                        {"type": "SizedBox", "id": "{{widgetId}}-icon-gap", "props": {"width": 8}},
+                        {
+                          "type": "Conditional", "id": "{{widgetId}}-has-name",
+                          "props": {"visible": "{{ready}}"},
+                          "children": [
+                            {"type": "Text", "id": "{{widgetId}}-title", "props": {"text": "{{data.name}}", "textStyle": "labelMedium", "color": "onSurface"}}
+                          ]
+                        },
+                        {
+                          "type": "Conditional", "id": "{{widgetId}}-no-name",
+                          "props": {"visible": "{{loading}}"},
+                          "children": [
+                            {"type": "Text", "id": "{{widgetId}}-title-loading", "props": {"text": "Document Viewer", "textStyle": "labelMedium", "color": "onSurface"}}
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "Conditional", "id": "{{widgetId}}-meta-ready",
+                      "props": {"visible": "{{ready}}"},
+                      "children": [{
+                        "type": "Row",
+                        "id": "{{widgetId}}-meta-row",
+                        "children": [
+                          {"type": "Icon", "id": "{{widgetId}}-owner-icon", "props": {"icon": "person", "size": 14, "color": "onSurfaceMuted"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-og", "props": {"width": 4}},
+                          {"type": "Text", "id": "{{widgetId}}-owner", "props": {"text": "{{data.acl.owner}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-sep1", "props": {"width": 16}},
+                          {"type": "Icon", "id": "{{widgetId}}-size-icon", "props": {"icon": "storage", "size": 14, "color": "onSurfaceMuted"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-sg", "props": {"width": 4}},
+                          {"type": "Text", "id": "{{widgetId}}-size", "props": {"text": "{{data.size}} bytes", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
+                        ]
+                      }]
+                    }
+                  ]
+                }]
+              }]
+            },
+            {"type": "Divider", "id": "{{widgetId}}-div-top", "props": {"height": 1, "color": "outlineVariant"}},
+            {
+              "type": "Expanded",
+              "id": "{{widgetId}}-body",
+              "children": [{
                 "type": "DataSource",
-                "id": "{{widgetId}}-ds",
+                "id": "{{widgetId}}-content-ds",
                 "props": {
                   "service": "fileService",
-                  "method": "get",
-                  "args": ["{{props.fileId}}"]
+                  "method": "download",
+                  "args": ["{{fileId}}"]
                 },
                 "children": [
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
-                    "props": { "visible": "{{loading}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-spinner",
-                        "children": [
-                          {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-li",
-                            "props": { "variant": "skeleton", "text": "Loading document…" }
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "Conditional", "id": "{{widgetId}}-loading",
+                    "props": {"visible": "{{loading}}"},
+                    "children": [{"type": "Center", "id": "{{widgetId}}-spinner", "children": [{"type": "LoadingIndicator", "id": "{{widgetId}}-li", "props": {"variant": "skeleton", "text": "Loading document…"}}]}]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-error",
-                    "props": { "visible": "{{error}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-err-center",
+                    "type": "Conditional", "id": "{{widgetId}}-error",
+                    "props": {"visible": "{{error}}"},
+                    "children": [{
+                      "type": "Center", "id": "{{widgetId}}-err-center",
+                      "children": [{
+                        "type": "Column", "id": "{{widgetId}}-err-col",
+                        "props": {"mainAxisAlignment": "center"},
                         "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-err-text",
-                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
-                          }
+                          {"type": "Icon", "id": "{{widgetId}}-err-icon", "props": {"icon": "error_outline", "size": 32, "color": "error"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-err-gap", "props": {"height": 8}},
+                          {"type": "Text", "id": "{{widgetId}}-err-text", "props": {"text": "{{errorMessage}}", "textStyle": "bodySmall", "color": "error"}}
                         ]
-                      }
-                    ]
+                      }]
+                    }]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
-                    "props": { "visible": "{{ready}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-ready-center",
-                        "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-ready-text",
-                            "props": { "text": "Document loaded — use native editor for full editing", "fontSize": 12, "color": "grey" }
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "Conditional", "id": "{{widgetId}}-ready",
+                    "props": {"visible": "{{ready}}"},
+                    "children": [{
+                      "type": "ListView",
+                      "id": "{{widgetId}}-scroll",
+                      "props": {"padding": "md"},
+                      "children": [{
+                        "type": "SelectableText",
+                        "id": "{{widgetId}}-content",
+                        "props": {
+                          "text": "{{data.content}}",
+                          "textStyle": "bodyMedium",
+                          "color": "onSurface"
+                        }
+                      }]
+                    }]
                   }
                 ]
-              }
-            ]
-          }
-        ]
+              }]
+            }
+          ]
+        }]
       }
     },
     {
