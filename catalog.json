@@ -722,127 +722,118 @@
       "metadata": {
         "type": "PngViewer",
         "tier": 2,
-        "description": "Image annotation and visual context tool for Tercen. Displays PNG images from workflow step outputs or project files with pan and zoom navigation. Provides six drawing tools (polygon, rectangle, circle, arrow, freehand, text) for annotating regions of interest. Sends annotated image and structured coordinate data to Chat as LLM context via EventBus.",
+        "description": "Image viewer for Tercen workflow step outputs. Fetches generated images (PNG, SVG) from a step's computed results and displays them with zoom/pan. Multiple images shown in browser-style tabs.",
         "props": {
-          "resourceId": {
+          "workflowId": {
             "type": "string",
-            "required": true,
-            "description": "ID of the PNG image resource in Tercen (step output or project file)"
+            "required": false,
+            "description": "Workflow ID. If omitted, prompts user."
           },
-          "resourceType": {
+          "stepId": {
             "type": "string",
-            "required": true,
-            "values": ["stepOutput", "projectFile"],
-            "description": "Type of image resource — either a workflow step output or a project file"
+            "required": false,
+            "description": "Step ID within the workflow. If omitted, prompts user."
           }
         },
-        "emittedEvents": [
-          "window.intent",
-          "visualization.annotations.send"
-        ],
+        "emittedEvents": [],
         "acceptedActions": []
       },
       "template": {
-        "type": "Column",
-        "id": "{{widgetId}}-root",
-        "props": { "crossAxisAlignment": "stretch" },
-        "children": [
-          {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": { "color": "#1E1E1E", "padding": 8 },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": { "mainAxisAlignment": "spaceBetween" },
-                "children": [
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": { "text": "PNG Viewer", "fontSize": 13, "fontWeight": "bold", "color": "#66FF7F" }
-                  },
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-resource-label",
-                    "props": { "text": "{{props.resourceType}}", "fontSize": 11, "color": "grey" }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body",
-            "children": [
-              {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {"name": "workflowId", "label": "Workflow ID", "default": "28e3c9888e9935f667aed6f07c007c7c"},
+            {"name": "stepId", "label": "Step ID", "default": "a7a3aaea-33b9-4dfd-81f9-d86de12d6dcc"}
+          ]
+        },
+        "children": [{
+          "type": "Column",
+          "id": "{{widgetId}}-root",
+          "props": {"crossAxisAlignment": "stretch"},
+          "children": [
+            {
+              "type": "Expanded",
+              "id": "{{widgetId}}-body",
+              "children": [{
                 "type": "DataSource",
                 "id": "{{widgetId}}-ds",
                 "props": {
-                  "service": "imageDataService",
-                  "method": "get",
-                  "args": ["{{props.resourceType}}", "{{props.resourceId}}"]
+                  "service": "tableSchemaService",
+                  "method": "getStepImages",
+                  "args": ["{{workflowId}}", "{{stepId}}"]
                 },
                 "children": [
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
-                    "props": { "visible": "{{loading}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-spinner",
-                        "children": [
-                          {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-li",
-                            "props": { "variant": "skeleton", "text": "Loading image…" }
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "Conditional", "id": "{{widgetId}}-loading",
+                    "props": {"visible": "{{loading}}"},
+                    "children": [{"type": "Center", "id": "{{widgetId}}-spinner", "children": [{"type": "LoadingIndicator", "id": "{{widgetId}}-li", "props": {"variant": "skeleton", "text": "Loading images…"}}]}]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-error",
-                    "props": { "visible": "{{error}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-err-center",
+                    "type": "Conditional", "id": "{{widgetId}}-error",
+                    "props": {"visible": "{{error}}"},
+                    "children": [{
+                      "type": "Center", "id": "{{widgetId}}-err-center",
+                      "children": [{
+                        "type": "Column", "id": "{{widgetId}}-err-col", "props": {"mainAxisAlignment": "center"},
                         "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-err-text",
-                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
-                          }
+                          {"type": "Icon", "id": "{{widgetId}}-err-icon", "props": {"icon": "error_outline", "size": 32, "color": "error"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-err-gap", "props": {"height": 8}},
+                          {"type": "Text", "id": "{{widgetId}}-err-text", "props": {"text": "{{errorMessage}}", "textStyle": "bodySmall", "color": "error"}}
                         ]
-                      }
-                    ]
+                      }]
+                    }]
                   },
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
-                    "props": { "visible": "{{ready}}" },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-ready-center",
-                        "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-ready-text",
-                            "props": { "text": "Image loaded — use native viewer for annotations and pan/zoom", "fontSize": 12, "color": "grey" }
-                          }
-                        ]
-                      }
-                    ]
+                    "type": "Conditional", "id": "{{widgetId}}-ready",
+                    "props": {"visible": "{{ready}}"},
+                    "children": [{
+                      "type": "Column",
+                      "id": "{{widgetId}}-content",
+                      "props": {"crossAxisAlignment": "stretch"},
+                      "children": [
+                        {
+                          "type": "Container",
+                          "id": "{{widgetId}}-toolbar",
+                          "props": {"color": "surfaceContainerHigh", "padding": "sm"},
+                          "children": [{
+                            "type": "Row",
+                            "id": "{{widgetId}}-toolbar-row",
+                            "props": {"mainAxisAlignment": "spaceBetween"},
+                            "children": [
+                              {
+                                "type": "Row", "id": "{{widgetId}}-toolbar-left",
+                                "children": [
+                                  {"type": "Icon", "id": "{{widgetId}}-icon", "props": {"icon": "image", "size": 16, "color": "primary"}},
+                                  {"type": "SizedBox", "id": "{{widgetId}}-icon-gap", "props": {"width": 8}},
+                                  {"type": "Text", "id": "{{widgetId}}-title", "props": {"text": "{{data.stepName}}", "textStyle": "labelMedium", "color": "onSurface"}}
+                                ]
+                              },
+                              {"type": "Text", "id": "{{widgetId}}-count", "props": {"text": "{{data.images.length}} images", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
+                            ]
+                          }]
+                        },
+                        {"type": "Divider", "id": "{{widgetId}}-div", "props": {"height": 1, "color": "outlineVariant"}},
+                        {
+                          "type": "Expanded",
+                          "id": "{{widgetId}}-viewer-area",
+                          "children": [{
+                            "type": "TabbedImageViewer",
+                            "id": "{{widgetId}}-viewer",
+                            "props": {
+                              "images": "{{data.images}}",
+                              "authToken": "{{context.token}}"
+                            }
+                          }]
+                        }
+                      ]
+                    }]
                   }
                 ]
-              }
-            ]
-          }
-        ]
+              }]
+            }
+          ]
+        }]
       }
     }
   ]
