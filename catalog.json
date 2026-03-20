@@ -685,6 +685,193 @@
           ]
         }]
       }
+    },
+    {
+      "metadata": {
+        "type": "AuditTrail",
+        "tier": 2,
+        "description": "Compliance and regulatory log review tool for Tercen. Displays a unified timeline of platform activity events (object creation, modification, deletion, workflow execution) with resizable columns, sortable headers, column-level filters, and date-range filtering. Supports detail panel inspection, multi-select with send-to-Chat for hallucination checking, CSV export, and EventBus-driven scope control.",
+        "props": {},
+        "emittedEvents": [
+          "window.intent"
+        ],
+        "acceptedActions": ["openAuditTrail"]
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Audit Trail", "fontSize": 13, "fontWeight": "bold", "color": "#0D9488" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-scope-label",
+                    "props": { "text": "No scope selected", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "Center",
+                "id": "{{widgetId}}-empty",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-empty-text",
+                    "props": { "text": "Select a scope to view audit events", "fontSize": 12, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "PngViewer",
+        "tier": 2,
+        "description": "Image annotation and visual context tool for Tercen. Displays PNG images from workflow step outputs or project files with pan and zoom navigation. Provides six drawing tools (polygon, rectangle, circle, arrow, freehand, text) for annotating regions of interest. Sends annotated image and structured coordinate data to Chat as LLM context via EventBus.",
+        "props": {
+          "resourceId": {
+            "type": "string",
+            "required": true,
+            "description": "ID of the PNG image resource in Tercen (step output or project file)"
+          },
+          "resourceType": {
+            "type": "string",
+            "required": true,
+            "values": ["stepOutput", "projectFile"],
+            "description": "Type of image resource — either a workflow step output or a project file"
+          }
+        },
+        "emittedEvents": [
+          "window.intent",
+          "visualization.annotations.send"
+        ],
+        "acceptedActions": []
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "#1E1E1E", "padding": 8 },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "PNG Viewer", "fontSize": 13, "fontWeight": "bold", "color": "#66FF7F" }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-resource-label",
+                    "props": { "text": "{{props.resourceType}}", "fontSize": 11, "color": "grey" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "imageDataService",
+                  "method": "get",
+                  "args": ["{{props.resourceType}}", "{{props.resourceId}}"]
+                },
+                "children": [
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
+                    "props": { "visible": "{{loading}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": { "variant": "skeleton", "text": "Loading image…" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": { "visible": "{{error}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-err-text",
+                            "props": { "text": "Error: {{errorMessage}}", "color": "red" }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": { "visible": "{{ready}}" },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-ready-center",
+                        "children": [
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-ready-text",
+                            "props": { "text": "Image loaded — use native viewer for annotations and pan/zoom", "fontSize": 12, "color": "grey" }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   ]
 }
