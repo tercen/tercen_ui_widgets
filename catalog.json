@@ -456,6 +456,12 @@
             "propsMap": {"id": "fileId", "name": "fileName"},
             "windowTitle": "{{name}}",
             "windowSize": "medium"
+          },
+          {
+            "intent": "ProjectDocument",
+            "propsMap": {"id": "fileId", "name": "fileName"},
+            "windowTitle": "{{name}}",
+            "windowSize": "medium"
           }
         ]
       },
