@@ -14,12 +14,20 @@
         },
         "emittedEvents": ["workflow.selection"],
         "acceptedActions": ["onTap"],
-        "handlesIntent": {
-          "intent": "openWorkflow",
-          "propsMap": {"workflowId": "workflowId"},
-          "windowTitle": "Workflow: {{workflowName}}",
-          "windowSize": "large"
-        }
+        "handlesIntent": [
+          {
+            "intent": "openWorkflow",
+            "propsMap": {"workflowId": "workflowId"},
+            "windowTitle": "Workflow: {{workflowName}}",
+            "windowSize": "large"
+          },
+          {
+            "intent": "Workflow",
+            "propsMap": {"id": "workflowId", "name": "workflowName"},
+            "windowTitle": "Workflow: {{name}}",
+            "windowSize": "large"
+          }
+        ]
       },
       "template": {
         "type": "PromptRequired",
@@ -436,12 +444,20 @@
         },
         "emittedEvents": ["system.selection.file"],
         "acceptedActions": [],
-        "handlesIntent": {
-          "intent": "openFile",
-          "propsMap": {"fileId": "fileId"},
-          "windowTitle": "{{fileName}}",
-          "windowSize": "medium"
-        }
+        "handlesIntent": [
+          {
+            "intent": "openFile",
+            "propsMap": {"fileId": "fileId"},
+            "windowTitle": "{{fileName}}",
+            "windowSize": "medium"
+          },
+          {
+            "intent": "FileDocument",
+            "propsMap": {"id": "fileId", "name": "fileName"},
+            "windowTitle": "{{name}}",
+            "windowSize": "medium"
+          }
+        ]
       },
       "template": {
         "type": "PromptRequired",
@@ -587,8 +603,8 @@
             "description": "Project ID to browse. If omitted, prompts user."
           }
         },
-        "emittedEvents": ["navigator.focusChanged"],
-        "acceptedActions": ["onTap"],
+        "emittedEvents": ["navigator.focusChanged", "system.intent"],
+        "acceptedActions": ["onTap", "onDoubleTap"],
         "handlesIntent": {
           "intent": "openFileNavigator",
           "propsMap": {"projectId": "projectId"},
@@ -653,21 +669,25 @@
                       "children": [{
                         "type": "ForEach", "id": "{{widgetId}}-fe", "props": {"items": "{{data}}"},
                         "children": [{
-                          "type": "Action", "id": "tap-{{item.id}}",
-                          "props": {"gesture": "onTap", "channel": "navigator.focusChanged", "payload": {"nodeId": "{{item.id}}", "nodeType": "{{item.kind}}", "nodeName": "{{item.name}}"}},
+                          "type": "Action", "id": "dbl-{{item.id}}",
+                          "props": {"gesture": "onDoubleTap", "channel": "system.intent", "payload": {"intent": "{{item.kind}}", "id": "{{item.id}}", "name": "{{item.name}}", "kind": "{{item.kind}}", "subKind": "{{item.subKind}}"}},
                           "children": [{
-                            "type": "ReactTo", "id": "rt-{{item.id}}",
-                            "props": {"channel": "navigator.focusChanged", "match": {"nodeId": "{{item.id}}"}, "overrideProps": {"color": "primaryContainer"}},
+                            "type": "Action", "id": "tap-{{item.id}}",
+                            "props": {"gesture": "onTap", "channel": "navigator.focusChanged", "payload": {"nodeId": "{{item.id}}", "nodeType": "{{item.kind}}", "nodeName": "{{item.name}}"}},
                             "children": [{
-                              "type": "Padding", "id": "pad-{{item.id}}", "props": {"padding": "sm"},
+                              "type": "ReactTo", "id": "rt-{{item.id}}",
+                              "props": {"channel": "navigator.focusChanged", "match": {"nodeId": "{{item.id}}"}, "overrideProps": {"color": "primaryContainer"}},
                               "children": [{
-                                "type": "Row", "id": "row-{{item.id}}",
-                                "children": [
-                                  {"type": "Icon", "id": "icon-{{item.id}}", "props": {"icon": "description", "size": 16, "color": "onSurfaceVariant"}},
-                                  {"type": "SizedBox", "id": "gap-{{item.id}}", "props": {"width": 8}},
-                                  {"type": "Expanded", "id": "exp-{{item.id}}", "children": [{"type": "Text", "id": "name-{{item.id}}", "props": {"text": "{{item.name}}", "textStyle": "bodySmall"}}]},
-                                  {"type": "Text", "id": "kind-{{item.id}}", "props": {"text": "{{item.kind}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
-                                ]
+                                "type": "Padding", "id": "pad-{{item.id}}", "props": {"padding": "sm"},
+                                "children": [{
+                                  "type": "Row", "id": "row-{{item.id}}",
+                                  "children": [
+                                    {"type": "Icon", "id": "icon-{{item.id}}", "props": {"icon": "description", "size": 16, "color": "onSurfaceVariant"}},
+                                    {"type": "SizedBox", "id": "gap-{{item.id}}", "props": {"width": 8}},
+                                    {"type": "Expanded", "id": "exp-{{item.id}}", "children": [{"type": "Text", "id": "name-{{item.id}}", "props": {"text": "{{item.name}}", "textStyle": "bodySmall"}}]},
+                                    {"type": "Text", "id": "kind-{{item.id}}", "props": {"text": "{{item.kind}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
+                                  ]
+                                }]
                               }]
                             }]
                           }]
