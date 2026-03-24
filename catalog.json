@@ -1102,42 +1102,74 @@
         "acceptedActions": ["header.state"]
       },
       "template": {
-        "type": "Container",
+        "type": "Column",
         "id": "{{widgetId}}-root",
-        "props": { "color": "surface", "height": 36 },
-        "children": [{
-          "type": "Row",
-          "id": "{{widgetId}}-row",
-          "props": { "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center" },
-          "children": [
-            {
-              "type": "Action",
-              "id": "{{widgetId}}-brand-action",
-              "props": { "onTap": "navigateHome", "tooltip": "Home", "cursor": "pointer" },
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-bar",
+            "props": { "color": "surface", "height": 35 },
+            "children": [{
+              "type": "Padding",
+              "id": "{{widgetId}}-pad",
+              "props": { "horizontal": 16 },
               "children": [{
-                "type": "Container",
-                "id": "{{widgetId}}-brand-box",
-                "props": { "padding": "sm" },
-                "children": [{
-                  "type": "Icon",
-                  "id": "{{widgetId}}-brand-placeholder",
-                  "props": { "icon": "home", "size": 20, "color": "primary" }
-                }]
+                "type": "Row",
+                "id": "{{widgetId}}-row",
+                "props": { "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center" },
+                "children": [
+                  {
+                    "type": "Action",
+                    "id": "{{widgetId}}-brand-action",
+                    "props": { "channel": "header.intent", "payload": { "intent": "navigateHome" } },
+                    "children": [{
+                      "type": "Row",
+                      "id": "{{widgetId}}-brand-row",
+                      "props": { "crossAxisAlignment": "center" },
+                      "children": [
+                        {
+                          "type": "Row",
+                          "id": "{{widgetId}}-logo-blocks",
+                          "children": [
+                            { "type": "Container", "id": "{{widgetId}}-b1", "props": { "color": "#0099FF", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b2", "props": { "color": "#00FFFF", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b3", "props": { "color": "#6D0000", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b4", "props": { "color": "#0000FF", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b5", "props": { "color": "#FFBF00", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b6", "props": { "color": "#99FF00", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b7", "props": { "color": "#FF0000", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b8", "props": { "color": "#FF8200", "width": 4, "height": 10 } },
+                            { "type": "Container", "id": "{{widgetId}}-b9", "props": { "color": "#66FF7F", "width": 4, "height": 10 } }
+                          ]
+                        },
+                        { "type": "SizedBox", "id": "{{widgetId}}-brand-gap", "props": { "width": 6 } },
+                        { "type": "Text", "id": "{{widgetId}}-brand-text", "props": { "text": "ercen", "textStyle": "titleSmall", "color": "onSurface" } }
+                      ]
+                    }]
+                  },
+                  {
+                    "type": "Row",
+                    "id": "{{widgetId}}-right",
+                    "props": { "crossAxisAlignment": "center" },
+                    "children": [
+                      {
+                        "type": "IconButton",
+                        "id": "{{widgetId}}-avatar",
+                        "props": { "icon": "account_circle", "size": 28, "channel": "header.intent", "payload": { "intent": "openUserMenu" }, "tooltip": "User menu" }
+                      }
+                    ]
+                  }
+                ]
               }]
-            },
-            {
-              "type": "Row",
-              "id": "{{widgetId}}-right",
-              "children": [
-                {
-                  "type": "IconButton",
-                  "id": "{{widgetId}}-avatar",
-                  "props": { "icon": "account_circle", "size": 24, "tooltip": "User menu" }
-                }
-              ]
-            }
-          ]
-        }]
+            }]
+          },
+          {
+            "type": "Divider",
+            "id": "{{widgetId}}-border",
+            "props": { "height": 1, "thickness": 1, "color": "outlineVariant" }
+          }
+        ]
       }
     }
   ],
