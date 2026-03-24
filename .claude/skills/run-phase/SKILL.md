@@ -44,14 +44,30 @@ Before invoking any agent, detect the widget kind:
 
 ### Phase 3 (Tercen Integration)
 
+Detect the integration target before invoking agents:
+
+**SDUI path** (window widgets → JSON templates in catalog.json):
+1. Invoke the **integrator-sdui** agent with the spec/mock at $ARGUMENTS[1]
+2. When integration completes, invoke the **reviewer** agent for Phase 3 SDUI review
+   - Reviewer uses `phase-3-sdui-review` skill
+3. If review **PASSES** → notify user the template is ready
+4. If review **FAILS** → pass the failure items back to the integrator-sdui agent to fix
+5. After fixes, re-run the reviewer
+6. Loop steps 3–5 until PASS or the user intervenes
+
+**Compiled-app path** (panel/runner widgets → Flutter apps):
 1. Invoke the **integrator** agent with the mock widget at $ARGUMENTS[1]
 2. When integration completes, invoke the **reviewer** agent for Phase 3 review
+   - Reviewer uses `phase-3-review` skill
 3. If review **PASSES** → run `flutter build web --wasm` to verify, then notify user
 4. If review **FAILS** → pass the failure items back to the integrator agent to fix
 5. After fixes, re-run the reviewer
 6. Loop steps 3–5 until PASS or the user intervenes
 
-*Phase 3 supports panel widgets (Flows A-D) and runner widgets (Flow E: workflow execution).*
+**How to detect the path:**
+- If the widget kind is `window` (from `skeleton.yaml` or spec metadata) → SDUI path
+- If the widget kind is `panel` or `runner` → compiled-app path
+- If unclear, check if `catalog.json` already has an entry for this widget type → SDUI path
 
 ## Rules
 

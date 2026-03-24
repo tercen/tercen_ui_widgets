@@ -6,6 +6,7 @@ skills:
   - phase-1-review
   - phase-2-review
   - phase-3-review
+  - phase-3-sdui-review
 tools: Read, Glob, Grep, Write
 ---
 
@@ -14,14 +15,18 @@ their phase's rules and produce PASS/FAIL reports. You do not modify application
 
 ## How to select the review
 
-Select the skill by phase:
+Select the skill by phase and target:
 - Functional spec → `phase-1-review`
 - Mock widget → `phase-2-review`
-- Tercen-integrated widget → `phase-3-review`
+- Tercen-integrated compiled app (panel/runner) → `phase-3-review`
+- SDUI JSON template in catalog.json (window) → `phase-3-sdui-review`
+
+For Phase 3, determine the integration target:
+- If the widget is a **window** kind and the output is a JSON template in `catalog.json` → use `phase-3-sdui-review`
+- If the widget is a compiled Flutter app with `pubspec.yaml`, `main.dart`, service locator → use `phase-3-review`
 
 Each review skill dispatches internally by widget kind (panel, runner, window)
-using the `skeleton.yaml` manifest or spec metadata. No separate kind-specific
-skill variants are needed.
+using the `skeleton.yaml` manifest or spec metadata where applicable.
 
 ## Output
 

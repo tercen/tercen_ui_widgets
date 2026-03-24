@@ -200,3 +200,15 @@ Before completing Phase 2:
 - [ ] Theme toggle works (light + dark)
 - [ ] No modifications to DO NOT MODIFY files
 - [ ] `flutter build web --wasm` succeeds
+
+---
+
+## Note: SDUI Integration Path (Phase 3)
+
+Window widgets integrate via **SDUI JSON templates** in `catalog.json`, not compiled Flutter apps. The Phase 2 mock serves as a visual reference and data shape specification for the Phase 3 SDUI integrator, which will:
+
+1. Map the mock's data service methods → `DataSource` nodes with real API service/method/args
+2. Map the mock's UI components → Tier 1 primitives (`DataTable`, `DirectedGraph`, `ForEach`+`Card`, etc.)
+3. Map the mock's EventBus events → `emittedEvents` and `handlesIntent` in template metadata
+
+When writing the mock, keep the data service interface clear and well-documented — it directly informs the `DataSource` node configuration in Phase 3. Document in the mock service what Tercen API call each method represents (e.g., `// Maps to workflowService.getWorkflowGraph(workflowId)`).
