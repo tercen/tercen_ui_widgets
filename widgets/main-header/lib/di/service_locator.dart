@@ -2,23 +2,21 @@ import 'package:get_it/get_it.dart';
 
 import '../domain/services/event_bus.dart';
 import '../domain/services/header_data_service.dart';
+import '../implementations/services/mock_event_bus.dart';
+import '../implementations/services/mock_header_data_service.dart';
 
 final GetIt serviceLocator = GetIt.instance;
 
-/// Register services. Called once from main() after init-context is received.
-///
-/// Both [eventBus] and [dataService] are required — no fallback to mocks.
-void setupServiceLocator({
-  required EventBus eventBus,
-  required HeaderDataService dataService,
-}) {
-  if (serviceLocator.isRegistered<EventBus>()) {
-    print('[ServiceLocator] WARNING: services already registered, skipping');
-    return;
+/// Register services. Called once from main().
+void setupServiceLocator({bool useMocks = true}) {
+  if (serviceLocator.isRegistered<EventBus>()) return;
+
+  if (useMocks) {
+    serviceLocator.registerLazySingleton<EventBus>(
+      () => MockEventBus(),
+    );
+    serviceLocator.registerLazySingleton<HeaderDataService>(
+      () => MockHeaderDataService(),
+    );
   }
-
-  serviceLocator.registerSingleton<EventBus>(eventBus);
-  serviceLocator.registerSingleton<HeaderDataService>(dataService);
-
-  print('[ServiceLocator] registered EventBus and HeaderDataService');
 }

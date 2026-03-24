@@ -13,7 +13,22 @@ allowed-tools:
 
 **This file is READ-ONLY during reviews. Do NOT modify it.**
 
-## Inputs
+## Kind dispatch
+
+Determine the widget kind from the spec header or `skeleton.yaml`:
+
+| Kind | Checklist |
+|------|-----------|
+| panel | This file (Groups A–I below) |
+| runner | This file (Groups A–M below) |
+| header | `checks-catalog.md` — **stop here and follow that file instead** |
+| window | `checks-catalog.md` — **stop here and follow that file instead** |
+
+If the kind is **header** or **window**, do NOT use the checks below. Load and follow `checks-catalog.md` in this same skill directory. It has its own complete workflow, check groups, and report format designed for catalog.json integrations.
+
+---
+
+## Inputs (panel/runner only)
 
 - **Built app directory** — the Phase 3 output (app project folder)
 - **Functional spec** — the Phase 1 output document (markdown file)
@@ -22,9 +37,9 @@ If missing, ask the user.
 
 ---
 
-## Workflow
+## Workflow (panel/runner only)
 
-1. Read the functional spec. Identify widget kind (panel/runner/window) and data flow (A/B/C/D/E) from Section 2.2.
+1. Read the functional spec. Identify widget kind (panel/runner) and data flow (A/B/C/D/E) from Section 2.2.
 2. Read `pubspec.yaml`, `lib/main.dart`, `lib/di/service_locator.dart`, `operator.json`, `web/index.html`, `.gitignore`. Glob `lib/implementations/services/*.dart` and read each result.
 3. Grep `lib/` for banned patterns: `dart:html`, `tableSchemaService`, `taskService.get`, `RunWebAppTask`, `CubeQueryTask`, `package:http/`, `sci_tercen_context`, `Phase 3:`. For runner widgets, also grep for `OperatorContext` (should NOT appear).
 4. Spot-check: read `lib/core/theme/app_theme.dart`, `lib/presentation/widgets/left_panel/left_panel.dart`, `lib/core/theme/app_line_weights.dart` from both skeleton and app.

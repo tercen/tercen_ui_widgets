@@ -1094,12 +1094,10 @@
       "metadata": {
         "type": "MainHeader",
         "tier": 2,
-        "description": "Frame header chrome for Tercen. Extends the header skeleton with the Tercen brand mark (colourful 't' blocks + 'ercen' wordmark SVG). Provides theme-aware wordmark rendering (black on light, white on dark). Inherits user identicon avatar, dropdown menu (Save Layout, Theme toggle, LLM Connection, Task Manager, Admin Panel, Sign Out), and EventBus communication from the header skeleton.",
+        "description": "Frame-level chrome bar for Tercen. 36px fixed height. Brand mark with theme-aware logo on the left (PNG, light/dark variants). User identicon avatar and dropdown menu on the right with actions: About, Save Layout, Theme Toggle, LLM Settings, Task Manager, Admin (admin-only), Sign Out. Publishes all actions to header.intent channel.",
         "props": {},
-        "emittedEvents": [
-          "header.intent"
-        ],
-        "acceptedActions": ["header.state"]
+        "emittedEvents": ["header.intent"],
+        "acceptedActions": []
       },
       "template": {
         "type": "Column",
@@ -1109,43 +1107,63 @@
           {
             "type": "Container",
             "id": "{{widgetId}}-bar",
-            "props": { "color": "surface", "height": 35 },
+            "props": { "color": "surface", "height": 36 },
             "children": [{
               "type": "Padding",
               "id": "{{widgetId}}-pad",
-              "props": { "horizontal": 16 },
+              "props": { "padding": "sm" },
               "children": [{
                 "type": "Row",
                 "id": "{{widgetId}}-row",
                 "props": { "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center" },
                 "children": [
                   {
-                    "type": "Action",
-                    "id": "{{widgetId}}-brand-action",
-                    "props": { "channel": "header.intent", "payload": { "intent": "navigateHome" } },
+                    "type": "Tooltip",
+                    "id": "{{widgetId}}-brand-tip",
+                    "props": { "message": "Home" },
                     "children": [{
-                      "type": "Row",
-                      "id": "{{widgetId}}-brand-row",
-                      "props": { "crossAxisAlignment": "center" },
-                      "children": [
-                        {
-                          "type": "Row",
-                          "id": "{{widgetId}}-logo-blocks",
-                          "children": [
-                            { "type": "Container", "id": "{{widgetId}}-b1", "props": { "color": "#0099FF", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b2", "props": { "color": "#00FFFF", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b3", "props": { "color": "#6D0000", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b4", "props": { "color": "#0000FF", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b5", "props": { "color": "#FFBF00", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b6", "props": { "color": "#99FF00", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b7", "props": { "color": "#FF0000", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b8", "props": { "color": "#FF8200", "width": 4, "height": 10 } },
-                            { "type": "Container", "id": "{{widgetId}}-b9", "props": { "color": "#66FF7F", "width": 4, "height": 10 } }
-                          ]
-                        },
-                        { "type": "SizedBox", "id": "{{widgetId}}-brand-gap", "props": { "width": 6 } },
-                        { "type": "Text", "id": "{{widgetId}}-brand-text", "props": { "text": "ercen", "textStyle": "titleSmall", "color": "onSurface" } }
-                      ]
+                      "type": "Action",
+                      "id": "{{widgetId}}-brand-action",
+                      "props": {
+                        "gesture": "onTap",
+                        "channel": "header.intent",
+                        "payload": { "value": "navigateHome" }
+                      },
+                      "children": [{
+                        "type": "Row",
+                        "id": "{{widgetId}}-brand-row",
+                        "props": { "crossAxisAlignment": "center" },
+                        "children": [
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-logo-light",
+                            "props": { "visible": "{{isDark}}", "negate": true },
+                            "children": [{
+                              "type": "Image",
+                              "id": "{{widgetId}}-logo-l",
+                              "props": {
+                                "src": "https://raw.githubusercontent.com/tercen/tercen-style/master/logo/TercenID_Final_C_no_tag.png",
+                                "height": 20,
+                                "fit": "contain"
+                              }
+                            }]
+                          },
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-logo-dark",
+                            "props": { "visible": "{{isDark}}" },
+                            "children": [{
+                              "type": "Image",
+                              "id": "{{widgetId}}-logo-d",
+                              "props": {
+                                "src": "https://raw.githubusercontent.com/tercen/tercen-style/master/logo/TercenID_Final_C_no_tag_white.png",
+                                "height": 20,
+                                "fit": "contain"
+                              }
+                            }]
+                          }
+                        ]
+                      }]
                     }]
                   },
                   {
@@ -1154,19 +1172,37 @@
                     "props": { "crossAxisAlignment": "center" },
                     "children": [
                       {
+                        "type": "Tooltip",
+                        "id": "{{widgetId}}-avatar-tip",
+                        "props": { "message": "{{context.username}}" },
+                        "children": [{
+                          "type": "Identicon",
+                          "id": "{{widgetId}}-avatar",
+                          "props": {
+                            "identity": "{{context.username}}",
+                            "size": 24,
+                            "borderColor": "primary"
+                          }
+                        }]
+                      },
+                      { "type": "SizedBox", "id": "{{widgetId}}-avatar-gap", "props": { "width": 4 } },
+                      {
                         "type": "PopupMenu",
                         "id": "{{widgetId}}-user-menu",
                         "props": {
-                          "icon": "account_circle",
-                          "iconSize": 28,
+                          "icon": "expand_more",
+                          "iconSize": 16,
+                          "iconColor": "onSurfaceVariant",
                           "tooltip": "User menu",
                           "channel": "header.intent",
                           "items": [
-                            { "value": "about", "label": "About", "icon": "info_outline" },
+                            { "value": "about", "label": "About", "icon": "info" },
+                            { "divider": true },
                             { "value": "saveLayout", "label": "Save this layout", "icon": "save" },
                             { "value": "toggleTheme", "label": "Toggle theme", "icon": "dark_mode" },
                             { "value": "connectLlm", "label": "Connect an LLM", "icon": "smart_toy" },
                             { "value": "taskManager", "label": "Task Manager", "icon": "checklist" },
+                            { "value": "openAdminPanel", "label": "Admin", "icon": "settings" },
                             { "divider": true },
                             { "value": "signOut", "label": "Sign Out", "icon": "logout" }
                           ]

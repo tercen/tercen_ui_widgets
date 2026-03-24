@@ -44,30 +44,37 @@ Before invoking any agent, detect the widget kind:
 
 ### Phase 3 (Tercen Integration)
 
-Detect the integration target before invoking agents:
+**Route by widget kind:**
 
-**SDUI path** (window widgets → JSON templates in catalog.json):
-1. Invoke the **integrator-sdui** agent with the spec/mock at $ARGUMENTS[1]
-2. When integration completes, invoke the **reviewer** agent for Phase 3 SDUI review
-   - Reviewer uses `phase-3-sdui-review` skill
-3. If review **PASSES** → notify user the template is ready
-4. If review **FAILS** → pass the failure items back to the integrator-sdui agent to fix
-5. After fixes, re-run the reviewer
-6. Loop steps 3–5 until PASS or the user intervenes
+- **panel** or **runner** → use the **integrator** agent (standalone Flutter app with real Tercen services)
+- **header** or **window** → use the **catalog-integrator** agent (catalog.json template with SDUI primitives)
 
-**Compiled-app path** (panel/runner widgets → Flutter apps):
+#### Panel / Runner (standard integration)
+
 1. Invoke the **integrator** agent with the mock widget at $ARGUMENTS[1]
 2. When integration completes, invoke the **reviewer** agent for Phase 3 review
-   - Reviewer uses `phase-3-review` skill
 3. If review **PASSES** → run `flutter build web --wasm` to verify, then notify user
 4. If review **FAILS** → pass the failure items back to the integrator agent to fix
 5. After fixes, re-run the reviewer
 6. Loop steps 3–5 until PASS or the user intervenes
 
-**How to detect the path:**
-- If the widget kind is `window` (from `skeleton.yaml` or spec metadata) → SDUI path
-- If the widget kind is `panel` or `runner` → compiled-app path
-- If unclear, check if `catalog.json` already has an entry for this widget type → SDUI path
+*Supports panel widgets (Flows A-D) and runner widgets (Flow E: workflow execution).*
+
+#### Header / Window (catalog integration)
+
+1. Invoke the **catalog-integrator** agent with the mock widget at $ARGUMENTS[1]
+   - Agent uses `phase-3-catalog-integration` skill (dispatches by kind: header or window)
+   - Performs gap analysis against SDUI primitives
+   - Creates missing primitives in the sdui package if needed
+   - Authors catalog.json template entry
+2. When integration completes, invoke the **reviewer** agent for Phase 3 review
+   - Reviewer uses `phase-3-review` skill with `checks-catalog.md` checklist
+3. If review **PASSES** → validate catalog.json parses cleanly, then notify user
+4. If review **FAILS** → pass the failure items back to the catalog-integrator agent to fix
+5. After fixes, re-run the reviewer
+6. Loop steps 3–5 until PASS or the user intervenes
+
+*Output is a catalog.json entry, not a standalone Flutter app. No `flutter build` step needed.*
 
 ## Rules
 
