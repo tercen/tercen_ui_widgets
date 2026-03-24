@@ -891,6 +891,254 @@
           ]
         }]
       }
+    },
+    {
+      "metadata": {
+        "type": "HomePanel",
+        "tier": 2,
+        "description": "Personalized landing dashboard for Tercen. Displays a six-card grid with time-contextual welcome greeting, recent projects, recent activity feed, quick action buttons (New Project, Teams, Audit), featured apps from the library, and help/docs links. Cards load independently. Publishes navigation intents on the EventBus when items are clicked.",
+        "props": {},
+        "emittedEvents": [
+          "window.intent"
+        ],
+        "acceptedActions": []
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": { "crossAxisAlignment": "stretch" },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": { "color": "surfaceContainerHigh", "padding": "sm" },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": { "mainAxisAlignment": "spaceBetween" },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": { "text": "Home", "textStyle": "labelMedium", "color": "onSurface" }
+                  },
+                  {
+                    "type": "IconButton",
+                    "id": "{{widgetId}}-refresh",
+                    "props": { "icon": "refresh", "size": 16, "tooltip": "Refresh" }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Divider",
+            "id": "{{widgetId}}-div",
+            "props": { "height": 1, "color": "outlineVariant" }
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [{
+              "type": "DataSource",
+              "id": "{{widgetId}}-ds",
+              "props": {
+                "service": "homeService",
+                "method": "getHomeDashboard",
+                "args": []
+              },
+              "children": [
+                {
+                  "type": "Conditional", "id": "{{widgetId}}-loading",
+                  "props": {"visible": "{{loading}}"},
+                  "children": [{"type": "Center", "id": "{{widgetId}}-spinner", "children": [{"type": "LoadingIndicator", "id": "{{widgetId}}-li", "props": {"variant": "skeleton", "text": "Loading…"}}]}]
+                },
+                {
+                  "type": "Conditional", "id": "{{widgetId}}-error",
+                  "props": {"visible": "{{error}}"},
+                  "children": [{
+                    "type": "Center", "id": "{{widgetId}}-err-center",
+                    "children": [{
+                      "type": "Column", "id": "{{widgetId}}-err-col", "props": {"mainAxisAlignment": "center"},
+                      "children": [
+                        {"type": "Icon", "id": "{{widgetId}}-err-icon", "props": {"icon": "error_outline", "size": 32, "color": "error"}},
+                        {"type": "SizedBox", "id": "{{widgetId}}-err-gap", "props": {"height": 8}},
+                        {"type": "Text", "id": "{{widgetId}}-err-text", "props": {"text": "{{errorMessage}}", "textStyle": "bodySmall", "color": "error"}}
+                      ]
+                    }]
+                  }]
+                },
+                {
+                  "type": "Conditional", "id": "{{widgetId}}-ready",
+                  "props": {"visible": "{{ready}}"},
+                  "children": [{
+                    "type": "ListView",
+                    "id": "{{widgetId}}-scroll",
+                    "props": {"padding": 16},
+                    "children": [
+                      {
+                        "type": "Container",
+                        "id": "{{widgetId}}-welcome",
+                        "props": {"padding": "md", "color": "surfaceContainerLow", "borderRadius": 8},
+                        "children": [{
+                          "type": "Text",
+                          "id": "{{widgetId}}-greeting",
+                          "props": {"text": "{{data.greeting}}", "textStyle": "headlineSmall", "color": "onSurface"}
+                        }]
+                      },
+                      {"type": "SizedBox", "id": "{{widgetId}}-gap1", "props": {"height": 16}},
+                      {
+                        "type": "Row",
+                        "id": "{{widgetId}}-mid-row",
+                        "props": {"crossAxisAlignment": "start"},
+                        "children": [
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-projects-col",
+                            "children": [{
+                              "type": "Container",
+                              "id": "{{widgetId}}-projects-card",
+                              "props": {"padding": "md", "color": "surfaceContainerLow", "borderRadius": 8},
+                              "children": [
+                                {"type": "Text", "id": "{{widgetId}}-projects-title", "props": {"text": "Recent Projects", "textStyle": "titleSmall", "color": "onSurface"}},
+                                {"type": "SizedBox", "id": "{{widgetId}}-pg", "props": {"height": 8}},
+                                {"type": "Text", "id": "{{widgetId}}-projects-placeholder", "props": {"text": "{{data.projectsSummary}}", "textStyle": "bodySmall", "color": "onSurfaceMuted"}}
+                              ]
+                            }]
+                          },
+                          {"type": "SizedBox", "id": "{{widgetId}}-mid-gap", "props": {"width": 16}},
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-activity-col",
+                            "children": [{
+                              "type": "Container",
+                              "id": "{{widgetId}}-activity-card",
+                              "props": {"padding": "md", "color": "surfaceContainerLow", "borderRadius": 8},
+                              "children": [
+                                {"type": "Text", "id": "{{widgetId}}-activity-title", "props": {"text": "Recent Activity", "textStyle": "titleSmall", "color": "onSurface"}},
+                                {"type": "SizedBox", "id": "{{widgetId}}-ag", "props": {"height": 8}},
+                                {"type": "Text", "id": "{{widgetId}}-activity-placeholder", "props": {"text": "{{data.activitySummary}}", "textStyle": "bodySmall", "color": "onSurfaceMuted"}}
+                              ]
+                            }]
+                          }
+                        ]
+                      },
+                      {"type": "SizedBox", "id": "{{widgetId}}-gap2", "props": {"height": 16}},
+                      {
+                        "type": "Row",
+                        "id": "{{widgetId}}-bot-row",
+                        "props": {"crossAxisAlignment": "start"},
+                        "children": [
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-actions-col",
+                            "children": [{
+                              "type": "Container",
+                              "id": "{{widgetId}}-actions-card",
+                              "props": {"padding": "md", "color": "surfaceContainerLow", "borderRadius": 8},
+                              "children": [
+                                {"type": "Text", "id": "{{widgetId}}-actions-title", "props": {"text": "Quick Actions", "textStyle": "titleSmall", "color": "onSurface"}},
+                                {"type": "SizedBox", "id": "{{widgetId}}-qg", "props": {"height": 8}},
+                                {
+                                  "type": "Row", "id": "{{widgetId}}-action-btns",
+                                  "children": [
+                                    {"type": "IconButton", "id": "{{widgetId}}-new-project", "props": {"icon": "create_new_folder", "tooltip": "New Project", "size": 20}},
+                                    {"type": "SizedBox", "id": "{{widgetId}}-ab1", "props": {"width": 8}},
+                                    {"type": "IconButton", "id": "{{widgetId}}-teams", "props": {"icon": "group", "tooltip": "Teams", "size": 20}},
+                                    {"type": "SizedBox", "id": "{{widgetId}}-ab2", "props": {"width": 8}},
+                                    {"type": "IconButton", "id": "{{widgetId}}-audit", "props": {"icon": "checklist", "tooltip": "Audit", "size": 20}}
+                                  ]
+                                }
+                              ]
+                            }]
+                          },
+                          {"type": "SizedBox", "id": "{{widgetId}}-bot-gap", "props": {"width": 16}},
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-apps-col",
+                            "children": [{
+                              "type": "Container",
+                              "id": "{{widgetId}}-apps-card",
+                              "props": {"padding": "md", "color": "surfaceContainerLow", "borderRadius": 8},
+                              "children": [
+                                {"type": "Text", "id": "{{widgetId}}-apps-title", "props": {"text": "Featured Apps", "textStyle": "titleSmall", "color": "onSurface"}},
+                                {"type": "SizedBox", "id": "{{widgetId}}-fg", "props": {"height": 8}},
+                                {"type": "Text", "id": "{{widgetId}}-apps-placeholder", "props": {"text": "{{data.appsSummary}}", "textStyle": "bodySmall", "color": "onSurfaceMuted"}}
+                              ]
+                            }]
+                          }
+                        ]
+                      },
+                      {"type": "SizedBox", "id": "{{widgetId}}-gap3", "props": {"height": 16}},
+                      {
+                        "type": "Container",
+                        "id": "{{widgetId}}-help-card",
+                        "props": {"padding": "md", "color": "surfaceContainerLow", "borderRadius": 8},
+                        "children": [
+                          {"type": "Text", "id": "{{widgetId}}-help-title", "props": {"text": "Help & Documentation", "textStyle": "titleSmall", "color": "onSurface"}},
+                          {"type": "SizedBox", "id": "{{widgetId}}-hg", "props": {"height": 8}},
+                          {"type": "Text", "id": "{{widgetId}}-help-links", "props": {"text": "Documentation · Getting Started · Tutorials · Community", "textStyle": "bodySmall", "color": "primary"}}
+                        ]
+                      }
+                    ]
+                  }]
+                }
+              ]
+            }]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "MainHeader",
+        "tier": 2,
+        "description": "Frame header chrome for Tercen. Extends the header skeleton with the Tercen brand mark (colourful 't' blocks + 'ercen' wordmark SVG). Provides theme-aware wordmark rendering (black on light, white on dark). Inherits user identicon avatar, dropdown menu (Save Layout, Theme toggle, LLM Connection, Task Manager, Admin Panel, Sign Out), and EventBus communication from the header skeleton.",
+        "props": {},
+        "emittedEvents": [
+          "header.intent"
+        ],
+        "acceptedActions": ["header.state"]
+      },
+      "template": {
+        "type": "Container",
+        "id": "{{widgetId}}-root",
+        "props": { "color": "surface", "height": 36 },
+        "children": [{
+          "type": "Row",
+          "id": "{{widgetId}}-row",
+          "props": { "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center" },
+          "children": [
+            {
+              "type": "Action",
+              "id": "{{widgetId}}-brand-action",
+              "props": { "onTap": "navigateHome", "tooltip": "Home", "cursor": "pointer" },
+              "children": [{
+                "type": "Container",
+                "id": "{{widgetId}}-brand-box",
+                "props": { "padding": "sm" },
+                "children": [{
+                  "type": "Icon",
+                  "id": "{{widgetId}}-brand-placeholder",
+                  "props": { "icon": "home", "size": 20, "color": "primary" }
+                }]
+              }]
+            },
+            {
+              "type": "Row",
+              "id": "{{widgetId}}-right",
+              "children": [
+                {
+                  "type": "IconButton",
+                  "id": "{{widgetId}}-avatar",
+                  "props": { "icon": "account_circle", "size": 24, "tooltip": "User menu" }
+                }
+              ]
+            }
+          ]
+        }]
+      }
     }
   ]
 }
