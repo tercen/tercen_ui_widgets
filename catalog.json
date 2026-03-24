@@ -1154,9 +1154,23 @@
                     "props": { "crossAxisAlignment": "center" },
                     "children": [
                       {
-                        "type": "IconButton",
-                        "id": "{{widgetId}}-avatar",
-                        "props": { "icon": "account_circle", "size": 28, "channel": "header.intent", "payload": { "intent": "openUserMenu" }, "tooltip": "User menu" }
+                        "type": "PopupMenu",
+                        "id": "{{widgetId}}-user-menu",
+                        "props": {
+                          "icon": "account_circle",
+                          "iconSize": 28,
+                          "tooltip": "User menu",
+                          "channel": "header.intent",
+                          "items": [
+                            { "value": "about", "label": "About", "icon": "info_outline" },
+                            { "value": "saveLayout", "label": "Save this layout", "icon": "save" },
+                            { "value": "toggleTheme", "label": "Toggle theme", "icon": "dark_mode" },
+                            { "value": "connectLlm", "label": "Connect an LLM", "icon": "smart_toy" },
+                            { "value": "taskManager", "label": "Task Manager", "icon": "checklist" },
+                            { "divider": true },
+                            { "value": "signOut", "label": "Sign Out", "icon": "logout" }
+                          ]
+                        }
                       }
                     ]
                   }
