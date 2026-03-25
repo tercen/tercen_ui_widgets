@@ -562,38 +562,85 @@
             }]
           },
           {
-            "type": "Container",
-            "id": "{{widgetId}}-compose-outer",
-            "props": { "color": "surface", "padding": "sm" },
-            "children": [
-              {
-                "type": "Container",
-                "id": "{{widgetId}}-compose",
-                "props": {
-                  "color": "surface",
-                  "padding": "sm"
-                },
+            "type": "Padding",
+            "id": "{{widgetId}}-compose-pad",
+            "props": { "padding": "sm" },
+            "children": [{
+              "type": "Container",
+              "id": "{{widgetId}}-compose",
+              "props": {
+                "color": "surface",
+                "borderColor": "primary",
+                "borderWidth": 1.5,
+                "borderRadius": 12,
+                "elevation": 3
+              },
+              "children": [{
+                "type": "Column",
+                "id": "{{widgetId}}-compose-col",
+                "props": { "crossAxisAlignment": "stretch" },
                 "children": [
                   {
-                    "type": "Column",
-                    "id": "{{widgetId}}-compose-col",
-                    "props": { "crossAxisAlignment": "stretch" },
-                    "children": [
-                      {
-                        "type": "TextField",
-                        "id": "{{widgetId}}-input",
-                        "props": {
-                          "hint": "Type a message...",
-                          "maxLines": 4,
-                          "autofocus": true,
-                          "clearOn": "chat.inputCleared"
-                        }
-                      },
-                      {
+                    "type": "Padding",
+                    "id": "{{widgetId}}-input-pad",
+                    "props": { "padding": "sm" },
+                    "children": [{
+                      "type": "TextField",
+                      "id": "{{widgetId}}-input",
+                      "props": {
+                        "hint": "Type a message...",
+                        "maxLines": 8,
+                        "autofocus": true,
+                        "clearOn": "chat.inputCleared"
+                      }
+                    }]
+                  },
+                  {
+                    "type": "Divider",
+                    "id": "{{widgetId}}-compose-divider",
+                    "props": { "height": 1, "thickness": 0.5, "color": "outlineVariant" }
+                  },
+                  {
+                    "type": "Container",
+                    "id": "{{widgetId}}-bottom-bar",
+                    "props": { "height": 44 },
+                    "children": [{
+                      "type": "Padding",
+                      "id": "{{widgetId}}-bottom-pad",
+                      "props": { "padding": 4 },
+                      "children": [{
                         "type": "Row",
-                        "id": "{{widgetId}}-compose-bottom",
-                        "props": { "mainAxisAlignment": "end" },
+                        "id": "{{widgetId}}-bottom-row",
+                        "props": { "crossAxisAlignment": "center" },
                         "children": [
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-focus-cond",
+                            "props": { "visible": "{{focusLabel}}" },
+                            "children": [{
+                              "type": "Row",
+                              "id": "{{widgetId}}-focus-row",
+                              "props": { "crossAxisAlignment": "center" },
+                              "children": [
+                                {
+                                  "type": "Icon",
+                                  "id": "{{widgetId}}-focus-icon",
+                                  "props": { "icon": "crosshairs", "size": 10, "color": "onSurfaceMuted" }
+                                },
+                                { "type": "SizedBox", "id": "{{widgetId}}-focus-gap", "props": { "width": 4 } },
+                                {
+                                  "type": "Text",
+                                  "id": "{{widgetId}}-focus-text",
+                                  "props": { "text": "Focus: {{focusLabel}}", "textStyle": "bodySmall", "color": "onSurfaceMuted" }
+                                }
+                              ]
+                            }]
+                          },
+                          {
+                            "type": "Spacer",
+                            "id": "{{widgetId}}-bottom-spacer",
+                            "props": {}
+                          },
                           {
                             "type": "Tooltip",
                             "id": "{{widgetId}}-send-tip",
@@ -628,12 +675,12 @@
                             }]
                           }
                         ]
-                      }
-                    ]
+                      }]
+                    }]
                   }
                 ]
-              }
-            ]
+              }]
+            }]
           }
         ]
       }
