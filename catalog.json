@@ -263,9 +263,10 @@
       "metadata": {
         "type": "ChatBox",
         "tier": 2,
-        "description": "LLM chat interface for Tercen. Displays a message thread with markdown-rich responses, syntax-highlighted code blocks, and session management. Sends user messages with focus context to the LLM and emits action intents on the EventBus (create step, open file, navigate workflows). Receives focus context from other widgets to provide situational awareness to the AI.",
+        "description": "LLM chat interface for Tercen. Displays a message thread with markdown-rich responses, syntax-highlighted code blocks, and streaming indicators. Sends user messages to the LLM via WebSocket and emits action intents on the EventBus.",
         "props": {},
         "emittedEvents": [
+          "chat.message.sent",
           "createStep",
           "openFile",
           "openWorkflow",
@@ -274,7 +275,15 @@
           "refreshTree",
           "workflowUpdated"
         ],
-        "acceptedActions": []
+        "acceptedActions": [],
+        "handlesIntent": [
+          {
+            "intent": "openChat",
+            "propsMap": {},
+            "windowTitle": "Chat",
+            "windowSize": "column"
+          }
+        ]
       },
       "template": {
         "type": "Column",
@@ -289,34 +298,27 @@
               {
                 "type": "Row",
                 "id": "{{widgetId}}-toolbar-row",
-                "props": { "mainAxisAlignment": "spaceBetween" },
+                "props": { "mainAxisAlignment": "start", "crossAxisAlignment": "center" },
                 "children": [
                   {
-                    "type": "IconButton",
-                    "id": "{{widgetId}}-new-session",
-                    "props": {
-                      "icon": "add",
-                      "channel": "chat.newSession",
-                      "tooltip": "New Session",
-                      "size": 18,
-                      "color": "primary"
-                    }
+                    "type": "Icon",
+                    "id": "{{widgetId}}-toolbar-icon",
+                    "props": { "icon": "terminal", "size": 16, "color": "primary" }
+                  },
+                  {
+                    "type": "SizedBox",
+                    "id": "{{widgetId}}-toolbar-gap",
+                    "props": { "width": 8 }
                   },
                   {
                     "type": "Text",
                     "id": "{{widgetId}}-title",
-                    "props": { "text": "Chat", "textStyle": "labelMedium", "color": "onSurface" }
+                    "props": { "text": "Chat", "textStyle": "labelMedium", "fontWeight": "bold", "color": "onSurface" }
                   },
                   {
-                    "type": "IconButton",
-                    "id": "{{widgetId}}-history",
-                    "props": {
-                      "icon": "schedule",
-                      "channel": "chat.showHistory",
-                      "tooltip": "Chat History",
-                      "size": 18,
-                      "color": "onSurfaceVariant"
-                    }
+                    "type": "Spacer",
+                    "id": "{{widgetId}}-toolbar-spacer",
+                    "props": {}
                   }
                 ]
               }
@@ -332,38 +334,223 @@
             "id": "{{widgetId}}-body",
             "children": [
               {
-                "type": "Center",
-                "id": "{{widgetId}}-empty",
+                "type": "ChatStream",
+                "id": "{{widgetId}}-stream",
+                "props": {
+                  "inputId": "{{widgetId}}-input",
+                  "sendChannel": "chat.send",
+                  "clearChannel": "chat.inputCleared"
+                },
                 "children": [
                   {
-                    "type": "Column",
-                    "id": "{{widgetId}}-empty-col",
-                    "props": { "mainAxisAlignment": "center" },
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-empty-cond",
+                    "props": { "visible": "{{hasMessages}}", "negate": true },
                     "children": [
                       {
-                        "type": "Icon",
-                        "id": "{{widgetId}}-empty-icon",
-                        "props": { "icon": "chat", "size": 48, "color": "onSurfaceMuted" }
-                      },
+                        "type": "Center",
+                        "id": "{{widgetId}}-empty",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-empty-col",
+                            "props": { "mainAxisAlignment": "center" },
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-empty-icon",
+                                "props": { "icon": "comments", "size": 48, "color": "onSurfaceMuted" }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-empty-spacer",
+                                "props": { "height": 12 }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-empty-msg",
+                                "props": { "text": "Start a conversation", "textStyle": "titleMedium", "color": "onSurfaceVariant" }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-empty-spacer2",
+                                "props": { "height": 4 }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-empty-detail",
+                                "props": { "text": "Ask a question or give an instruction", "textStyle": "bodySmall", "color": "onSurfaceMuted" }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-active-cond",
+                    "props": { "visible": "{{hasMessages}}" },
+                    "children": [
                       {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-empty-spacer",
-                        "props": { "height": 12 }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-empty-msg",
-                        "props": { "text": "Start a conversation", "textStyle": "titleMedium", "color": "onSurfaceVariant" }
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-empty-spacer2",
-                        "props": { "height": 4 }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-empty-detail",
-                        "props": { "text": "Ask a question or give an instruction", "textStyle": "bodySmall", "color": "onSurfaceMuted" }
+                        "type": "ListView",
+                        "id": "{{widgetId}}-message-list",
+                        "children": [
+                          {
+                            "type": "ForEach",
+                            "id": "{{widgetId}}-messages",
+                            "props": { "items": "{{messages}}" },
+                            "children": [
+                              {
+                                "type": "Padding",
+                                "id": "{{widgetId}}-msg-pad",
+                                "props": { "padding": 6 },
+                                "children": [
+                                  {
+                                    "type": "Row",
+                                    "id": "{{widgetId}}-msg-row",
+                                    "props": { "crossAxisAlignment": "start" },
+                                    "children": [
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-user",
+                                        "props": { "visible": "{{item.isUser}}" },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-user",
+                                            "props": { "icon": "user", "size": 16, "color": "primary" }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-assistant",
+                                        "props": { "visible": "{{item.isAssistant}}" },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-assistant",
+                                            "props": { "icon": "robot", "size": 16, "color": "tertiary" }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-tool",
+                                        "props": { "visible": "{{item.isTool}}" },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-tool",
+                                            "props": { "icon": "wrench", "size": 16, "color": "onSurfaceVariant" }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-error",
+                                        "props": { "visible": "{{item.isError}}" },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-error",
+                                            "props": { "icon": "circle-exclamation", "size": 16, "color": "error" }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "SizedBox",
+                                        "id": "{{widgetId}}-msg-gap",
+                                        "props": { "width": 8 }
+                                      },
+                                      {
+                                        "type": "Expanded",
+                                        "id": "{{widgetId}}-msg-content",
+                                        "children": [
+                                          {
+                                            "type": "Column",
+                                            "id": "{{widgetId}}-msg-content-col",
+                                            "props": { "crossAxisAlignment": "stretch" },
+                                            "children": [
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-user",
+                                                "props": { "visible": "{{item.isUser}}" },
+                                                "children": [
+                                                  {
+                                                    "type": "SelectableText",
+                                                    "id": "{{widgetId}}-text-user",
+                                                    "props": { "text": "{{item.text}}", "color": "onSurface" }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-assistant",
+                                                "props": { "visible": "{{item.isAssistant}}" },
+                                                "children": [
+                                                  {
+                                                    "type": "Markdown",
+                                                    "id": "{{widgetId}}-md-assistant",
+                                                    "props": { "content": "{{item.text}}", "selectable": true }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-tool",
+                                                "props": { "visible": "{{item.isTool}}" },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-text-tool",
+                                                    "props": { "text": "{{item.text}}", "color": "onSurfaceVariant" }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-error",
+                                                "props": { "visible": "{{item.isError}}" },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-text-error",
+                                                    "props": { "text": "{{item.text}}", "color": "error" }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-streaming-ind",
+                                                "props": { "visible": "{{item.isStreaming}}" },
+                                                "children": [
+                                                  {
+                                                    "type": "Padding",
+                                                    "id": "{{widgetId}}-streaming-pad",
+                                                    "props": { "padding": 4 },
+                                                    "children": [
+                                                      {
+                                                        "type": "LoadingIndicator",
+                                                        "id": "{{widgetId}}-spinner",
+                                                        "props": { "variant": "spinner", "width": 14, "height": 14 }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
@@ -382,46 +569,41 @@
             "props": { "color": "surface", "padding": "sm" },
             "children": [
               {
-                "type": "Column",
-                "id": "{{widgetId}}-compose-col",
-                "props": { "crossAxisAlignment": "stretch" },
+                "type": "Row",
+                "id": "{{widgetId}}-compose-row",
+                "props": { "crossAxisAlignment": "end" },
                 "children": [
                   {
-                    "type": "TextField",
-                    "id": "{{widgetId}}-input",
-                    "props": {
-                      "hint": "Type a message...",
-                      "maxLines": 4,
-                      "autofocus": true
-                    }
-                  },
-                  {
-                    "type": "SizedBox",
-                    "id": "{{widgetId}}-input-spacer",
-                    "props": { "height": 4 }
-                  },
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-bottom-bar",
-                    "props": { "mainAxisAlignment": "end" },
+                    "type": "Expanded",
+                    "id": "{{widgetId}}-input-expand",
                     "children": [
                       {
-                        "type": "Spacer",
-                        "id": "{{widgetId}}-bar-spacer",
-                        "props": {}
-                      },
-                      {
-                        "type": "IconButton",
-                        "id": "{{widgetId}}-send",
+                        "type": "TextField",
+                        "id": "{{widgetId}}-input",
                         "props": {
-                          "icon": "send",
-                          "channel": "chat.send",
-                          "tooltip": "Send",
-                          "size": 20,
-                          "color": "primary"
+                          "hint": "Message Claude...",
+                          "maxLines": 4,
+                          "autofocus": true,
+                          "clearOn": "chat.inputCleared"
                         }
                       }
                     ]
+                  },
+                  {
+                    "type": "SizedBox",
+                    "id": "{{widgetId}}-send-gap",
+                    "props": { "width": 8 }
+                  },
+                  {
+                    "type": "IconButton",
+                    "id": "{{widgetId}}-send",
+                    "props": {
+                      "icon": "paper-plane-top",
+                      "channel": "chat.send",
+                      "tooltip": "Send",
+                      "size": 20,
+                      "color": "primary"
+                    }
                   }
                 ]
               }
@@ -1213,7 +1395,10 @@
     "regions": [
       {"type": "MainHeader", "id": "main-header", "region": "top"}
     ],
-    "windows": []
+    "windows": [
+      {"type": "HomePanel", "id": "home-panel", "size": "large", "align": "left", "title": "Home"},
+      {"type": "ChatBox", "id": "chat-box", "size": "column", "align": "right", "title": "Chat"}
+    ]
   }
 }
 
