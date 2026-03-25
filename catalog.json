@@ -1143,7 +1143,7 @@
                               "id": "{{widgetId}}-logo-l",
                               "props": {
                                 "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/Tercen%20Logo/TercenID_Final_C_no_tag.png",
-                                "height": 20,
+                                "height": 32,
                                 "fit": "contain"
                               }
                             }]
@@ -1157,7 +1157,7 @@
                               "id": "{{widgetId}}-logo-d",
                               "props": {
                                 "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/Tercen%20Logo/TercenID_Final_C_no_tag_white.png",
-                                "height": 20,
+                                "height": 32,
                                 "fit": "contain"
                               }
                             }]
@@ -1172,28 +1172,10 @@
                     "props": { "crossAxisAlignment": "center" },
                     "children": [
                       {
-                        "type": "Tooltip",
-                        "id": "{{widgetId}}-avatar-tip",
-                        "props": { "message": "{{context.username}}" },
-                        "children": [{
-                          "type": "Identicon",
-                          "id": "{{widgetId}}-avatar",
-                          "props": {
-                            "identity": "{{context.username}}",
-                            "size": 24,
-                            "borderColor": "primary"
-                          }
-                        }]
-                      },
-                      { "type": "SizedBox", "id": "{{widgetId}}-avatar-gap", "props": { "width": 4 } },
-                      {
                         "type": "PopupMenu",
                         "id": "{{widgetId}}-user-menu",
                         "props": {
-                          "icon": "expand_more",
-                          "iconSize": 16,
-                          "iconColor": "onSurfaceVariant",
-                          "tooltip": "User menu",
+                          "tooltip": "{{context.username}}",
                           "channel": "header.intent",
                           "items": [
                             { "value": "about", "label": "About", "icon": "info" },
@@ -1206,7 +1188,16 @@
                             { "divider": true },
                             { "value": "signOut", "label": "Sign Out", "icon": "logout" }
                           ]
-                        }
+                        },
+                        "children": [{
+                          "type": "Identicon",
+                          "id": "{{widgetId}}-avatar",
+                          "props": {
+                            "identity": "{{context.username}}",
+                            "size": 32,
+                            "borderColor": "primary"
+                          }
+                        }]
                       }
                     ]
                   }
