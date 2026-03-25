@@ -291,7 +291,7 @@
         "props": {
           "toolbarActions": [
             { "icon": "plus", "channel": "chat.newSession", "isPrimary": true, "tooltip": "New Session" },
-            { "icon": "search", "channel": "chat.showHistory", "tooltip": "History" }
+            { "icon": "comments", "channel": "chat.showHistory", "tooltip": "History" }
           ]
         },
         "children": [
@@ -570,10 +570,6 @@
                 "type": "Container",
                 "id": "{{widgetId}}-compose",
                 "props": {
-                  "borderColor": "primary",
-                  "borderWidth": 1.5,
-                  "borderRadius": 12,
-                  "elevation": 2,
                   "color": "surface",
                   "padding": "sm"
                 },
@@ -599,15 +595,37 @@
                         "props": { "mainAxisAlignment": "end" },
                         "children": [
                           {
-                            "type": "IconButton",
-                            "id": "{{widgetId}}-send",
-                            "props": {
-                              "icon": "paper-plane-top",
-                              "channel": "chat.send",
-                              "tooltip": "Send",
-                              "size": 18,
-                              "color": "primary"
-                            }
+                            "type": "Tooltip",
+                            "id": "{{widgetId}}-send-tip",
+                            "props": { "message": "Send" },
+                            "children": [{
+                              "type": "Action",
+                              "id": "{{widgetId}}-send-action",
+                              "props": {
+                                "gesture": "onTap",
+                                "channel": "chat.send",
+                                "payload": {}
+                              },
+                              "children": [{
+                                "type": "Container",
+                                "id": "{{widgetId}}-send",
+                                "props": {
+                                  "width": 36,
+                                  "height": 36,
+                                  "color": "primary",
+                                  "borderRadius": 8
+                                },
+                                "children": [{
+                                  "type": "Center",
+                                  "id": "{{widgetId}}-send-center",
+                                  "children": [{
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-send-icon",
+                                    "props": { "icon": "send", "size": 14, "color": "onPrimary" }
+                                  }]
+                                }]
+                              }]
+                            }]
                           }
                         ]
                       }
