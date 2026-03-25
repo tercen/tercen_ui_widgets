@@ -591,6 +591,7 @@
                         "hint": "Type a message...",
                         "maxLines": 8,
                         "autofocus": true,
+                        "borderless": true,
                         "clearOn": "chat.inputCleared"
                       }
                     }]
