@@ -1107,7 +1107,7 @@
           {
             "type": "Container",
             "id": "{{widgetId}}-bar",
-            "props": { "color": "surface", "height": 36 },
+            "props": { "color": "surface", "height": 48 },
             "children": [{
               "type": "Padding",
               "id": "{{widgetId}}-pad",
