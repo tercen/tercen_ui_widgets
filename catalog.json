@@ -290,8 +290,8 @@
         "id": "{{widgetId}}-root",
         "props": {
           "toolbarActions": [
-            { "icon": "plus", "label": "New Chat", "channel": "chat.newSession", "isPrimary": true },
-            { "icon": "clock-rotate-left", "label": "History", "channel": "chat.showHistory" }
+            { "icon": "plus", "channel": "chat.newSession", "isPrimary": true, "tooltip": "New Session" },
+            { "icon": "search", "channel": "chat.showHistory", "tooltip": "History" }
           ]
         },
         "children": [
@@ -599,11 +599,13 @@
                         "props": { "mainAxisAlignment": "end" },
                         "children": [
                           {
-                            "type": "ElevatedButton",
+                            "type": "IconButton",
                             "id": "{{widgetId}}-send",
                             "props": {
-                              "text": "Send",
+                              "icon": "paper-plane-top",
                               "channel": "chat.send",
+                              "tooltip": "Send",
+                              "size": 18,
                               "color": "primary"
                             }
                           }
