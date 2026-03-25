@@ -286,72 +286,15 @@
         ]
       },
       "template": {
-        "type": "Column",
+        "type": "WindowShell",
         "id": "{{widgetId}}-root",
-        "props": { "crossAxisAlignment": "stretch" },
+        "props": {
+          "toolbarActions": [
+            { "icon": "plus", "label": "New Chat", "channel": "chat.newSession", "isPrimary": true },
+            { "icon": "clock-rotate-left", "label": "History", "channel": "chat.showHistory" }
+          ]
+        },
         "children": [
-          {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": { "color": "surfaceContainerHigh", "padding": "sm" },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": { "mainAxisAlignment": "start", "crossAxisAlignment": "center" },
-                "children": [
-                  {
-                    "type": "Icon",
-                    "id": "{{widgetId}}-toolbar-icon",
-                    "props": { "icon": "terminal", "size": 16, "color": "primary" }
-                  },
-                  {
-                    "type": "SizedBox",
-                    "id": "{{widgetId}}-toolbar-gap",
-                    "props": { "width": 8 }
-                  },
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": { "text": "Chat", "textStyle": "labelMedium", "fontWeight": "bold", "color": "onSurface" }
-                  },
-                  {
-                    "type": "Spacer",
-                    "id": "{{widgetId}}-toolbar-spacer",
-                    "props": {}
-                  },
-                  {
-                    "type": "ElevatedButton",
-                    "id": "{{widgetId}}-new-chat",
-                    "props": {
-                      "text": "New Chat",
-                      "channel": "chat.newSession",
-                      "color": "primary"
-                    }
-                  },
-                  {
-                    "type": "SizedBox",
-                    "id": "{{widgetId}}-toolbar-btn-gap",
-                    "props": { "width": 8 }
-                  },
-                  {
-                    "type": "TextButton",
-                    "id": "{{widgetId}}-history",
-                    "props": {
-                      "text": "History",
-                      "channel": "chat.showHistory",
-                      "color": "onSurfaceVariant"
-                    }
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Divider",
-            "id": "{{widgetId}}-divider-top",
-            "props": { "height": 1, "color": "outlineVariant" }
-          },
           {
             "type": "Expanded",
             "id": "{{widgetId}}-body",
