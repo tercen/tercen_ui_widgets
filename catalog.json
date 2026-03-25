@@ -1109,10 +1109,6 @@
             "id": "{{widgetId}}-bar",
             "props": { "color": "surface", "height": 36 },
             "children": [{
-              "type": "Padding",
-              "id": "{{widgetId}}-pad",
-              "props": { "padding": "sm" },
-              "children": [{
                 "type": "Row",
                 "id": "{{widgetId}}-row",
                 "props": { "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center" },
@@ -1202,7 +1198,6 @@
                     ]
                   }
                 ]
-              }]
             }]
           },
           {
