@@ -1020,7 +1020,8 @@
                   "borderColor": "primary",
                   "borderWidth": 1.5,
                   "borderRadius": 12,
-                  "elevation": 3
+                  "elevation": 3,
+                  "maxWidth": 720
                 },
                 "children": [
                   {
