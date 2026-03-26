@@ -385,7 +385,7 @@
                                           {
                                             "type": "Icon",
                                             "id": "{{widgetId}}-ic-user",
-                                            "props": { "icon": "user", "size": 16, "color": "primary" }
+                                            "props": { "icon": "message", "iconStyle": "solid", "size": 14, "color": "#FF8200" }
                                           }
                                         ]
                                       },
@@ -523,6 +523,39 @@
                 ]
               }
             ]
+          },
+          {
+            "type": "Conditional",
+            "id": "{{widgetId}}-thinking-cond",
+            "props": { "visible": "{{isThinking}}" },
+            "children": [{
+              "type": "Padding",
+              "id": "{{widgetId}}-thinking-pad",
+              "props": { "padding": "sm" },
+              "children": [{
+                "type": "Row",
+                "id": "{{widgetId}}-thinking-row",
+                "props": { "crossAxisAlignment": "center", "mainAxisSize": "min" },
+                "children": [
+                  {
+                    "type": "Image",
+                    "id": "{{widgetId}}-thinking-gif",
+                    "props": {
+                      "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/Tercen%20Logo/animated_five_level.gif",
+                      "width": 16,
+                      "height": 16,
+                      "fit": "contain"
+                    }
+                  },
+                  { "type": "SizedBox", "id": "{{widgetId}}-thinking-gap", "props": { "width": 8 } },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-thinking-text",
+                    "props": { "text": "Thinking...", "textStyle": "bodySmall", "color": "onSurfaceMuted", "fontStyle": "italic" }
+                  }
+                ]
+              }]
+            }]
           },
           {
             "type": "Divider",

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../core/constants/app_logo_colors.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_colors_dark.dart';
@@ -9,7 +10,8 @@ import '../../../domain/models/chat_message.dart';
 
 /// Renders a single chat message bubble.
 ///
-/// User messages: left-aligned with primary tint background.
+/// User messages: left-aligned with primary tint background and an orange
+/// FontAwesome message icon (Tercen logo orange #FF8200).
 /// Assistant messages: left-aligned with panel background, markdown rendered,
 /// and a coloured square bullet from the Tercen App logo palette.
 class ChatMessageBubble extends StatelessWidget {
@@ -48,6 +50,9 @@ class _UserBubble extends StatelessWidget {
 
   const _UserBubble({required this.message, required this.isDark});
 
+  /// Tercen logo orange used for user message icon.
+  static const _tercenOrange = Color(0xFFFF8200);
+
   @override
   Widget build(BuildContext context) {
     final bgColor = isDark ? AppColorsDark.primaryBg : AppColors.primaryBg;
@@ -63,30 +68,48 @@ class _UserBubble extends StatelessWidget {
         constraints: BoxConstraints(
           maxWidth: MediaQuery.of(context).size.width * 0.75,
         ),
-        child: Container(
-          padding: const EdgeInsets.all(AppSpacing.sm + 2),
-          decoration: BoxDecoration(
-            color: bgColor,
-            border: Border.all(color: borderColor, width: 1.0),
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                message.content,
-                style: AppTextStyles.body.copyWith(color: textColor),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Orange FA message icon (Tercen logo orange)
+            Padding(
+              padding: const EdgeInsets.only(top: 6, right: AppSpacing.sm),
+              child: FaIcon(
+                FontAwesomeIcons.solidMessage,
+                size: 12,
+                color: _tercenOrange,
               ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                _formatTime(message.timestamp),
-                style: AppTextStyles.bodySmall.copyWith(
-                  color: timeColor,
-                  fontSize: 11,
+            ),
+            // Message bubble
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  border: Border.all(color: borderColor, width: 1.0),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message.content,
+                      style: AppTextStyles.body.copyWith(color: textColor),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      _formatTime(message.timestamp),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: timeColor,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
