@@ -125,6 +125,48 @@ All toolbar controls must have a `Tooltip`. For filter/dropdown controls, use "F
 
 ---
 
+## Pane — The Tab Container
+
+Window widgets run inside a **pane**. The pane is the draggable tab container managed by the orchestrator. Widget authors do NOT build pane chrome — it is provided by the framework.
+
+**Terminology:** Frame (overall UI) > Workspace > Pane(s) > Tab(s) > Window widget content
+
+**Design reference:** `skeletons/pane/` in the SDUI repo.
+
+### What the pane provides (widget does NOT implement)
+
+- **Tab strip** (32px): color square, title, close button per tab
+- **Container**: straight corners (0px radius), `borderSubtle` border
+- **Focus state**: primary accent bar on active tab when pane is focused
+- **Drag/resize**: handled by the orchestrator's window manager
+
+### What the widget provides (via its template)
+
+- **Toolbar**: via `WindowShell` with `toolbarActions`
+- **Body states**: loading, empty, active, error
+- **Content**: all internal layout and styling
+- **Identity**: `typeColor` (hex, for tab color square) and initial `label` (for tab title)
+- **Dynamic title updates**: publish `{type: 'setTitle', title: '...'}` on `window.{id}.command`
+
+### Widget metadata requirements for pane integration
+
+Each widget must declare in its metadata:
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `typeColor` | Hex color for the 8px tab color square | `#1E40AF` |
+| `handlesIntent[].windowTitle` | Initial tab title (supports `{{param}}` interpolation) | `"Workflow: {{name}}"` |
+| `handlesIntent[].windowSize` | Initial pane size preset | `"large"`, `"column"` |
+
+### Styling rules
+
+- **No window-level chrome** in widget templates (no outer border, shadow, or title bar)
+- **No rounded corners on outermost container** (pane has 0px radius)
+- **Internal components** may use `borderRadius` (cards, inputs, etc.)
+- **`elevation`** on internal components is acceptable but keep it subtle (1-2, not 3+)
+
+---
+
 ## Design Details (Pending)
 
 Key areas still to document:
