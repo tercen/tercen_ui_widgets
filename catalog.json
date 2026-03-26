@@ -37,7 +37,7 @@
             "windowSize": "large"
           }
         ],
-        "typeColor": "#0E7490"
+        "typeColor": "#9333EA"
       },
       "template": {
         "type": "PromptRequired",
@@ -295,7 +295,7 @@
           "windowTitle": "Tables: {{stepName}}",
           "windowSize": "large"
         },
-        "typeColor": "#B45309"
+        "typeColor": "#FF8200"
       },
       "template": {
         "type": "PromptRequired",
@@ -553,7 +553,7 @@
             "windowSize": "column"
           }
         ],
-        "typeColor": "#1E40AF"
+        "typeColor": "#0099FF"
       },
       "template": {
         "type": "WindowShell",
@@ -1234,7 +1234,7 @@
             "windowSize": "medium"
           }
         ],
-        "typeColor": "#7C3AED"
+        "typeColor": "#EC4899"
       },
       "template": {
         "type": "PromptRequired",
@@ -1577,7 +1577,7 @@
           "windowTitle": "Files: {{projectName}}",
           "windowSize": "medium"
         },
-        "typeColor": "#374151"
+        "typeColor": "#FFBF00"
       },
       "template": {
         "type": "PromptRequired",
@@ -1854,7 +1854,7 @@
         "acceptedActions": [
           "openAuditTrail"
         ],
-        "typeColor": "#0E7490"
+        "typeColor": "#0000FF"
       },
       "template": {
         "type": "Column",
@@ -1953,7 +1953,7 @@
           "windowTitle": "Images: {{stepName}}",
           "windowSize": "large"
         },
-        "typeColor": "#047857"
+        "typeColor": "#66FF7F"
       },
       "template": {
         "type": "PromptRequired",
@@ -2186,7 +2186,7 @@
           "window.intent"
         ],
         "acceptedActions": [],
-        "typeColor": "#1E40AF"
+        "typeColor": "#0D9488"
       },
       "template": {
         "type": "Column",
@@ -2675,7 +2675,7 @@
           "header.intent"
         ],
         "acceptedActions": [],
-        "typeColor": "#1E40AF"
+        "typeColor": "#FF0000"
       },
       "template": {
         "type": "Column",
