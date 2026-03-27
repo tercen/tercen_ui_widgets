@@ -2261,7 +2261,8 @@
                             "props": {
                               "title": "Recent Projects",
                               "icon": "folder_open",
-                              "footerSlot": 1
+                              "footerSlot": 1,
+                              "searchable": true
                             },
                             "children": [
                               {
@@ -2366,7 +2367,9 @@
                                                 "id": "{{widgetId}}-proj-fe",
                                                 "props": {
                                                   "items": "{{data}}",
-                                                  "limit": "{{state}}"
+                                                  "limit": "{{state}}",
+                                                  "filterChannel": "card.{{widgetId}}-proj-card.filter",
+                                                  "filterFields": ["name"]
                                                 },
                                                 "children": [
                                                   {
@@ -2603,7 +2606,8 @@
                             "props": {
                               "title": "Featured Apps",
                               "icon": "extension",
-                              "footerSlot": 1
+                              "footerSlot": 1,
+                              "searchable": true
                             },
                             "children": [
                               {
@@ -2713,7 +2717,9 @@
                                                 "id": "{{widgetId}}-apps-fe",
                                                 "props": {
                                                   "items": "{{data}}",
-                                                  "limit": "{{state}}"
+                                                  "limit": "{{state}}",
+                                                  "filterChannel": "card.{{widgetId}}-apps-card.filter",
+                                                  "filterFields": ["name"]
                                                 },
                                                 "children": [
                                                   {
@@ -3113,7 +3119,8 @@
                             "props": {
                               "title": "Recent Activity",
                               "icon": "clock_rotate_left",
-                              "footerSlot": 1
+                              "footerSlot": 1,
+                              "searchable": true
                             },
                             "children": [
                               {
@@ -3229,7 +3236,9 @@
                                                 "id": "{{widgetId}}-act-fe",
                                                 "props": {
                                                   "items": "{{data}}",
-                                                  "limit": "{{state}}"
+                                                  "limit": "{{state}}",
+                                                  "filterChannel": "card.{{widgetId}}-act-card.filter",
+                                                  "filterFields": ["objectName", "type"]
                                                 },
                                                 "children": [
                                                   {
