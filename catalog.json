@@ -2262,7 +2262,10 @@
                               "title": "Recent Projects",
                               "icon": "folder_open",
                               "footerSlot": 1,
-                              "searchable": true
+                              "searchable": true,
+                              "pageSizes": [5, 10, 20],
+                              "pageSizeChannel": "state.hp-proj-ps.set",
+                              "defaultPageSize": 5
                             },
                             "children": [
                               {
@@ -2500,108 +2503,6 @@
                                     ]
                                   }
                                 ]
-                              },
-                              {
-                                "type": "Row",
-                                "id": "{{widgetId}}-proj-ftr-row",
-                                "children": [
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-proj-ftr-lbl",
-                                    "props": {
-                                      "text": "Show:",
-                                      "textStyle": "bodySmall",
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-proj-ftr-g1",
-                                    "props": {
-                                      "width": 4
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-proj-ps5",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-proj-ps.set",
-                                      "payload": {
-                                        "value": 5
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-proj-ps5-txt",
-                                        "props": {
-                                          "text": "5",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-proj-ftr-g2",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-proj-ps10",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-proj-ps.set",
-                                      "payload": {
-                                        "value": 10
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-proj-ps10-txt",
-                                        "props": {
-                                          "text": "10",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-proj-ftr-g3",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-proj-ps20",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-proj-ps.set",
-                                      "payload": {
-                                        "value": 20
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-proj-ps20-txt",
-                                        "props": {
-                                          "text": "20",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
                               }
                             ]
                           },
@@ -2612,7 +2513,10 @@
                               "title": "Featured Apps",
                               "icon": "extension",
                               "footerSlot": 1,
-                              "searchable": true
+                              "searchable": true,
+                              "pageSizes": [5, 10, 20],
+                              "pageSizeChannel": "state.hp-apps-ps.set",
+                              "defaultPageSize": 5
                             },
                             "children": [
                               {
@@ -2840,108 +2744,6 @@
                                     ]
                                   }
                                 ]
-                              },
-                              {
-                                "type": "Row",
-                                "id": "{{widgetId}}-apps-ftr-row",
-                                "children": [
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-apps-ftr-lbl",
-                                    "props": {
-                                      "text": "Show:",
-                                      "textStyle": "bodySmall",
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-apps-ftr-g1",
-                                    "props": {
-                                      "width": 4
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-apps-ps5",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-apps-ps.set",
-                                      "payload": {
-                                        "value": 5
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-apps-ps5-txt",
-                                        "props": {
-                                          "text": "5",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-apps-ftr-g2",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-apps-ps10",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-apps-ps.set",
-                                      "payload": {
-                                        "value": 10
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-apps-ps10-txt",
-                                        "props": {
-                                          "text": "10",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-apps-ftr-g3",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-apps-ps20",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-apps-ps.set",
-                                      "payload": {
-                                        "value": 20
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-apps-ps20-txt",
-                                        "props": {
-                                          "text": "20",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
                               }
                             ]
                           },
@@ -3125,7 +2927,10 @@
                               "title": "Recent Activity",
                               "icon": "clock_rotate_left",
                               "footerSlot": 1,
-                              "searchable": true
+                              "searchable": true,
+                              "pageSizes": [5, 10, 20],
+                              "pageSizeChannel": "state.hp-activity-ps.set",
+                              "defaultPageSize": 5
                             },
                             "children": [
                               {
@@ -3403,108 +3208,6 @@
                                             ]
                                           }
                                         ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Row",
-                                "id": "{{widgetId}}-act-ftr-row",
-                                "children": [
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-act-ftr-lbl",
-                                    "props": {
-                                      "text": "Show:",
-                                      "textStyle": "bodySmall",
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-act-ftr-g1",
-                                    "props": {
-                                      "width": 4
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-act-ps5",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-activity-ps.set",
-                                      "payload": {
-                                        "value": 5
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-act-ps5-txt",
-                                        "props": {
-                                          "text": "5",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-act-ftr-g2",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-act-ps10",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-activity-ps.set",
-                                      "payload": {
-                                        "value": 10
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-act-ps10-txt",
-                                        "props": {
-                                          "text": "10",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-act-ftr-g3",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Action",
-                                    "id": "{{widgetId}}-act-ps20",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "state.hp-activity-ps.set",
-                                      "payload": {
-                                        "value": 20
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-act-ps20-txt",
-                                        "props": {
-                                          "text": "20",
-                                          "textStyle": "labelSmall",
-                                          "color": "primary"
-                                        }
                                       }
                                     ]
                                   }
