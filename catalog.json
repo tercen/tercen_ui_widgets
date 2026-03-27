@@ -2281,7 +2281,12 @@
                                       "args": [
                                         "{{context.username}}"
                                       ],
-                                      "refreshOn": "home-panel.refresh"
+                                      "refreshOn": "home-panel.refresh",
+                                      "searchChannel": "card.{{widgetId}}-proj-card.filter",
+                                      "searchService": "documentService",
+                                      "searchMethod": "search",
+                                      "searchArgs": [20, false, ""],
+                                      "searchResultFilter": {"subKind": "Project"}
                                     },
                                     "children": [
                                       {
