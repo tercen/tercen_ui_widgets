@@ -2199,7 +2199,9 @@
               "label": "New Project",
               "channel": "window.intent",
               "payload": {
-                "intent": "createProject"
+                "intent": "createProject",
+                "placement": "samePane",
+                "sourceWindowId": "{{widgetId}}"
               },
               "isPrimary": true,
               "tooltip": "New Project"
@@ -2209,7 +2211,9 @@
               "label": "Teams",
               "channel": "window.intent",
               "payload": {
-                "intent": "openTeamManagement"
+                "intent": "openTeamManagement",
+                "placement": "samePane",
+                "sourceWindowId": "{{widgetId}}"
               },
               "tooltip": "Teams"
             },
@@ -2218,7 +2222,9 @@
               "label": "Audit",
               "channel": "window.intent",
               "payload": {
-                "intent": "openAuditTrail"
+                "intent": "openAuditTrail",
+                "placement": "samePane",
+                "sourceWindowId": "{{widgetId}}"
               },
               "tooltip": "Audit"
             }
@@ -2377,7 +2383,9 @@
                                                         "intent": "openResource",
                                                         "resourceType": "project",
                                                         "resourceId": "{{item.id}}",
-                                                        "resourceName": "{{item.name}}"
+                                                        "resourceName": "{{item.name}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
                                                       },
                                                       "hoverColor": "surfaceContainerLowest"
                                                     },
@@ -2720,7 +2728,9 @@
                                                       "payload": {
                                                         "intent": "openApp",
                                                         "appId": "{{item.id}}",
-                                                        "appName": "{{item.name}}"
+                                                        "appName": "{{item.name}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
                                                       },
                                                       "hoverColor": "surfaceContainerLowest"
                                                     },
@@ -3234,7 +3244,9 @@
                                                         "intent": "openResource",
                                                         "resourceType": "project",
                                                         "resourceId": "{{item.projectId}}",
-                                                        "resourceName": "{{item.projectName}}"
+                                                        "resourceName": "{{item.projectName}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
                                                       },
                                                       "hoverColor": "surfaceContainerLowest"
                                                     },
