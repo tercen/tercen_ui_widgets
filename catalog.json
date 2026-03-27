@@ -2729,7 +2729,7 @@
                                                         "placement": "samePane",
                                                         "sourceWindowId": "{{widgetId}}"
                                                       },
-                                                      "hoverColor": "surfaceContainerLowest"
+                                                      "hoverColor": "surfaceContainerHigh"
                                                     },
                                                     "children": [
                                                       {
@@ -2797,7 +2797,8 @@
                                                                         "props": {
                                                                           "text": "{{item.name}}",
                                                                           "textStyle": "labelLarge",
-                                                                          "color": "onSurface"
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
                                                                         }
                                                                       },
                                                                       {
@@ -3245,7 +3246,7 @@
                                                         "placement": "samePane",
                                                         "sourceWindowId": "{{widgetId}}"
                                                       },
-                                                      "hoverColor": "surfaceContainerLowest"
+                                                      "hoverColor": "surfaceContainerHigh"
                                                     },
                                                     "children": [
                                                       {
@@ -3317,7 +3318,8 @@
                                                                     "props": {
                                                                       "text": "{{item.objectName}}",
                                                                       "textStyle": "bodySmall",
-                                                                      "color": "onSurface"
+                                                                      "color": "onSurface",
+                                                                      "maxLines": 1
                                                                     }
                                                                   }
                                                                 ]
