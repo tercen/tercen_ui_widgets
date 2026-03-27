@@ -9,7 +9,7 @@
 
 ## Overview
 
-Replace the placeholder HomePanel catalog.json template with a real implementation that connects to a Tercen server via authenticated service calls. The widget displays six cards (Welcome, Quick Actions, Recent Projects, Featured Apps, Help & Docs, Recent Activity) in a responsive 2-column grid, with a toolbar providing quick actions (New Project, Teams, Audit).
+Replace the placeholder HomePanel catalog.json template with a real implementation that connects to a Tercen server via authenticated service calls. The widget displays four cards (Recent Projects, Featured Apps, Help & Docs, Recent Activity) in a responsive 2×2 grid, with a toolbar providing quick actions (New Project, Teams, Audit).
 
 ---
 
@@ -37,7 +37,7 @@ These don't close any gaps but are available for the template:
 - **Catalog cached** — `_loadedCatalog` field stores fetched catalog for reuse by navigateHome
 - **TaskMonitor** wired — task polling, event streaming, cancel via header intent
 
-Still not wired: `createProject`, `openProject`, `openUrl` intents. No `displayName`/`email`/`teams` context enrichment. No object-form window size.
+Still not wired: `openUrl` intent handler, `projectService.create` in dispatcher. No `teams` context enrichment. No object-form window size. (`createProject`, `openResource`, `openTeamManagement`, `openAuditTrail` are already handled by WindowManager via `window.intent`.)
 
 ---
 
@@ -72,8 +72,9 @@ Every visual element below is mapped to its SDUI primitive or flagged as a gap.
 
 **Icons to add to SDUI `_iconMap`:**
 1. `clock_rotate_left` → `FontAwesomeIcons.clockRotateLeft` (Recent Activity title)
-2. `bolt` → `FontAwesomeIcons.bolt` (Quick Actions title)
-3. `folder_plus` → `FontAwesomeIcons.folderPlus` (Quick Actions New Project button)
+
+Note: `bolt` and `folder_plus` were only needed by the Welcome/Quick Actions cards which are
+not in the approved mock and have been removed from the plan.
 
 ### Layout Mapping (Mock Widget → SDUI Primitive)
 
@@ -123,30 +124,42 @@ The SDUI `Grid` widget exists but has critical limitations vs the mock:
 
 All colors must use SDUI semantic tokens, never hardcoded hex values.
 
+#### Surface Hierarchy (verified against orchestrator, pane chrome, header, chat-box)
+
+All other SDUI windows use `surface` (#FFFFFF light / #111827 dark) for toolbar, body, and
+base backgrounds. HomePanel must conform to this, but needs card separation. The solution
+is a tinted scroll area behind white cards:
+
+| Element | Mock Color | SDUI Token | Light Hex | Rationale |
+|---|---|---|---|---|
+| Toolbar | (from WindowShell) | `surface` | `#FFFFFF` | Conforms with header, pane chrome, all other windows |
+| Scroll area behind cards | `AppColors.panelBackground` (#F9FAFB) | `surfaceContainerLow` | `#F9FAFB` | Tinted bg gives white cards visual separation |
+| Card body | `AppColors.surface` (#FFFFFF) | `surface` | `#FFFFFF` | White cards pop on tinted background |
+| Card header | `AppColors.neutral100` (#F3F4F6) | `surfaceContainer` | `#F3F4F6` | Exact match to mock's neutral100 |
+
+#### Other Colors
+
 | Mock Color | Purpose | SDUI Token | Status |
 |---|---|---|---|
 | `AppColors.primary` | Icons, active states, links | `primary` | OK |
 | `AppColors.primarySurface` | Card highlight bg, button hover | `primaryContainer` | OK |
-| `AppColors.primaryBg` | Welcome card bg | `primaryContainer` (lighter variant needed?) | Check |
 | `AppColors.textPrimary` | Main text | `onSurface` | OK |
 | `AppColors.textSecondary` | Secondary text | `onSurfaceVariant` | OK |
 | `AppColors.textTertiary` | Tertiary/muted text | `textTertiary` | OK |
 | `AppColors.textMuted` | Muted text, hints | `onSurfaceMuted` | OK |
 | `AppColors.textDisabled` | Disabled text | `onSurfaceDisabled` | OK |
-| `AppColors.surface` | Card background | `surface` | OK |
-| `AppColors.neutral100` / card header bg | Card header background | `surfaceContainerLow` | OK |
 | `AppColors.surfaceElevated` | Hover row bg (dark mode) | `surfaceContainerHigh` | OK |
 | `AppColors.neutral50` | Hover row bg (light mode) | `surfaceContainerLowest` | OK |
 | `AppColors.border` | Card borders | `outline` or `border` | OK |
 | `AppColors.borderSubtle` | Internal borders | `outlineVariant` or `borderSubtle` | OK |
-| `AppColors.success` | Create/complete activity chip | `success` | OK |
-| `AppColors.error` | Delete activity chip, error icon | `error` | OK |
-| `AppColors.warning` | Run activity chip | `warning` | OK |
-| `AppColors.info` | Update activity chip | `info` | OK |
-| `AppColors.successLight` | Create chip bg | `successContainer` | OK |
-| `AppColors.errorLight` | Delete chip bg | `errorContainer` | OK |
-| `AppColors.warningLight` | Run chip bg | `warningContainer` | OK |
-| `AppColors.infoLight` | Update chip bg | `infoContainer` | OK |
+| `AppColors.success` | Create/complete activity square | `success` | OK |
+| `AppColors.error` | Delete activity square, error icon | `error` | OK |
+| `AppColors.warning` | Run activity square | `warning` | OK |
+| `AppColors.info` | Update activity square | `info` | OK |
+| `AppColors.successLight` | Create chip bg (unused — chips removed) | `successContainer` | OK |
+| `AppColors.errorLight` | Delete chip bg (unused) | `errorContainer` | OK |
+| `AppColors.warningLight` | Run chip bg (unused) | `warningContainer` | OK |
+| `AppColors.infoLight` | Update chip bg (unused) | `infoContainer` | OK |
 | `AppColors.link` | Hyperlink text | `link` | OK |
 
 ### Interaction & Behavior Mapping
@@ -160,7 +173,7 @@ All colors must use SDUI semantic tokens, never hardcoded hex values.
 | Hyperlink underline on hover | Text decoration in mock | **GAP: `Text` has no `decoration` prop** |
 | Responsive column collapse at 600px | `LayoutBuilder` in mock | **GAP: `Grid` has no responsive breakpoint** |
 | New Project dialog (form + dropdown) | Native Flutter dialog | **Not SDUI — orchestrator handles this** |
-| External URL open (Help links) | `system.intent` → orchestrator | OK (needs `openUrl` intent handler) |
+| External URL open (Help links) | `window.intent` → WindowManager/orchestrator | OK (needs `openUrl` intent handler) |
 
 ### Card Search + Filter Gap
 
@@ -196,7 +209,7 @@ Neither is supported by SDUI `Action` or `Text`. Two options:
 
 | # | Gap | SDUI Component | Change Required | Priority |
 |---|---|---|---|---|
-| G1 | Missing icons: `clock_rotate_left`, `bolt`, `folder_plus` | `_iconMap` in builtin_widgets.dart | Add 3 entries | **P0** |
+| G1 | Missing icon: `clock_rotate_left` | `_iconMap` in builtin_widgets.dart | Add 1 entry | **P0** |
 | G2 | Grid forces equal aspect ratio, not responsive | `_buildGrid` in builtin_widgets.dart | Rewrite to use `LayoutBuilder` + `Row`/`Column` with `IntrinsicHeight`, add `minColumnWidth` prop | **P0** |
 | G3 | ForEach has no `limit`/`offset` | `_buildForEach` in behavior_widgets.dart | Add optional `limit` and `offset` props with template expression support | **P0** |
 | G4 | WindowState has no object-form size | `window_state.dart` | Support `{"width": 0.70, "height": 1.0}` alongside string presets | **P1** |
@@ -217,8 +230,6 @@ Neither is supported by SDUI `Action` or `Text`. Two options:
 
 ```dart
 'clock_rotate_left': FontAwesomeIcons.clockRotateLeft,
-'bolt': FontAwesomeIcons.bolt,
-'folder_plus': FontAwesomeIcons.folderPlus,
 ```
 
 #### 1b. Rewrite Grid widget for variable-height children (G2)
@@ -292,39 +303,76 @@ Add optional `decoration` prop to `_buildText`: values `none`, `underline`, `lin
 **File:** `lib/main.dart`, `_fetchUserRoles()` or `_setUserContext()`
 
 Add after existing context:
-- `displayName` — `user.name.isNotEmpty ? user.name : username`
-- `email` — `user.email`
-- `teams` — list of team names from `teamService`
+- `teams` — list of team names from `teamService` (for createProject dialog team dropdown)
 
-#### 2b. Dispatcher handlers — already exist
+#### 2b. Add write operations to base dispatcher
 
-Verified in dispatcher:
+**File:** `lib/sdui/service/service_call_dispatcher.dart`, `_tryBaseMethod()`
+
+The dispatcher currently only exposes read operations (`get`, `list`, `findStartKeys`, `findKeys`). Add the standard write operations so all services can create, update, and delete objects via SDUI:
+
+```dart
+case 'create':
+  final obj = service.fromJson(args[0] as Map<String, dynamic>);
+  final result = await service.create(obj);
+  return service.toJson(result);
+
+case 'update':
+  final obj = service.fromJson(args[0] as Map<String, dynamic>);
+  final result = await service.update(obj);
+  return service.toJson(result);
+
+case 'delete':
+  final id = args[0] as String;
+  await service.delete(id);
+  return {'success': true, 'id': id};
+```
+
+This makes `create`, `update`, and `delete` available on **every** service (`projectService`, `documentService`, `teamService`, etc.) — not just for HomePanel but for all future SDUI templates.
+
+**HomePanel uses:** `projectService.create` (createProject dialog).
+
+#### 2c. Add activity `colorToken` post-processing
+
+**File:** `lib/sdui/service/service_call_dispatcher.dart`
+
+After fetching activity results via `findStartKeys`, map the activity `type` field to an SDUI color token string so templates can bind `color: "{{item.colorToken}}"` directly:
+
+```dart
+// In activity result post-processing:
+for (final a in result) {
+  a['colorToken'] = switch (a['type']) {
+    'create' || 'complete' => 'success',
+    'update' => 'info',
+    'delete' => 'error',
+    'run' => 'warning',
+    _ => 'onSurfaceMuted',
+  };
+}
+```
+
+#### 2d. Existing dispatcher handlers (verified, no changes needed)
+
 - `projectService.recentProjects` — **already registered**, takes `[username]`
-- `documentService.getLibrary` — **already registered** (not `getTercenAppLibrary`), takes `(query, authors[], folders[], kinds[], offset, limit)`
+- `documentService.getLibrary` — **already registered** (not `getTercenAppLibrary`), takes `(projectId, teamIds[], docTypes[], tags[], offset, limit)`
 - `activityService` — **already has base CRUD + `findStartKeys`**, will work for activity queries
 
-**No dispatcher changes needed.**
-
-#### 2c. Handle `createProject` intent
+#### 2e. Handle `createProject` intent
 
 **File:** `lib/main.dart`
 
-Listen on `system.intent` for `"createProject"`. Show native Flutter dialog (SDUI has no form/dialog primitive). Dialog fields from mock:
+Listen on `window.intent` for `"createProject"`. Show native Flutter dialog (SDUI has no form/dialog primitive). Dialog fields from mock:
 - Project name (required)
 - Team dropdown (searchable, from `context.teams`)
 - Description (optional)
 - Public toggle
 - Collapsible git section (repo URL, branch, tag, commit, token)
 
-On submit: call `projectService.create()`, then emit `openProject` intent.
+On submit: call `projectService.create()` via dispatcher (now available from §2b), then emit `window.intent` with `{intent: "openResource", resourceType: "project", ...}`.
 
-#### 2d. Handle `openProject` intent routing
+#### 2f. Handle `openUrl` intent
 
-Ensure ProjectNavigator catalog entry has `handlesIntent` for `openProject`.
-
-#### 2e. Handle `openUrl` intent
-
-Listen for `"openUrl"` intent, call `url_launcher` or `html.window.open()` with the URL from payload.
+Add handler in WindowManager or orchestrator for `window.intent` with `intent: "openUrl"`. Call `url_launcher` or `html.window.open()` with the `url` field from payload. **This is the only missing intent handler.**
 
 ---
 
@@ -336,42 +384,35 @@ Listen for `"openUrl"` intent, call `url_launcher` or `html.window.open()` with 
 {"type": "HomePanel", "id": "home-panel", "size": {"width": 0.70, "height": 1.0}, "align": "left", "title": "Home"}
 ```
 
+The pane tab title comes from the window config `title` field.
+
+**Tab color square:** The catalog metadata already has `"typeColor": "#0D9488"` (teal) — this is
+a unique color from the approved Tercen logo palette (row 2, position 4). Verified: no other
+widget uses teal as its typeColor. The mock shows a multi-color gradient dot (cosmetic mock
+behavior via `Colors.transparent`); in production SDUI the pane chrome renders a solid teal square.
+
 #### 3b. Rewrite HomePanel template
 
-**Structure matching the approved mock:**
+**Structure matching the approved mock (verified via Playwright 2026-03-27):**
+
+Note: The mock has `WelcomeCard` and `QuickActionsCard` source files but they are NOT used
+in `_buildDashboard()`. The dashboard shows only 4 cards. The toolbar already provides the
+quick action buttons, making a separate Quick Actions card redundant. Removed from plan.
 
 ```
 WindowShell (root — provides toolbar frame)
 ├── toolbarActions: [
-│     {icon: "plus", label: "New Project", channel: "system.intent", payload: {intent: "createProject"}},
-│     {icon: "people", label: "Teams", channel: "system.intent", payload: {intent: "showTeams"}},
-│     {icon: "checklist", label: "Audit", channel: "system.intent", payload: {intent: "showAudit"}}
+│     {icon: "plus", label: "New Project", channel: "window.intent", payload: {intent: "createProject"}},
+│     {icon: "people", label: "Teams", channel: "window.intent", payload: {intent: "openTeamManagement"}},
+│     {icon: "checklist", label: "Audit", channel: "window.intent", payload: {intent: "openAuditTrail"}}
 │   ]
 └── body:
-    ListView (padding: 16)
-    ├── [Card 0] Welcome Card
-    │   └── Container (color: "primaryContainer", borderColor: "primaryContainer", borderRadius: 8)
-    │       └── Padding (24h, 16v)
-    │           └── Text "Welcome, {{context.displayName}}" (textStyle: "headlineMedium", color: "primary")
-    │
-    ├── SizedBox (height: 16)
-    │
-    ├── [Card 1] Quick Actions
-    │   └── Container (card styling)
-    │       ├── Row (header: Icon "bolt" + Text "Quick Actions")
-    │       ├── Divider
-    │       └── Padding
-    │           └── Wrap (spacing: 8, runSpacing: 8)               ← NEEDS G6
-    │               ├── Action → Container+Row [Icon "folder_plus" + Text "New Project"]  ← NEEDS G1
-    │               ├── Action → Container+Row [Icon "people" + Text "Teams"]
-    │               └── Action → Container+Row [Icon "checklist" + Text "Audit"]
-    │
-    ├── SizedBox (height: 16)
-    │
-    └── Grid (columns: 2, minColumnWidth: 300, spacing: 16, runSpacing: 16)  ← NEEDS G2
-        ├── [Card 2] Recent Projects
+    Container (color: "surfaceContainerLow")                       ← tinted bg for card separation
+    └── ListView (padding: 8)                                      ← mock uses AppSpacing.sm (8px)
+        └── Grid (columns: 2, minColumnWidth: 300, spacing: 16, runSpacing: 16)  ← NEEDS G2
+        ├── [Card 1] Recent Projects
         │   └── Container (card styling: color "surface", borderColor "outline", borderRadius 8, elevation 1)
-        │       ├── Container (header: color "surfaceContainerLow", borderColor "outlineVariant")
+        │       ├── Container (header: color "surfaceContainer", borderColor "outlineVariant")
         │       │   └── Row
         │       │       ├── Icon "folder_open" (size: 14, color: "primary")
         │       │       ├── SizedBox (width: 8)
@@ -387,8 +428,8 @@ WindowShell (root — provides toolbar frame)
         │       │           ├── Conditional (visible: "{{error}}") → Center → Text "{{errorMessage}}"
         │       │           └── Conditional (visible: "{{ready}}")
         │       │               └── ForEach (items: "{{data}}", limit: "{{state}}")  ← NEEDS G3
-        │       │                   └── Action (channel: "system.intent",
-        │       │                   │   payload: {intent: "openProject", projectId: "{{item.id}}", projectName: "{{item.name}}"},
+        │       │                   └── Action (channel: "window.intent",
+        │       │                   │   payload: {intent: "openResource", resourceType: "project", resourceId: "{{item.id}}", resourceName: "{{item.name}}"},
         │       │                   │   hoverColor: "surfaceContainerLowest")          ← NEEDS G5
         │       │                   └── Padding (padding: 8)
         │       │                       └── Row
@@ -408,29 +449,27 @@ WindowShell (root — provides toolbar frame)
         │               ├── Action → TextButton "10" (channel: "state.hp-proj-ps.set", payload: {value: 10})
         │               └── Action → TextButton "20" (channel: "state.hp-proj-ps.set", payload: {value: 20})
         │
-        ├── [Card 3] Featured Apps
+        ├── [Card 2] Featured Apps
         │   Same card structure as Recent Projects:
         │   - Header icon: "extension" (maps to puzzlePiece)
         │   - DataSource: service "documentService", method "getLibrary", args: ["", [], [], [], 0, 50]
         │   - ForEach row: Icon "extension" + name + description (textStyle: "bodySmall")
-        │   - Action payload: {intent: "openApp", appId: "{{item.id}}", appName: "{{item.name}}"}
+        │   - Action channel: "window.intent", payload: {intent: "openApp", appId: "{{item.id}}", appName: "{{item.name}}"}
         │   - StateHolder id: "hp-apps-ps", initial: 5
         │
-        ├── [Card 4] Help & Docs
+        ├── [Card 3] Help & Docs
         │   └── Container (card styling)
         │       ├── Container (header: Icon "help" + Text "Help & Documentation")
         │       └── Padding
         │           └── Wrap (spacing: 16, runSpacing: 8)               ← NEEDS G6
-        │               ├── Action → Row [Icon "open_in_new" (size: 12) + Text "Documentation"]
-        │               │   channel: "system.intent", payload: {intent: "openUrl", url: "https://docs.tercen.com"}
-        │               ├── Action → Row [Icon "open_in_new" + Text "Getting Started"]
-        │               │   channel: "system.intent", payload: {intent: "openUrl", url: "https://docs.tercen.com/getting-started"}
-        │               ├── Action → Row [Icon "open_in_new" + Text "Tutorials"]
-        │               │   channel: "system.intent", payload: {intent: "openUrl", url: "https://docs.tercen.com/tutorials"}
-        │               └── Action → Row [Icon "open_in_new" + Text "Community"]
-        │                   channel: "system.intent", payload: {intent: "openUrl", url: "https://community.tercen.com"}
+        │               ├── Action → Row [Icon "open_in_new" (size: 12) + Text "Learning Center"]
+        │               │   channel: "window.intent", payload: {intent: "openUrl", url: "https://learn.tercen.com/en/"}
+        │               ├── Action → Row [Icon "open_in_new" + Text "Starter Guide"]
+        │               │   channel: "window.intent", payload: {intent: "openUrl", url: "https://github.com/tercen/starter_guide"}
+        │               └── Action → Row [Icon "open_in_new" + Text "Public Projects"]
+        │                   channel: "window.intent", payload: {intent: "openUrl", url: "https://tercen.com/explore"}
         │
-        └── [Card 5] Recent Activity
+        └── [Card 4] Recent Activity
             └── Container (card styling)
                 ├── Container (header: Icon "clock_rotate_left" + Text "Recent Activity")  ← NEEDS G1
                 ├── StateHolder (id: "hp-activity-ps", initial: 10)
@@ -446,14 +485,13 @@ WindowShell (root — provides toolbar frame)
                 │                       └── Row
                 │                           ├── [Color square — TabTypeIcon pattern]
                 │                           │   Container (width: 8, height: 8, borderRadius: 2)
-                │                           │   Color per type via stacked Conditionals:
-                │                           │   - Conditional visible:"{{item.type}}==create"   → color:"success"
-                │                           │   - Conditional visible:"{{item.type}}==update"   → color:"info"
-                │                           │   - Conditional visible:"{{item.type}}==delete"   → color:"error"
-                │                           │   - Conditional visible:"{{item.type}}==run"      → color:"warning"
-                │                           │   - Conditional visible:"{{item.type}}==complete" → color:"success"
-                │                           │   NOTE: Conditional equality matching ("==") is unverified in SDUI.
-                │                           │   If not supported, need to extend Conditional or find alternative.
+                │                           │   Color resolved via dispatcher-computed field:
+                │                           │   Container color: "{{item.colorToken}}"
+                │                           │   Dispatcher maps type→token before returning:
+                │                           │     create/complete → "success"
+                │                           │     update → "info", delete → "error", run → "warning"
+                │                           │   Template resolver resolves "{{item.colorToken}}" → "success",
+                │                           │   then _resolveColor maps "success" → theme success color.
                 │                           ├── SizedBox (width: 8)
                 │                           ├── Text "{{item.type}}" (textStyle: "bodySmall", color: "onSurfaceMuted")
                 │                           ├── SizedBox (width: 8)
@@ -467,17 +505,87 @@ WindowShell (root — provides toolbar frame)
 
 ---
 
-## Intent Summary
+## Data I/O Verification (2026-03-27)
 
-| Intent | Emitted By | Handled By |
+### Service Calls (Tercen API via Dispatcher)
+
+| # | Card | Service.Method | Args (verified) | Dispatcher Status | Notes |
+|---|---|---|---|---|---|
+| S1 | Recent Projects | `projectService.recentProjects` | `["{{context.username}}"]` | **EXISTS** | Takes username string, returns `List<Project>` as JSON maps |
+| S2 | Featured Apps | `documentService.getLibrary` | `["", [], [], [], 0, 50]` | **EXISTS** | Args: `[projectId, teamIds[], docTypes[], tags[], offset, limit]`. Empty projectId returns global library. |
+| S3 | Recent Activity | `activityService.findStartKeys` | `["findByUserAndDate", ["{{context.userId}}", ""], ["{{context.userId}}", "\uf000"], 100, 0, true]` | **EXISTS** (generic handler) | View name `findByUserAndDate` — must test against stage to confirm |
+| S4 | Create Project dialog | `projectService.create` | `(Project object)` | **DOES NOT EXIST** | Not in dispatcher. Must add, or handle entirely in orchestrator Dart code |
+
+**Dot-notation binding verified:** Template resolver supports `{{item.name}}`, `{{item.id}}`, `{{item.acl.owner}}` etc. via Map path navigation.
+
+### EventBus Input Signals (HomePanel Listens To)
+
+| Channel | Listener | Purpose | Verified |
+|---|---|---|---|
+| `home-panel.refresh` | DataSource `refreshOn` | Trigger refetch on all cards | **YES** — DataSource accepts any arbitrary channel name |
+| `state.hp-proj-ps.set` | StateHolder | Page size for Recent Projects | **YES** — pattern is `state.<nodeId>.set` |
+| `state.hp-apps-ps.set` | StateHolder | Page size for Featured Apps | **YES** |
+| `state.hp-activity-ps.set` | StateHolder | Page size for Recent Activity | **YES** |
+
+StateHolder payload: implicit merge (e.g., `{value: 5}`) or explicit `{op: "merge", values: {value: 5}}`.
+
+### EventBus Output Signals (HomePanel Emits)
+
+**CRITICAL CORRECTION:** The plan previously used `system.intent` as the output channel. This is **wrong**. There are three intent channels with different purposes:
+
+| Channel | Purpose | Handler |
 |---|---|---|
-| `openProject` | Project row click, activity project click | ProjectNavigator (`handlesIntent`) |
-| `openApp` | App row click | TBD — may need new widget or intent handler |
-| `createProject` | New Project toolbar button / Quick Actions | Orchestrator native dialog |
-| `showTeams` | Teams toolbar button / Quick Actions | TBD — team management widget |
-| `showAudit` | Audit toolbar button | AuditTrail (`handlesIntent`) |
-| `openUrl` | Help link click | Orchestrator → browser open |
-| `home-panel.refresh` | Refresh toolbar button | DataSource `refreshOn` channels |
+| `header.intent` | Header menu actions (theme, navigate, save) | Orchestrator `_listenHeaderIntents()` |
+| `system.intent` | Routes to registered catalog widgets via IntentRouter | IntentRouter (catalog-driven) |
+| `window.intent` | Window management (open, create, close resources) | WindowManager |
+
+**HomePanel must emit to `window.intent`** for all window/navigation operations.
+
+| Feature | Channel | Intent Name | Payload | Handler Exists |
+|---|---|---|---|---|
+| Project row click | `window.intent` | `openResource` | `{resourceType: "project", resourceId: "{{item.id}}", resourceName: "{{item.name}}"}` | **YES** — WindowManager `_handleOpenResource()` |
+| Activity project click | `window.intent` | `openResource` | `{resourceType: "project", resourceId: "{{item.projectId}}", resourceName: "{{item.projectName}}"}` | **YES** |
+| New Project button | `window.intent` | `createProject` | `{}` | **YES** — WindowManager handles it |
+| Teams button | `window.intent` | `openTeamManagement` | `{}` | **YES** — WindowManager handles it |
+| Audit button | `window.intent` | `openAuditTrail` | `{}` | **YES** — WindowManager handles it |
+| App row click | `window.intent` | `openApp` | `{appId: "{{item.id}}", appName: "{{item.name}}"}` | **PARTIAL** — published but no catalog widget registered |
+| Help link click | `window.intent` | `openUrl` | `{url: "https://..."}` | **NO** — not found anywhere. Must add handler. |
+| Refresh (future) | `home-panel.refresh` | — | `{}` | **YES** — DataSource `refreshOn` picks it up. No button in mock; channel reserved for future use. |
+| Page size buttons | `state.<id>.set` | — | `{value: N}` | **YES** — StateHolder implicit merge |
+
+### Activity Type Colors — Solved via Dispatcher
+
+The activity type color-square initially seemed to require Conditional equality expressions (`{{item.type}}==create`), but SDUI Conditional only accepts booleans. **Solution:** compute a `colorToken` field in the dispatcher before returning activity data. The dispatcher maps `type` → SDUI color token string (e.g., `create` → `"success"`). The template then uses `color: "{{item.colorToken}}"` directly — template resolver produces `"success"`, and `_resolveColor` maps it to the theme color. No SDUI changes needed.
+
+**Dispatcher addition** (in `activityService.findStartKeys` response post-processing):
+```dart
+for (final a in result) {
+  a['colorToken'] = switch (a['type']) {
+    'create' || 'complete' => 'success',
+    'update' => 'info',
+    'delete' => 'error',
+    'run' => 'warning',
+    _ => 'onSurfaceMuted',
+  };
+}
+```
+
+---
+
+## SDUI Gaps Summary (Must Fix Before Implementation)
+
+**Last checked: 2026-03-27 — 8 gaps remain.**
+
+| # | Gap | SDUI Component | Change Required | Priority |
+|---|---|---|---|---|
+| G1 | Missing icon: `clock_rotate_left` | `_iconMap` in builtin_widgets.dart | Add 1 entry | **P0** |
+| G2 | Grid forces equal aspect ratio, not responsive | `_buildGrid` in builtin_widgets.dart | Rewrite to `LayoutBuilder`+`Row`/`Column`+`IntrinsicHeight` | **P0** |
+| G3 | ForEach has no `limit`/`offset` | `_buildForEach` in behavior_widgets.dart | Add optional `limit` and `offset` props with template expression support | **P0** |
+| G4 | WindowState has no object-form size | `window_state.dart` | Support `{"width": 0.70, "height": 1.0}` alongside string presets | **P1** |
+| G5 | Action has no hover visual feedback | `_buildAction` in behavior_widgets.dart | Add optional `hoverColor` prop | **P1** |
+| G6 | No `Wrap` layout widget | builtin_widgets.dart | Add `Wrap` widget with `spacing` and `runSpacing` props | **P1** |
+| G7 | Text has no `decoration` prop (underline) | `_buildText` in builtin_widgets.dart | Add `decoration` prop | **P2** |
+| G8 | Filter `contains` not reactive to TextField input | `_buildFilter` in behavior_widgets.dart | Support template expressions in `contains` | **P2** (deferred) |
 
 ---
 
@@ -485,9 +593,10 @@ WindowShell (root — provides toolbar frame)
 
 1. **SDUI gap fixes (P0)** — Icons (G1), Grid rewrite (G2), ForEach limit/offset (G3)
 2. **SDUI gap fixes (P1)** — WindowState object size (G4), Action hoverColor (G5), Wrap widget (G6)
-3. **Orchestrator context enrichment** — displayName, email, teams
-4. **Orchestrator intent handlers** — createProject dialog, openUrl handler, openProject routing
-5. **Catalog template rewrite** — HomePanel with real data bindings using SDUI tokens
+3. **Orchestrator context enrichment** — displayName, teams
+4. **Orchestrator dispatcher** — add `create`/`update`/`delete` to base methods, activity `colorToken` post-processing
+5. **Orchestrator intent handlers** — `openUrl` handler (only missing one)
+6. **Catalog template rewrite** — HomePanel with corrected channels (`window.intent`) and intent names
 6. **Catalog home config** — update window size to object form
 7. **Integration test** — connect to stage.tercen.com, verify all cards render correctly
 
@@ -496,21 +605,25 @@ WindowShell (root — provides toolbar frame)
 ## Dependencies
 
 - `sci_tercen_client` — no changes needed
-- `sdui` — 7 changes: 3 icon entries (G1), Grid rewrite (G2), ForEach extension (G3), WindowState extension (G4), Action hoverColor (G5), Wrap widget (G6), Text decoration (G7, P2)
-- `tercen_ui_orchestrator` — 3 changes: context enrichment, intent handlers (createProject, openUrl)
-- `tercen_ui_widgets/catalog.json` — template rewrite + home config update
+- `sdui` — 7 changes: 1 icon (G1), Grid (G2), ForEach (G3), WindowState (G4), Action hover (G5), Wrap (G6), Text decoration (G7, P2)
+- `tercen_ui_orchestrator` — 4 changes: context enrichment, base CRUD write ops (`create`/`update`/`delete`) in dispatcher, activity `colorToken` post-processing, `openUrl` intent handler
+- `tercen_ui_widgets/catalog.json` — template rewrite (corrected channels + intent names) + home config update
 
-**No dispatcher changes needed** — `projectService.recentProjects`, `documentService.getLibrary`, and `activityService.findStartKeys` are all already registered.
+### Dispatcher status
+- `projectService.recentProjects` — already registered
+- `documentService.getLibrary` — already registered
+- `activityService.findStartKeys` — already registered (generic handler)
+- `create` / `update` / `delete` — **must add** to `_tryBaseMethod` (available on all services)
 
 ---
 
 ## Open Items
 
-- [ ] Verify `Conditional` supports equality matching (`{{item.type}}==create`) for activity type chips — if not, need to extend Conditional or find alternative
 - [ ] Confirm `recentProjects()` return shape — verify field names (`id`, `name`, `owner`, `lastModifiedDate`) accessible via `{{item.fieldName}}`
 - [ ] Confirm `documentService.getLibrary()` return shape — verify field names for app rows
-- [ ] Confirm `activityService.findStartKeys` with `by_user_and_date` view works — test against stage
-- [ ] Decide: should `openApp` open a new workflow from the app, or show app details?
-- [ ] Decide: what does "Teams" quick action open?
+- [ ] Confirm `activityService.findStartKeys` with `findByUserAndDate` view works — test against stage
+- [ ] Confirm activity object field names for ForEach bindings (`type`, `objectName`, `userName`, `projectName`, `date`)
+- [ ] Decide: should `openApp` open a new workflow from the app, or show app details? No catalog widget registered yet.
+- [ ] `openUrl` intent handler — must add to orchestrator or WindowManager
 - [ ] Card search (G8) deferred — revisit when Filter supports reactive `contains` binding
 - [ ] Text underline decoration (G7) deferred — ship without hyperlink underline styling
