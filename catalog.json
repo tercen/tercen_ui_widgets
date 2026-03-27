@@ -4042,20 +4042,8 @@
       }
     ],
     "windows": [
-      {
-        "type": "HomePanel",
-        "id": "home-panel",
-        "size": "large",
-        "align": "left",
-        "title": "Home"
-      },
-      {
-        "type": "ChatBox",
-        "id": "chat-box",
-        "size": "column",
-        "align": "right",
-        "title": "Chat"
-      }
+      {"type": "HomePanel", "id": "home-panel", "title": "Home"},
+      {"type": "ChatBox", "id": "chat-box", "title": "Chat"}
     ]
   }
 }
