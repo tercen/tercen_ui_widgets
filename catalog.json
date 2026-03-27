@@ -2390,7 +2390,7 @@
                                                         "type": "Padding",
                                                         "id": "{{widgetId}}-proj-row-pad",
                                                         "props": {
-                                                          "padding": [8, 12, 8, 12]
+                                                          "padding": 10
                                                         },
                                                         "children": [
                                                           {
