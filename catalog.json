@@ -2374,14 +2374,11 @@
                                                     "id": "{{widgetId}}-proj-action",
                                                     "props": {
                                                       "gesture": "onTap",
-                                                      "channel": "window.intent",
+                                                      "channel": "system.intent",
                                                       "payload": {
-                                                        "intent": "openResource",
-                                                        "resourceType": "project",
-                                                        "resourceId": "{{item.id}}",
-                                                        "resourceName": "{{item.name}}",
-                                                        "placement": "samePane",
-                                                        "sourceWindowId": "{{widgetId}}"
+                                                        "intent": "openProjectNavigator",
+                                                        "projectId": "{{item.id}}",
+                                                        "projectName": "{{item.name}}"
                                                       },
                                                       "hoverColor": "surfaceContainerLowest"
                                                     },
@@ -2390,7 +2387,7 @@
                                                         "type": "Padding",
                                                         "id": "{{widgetId}}-proj-row-pad",
                                                         "props": {
-                                                          "padding": 8
+                                                          "padding": [6, 10, 6, 10]
                                                         },
                                                         "children": [
                                                           {
@@ -2401,31 +2398,13 @@
                                                             },
                                                             "children": [
                                                               {
-                                                                "type": "Container",
-                                                                "id": "{{widgetId}}-proj-icon-box",
+                                                                "type": "Icon",
+                                                                "id": "{{widgetId}}-proj-icon",
                                                                 "props": {
-                                                                  "width": 32,
-                                                                  "height": 32,
-                                                                  "borderColor": "outlineVariant",
-                                                                  "borderRadius": 8
-                                                                },
-                                                                "children": [
-                                                                  {
-                                                                    "type": "Center",
-                                                                    "id": "{{widgetId}}-proj-icon-c",
-                                                                    "children": [
-                                                                      {
-                                                                        "type": "Icon",
-                                                                        "id": "{{widgetId}}-proj-icon",
-                                                                        "props": {
-                                                                          "icon": "folder",
-                                                                          "size": 14,
-                                                                          "color": "primary"
-                                                                        }
-                                                                      }
-                                                                    ]
-                                                                  }
-                                                                ]
+                                                                  "icon": "folder",
+                                                                  "size": 14,
+                                                                  "color": "primary"
+                                                                }
                                                               },
                                                               {
                                                                 "type": "SizedBox",
@@ -2439,10 +2418,10 @@
                                                                 "id": "{{widgetId}}-proj-info",
                                                                 "children": [
                                                                   {
-                                                                    "type": "Column",
-                                                                    "id": "{{widgetId}}-proj-info-col",
+                                                                    "type": "Tooltip",
+                                                                    "id": "{{widgetId}}-proj-name-tip",
                                                                     "props": {
-                                                                      "crossAxisAlignment": "start"
+                                                                      "message": "{{item.name}}"
                                                                     },
                                                                     "children": [
                                                                       {
@@ -2450,17 +2429,9 @@
                                                                         "id": "{{widgetId}}-proj-name",
                                                                         "props": {
                                                                           "text": "{{item.name}}",
-                                                                          "textStyle": "labelLarge",
-                                                                          "color": "onSurface"
-                                                                        }
-                                                                      },
-                                                                      {
-                                                                        "type": "Text",
-                                                                        "id": "{{widgetId}}-proj-owner",
-                                                                        "props": {
-                                                                          "text": "{{item.acl.owner}}",
-                                                                          "textStyle": "bodySmall",
-                                                                          "color": "textTertiary"
+                                                                          "textStyle": "bodyMedium",
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
                                                                         }
                                                                       }
                                                                     ]
@@ -2468,12 +2439,19 @@
                                                                 ]
                                                               },
                                                               {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-proj-date-gap",
+                                                                "props": {
+                                                                  "width": 12
+                                                                }
+                                                              },
+                                                              {
                                                                 "type": "Text",
                                                                 "id": "{{widgetId}}-proj-date",
                                                                 "props": {
                                                                   "text": "{{item.lastModifiedDate}}",
                                                                   "textStyle": "bodySmall",
-                                                                  "color": "textTertiary"
+                                                                  "color": "onSurfaceMuted"
                                                                 }
                                                               }
                                                             ]
@@ -3118,7 +3096,7 @@
                                 "type": "StateHolder",
                                 "id": "hp-activity-ps",
                                 "props": {
-                                  "initial": 10
+                                  "initial": 5
                                 },
                                 "children": [
                                   {
@@ -3137,7 +3115,7 @@
                                           "{{context.userId}}",
                                           "\uf000"
                                         ],
-                                        100,
+                                        20,
                                         0,
                                         true
                                       ],
