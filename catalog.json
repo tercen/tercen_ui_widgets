@@ -2881,7 +2881,7 @@
           {
             "type": "Column",
             "id": "{{widgetId}}-root",
-            "props": { "crossAxisAlignment": "stretch" },
+            "props": { "crossAxisAlignment": "stretch", "mainAxisSize": "min" },
             "children": [
               {
                 "type": "Container",
@@ -2915,226 +2915,113 @@
                 }]
               },
               {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
+                "type": "Conditional",
+                "id": "{{widgetId}}-running-section",
+                "props": { "visible": "{{hasRunning}}" },
                 "children": [{
                   "type": "Column",
-                  "id": "{{widgetId}}-sections",
-                  "props": { "crossAxisAlignment": "stretch" },
+                  "id": "{{widgetId}}-running-col",
+                  "props": { "crossAxisAlignment": "stretch", "mainAxisSize": "min" },
                   "children": [
                     {
-                      "type": "Conditional",
-                      "id": "{{widgetId}}-running-section",
-                      "props": { "visible": "{{hasRunning}}" },
+                      "type": "Padding",
+                      "id": "{{widgetId}}-running-header-pad",
+                      "props": { "padding": "sm" },
                       "children": [{
-                        "type": "Column",
-                        "id": "{{widgetId}}-running-col",
-                        "props": { "crossAxisAlignment": "stretch" },
-                        "children": [
-                          {
-                            "type": "Padding",
-                            "id": "{{widgetId}}-running-header-pad",
-                            "props": { "padding": "sm" },
-                            "children": [{
-                              "type": "Text",
-                              "id": "{{widgetId}}-running-header",
-                              "props": { "text": "Running", "textStyle": "labelSmall", "color": "onSurfaceMuted" }
-                            }]
-                          },
-                          {
-                            "type": "ListView",
-                            "id": "{{widgetId}}-running-lv",
-                            "props": { "shrinkWrap": true },
-                            "children": [{
-                              "type": "ForEach",
-                              "id": "{{widgetId}}-running-fe",
-                              "props": { "items": "{{runningTasks}}" },
-                              "children": [{
-                                "type": "Padding",
-                                "id": "{{widgetId}}-run-pad-{{_index}}",
-                                "props": { "left": "sm", "right": "sm", "bottom": "xs" },
-                                "children": [{
-                                  "type": "Card",
-                                  "id": "{{widgetId}}-run-card-{{_index}}",
-                                  "children": [{
-                                    "type": "Padding",
-                                    "id": "{{widgetId}}-run-card-pad-{{_index}}",
-                                    "props": { "padding": "sm" },
-                                    "children": [{
-                                      "type": "Row",
-                                      "id": "{{widgetId}}-run-row-{{_index}}",
-                                      "props": { "crossAxisAlignment": "center" },
-                                      "children": [
-                                        {
-                                          "type": "Conditional",
-                                          "id": "{{widgetId}}-run-spinner-cond-{{_index}}",
-                                          "props": { "visible": "{{item.isRunning}}" },
-                                          "children": [{
-                                            "type": "LoadingIndicator",
-                                            "id": "{{widgetId}}-run-spinner-{{_index}}",
-                                            "props": { "size": 16 }
-                                          }]
-                                        },
-                                        {
-                                          "type": "Conditional",
-                                          "id": "{{widgetId}}-run-pending-cond-{{_index}}",
-                                          "props": { "visible": "{{item.isPending}}" },
-                                          "children": [{
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-run-pending-{{_index}}",
-                                            "props": { "icon": "pending", "size": 16, "color": "warning" }
-                                          }]
-                                        },
-                                        {"type": "SizedBox", "id": "{{widgetId}}-run-gap-{{_index}}", "props": {"width": 8}},
-                                        {
-                                          "type": "Expanded",
-                                          "id": "{{widgetId}}-run-info-{{_index}}",
-                                          "children": [{
-                                            "type": "Column",
-                                            "id": "{{widgetId}}-run-info-col-{{_index}}",
-                                            "props": { "crossAxisAlignment": "start" },
-                                            "children": [
-                                              {"type": "Text", "id": "{{widgetId}}-run-wf-{{_index}}", "props": {"text": "{{item.workflowName}}", "textStyle": "bodySmall", "color": "onSurface"}},
-                                              {
-                                                "type": "Row",
-                                                "id": "{{widgetId}}-run-detail-{{_index}}",
-                                                "children": [
-                                                  {"type": "Text", "id": "{{widgetId}}-run-proj-{{_index}}", "props": {"text": "{{item.projectName}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}},
-                                                  {"type": "SizedBox", "id": "{{widgetId}}-run-sep-{{_index}}", "props": {"width": 8}},
-                                                  {"type": "Text", "id": "{{widgetId}}-run-elapsed-{{_index}}", "props": {"text": "{{item.elapsed}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
-                                                ]
-                                              }
-                                            ]
-                                          }]
-                                        },
-                                        {
-                                          "type": "IconButton",
-                                          "id": "{{widgetId}}-run-cancel-{{_index}}",
-                                          "props": { "icon": "close", "size": 16, "color": "error", "tooltip": "Cancel", "channel": "task.cancel", "payload": { "taskId": "{{item.taskId}}" } }
-                                        }
-                                      ]
-                                    }]
-                                  }]
-                                }]
-                              }]
-                            }]
-                          }
-                        ]
+                        "type": "Text",
+                        "id": "{{widgetId}}-running-header",
+                        "props": { "text": "Running", "textStyle": "labelSmall", "color": "onSurfaceMuted" }
                       }]
                     },
                     {
-                      "type": "Conditional",
-                      "id": "{{widgetId}}-recent-section",
-                      "props": { "visible": "{{hasRecent}}" },
+                      "type": "ForEach",
+                      "id": "{{widgetId}}-running-fe",
+                      "props": { "items": "{{runningTasks}}" },
                       "children": [{
-                        "type": "Column",
-                        "id": "{{widgetId}}-recent-col",
-                        "props": { "crossAxisAlignment": "stretch" },
-                        "children": [
-                          {
-                            "type": "Divider",
-                            "id": "{{widgetId}}-divider",
-                            "props": { "height": 1, "thickness": 1, "color": "outlineVariant" }
-                          },
-                          {
-                            "type": "Padding",
-                            "id": "{{widgetId}}-recent-header-pad",
-                            "props": { "padding": "sm" },
-                            "children": [{
-                              "type": "Text",
-                              "id": "{{widgetId}}-recent-header",
-                              "props": { "text": "Recent", "textStyle": "labelSmall", "color": "onSurfaceMuted" }
-                            }]
-                          },
-                          {
-                            "type": "ListView",
-                            "id": "{{widgetId}}-recent-lv",
-                            "props": { "shrinkWrap": true },
-                            "children": [{
-                              "type": "ForEach",
-                              "id": "{{widgetId}}-recent-fe",
-                              "props": { "items": "{{recentTasks}}" },
-                              "children": [{
-                                "type": "Padding",
-                                "id": "{{widgetId}}-rec-pad-{{_index}}",
-                                "props": { "left": "sm", "right": "sm", "bottom": "xs" },
-                                "children": [{
-                                  "type": "Row",
-                                  "id": "{{widgetId}}-rec-row-{{_index}}",
-                                  "props": { "crossAxisAlignment": "center" },
-                                  "children": [
-                                    {
-                                      "type": "Conditional",
-                                      "id": "{{widgetId}}-rec-done-cond-{{_index}}",
-                                      "props": { "visible": "{{item.isDone}}" },
-                                      "children": [{
-                                        "type": "Icon",
-                                        "id": "{{widgetId}}-rec-done-{{_index}}",
-                                        "props": { "icon": "check_circle", "size": 16, "color": "success" }
-                                      }]
-                                    },
-                                    {
-                                      "type": "Conditional",
-                                      "id": "{{widgetId}}-rec-fail-cond-{{_index}}",
-                                      "props": { "visible": "{{item.isFailed}}" },
-                                      "children": [{
-                                        "type": "Icon",
-                                        "id": "{{widgetId}}-rec-fail-{{_index}}",
-                                        "props": { "icon": "error", "size": 16, "color": "error" }
-                                      }]
-                                    },
-                                    {
-                                      "type": "Conditional",
-                                      "id": "{{widgetId}}-rec-cancel-cond-{{_index}}",
-                                      "props": { "visible": "{{item.isCancelled}}" },
-                                      "children": [{
-                                        "type": "Icon",
-                                        "id": "{{widgetId}}-rec-cancel-icon-{{_index}}",
-                                        "props": { "icon": "cancel", "size": 16, "color": "onSurfaceMuted" }
-                                      }]
-                                    },
-                                    {"type": "SizedBox", "id": "{{widgetId}}-rec-gap-{{_index}}", "props": {"width": 8}},
-                                    {
-                                      "type": "Expanded",
-                                      "id": "{{widgetId}}-rec-info-{{_index}}",
-                                      "children": [{
-                                        "type": "Column",
-                                        "id": "{{widgetId}}-rec-info-col-{{_index}}",
-                                        "props": { "crossAxisAlignment": "start" },
-                                        "children": [
-                                          {"type": "Text", "id": "{{widgetId}}-rec-wf-{{_index}}", "props": {"text": "{{item.workflowName}}", "textStyle": "bodySmall", "color": "onSurface"}},
-                                          {"type": "Text", "id": "{{widgetId}}-rec-elapsed-{{_index}}", "props": {"text": "{{item.elapsed}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
-                                        ]
-                                      }]
-                                    }
-                                  ]
-                                }]
-                              }]
-                            }]
-                          }
-                        ]
-                      }]
-                    },
-                    {
-                      "type": "Conditional",
-                      "id": "{{widgetId}}-empty-cond",
-                      "props": { "visible": "{{!hasTasks}}" },
-                      "children": [{
-                        "type": "Center",
-                        "id": "{{widgetId}}-empty",
+                        "type": "Padding",
+                        "id": "{{widgetId}}-run-pad-{{_index}}",
+                        "props": { "left": "sm", "right": "sm", "bottom": "xs" },
                         "children": [{
-                          "type": "Padding",
-                          "id": "{{widgetId}}-empty-pad",
-                          "props": { "padding": "xl" },
+                          "type": "Card",
+                          "id": "{{widgetId}}-run-card-{{_index}}",
                           "children": [{
-                            "type": "Text",
-                            "id": "{{widgetId}}-empty-text",
-                            "props": { "text": "No tasks running", "textStyle": "bodySmall", "color": "onSurfaceMuted" }
+                            "type": "Padding",
+                            "id": "{{widgetId}}-run-card-pad-{{_index}}",
+                            "props": { "padding": "sm" },
+                            "children": [{
+                              "type": "Row",
+                              "id": "{{widgetId}}-run-row-{{_index}}",
+                              "props": { "crossAxisAlignment": "center" },
+                              "children": [
+                                {
+                                  "type": "Conditional",
+                                  "id": "{{widgetId}}-run-spinner-cond-{{_index}}",
+                                  "props": { "visible": "{{item.isRunning}}" },
+                                  "children": [{
+                                    "type": "LoadingIndicator",
+                                    "id": "{{widgetId}}-run-spinner-{{_index}}",
+                                    "props": { "size": 16 }
+                                  }]
+                                },
+                                {
+                                  "type": "Conditional",
+                                  "id": "{{widgetId}}-run-pending-cond-{{_index}}",
+                                  "props": { "visible": "{{item.isPending}}" },
+                                  "children": [{
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-run-pending-{{_index}}",
+                                    "props": { "icon": "pending", "size": 16, "color": "warning" }
+                                  }]
+                                },
+                                {"type": "SizedBox", "id": "{{widgetId}}-run-gap-{{_index}}", "props": {"width": 8}},
+                                {
+                                  "type": "Expanded",
+                                  "id": "{{widgetId}}-run-info-{{_index}}",
+                                  "children": [{
+                                    "type": "Column",
+                                    "id": "{{widgetId}}-run-info-col-{{_index}}",
+                                    "props": { "crossAxisAlignment": "start", "mainAxisSize": "min" },
+                                    "children": [
+                                      {"type": "Text", "id": "{{widgetId}}-run-wf-{{_index}}", "props": {"text": "{{item.workflowName}}", "textStyle": "bodySmall", "color": "onSurface"}},
+                                      {
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-run-detail-{{_index}}",
+                                        "children": [
+                                          {"type": "Text", "id": "{{widgetId}}-run-proj-{{_index}}", "props": {"text": "{{item.projectName}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}},
+                                          {"type": "SizedBox", "id": "{{widgetId}}-run-sep-{{_index}}", "props": {"width": 8}},
+                                          {"type": "Text", "id": "{{widgetId}}-run-elapsed-{{_index}}", "props": {"text": "{{item.elapsed}}", "textStyle": "labelSmall", "color": "onSurfaceMuted"}}
+                                        ]
+                                      }
+                                    ]
+                                  }]
+                                },
+                                {
+                                  "type": "IconButton",
+                                  "id": "{{widgetId}}-run-cancel-{{_index}}",
+                                  "props": { "icon": "close", "size": 16, "color": "error", "tooltip": "Cancel", "channel": "task.cancel", "payload": { "taskId": "{{item.taskId}}" } }
+                                }
+                              ]
+                            }]
                           }]
                         }]
                       }]
                     }
                   ]
+                }]
+              },
+              {
+                "type": "Conditional",
+                "id": "{{widgetId}}-empty-cond",
+                "props": { "visible": "{{!hasTasks}}" },
+                "children": [{
+                  "type": "Padding",
+                  "id": "{{widgetId}}-empty-pad",
+                  "props": { "padding": "xl" },
+                  "children": [{
+                    "type": "Text",
+                    "id": "{{widgetId}}-empty-text",
+                    "props": { "text": "No tasks running", "textStyle": "bodySmall", "color": "onSurfaceMuted" }
+                  }]
                 }]
               }
             ]
