@@ -1,5 +1,5 @@
-name: file_navigator_app
-description: File Navigator window for browsing the Tercen team/project/file hierarchy.
+name: project_navigator_app
+description: Project Navigator window for browsing the Tercen team/project/file hierarchy.
 publish_to: 'none'
 version: 1.0.0+1
 

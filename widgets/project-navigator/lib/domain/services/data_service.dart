@@ -1,6 +1,6 @@
 import '../models/tree_node.dart';
 
-/// Abstract data service for the file navigator.
+/// Abstract data service for the project navigator.
 /// Phase 2: Mock implementation returns placeholder tree data.
 /// Phase 3: Real implementation queries Tercen API.
 abstract class DataService {

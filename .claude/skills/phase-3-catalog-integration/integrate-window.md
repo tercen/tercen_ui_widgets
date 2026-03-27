@@ -217,7 +217,7 @@ Window widgets typically respond to intents. Define `handlesIntent` in metadata:
 ```json
 "handlesIntent": [
   {
-    "intent": "openFileNavigator",
+    "intent": "openProjectNavigator",
     "propsMap": { "projectId": "projectId" },
     "windowTitle": "Files: {{projectName}}",
     "windowSize": "medium",
@@ -238,7 +238,7 @@ Add to the `home.windows` array if this window should open on startup:
 "home": {
   "windows": [
     {
-      "type": "FileNavigator",
+      "type": "ProjectNavigator",
       "id": "home-file-nav",
       "size": "medium",
       "align": "centerLeft",

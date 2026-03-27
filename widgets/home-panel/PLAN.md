@@ -1,7 +1,7 @@
 # HomePanel — Real Implementation Plan
 
 **Status:** Revised Draft
-**Date:** 2026-03-26
+**Date:** 2026-03-27
 **Target server:** stage.tercen.com
 **Widget kind:** window (SDUI catalog.json template)
 
@@ -19,6 +19,25 @@ Replace the placeholder HomePanel catalog.json template with a real implementati
 - Template uses placeholder text bindings (`{{data.projectsSummary}}`, etc.) instead of iterable data
 - `home.windows` already references HomePanel with `"size": "large", "align": "left"`
 - Auth is handled: orchestrator exposes `{{context.username}}`, `{{context.userId}}`, `{{context.token}}`, `{{context.isAdmin}}`, `{{context.isDark}}`
+
+### Recent SDUI additions (since initial plan, as of 2026-03-27)
+
+These don't close any gaps but are available for the template:
+
+- **Container** now supports `maxWidth` and `maxHeight` props — useful for constraining card content width
+- **Column** now supports `mainAxisSize` prop (`"min"` / `"max"`) — fixes unbounded height in windows
+- **IconButton** has `isPrimary` prop — filled variant for primary toolbar actions
+- **WindowShell** toolbar icon buttons now support `tooltip` prop
+- **Pane system** introduced — windows live in panes with tab strips; `addWindow` still works (backward compatible)
+
+### Recent orchestrator additions (since initial plan, as of 2026-03-27)
+
+- **`navigateHome` intent** now wired — Tercen logo click clears panes and reloads home layout from cached catalog
+- **`saveLayout` intent** now wired — saves current window layout as `.sdui.json` file
+- **Catalog cached** — `_loadedCatalog` field stores fetched catalog for reuse by navigateHome
+- **TaskMonitor** wired — task polling, event streaming, cancel via header intent
+
+Still not wired: `createProject`, `openProject`, `openUrl` intents. No `displayName`/`email`/`teams` context enrichment. No object-form window size.
 
 ---
 
@@ -173,6 +192,8 @@ Neither is supported by SDUI `Action` or `Text`. Two options:
 
 ## SDUI Gaps Summary (Must Fix Before Implementation)
 
+**Last checked: 2026-03-27 — all 8 gaps remain open.**
+
 | # | Gap | SDUI Component | Change Required | Priority |
 |---|---|---|---|---|
 | G1 | Missing icons: `clock_rotate_left`, `bolt`, `folder_plus` | `_iconMap` in builtin_widgets.dart | Add 3 entries | **P0** |
@@ -299,7 +320,7 @@ On submit: call `projectService.create()`, then emit `openProject` intent.
 
 #### 2d. Handle `openProject` intent routing
 
-Ensure FileNavigator catalog entry has `handlesIntent` for `openProject`.
+Ensure ProjectNavigator catalog entry has `handlesIntent` for `openProject`.
 
 #### 2e. Handle `openUrl` intent
 
@@ -450,7 +471,7 @@ WindowShell (root — provides toolbar frame)
 
 | Intent | Emitted By | Handled By |
 |---|---|---|
-| `openProject` | Project row click, activity project click | FileNavigator (`handlesIntent`) |
+| `openProject` | Project row click, activity project click | ProjectNavigator (`handlesIntent`) |
 | `openApp` | App row click | TBD — may need new widget or intent handler |
 | `createProject` | New Project toolbar button / Quick Actions | Orchestrator native dialog |
 | `showTeams` | Teams toolbar button / Quick Actions | TBD — team management widget |

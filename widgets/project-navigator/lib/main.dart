@@ -42,13 +42,13 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  runApp(FileNavigatorApp(prefs: prefs));
+  runApp(ProjectNavigatorApp(prefs: prefs));
 }
 
-class FileNavigatorApp extends StatelessWidget {
+class ProjectNavigatorApp extends StatelessWidget {
   final SharedPreferences prefs;
 
-  const FileNavigatorApp({super.key, required this.prefs});
+  const ProjectNavigatorApp({super.key, required this.prefs});
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +72,7 @@ class FileNavigatorApp extends StatelessWidget {
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, _) {
           return MaterialApp(
-            title: 'File Navigator',
+            title: 'Project Navigator',
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeProvider.themeMode,

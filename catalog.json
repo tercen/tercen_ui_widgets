@@ -1552,7 +1552,7 @@
     },
     {
       "metadata": {
-        "type": "FileNavigator",
+        "type": "ProjectNavigator",
         "tier": 2,
         "description": "File browser for a Tercen project. Lists project documents (files, schemas, workflows) with selection support.",
         "props": {
@@ -1571,7 +1571,7 @@
           "onDoubleTap"
         ],
         "handlesIntent": {
-          "intent": "openFileNavigator",
+          "intent": "openProjectNavigator",
           "propsMap": {
             "projectId": "projectId"
           },

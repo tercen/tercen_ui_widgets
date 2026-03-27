@@ -736,7 +736,7 @@ Decisions made during the design process, for reference:
 | 5 | GroupSteps have no bounding box | GroupSteps are legacy sub-workflows. A bounding box would add visual clutter. Spatial proximity and the section-header icon are sufficient. |
 | 6 | ViewSteps on the SAME row as their parent | ViewSteps are visual outputs of DataSteps. Placing them beside their parent shows the relationship without consuming vertical space. |
 | 7 | JoinStep at half-space row | Visually shows the merge point between two data branches. The hexagon shape reinforces the "merge" concept. |
-| 8 | Single-click = focus, double-click = open viewer | Consistent with file-navigator interaction pattern. Focus tells the LLM what you are looking at. Open launches a detailed view. |
+| 8 | Single-click = focus, double-click = open viewer | Consistent with project-navigator interaction pattern. Focus tells the LLM what you are looking at. Open launches a detailed view. |
 | 9 | Slow double-click for inline rename | Distinguishes rename from open-viewer (rapid double-click). Requires the node to already be focused before the rename click. Standard desktop pattern. |
 | 10 | Elbow connectors, not curved | Right-angle lines are cleaner and easier to follow in dense flowcharts. Consistent with org-chart and file-tree visual language. |
 | 11 | No zoom or pan in rev 1 | Scroll is sufficient for the reference workflow (65 steps). Zoom/pan adds significant complexity and can be added in a future revision. |

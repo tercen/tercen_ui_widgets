@@ -1,4 +1,4 @@
-/// Domain models for the file navigator tree hierarchy.
+/// Domain models for the project navigator tree hierarchy.
 
 /// The types of nodes in the navigator tree.
 enum NodeType {

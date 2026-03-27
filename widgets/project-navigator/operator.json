@@ -1,6 +1,6 @@
 {
-  "name": "File Navigator",
-  "description": "File Navigator window for browsing the Tercen team/project/file hierarchy.",
+  "name": "Project Navigator",
+  "description": "Project Navigator window for browsing the Tercen team/project/file hierarchy.",
   "isWebApp": true,
   "isViewOnly": false,
   "entryType": "app",
