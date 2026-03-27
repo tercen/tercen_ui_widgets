@@ -2374,20 +2374,23 @@
                                                     "id": "{{widgetId}}-proj-action",
                                                     "props": {
                                                       "gesture": "onTap",
-                                                      "channel": "system.intent",
+                                                      "channel": "window.intent",
                                                       "payload": {
-                                                        "intent": "openProjectNavigator",
-                                                        "projectId": "{{item.id}}",
-                                                        "projectName": "{{item.name}}"
+                                                        "intent": "openResource",
+                                                        "resourceType": "project",
+                                                        "resourceId": "{{item.id}}",
+                                                        "resourceName": "{{item.name}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
                                                       },
-                                                      "hoverColor": "surfaceContainerLowest"
+                                                      "hoverColor": "surfaceContainerHigh"
                                                     },
                                                     "children": [
                                                       {
                                                         "type": "Padding",
                                                         "id": "{{widgetId}}-proj-row-pad",
                                                         "props": {
-                                                          "padding": [6, 10, 6, 10]
+                                                          "padding": [8, 12, 8, 12]
                                                         },
                                                         "children": [
                                                           {
@@ -2398,19 +2401,37 @@
                                                             },
                                                             "children": [
                                                               {
-                                                                "type": "Icon",
-                                                                "id": "{{widgetId}}-proj-icon",
+                                                                "type": "Container",
+                                                                "id": "{{widgetId}}-proj-icon-box",
                                                                 "props": {
-                                                                  "icon": "folder",
-                                                                  "size": 14,
-                                                                  "color": "primary"
-                                                                }
+                                                                  "width": 32,
+                                                                  "height": 32,
+                                                                  "borderColor": "outlineVariant",
+                                                                  "borderRadius": 8
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Center",
+                                                                    "id": "{{widgetId}}-proj-icon-c",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Icon",
+                                                                        "id": "{{widgetId}}-proj-icon",
+                                                                        "props": {
+                                                                          "icon": "folder",
+                                                                          "size": 14,
+                                                                          "color": "primary"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
                                                               },
                                                               {
                                                                 "type": "SizedBox",
                                                                 "id": "{{widgetId}}-proj-row-gap",
                                                                 "props": {
-                                                                  "width": 8
+                                                                  "width": 10
                                                                 }
                                                               },
                                                               {
@@ -2425,25 +2446,36 @@
                                                                     },
                                                                     "children": [
                                                                       {
-                                                                        "type": "Text",
-                                                                        "id": "{{widgetId}}-proj-name",
+                                                                        "type": "Column",
+                                                                        "id": "{{widgetId}}-proj-info-col",
                                                                         "props": {
-                                                                          "text": "{{item.name}}",
-                                                                          "textStyle": "bodyMedium",
-                                                                          "color": "onSurface",
-                                                                          "maxLines": 1
-                                                                        }
+                                                                          "crossAxisAlignment": "start"
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-proj-name",
+                                                                            "props": {
+                                                                              "text": "{{item.name}}",
+                                                                              "textStyle": "labelLarge",
+                                                                              "color": "onSurface",
+                                                                              "maxLines": 1
+                                                                            }
+                                                                          },
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-proj-owner",
+                                                                            "props": {
+                                                                              "text": "{{item.acl.owner}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurfaceMuted"
+                                                                            }
+                                                                          }
+                                                                        ]
                                                                       }
                                                                     ]
                                                                   }
                                                                 ]
-                                                              },
-                                                              {
-                                                                "type": "SizedBox",
-                                                                "id": "{{widgetId}}-proj-date-gap",
-                                                                "props": {
-                                                                  "width": 12
-                                                                }
                                                               },
                                                               {
                                                                 "type": "Text",
