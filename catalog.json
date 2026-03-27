@@ -2439,39 +2439,30 @@
                                                                 "id": "{{widgetId}}-proj-info",
                                                                 "children": [
                                                                   {
-                                                                    "type": "Tooltip",
-                                                                    "id": "{{widgetId}}-proj-name-tip",
+                                                                    "type": "Column",
+                                                                    "id": "{{widgetId}}-proj-info-col",
                                                                     "props": {
-                                                                      "message": "{{item.name}}"
+                                                                      "crossAxisAlignment": "start"
                                                                     },
                                                                     "children": [
                                                                       {
-                                                                        "type": "Column",
-                                                                        "id": "{{widgetId}}-proj-info-col",
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-proj-name",
                                                                         "props": {
-                                                                          "crossAxisAlignment": "start"
-                                                                        },
-                                                                        "children": [
-                                                                          {
-                                                                            "type": "Text",
-                                                                            "id": "{{widgetId}}-proj-name",
-                                                                            "props": {
-                                                                              "text": "{{item.name}}",
-                                                                              "textStyle": "labelLarge",
-                                                                              "color": "onSurface",
-                                                                              "maxLines": 1
-                                                                            }
-                                                                          },
-                                                                          {
-                                                                            "type": "Text",
-                                                                            "id": "{{widgetId}}-proj-owner",
-                                                                            "props": {
-                                                                              "text": "{{item.acl.owner}}",
-                                                                              "textStyle": "bodySmall",
-                                                                              "color": "onSurfaceMuted"
-                                                                            }
-                                                                          }
-                                                                        ]
+                                                                          "text": "{{item.name}}",
+                                                                          "textStyle": "labelLarge",
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-proj-owner",
+                                                                        "props": {
+                                                                          "text": "{{item.acl.owner}}",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "onSurfaceMuted"
+                                                                        }
                                                                       }
                                                                     ]
                                                                   }
