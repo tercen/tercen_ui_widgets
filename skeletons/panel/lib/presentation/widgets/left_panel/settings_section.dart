@@ -45,14 +45,22 @@ class SettingsSection extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.controlSpacing),
 
-        // Toggle
+        // Toggle — approved size: 36x20 (tercen-style/testboard-controls)
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Show Labels', style: AppTextStyles.label.copyWith(color: labelColor)),
-            Switch(
-              value: provider.showLabels,
-              onChanged: provider.setShowLabels,
+            SizedBox(
+              width: 36,
+              height: 20,
+              child: FittedBox(
+                fit: BoxFit.contain,
+                child: Switch(
+                  value: provider.showLabels,
+                  onChanged: provider.setShowLabels,
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                ),
+              ),
             ),
           ],
         ),

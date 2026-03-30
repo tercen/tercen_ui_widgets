@@ -28,8 +28,6 @@ class ButtonsSection extends StatelessWidget {
     final dangerBg = isDark
         ? AppColorsDark.error.withValues(alpha: 0.1)
         : AppColors.errorLight;
-    final subtleBg = isDark ? AppColorsDark.surfaceElevated : AppColors.neutral200;
-    final subtleText = isDark ? AppColorsDark.textSecondary : AppColors.textPrimary;
     final ghostHoverBg = isDark ? AppColorsDark.surfaceElevated : AppColors.neutral200;
 
     return Column(
@@ -76,24 +74,7 @@ class ButtonsSection extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.controlSpacing),
 
-        // 4. SUBTLE — least emphasis (background actions, toolbars)
-        Text('Subtle', style: AppTextStyles.label.copyWith(color: labelColor)),
-        const SizedBox(height: AppSpacing.xs),
-        SizedBox(
-          width: double.infinity,
-          child: TextButton(
-            onPressed: () {},
-            style: TextButton.styleFrom(
-              backgroundColor: subtleBg,
-              foregroundColor: subtleText,
-            ),
-            child: const Text('Details'),
-          ),
-        ),
-
-        const SizedBox(height: AppSpacing.controlSpacing),
-
-        // 5. DANGER — destructive actions (Delete, Remove)
+        // 4. DANGER — destructive actions (Delete, Remove)
         Text('Danger', style: AppTextStyles.label.copyWith(color: labelColor)),
         const SizedBox(height: AppSpacing.xs),
         SizedBox(
