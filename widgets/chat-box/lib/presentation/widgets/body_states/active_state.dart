@@ -34,48 +34,50 @@ class ActiveState extends StatelessWidget {
           child: ChatMessageList(),
         ),
         // Compose box: primary-bordered container with shadow, max 720px wide
-        Padding(
-          padding: const EdgeInsets.only(
-            left: AppSpacing.md,
-            right: AppSpacing.md,
-            top: AppSpacing.sm,
-            bottom: AppSpacing.md,
-          ),
+        Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
-            child: Container(
-              decoration: BoxDecoration(
-                color: composeBg,
-                border: Border.all(color: primaryColor, width: 1.5),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                boxShadow: [
-                  BoxShadow(
-                    color: isDark
-                        ? Colors.black.withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.07),
-                    blurRadius: 6.0,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
+            child: Padding(
+              padding: const EdgeInsets.only(
+                left: AppSpacing.md,
+                right: AppSpacing.md,
+                top: AppSpacing.sm,
+                bottom: AppSpacing.md,
               ),
-              child: ClipRRect(
-                borderRadius:
-                    BorderRadius.circular(AppSpacing.radiusLg - 1.5),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Multi-line input area
-                    const ChatInputArea(),
-                    // Subtle divider
-                    Container(
-                      height: 1,
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: AppSpacing.sm),
-                      color: dividerColor,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: composeBg,
+                  border: Border.all(color: primaryColor, width: 1.5),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                  boxShadow: [
+                    BoxShadow(
+                      color: isDark
+                          ? Colors.black.withValues(alpha: 0.3)
+                          : Colors.black.withValues(alpha: 0.07),
+                      blurRadius: 6.0,
+                      offset: const Offset(0, 4),
                     ),
-                    // Bottom toolbar: focus context + send button
-                    const ChatBottomBar(),
                   ],
+                ),
+                child: ClipRRect(
+                  borderRadius:
+                      BorderRadius.circular(AppSpacing.radiusLg - 1.5),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Multi-line input area
+                      const ChatInputArea(),
+                      // Subtle divider
+                      Container(
+                        height: 1,
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm),
+                        color: dividerColor,
+                      ),
+                      // Bottom toolbar: focus context + send button
+                      const ChatBottomBar(),
+                    ],
+                  ),
                 ),
               ),
             ),

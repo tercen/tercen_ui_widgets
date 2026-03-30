@@ -26,17 +26,13 @@ class ThinkingIndicator extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Animated Tercen five-level logo — kept small so it doesn't dominate
+          // Animated thinking indicator GIF — kept small so it doesn't dominate
           SizedBox(
-            width: 16,
-            height: 16,
-            child: Image.network(
-              'assets/assets/thinking_indicator.gif',
+            width: 24,
+            height: 24,
+            child: Image.asset(
+              'assets/thinking_indicator.gif',
               fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Image.asset(
-                'assets/thinking_indicator.gif',
-                fit: BoxFit.contain,
-              ),
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
