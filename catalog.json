@@ -3681,6 +3681,81 @@
           }
         ]
       }
+    },
+    {
+      "metadata": {
+        "type": "TeamManager",
+        "tier": 2,
+        "description": "Team management widget for viewing and editing team members, roles, and settings.",
+        "props": {
+          "teamId": {
+            "type": "string",
+            "required": false,
+            "description": "Team ID. If omitted, shows placeholder."
+          }
+        },
+        "emittedEvents": [],
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openTeamWidget",
+          "propsMap": {
+            "teamId": "teamId"
+          },
+          "windowTitle": "Team Manager",
+          "windowSize": "large"
+        },
+        "typeColor": "#F59E0B"
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": {
+          "crossAxisAlignment": "stretch"
+        },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": {
+              "color": "#1E1E1E",
+              "padding": 8
+            },
+            "children": [
+              {
+                "type": "Text",
+                "id": "{{widgetId}}-title",
+                "props": {
+                  "text": "Team Manager",
+                  "fontSize": 13,
+                  "fontWeight": "bold",
+                  "color": "#F59E0B"
+                }
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "Center",
+                "id": "{{widgetId}}-placeholder",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-placeholder-text",
+                    "props": {
+                      "text": "Team Manager — coming soon",
+                      "fontSize": 14,
+                      "color": "grey"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "home": {
