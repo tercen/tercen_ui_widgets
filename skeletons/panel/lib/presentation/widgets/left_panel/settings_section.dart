@@ -45,14 +45,14 @@ class SettingsSection extends StatelessWidget {
 
         const SizedBox(height: AppSpacing.controlSpacing),
 
-        // Toggle — approved size: 36x20 (tercen-style/testboard-controls)
+        // Toggle — approved size: matches default button height (tercen-style/testboard-controls)
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Show Labels', style: AppTextStyles.label.copyWith(color: labelColor)),
             SizedBox(
-              width: 36,
-              height: 20,
+              width: 65,
+              height: 36,
               child: FittedBox(
                 fit: BoxFit.contain,
                 child: Switch(

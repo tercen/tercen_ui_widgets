@@ -150,10 +150,10 @@ class _ControlsSectionState extends State<ControlsSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text('Show labels', style: AppTextStyles.body.copyWith(color: labelColor)),
-            // Approved size: 36x20 (tercen-style/testboard-controls)
+            // Approved size: matches default button height (tercen-style/testboard-controls)
             SizedBox(
-              width: 36,
-              height: 20,
+              width: 65,
+              height: 36,
               child: FittedBox(
                 fit: BoxFit.contain,
                 child: Switch(
