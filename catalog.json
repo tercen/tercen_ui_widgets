@@ -3087,9 +3087,9 @@
                                                                 "type": "Container",
                                                                 "id": "{{widgetId}}-act-color",
                                                                 "props": {
-                                                                  "width": 32,
-                                                                  "height": 32,
-                                                                  "borderRadius": 8,
+                                                                  "width": 8,
+                                                                  "height": 8,
+                                                                  "borderRadius": 2,
                                                                   "color": "{{item.colorToken}}"
                                                                 }
                                                               },
@@ -3097,7 +3097,7 @@
                                                                 "type": "SizedBox",
                                                                 "id": "{{widgetId}}-act-g1",
                                                                 "props": {
-                                                                  "width": 10
+                                                                  "width": 6
                                                                 }
                                                               },
                                                               {
