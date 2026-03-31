@@ -62,13 +62,14 @@ class _UserBubble extends StatelessWidget {
         isDark ? AppColorsDark.textPrimary : AppColors.textPrimary;
     final timeColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
 
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.75,
-        ),
-        child: Row(
+    return LayoutBuilder(builder: (context, constraints) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: constraints.maxWidth * 0.75,
+          ),
+          child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -113,6 +114,7 @@ class _UserBubble extends StatelessWidget {
         ),
       ),
     );
+    });
   }
 }
 
@@ -136,13 +138,14 @@ class _AssistantBubble extends StatelessWidget {
     final timeColor = isDark ? AppColorsDark.textMuted : AppColors.textMuted;
     final bulletColor = AppLogoColors.atIndex(messageIndex);
 
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: MediaQuery.of(context).size.width * 0.85,
-        ),
-        child: Row(
+    return LayoutBuilder(builder: (context, constraints) {
+      return Align(
+        alignment: Alignment.centerLeft,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: constraints.maxWidth * 0.85,
+          ),
+          child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -193,6 +196,7 @@ class _AssistantBubble extends StatelessWidget {
         ),
       ),
     );
+    });
   }
 }
 
