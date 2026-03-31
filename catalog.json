@@ -859,40 +859,14 @@
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "Row",
-                                                        "id": "{{widgetId}}-streaming-row",
+                                                        "type": "Image",
+                                                        "id": "{{widgetId}}-streaming-gif",
                                                         "props": {
-                                                          "crossAxisAlignment": "center",
-                                                          "mainAxisSize": "min"
-                                                        },
-                                                        "children": [
-                                                          {
-                                                            "type": "Image",
-                                                            "id": "{{widgetId}}-streaming-gif",
-                                                            "props": {
-                                                              "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
-                                                              "width": 18,
-                                                              "height": 18,
-                                                              "fit": "contain"
-                                                            }
-                                                          },
-                                                          {
-                                                            "type": "SizedBox",
-                                                            "id": "{{widgetId}}-streaming-gap",
-                                                            "props": {
-                                                              "width": 6
-                                                            }
-                                                          },
-                                                          {
-                                                            "type": "Text",
-                                                            "id": "{{widgetId}}-streaming-text",
-                                                            "props": {
-                                                              "text": "Thinking...",
-                                                              "textStyle": "bodySmall",
-                                                              "color": "onSurfaceMuted"
-                                                            }
-                                                          }
-                                                        ]
+                                                          "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
+                                                          "width": 28,
+                                                          "height": 28,
+                                                          "fit": "contain"
+                                                        }
                                                       }
                                                     ]
                                                   }
