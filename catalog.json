@@ -884,59 +884,59 @@
                         ]
                       }
                     ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "type": "Conditional",
-            "id": "{{widgetId}}-thinking-cond",
-            "props": {
-              "visible": "{{isThinking}}"
-            },
-            "children": [
-              {
-                "type": "Padding",
-                "id": "{{widgetId}}-thinking-pad",
-                "props": {
-                  "padding": "sm"
-                },
-                "children": [
+                  },
                   {
-                    "type": "Row",
-                    "id": "{{widgetId}}-thinking-row",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-thinking-cond",
                     "props": {
-                      "crossAxisAlignment": "center",
-                      "mainAxisSize": "min"
+                      "visible": "{{isThinking}}"
                     },
                     "children": [
                       {
-                        "type": "Image",
-                        "id": "{{widgetId}}-thinking-gif",
+                        "type": "Padding",
+                        "id": "{{widgetId}}-thinking-pad",
                         "props": {
-                          "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/widgets/chat-box/assets/thinking_indicator.gif",
-                          "width": 16,
-                          "height": 16,
-                          "fit": "contain"
-                        }
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-thinking-gap",
-                        "props": {
-                          "width": 8
-                        }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-thinking-text",
-                        "props": {
-                          "text": "Thinking...",
-                          "textStyle": "bodySmall",
-                          "color": "onSurfaceMuted",
-                          "fontStyle": "italic"
-                        }
+                          "padding": "sm"
+                        },
+                        "children": [
+                          {
+                            "type": "Row",
+                            "id": "{{widgetId}}-thinking-row",
+                            "props": {
+                              "crossAxisAlignment": "center",
+                              "mainAxisSize": "min"
+                            },
+                            "children": [
+                              {
+                                "type": "Image",
+                                "id": "{{widgetId}}-thinking-gif",
+                                "props": {
+                                  "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/widgets/chat-box/assets/thinking_indicator.gif",
+                                  "width": 16,
+                                  "height": 16,
+                                  "fit": "contain"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-thinking-gap",
+                                "props": {
+                                  "width": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-thinking-text",
+                                "props": {
+                                  "text": "Thinking...",
+                                  "textStyle": "bodySmall",
+                                  "color": "onSurfaceMuted",
+                                  "fontStyle": "italic"
+                                }
+                              }
+                            ]
+                          }
+                        ]
                       }
                     ]
                   }
