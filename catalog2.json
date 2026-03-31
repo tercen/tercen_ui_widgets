@@ -20,7 +20,8 @@
         "state": {
           "selection": {
             "channel": "navigator.focusChanged",
-            "matchField": "nodeId"
+            "matchField": "id",
+            "payloadField": "nodeId"
           },
           "publishTo": [
             "navigator.focusChanged"
@@ -1521,7 +1522,7 @@
                                               "icon": "message",
                                               "iconStyle": "solid",
                                               "size": 14,
-                                              "color": "#FF8200"
+                                              "color": "warning"
                                             }
                                           }
                                         ]
