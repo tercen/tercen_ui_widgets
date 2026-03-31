@@ -1050,6 +1050,7 @@
                               "maxLines": 8,
                               "autofocus": true,
                               "borderless": true,
+                              "submitOnEnter": true,
                               "clearOn": "chat.inputCleared"
                             }
                           }
