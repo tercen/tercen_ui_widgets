@@ -1,6 +1,6 @@
 ---
-name: phase-3-catalog-integration
-description: Translate a Phase 2 mock widget (header or window) into an SDUI catalog.json template. Performs primitive gap analysis, creates missing SDUI primitives, and authors the catalog entry with real data connections.
+name: phase-4-catalog
+description: Phase 4 — Translate a Phase 2 HTML mock widget (header or window) into an SDUI catalog.json template. Performs primitive gap analysis, creates missing SDUI primitives, and authors the catalog entry with real data connections.
 argument-hint: "[path to Phase 2 mock widget]"
 disable-model-invocation: true
 ---

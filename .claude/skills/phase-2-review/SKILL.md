@@ -1,7 +1,7 @@
 ---
 name: phase-2-review
-description: Review a Phase 2 mock build for conformance against the skeleton template and functional spec. Determines widget kind, runs shared and kind-specific checks, produces a PASS/FAIL report.
-argument-hint: "[path to built app] [path to functional spec]"
+description: Review a Phase 2 HTML mock for conformance against the functional spec and Tercen design system. Produces a PASS/FAIL report.
+argument-hint: "[path to widget directory]"
 disable-model-invocation: true
 allowed-tools:
   - Read
@@ -15,122 +15,66 @@ allowed-tools:
 
 ## Inputs
 
-1. **Built widget directory** -- the Phase 2 output
-2. **Functional spec** -- Phase 1 output (markdown)
+1. **Widget directory** — the Phase 2 output (contains `_mock/` and `_fixtures/`)
+2. **Functional spec** — at `widgets/{name}/{name}-spec.md`
 
 If missing, ask the user.
 
 ---
 
-## Kind Detection
+## Check Group A: Mock Files Exist
 
-Read `skeleton.yaml` in the widget directory. The `kind` field determines which checks to run:
-
-- `kind: panel` -- panel widget
-- `kind: runner` -- runner widget
-- `kind: window` -- window widget
-
-If `skeleton.yaml` is not present, fall back to heuristic detection:
-- If `lib/presentation/widgets/header_panel.dart` exists -> **runner**
-- Otherwise -> **panel**
+- **A1:** `_mock/wireframe.html` exists
+- **A2:** `_mock/styled.html` exists
+- **A3:** `_mock/gap-report.md` exists
+- **A4:** `_fixtures/` directory exists with at least one JSON file
 
 ---
 
-## Kind Dispatch
+## Check Group B: Spec Coverage
 
-After determining the kind, load the corresponding checks file from this skill directory:
-
-- **panel** -> `checks-panel.md`
-- **runner** -> `checks-runner.md`
-- **window** -> `checks-window.md`
-
-Run all **shared check groups** (below) plus all checks from the kind-specific file.
+- **B1:** Every feature in the spec has a corresponding element in the styled mock
+- **B2:** All 4 body states represented (loading, empty, active, error)
+- **B3:** Toolbar controls match spec
+- **B4:** Data shapes in fixtures match spec's data requirements
 
 ---
 
-## Workflow
+## Check Group C: Design System Compliance
 
-1. Read the functional spec.
-2. Determine the widget kind (see Kind Detection above).
-3. Run shared check groups (C, H, I below).
-4. Run kind-specific checks from the dispatched file.
-5. Save conformance report to `_local/phase-2-conformance-report.md`.
-
----
-
-## Shared Check Group C: Placeholder Replacement
-
-Check for skeleton defaults in each file.
-
-### C1: pubspec.yaml
-
-- `name:` must NOT be `skeleton_app` or `skeleton_type3_app`
-- `description:` must NOT contain "skeleton"
-
-### C2: operator.json
-
-- `name` must NOT be `"Skeleton App"` or `"Skeleton Runner App"`
-- `description` must NOT contain "skeleton"
-- `urls` must NOT contain `skeleton_app` or `skeleton_type3_app`
-- `isWebApp` must be `true`
-- `isViewOnly` must be `false`
-- `entryType` must be `"app"`
-- `serve` must be `"build/web"`
-
-### C3: version_info.dart
-
-- `gitRepo` must NOT contain `skeleton_app` or `skeleton_type3_app`
-- `version` must NOT be `'dev'` (should be `'0.1.0'` or later)
-
-### C4: main.dart class name
-
-- Must NOT contain a class named `SkeletonApp`
-- The class name should reflect the widget's name
-
-### C5: home_screen.dart widget identity
-
-- `appTitle:` must NOT be `'Skeleton'` or `'Skeleton App'`
-- The App icon (`AppIcon` widget) is hardcoded -- must NOT be modified or removed
+- **C1:** No hex colour values in `styled.html` (must use CSS variables from `tercen-tokens.css`)
+- **C2:** No raw pixel font sizes (must use text style CSS variables)
+- **C3:** Spacing uses token CSS variables
+- **C4:** Border radius uses token CSS variables
+- **C5:** FontAwesome 6 Solid icons only (no Material Icons, no custom fonts)
 
 ---
 
-## Shared Check Group H: Configuration Files
+## Check Group D: Colour Approval
 
-### H1: index.html base href
-
-`web/index.html` must have base href commented out: `<!--<base href="$FLUTTER_BASE_HREF">-->`
-
-### H2: .gitignore preserves build/web
-
-`.gitignore` must contain `!build/web/`.
-
-### H3: analysis_options.yaml exists
+- **D1:** Read `../tercen-style/tokens.meta.json`, extract approved colour names
+- **D2:** Every CSS variable colour reference in `styled.html` uses an approved token
+- **D3:** No unapproved colour tokens used
 
 ---
 
-## Shared Check Group I: Service Locator
+## Check Group E: Gap Report Quality
 
-### I1: Guard against double registration
-
-Must check `if (serviceLocator.isRegistered<DataService>()) return;` before registering.
-
-### I2: Phase 3 readiness
-
-Must accept optional `useMocks`, `factory`, `taskId` parameters (active or commented stubs).
+- **E1:** `gap-report.md` exists and is non-empty
+- **E2:** Every element in styled mock is accounted for in gap report
+- **E3:** Gap categorisation uses the 5 defined categories (primitive gap, variant gap, prop gap, composition question, style gap)
+- **E4:** If gaps exist, each has a clear action item
 
 ---
 
 ## Conformance Report Format
 
-Produce the report in this exact format. List every check -- do not abbreviate or truncate with "...".
-
-The report must include all shared checks (C, H, I) and all kind-specific checks from the dispatched file. Combine them into a single report.
+Write to `_local/review-phase-2.md`. Use this exact format:
 
 ```markdown
-# Phase 2 Conformance Report
+# Phase 2 Mock Review
 
-**Widget:** [widget name from pubspec.yaml]
-**Kind:** [panel / runner / window]
+**Widget:** [widget name]
 **Spec:** [spec filename]
 **Date:** [review date]
 
@@ -142,31 +86,43 @@ The report must include all shared checks (C, H, I) and all kind-specific checks
 | FAIL | [n] |
 | **Total** | [n] |
 
-**Verdict:** [CONFORMING / NON-CONFORMING]
+**Verdict:** [PASS / FAIL]
 
-A widget is CONFORMING only if every check is PASS. Any FAIL makes it NON-CONFORMING.
+A mock is PASS only if every check is PASS. Any FAIL makes it FAIL.
 
 ---
 
 ## Results
 
-[Kind-specific check groups listed first, then shared groups]
+### A: Mock Files Exist
+- A1: [PASS/FAIL] -- wireframe.html [detail if FAIL]
+- A2: [PASS/FAIL] -- styled.html [detail if FAIL]
+- A3: [PASS/FAIL] -- gap-report.md [detail if FAIL]
+- A4: [PASS/FAIL] -- _fixtures/ directory [detail if FAIL]
 
-### C: Placeholder Replacement
-- C1: [PASS/FAIL] -- pubspec.yaml [detail if FAIL]
-- C2: [PASS/FAIL] -- operator.json [detail if FAIL]
-- C3: [PASS/FAIL] -- version_info.dart [detail if FAIL]
-- C4: [PASS/FAIL] -- main.dart class name [detail if FAIL]
-- C5: [PASS/FAIL] -- home_screen.dart widget identity [detail if FAIL]
+### B: Spec Coverage
+- B1: [PASS/FAIL] -- Feature coverage [detail if FAIL]
+- B2: [PASS/FAIL] -- All 4 body states [detail if FAIL]
+- B3: [PASS/FAIL] -- Toolbar controls [detail if FAIL]
+- B4: [PASS/FAIL] -- Fixture data shapes [detail if FAIL]
 
-### H: Configuration
-- H1: [PASS/FAIL] -- index.html base href [detail if FAIL]
-- H2: [PASS/FAIL] -- .gitignore preserves build/web [detail if FAIL]
-- H3: [PASS/FAIL] -- analysis_options.yaml exists [detail if FAIL]
+### C: Design System Compliance
+- C1: [PASS/FAIL] -- No hex colours [detail if FAIL]
+- C2: [PASS/FAIL] -- No raw pixel font sizes [detail if FAIL]
+- C3: [PASS/FAIL] -- Spacing tokens [detail if FAIL]
+- C4: [PASS/FAIL] -- Border radius tokens [detail if FAIL]
+- C5: [PASS/FAIL] -- FontAwesome 6 Solid only [detail if FAIL]
 
-### I: Service Locator
-- I1: [PASS/FAIL] -- Guard against double registration [detail if FAIL]
-- I2: [PASS/FAIL] -- Phase 3 readiness [detail if FAIL]
+### D: Colour Approval
+- D1: [PASS/FAIL] -- Approved colours extracted [detail if FAIL]
+- D2: [PASS/FAIL] -- All colour refs approved [detail if FAIL]
+- D3: [PASS/FAIL] -- No unapproved tokens [detail if FAIL]
+
+### E: Gap Report Quality
+- E1: [PASS/FAIL] -- gap-report.md exists and non-empty [detail if FAIL]
+- E2: [PASS/FAIL] -- All elements accounted for [detail if FAIL]
+- E3: [PASS/FAIL] -- Correct gap categories [detail if FAIL]
+- E4: [PASS/FAIL] -- Action items for gaps [detail if FAIL]
 
 ---
 
@@ -176,18 +132,15 @@ A widget is CONFORMING only if every check is PASS. Any FAIL makes it NON-CONFOR
 
 ### [Check ID]: [Check name]
 **File:** [file path]
-**Line:** [line number if applicable]
 **Expected:** [what should be there]
 **Found:** [what was found]
-**Spec Reference:** [which spec section this relates to, if applicable]
 ```
 
 ---
 
 ## Rules
 
-- Report only. Never edit widget files.
-- Read the spec first. Cite file paths and line numbers in failures.
+- Report only. Never edit mock files.
+- Read the spec first. Cite file paths in failures.
 - Only check what this skill defines. Do not add opinions beyond the checks.
-- DO-NOT-MODIFY: compare literally -- do not accept "equivalent" code.
 - Every check is PASS or FAIL. No warnings.

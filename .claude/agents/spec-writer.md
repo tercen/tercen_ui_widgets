@@ -3,7 +3,7 @@ name: spec-writer
 description: Write functional specs for Tercen Flutter widgets. Use for Phase 1 work — producing a complete functional specification through conversation with the user.
 model: opus
 skills:
-  - phase-1-functional-spec
+  - phase-1-spec
 permissionMode: acceptEdits
 ---
 

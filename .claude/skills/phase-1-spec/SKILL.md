@@ -1,6 +1,6 @@
 ---
-name: phase-1-functional-spec
-description: Write a functional specification for a new Tercen Flutter web widget. Use when starting a new widget, converting an existing one, or when the user asks for a spec, requirements, or functional design. Produces a complete spec document with no code. Supports panel, runner, and window widget kinds.
+name: phase-1-spec
+description: Write a functional specification for a new Tercen window/header widget. Use when starting a new widget, converting an existing one, or when the user asks for a spec, requirements, or functional design. Produces a complete spec document with no code.
 argument-hint: "[widget name or description]"
 disable-model-invocation: true
 ---
@@ -13,20 +13,17 @@ For shared patterns: `_references/global-rules.md`.
 
 ---
 
-## Determine the Widget Kind
+## Widget Kind
 
-1. Check whether the target project contains a `skeleton.yaml` file. If it does, read the `kind` field to determine the widget kind.
-2. If no `skeleton.yaml` exists, ask the user which widget kind this is.
+This repo is for window/header widgets only. The widget kind is always **window**.
 
 ### Kind Dispatch
 
 | Kind | Template File |
 |------|--------------|
-| panel | `template-panel.md` |
-| runner | `template-runner.md` |
 | window | `template-window.md` |
 
-Load the matching template file from this skill directory and follow its constraints, spec template, discovery process, and checklist.
+Load `template-window.md` from this skill directory and follow its constraints, spec template, discovery process, and checklist.
 
 ---
 
