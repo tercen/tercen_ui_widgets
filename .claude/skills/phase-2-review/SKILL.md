@@ -3,24 +3,16 @@ name: phase-2-review
 description: Review a Phase 2 HTML mock for conformance against the functional spec and Tercen design system. Produces a PASS/FAIL report.
 argument-hint: "[path to widget directory]"
 disable-model-invocation: true
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - AskUserQuestion
 ---
 
 **READ-ONLY. Do NOT modify this file.**
 
 ## Inputs
 
-1. **Widget directory** — the Phase 2 output (contains `_mock/` and `_fixtures/`)
-2. **Functional spec** — at `widgets/{name}/{name}-spec.md`
+1. **Widget directory** — Phase 2 output (contains `_mock/` and `_fixtures/`)
+2. **Functional spec** — `widgets/{name}/{name}-spec.md`
 
-If missing, ask the user.
-
----
+Ask user if missing.
 
 ## Check Group A: Mock Files Exist
 
@@ -29,47 +21,37 @@ If missing, ask the user.
 - **A3:** `_mock/gap-report.md` exists
 - **A4:** `_fixtures/` directory exists with at least one JSON file
 
----
-
 ## Check Group B: Spec Coverage
 
-- **B1:** Every feature in the spec has a corresponding element in the styled mock
+- **B1:** Every spec feature has a corresponding element in styled mock
 - **B2:** All 4 body states represented (loading, empty, active, error)
 - **B3:** Toolbar controls match spec
-- **B4:** Data shapes in fixtures match spec's data requirements
-
----
+- **B4:** Fixture data shapes match spec's data requirements
 
 ## Check Group C: Design System Compliance
 
-- **C1:** No hex colour values in `styled.html` (must use CSS variables from `tercen-tokens.css`)
+- **C1:** No hex colour values in `styled.html` (must use CSS variables)
 - **C2:** No raw pixel font sizes (must use text style CSS variables)
 - **C3:** Spacing uses token CSS variables
 - **C4:** Border radius uses token CSS variables
-- **C5:** FontAwesome 6 Solid icons only (no Material Icons, no custom fonts)
-
----
+- **C5:** FontAwesome 6 Solid icons only
 
 ## Check Group D: Colour Approval
 
-- **D1:** Read `../tercen-style/tokens.meta.json`, extract approved colour names
-- **D2:** Every CSS variable colour reference in `styled.html` uses an approved token
+- **D1:** Approved colour names extracted from `../tercen-style/tokens.meta.json`
+- **D2:** Every CSS variable colour reference uses an approved token
 - **D3:** No unapproved colour tokens used
-
----
 
 ## Check Group E: Gap Report Quality
 
-- **E1:** `gap-report.md` exists and is non-empty
-- **E2:** Every element in styled mock is accounted for in gap report
-- **E3:** Gap categorisation uses the 5 defined categories (primitive gap, variant gap, prop gap, composition question, style gap)
-- **E4:** If gaps exist, each has a clear action item
-
----
+- **E1:** `gap-report.md` exists and non-empty
+- **E2:** Every styled mock element accounted for in gap report
+- **E3:** Gap categorisation uses the 5 defined categories
+- **E4:** Each gap has a clear action item
 
 ## Conformance Report Format
 
-Write to `_local/review-phase-2.md`. Use this exact format:
+Write to `_local/review-phase-2.md`:
 
 ```markdown
 # Phase 2 Mock Review
@@ -88,7 +70,7 @@ Write to `_local/review-phase-2.md`. Use this exact format:
 
 **Verdict:** [PASS / FAIL]
 
-A mock is PASS only if every check is PASS. Any FAIL makes it FAIL.
+PASS only if every check is PASS.
 
 ---
 
@@ -128,7 +110,7 @@ A mock is PASS only if every check is PASS. Any FAIL makes it FAIL.
 
 ## Failures Detail
 
-[For each FAIL, provide:]
+[For each FAIL:]
 
 ### [Check ID]: [Check name]
 **File:** [file path]
@@ -136,11 +118,9 @@ A mock is PASS only if every check is PASS. Any FAIL makes it FAIL.
 **Found:** [what was found]
 ```
 
----
-
 ## Rules
 
 - Report only. Never edit mock files.
-- Read the spec first. Cite file paths in failures.
-- Only check what this skill defines. Do not add opinions beyond the checks.
+- Read spec first. Cite file paths in failures.
+- Only check what this skill defines.
 - Every check is PASS or FAIL. No warnings.

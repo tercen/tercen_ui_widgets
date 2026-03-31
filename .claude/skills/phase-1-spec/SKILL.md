@@ -9,15 +9,11 @@ disable-model-invocation: true
 
 Produce a functional spec document. Do NOT write any code.
 
-For shared patterns: `_references/global-rules.md`.
-
----
+Shared patterns: `_references/global-rules.md`.
 
 ## Widget Kind
 
-This repo is for window/header widgets only. The widget kind is always **window**.
-
-### Kind Dispatch
+Window/header widgets only. Kind is always **window**.
 
 | Kind | Template File |
 |------|--------------|
@@ -25,21 +21,17 @@ This repo is for window/header widgets only. The widget kind is always **window*
 
 Load `template-window.md` from this skill directory and follow its constraints, spec template, discovery process, and checklist.
 
----
-
 ## Output Rules
 
-- The spec describes WHAT the widget does, never HOW it is implemented.
-- No Dart code, no pseudo-code, no implementation approach.
-- No pixel values, spacing tokens, or colour codes (except domain-specific colours like chart series colours).
-- No references to Flutter widgets, Provider, GetIt, or any framework.
-- Mock data requirements describe WHAT data is needed and WHERE it comes from, not how to load it.
-
----
+- Describe WHAT, never HOW.
+- No Dart/pseudo-code, no implementation approach.
+- No pixel values, spacing tokens, or colour codes (exception: domain-specific like chart series colours).
+- No Flutter widgets, Provider, GetIt, or framework references.
+- Mock data: describe WHAT data is needed and WHERE it comes from, not how to load it.
 
 ## Question Efficiency
 
-- Do NOT dump all questions at once. Ask 3-4 per round.
-- Skip questions already answered by provided material (existing code, screenshots, etc.).
-- When reviewing existing code/UI, proactively identify constraint violations and propose fixes.
+- 3-4 questions per round, not all at once.
+- Skip questions already answered by provided material.
+- Proactively identify constraint violations in existing code/UI and propose fixes.
 - Consolidate related questions.

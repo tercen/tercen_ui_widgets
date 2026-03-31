@@ -3,12 +3,6 @@ name: phase-1-review
 description: Review a Phase 1 functional spec for conformance. Determines widget kind, loads kind-specific checks, and produces a PASS/FAIL conformance report.
 argument-hint: "[path to functional spec]"
 disable-model-invocation: true
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
-  - Write
-  - AskUserQuestion
 ---
 
 **READ-ONLY — do not modify this file.**
@@ -19,80 +13,53 @@ Spec path (markdown file). Ask user if not provided.
 
 ## Kind Detection
 
-Read the spec to determine widget kind (panel / runner / window). Look for `Widget Kind:` in header metadata, or infer from layout:
-- **Two-panel** (left panel + main content) = **panel**
-- **Three-panel** (status panel + header panel + content panel) = **runner**
-- **Window** (standalone feature window) = **window**
+Read spec to determine widget kind. Look for `Widget Kind:` in header metadata, or infer:
+- Two-panel (left + main) = **panel**
+- Three-panel (status + header + content) = **runner**
+- Standalone feature window = **window**
 
 ## Kind Dispatch
 
-After determining the widget kind, load the corresponding kind-specific checks file from this skill directory:
-- panel → `checks-panel.md`
-- runner → `checks-runner.md`
-- window → `checks-window.md`
+Load kind-specific checks from this skill directory:
+- panel -> `checks-panel.md`
+- runner -> `checks-runner.md`
+- window -> `checks-window.md`
 
 ## Workflow
 
-1. Read the entire spec.
-2. Determine the widget kind. Load the kind-specific checks file.
-3. Run **shared checks** (Group B: Header Metadata, Group: No Implementation Detail) plus all **kind-specific checks** in order, recording PASS/FAIL for each.
-4. Produce the Conformance Report (template below).
-5. Save report to `_local/phase-1-conformance-report.md` in the widget directory (ask user for path if unknown).
-
----
+1. Read entire spec
+2. Determine kind, load kind-specific checks
+3. Run shared checks (Group B + No Implementation Detail) plus all kind-specific checks, recording PASS/FAIL
+4. Produce Conformance Report (template below)
+5. Save to `_local/phase-1-conformance-report.md` (ask user for path if unknown)
 
 ## Shared Check Group B: Header Metadata
 
-### B1: Widget name in top-level heading
-Top-level heading with widget name (e.g., `# Volcano Plot - Functional Specification`).
-
-### B2: Version field present
-`**Version:**` present (e.g., `1.0.0`).
-
-### B3: Status field present
-`**Status:**` present (e.g., `Draft`, `Approved`).
-
-### B4: Last Updated field present
-`**Last Updated:**` present with a date.
-
-### B5: Reference field present
-`**Reference:**` present, describing source material. If built from scratch: "Original specification".
-
-### B6: Widget kind identified
-Spec must explicitly state the widget kind (typically in 1.1 or 1.3):
-- Panel: Tercen -> Widget -> Screen (+ download / write-back)
-- Runner: Multi-step workflow manager with Tercen object creation and breakpoints
-- Window: Standalone feature window
-
----
+| Check | Rule |
+|-------|------|
+| B1 | Top-level heading with widget name |
+| B2 | `**Version:**` present |
+| B3 | `**Status:**` present |
+| B4 | `**Last Updated:**` with date |
+| B5 | `**Reference:**` describing source material (if from scratch: "Original specification") |
+| B6 | Widget kind explicitly stated (typically in 1.1 or 1.3) |
 
 ## Shared Check Group: No Implementation Detail
 
-Spec must describe WHAT, never HOW. Scan entire document for violations.
+Spec must describe WHAT, never HOW. Scan entire document.
 
-### No code
-No Dart code, pseudo-code, or code-like syntax (variable assignments, function calls, class definitions). Exception: ASCII layout diagram.
-
-### No framework references
-No Flutter widgets, Provider, GetIt, ChangeNotifier, Consumer, context.watch, setState, or framework-specific terms.
-
-### No pixel values or spacing tokens
-No pixel values ("280px"), spacing tokens ("AppSpacing.md"), or CSS-like specs. Exception: domain-specific user-facing sizes ("thumbnail 100x100").
-
-### No colour codes
-No hex codes ("#1E40AF"), RGB values, or theme tokens ("AppColors.primary"). Exception: domain-level colour descriptions ("red for upregulated").
-
-### No file paths or import statements
-No Dart file paths ("lib/domain/models/"), imports, or package names.
-
-### Mock data describes WHAT not HOW
-Mock Data section: no loading mechanisms (`rootBundle`, `loadString()`, `CsvToListConverter`). Only describe what data is needed and where it comes from.
-
----
+| Check | Rule | Exception |
+|-------|------|-----------|
+| No code | No Dart, pseudo-code, code-like syntax | ASCII layout diagrams OK |
+| No framework references | No Flutter widgets, Provider, GetIt, ChangeNotifier, Consumer, context.watch, setState | — |
+| No pixel values/spacing tokens | No "280px", "AppSpacing.md", CSS-like specs | Domain-specific user-facing sizes OK ("thumbnail 100x100") |
+| No colour codes | No hex codes, RGB values, theme tokens | Domain-level descriptions OK ("red for upregulated") |
+| No file paths/imports | No Dart file paths, imports, package names | — |
+| Mock data WHAT not HOW | No loading mechanisms (rootBundle, loadString, CsvToListConverter) | — |
 
 ## Conformance Report Format
 
-Produce the report in this exact wrapper format. The kind-specific checks file defines which check groups appear in the Results and Failures Detail sections. List every check — do not abbreviate or truncate with "...".
+Use this exact wrapper format. Kind-specific checks file defines which groups appear in Results and Failures Detail. List every check — do not abbreviate.
 
 ```markdown
 # Phase 1 Conformance Report
@@ -112,7 +79,7 @@ Produce the report in this exact wrapper format. The kind-specific checks file d
 
 **Verdict:** [CONFORMING / NON-CONFORMING]
 
-A widget is CONFORMING only if every check is PASS. Any FAIL makes it NON-CONFORMING.
+CONFORMING only if every check is PASS.
 
 ---
 
@@ -126,7 +93,7 @@ A widget is CONFORMING only if every check is PASS. Any FAIL makes it NON-CONFOR
 - B5: [PASS/FAIL] — Reference field [detail if FAIL]
 - B6: [PASS/FAIL] — Widget kind identified [detail if FAIL]
 
-[Kind-specific check groups inserted here — see checks-panel.md / checks-runner.md / checks-window.md]
+[Kind-specific check groups from checks-panel.md / checks-runner.md / checks-window.md]
 
 ### No Implementation Detail
 - [PASS/FAIL] — No code [detail if FAIL]
@@ -140,20 +107,18 @@ A widget is CONFORMING only if every check is PASS. Any FAIL makes it NON-CONFOR
 
 ## Failures Detail
 
-[For each FAIL, provide:]
+[For each FAIL:]
 
 ### [Check ID]: [Check name]
-**Location:** [section number and heading in the spec]
+**Location:** [section number and heading]
 **Expected:** [what should be there]
 **Found:** [what was found, or "missing"]
 ```
 
----
+## Rules
 
-## Rules for the Reviewer
-
-1. **Report only.** Never edit the spec. Cite section numbers and quote problematic text in failures.
-2. **Only check what skills define.** No opinions on domain accuracy, writing quality, or extra requirements.
-3. **Judge content, not formatting.** Correct info in non-standard markdown = PASS. Perfect formatting with empty/placeholder content = FAIL.
-4. **All checks are binary PASS/FAIL.** No warnings or partial credit.
-5. **Domain accuracy is out of scope.** Structural and rule conformance only.
+1. Report only. Never edit the spec. Cite section numbers and quote text in failures.
+2. Only check what skills define. No opinions on domain accuracy or writing quality.
+3. Judge content, not formatting. Correct info in non-standard markdown = PASS. Perfect formatting with empty content = FAIL.
+4. All checks are binary PASS/FAIL. No warnings or partial credit.
+5. Domain accuracy is out of scope. Structural and rule conformance only.
