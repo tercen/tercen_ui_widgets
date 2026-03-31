@@ -1,4 +1,0 @@
-kind: runner
-label: Runner Widget
-description: Three-panel layout. Status panel, header panel, content panel.
-design_reference: _references/runner-design.md
