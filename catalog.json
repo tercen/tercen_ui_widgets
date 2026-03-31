@@ -2538,7 +2538,7 @@
                                         [],
                                         [],
                                         0,
-                                        50
+                                        200
                                       ],
                                       "refreshOn": "home-panel.refresh"
                                     },
@@ -2627,6 +2627,7 @@
                                                 "props": {
                                                   "items": "{{data}}",
                                                   "limit": "{{state}}",
+                                                  "where": {"kind": "WebAppOperator"},
                                                   "filterChannel": "card.{{widgetId}}-apps-card.filter",
                                                   "filterFields": ["name"]
                                                 },
@@ -2795,7 +2796,7 @@
                                                 "props": {
                                                   "icon": "open_in_new",
                                                   "size": 12,
-                                                  "color": "primary"
+                                                  "color": "link"
                                                 }
                                               },
                                               {
@@ -2811,7 +2812,7 @@
                                                 "props": {
                                                   "text": "Learning Center",
                                                   "textStyle": "labelLarge",
-                                                  "color": "primary"
+                                                  "color": "link"
                                                 }
                                               }
                                             ]
@@ -2826,7 +2827,7 @@
                                           "channel": "window.intent",
                                           "payload": {
                                             "intent": "openUrl",
-                                            "url": "https://github.com/tercen/starter_guide"
+                                            "url": "https://tercen.github.io/starter_guide/"
                                           }
                                         },
                                         "children": [
@@ -2843,7 +2844,7 @@
                                                 "props": {
                                                   "icon": "open_in_new",
                                                   "size": 12,
-                                                  "color": "primary"
+                                                  "color": "link"
                                                 }
                                               },
                                               {
@@ -2859,7 +2860,7 @@
                                                 "props": {
                                                   "text": "Starter Guide",
                                                   "textStyle": "labelLarge",
-                                                  "color": "primary"
+                                                  "color": "link"
                                                 }
                                               }
                                             ]
@@ -2891,7 +2892,7 @@
                                                 "props": {
                                                   "icon": "open_in_new",
                                                   "size": 12,
-                                                  "color": "primary"
+                                                  "color": "link"
                                                 }
                                               },
                                               {
@@ -2907,7 +2908,7 @@
                                                 "props": {
                                                   "text": "Public Projects",
                                                   "textStyle": "labelLarge",
-                                                  "color": "primary"
+                                                  "color": "link"
                                                 }
                                               }
                                             ]
