@@ -859,14 +859,23 @@
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "Image",
-                                                        "id": "{{widgetId}}-streaming-gif",
+                                                        "type": "Row",
+                                                        "id": "{{widgetId}}-streaming-row",
                                                         "props": {
-                                                          "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
-                                                          "width": 28,
-                                                          "height": 28,
-                                                          "fit": "contain"
-                                                        }
+                                                          "mainAxisAlignment": "start"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Image",
+                                                            "id": "{{widgetId}}-streaming-gif",
+                                                            "props": {
+                                                              "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
+                                                              "width": 28,
+                                                              "height": 28,
+                                                              "fit": "contain"
+                                                            }
+                                                          }
+                                                        ]
                                                       }
                                                     ]
                                                   }
@@ -889,14 +898,6 @@
                 ]
               }
             ]
-          },
-          {
-            "type": "Divider",
-            "id": "{{widgetId}}-divider-bottom",
-            "props": {
-              "height": 1,
-              "color": "outlineVariant"
-            }
           },
           {
             "type": "Conditional",
