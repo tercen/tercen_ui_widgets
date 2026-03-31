@@ -911,9 +911,9 @@
                                 "type": "Image",
                                 "id": "{{widgetId}}-thinking-gif",
                                 "props": {
-                                  "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/widgets/chat-box/assets/thinking_indicator.gif",
-                                  "width": 16,
-                                  "height": 16,
+                                  "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
+                                  "width": 24,
+                                  "height": 24,
                                   "fit": "contain"
                                 }
                               },
