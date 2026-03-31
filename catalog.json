@@ -3073,7 +3073,7 @@
                                                         "type": "Padding",
                                                         "id": "{{widgetId}}-act-row-pad",
                                                         "props": {
-                                                          "padding": 8
+                                                          "padding": 10
                                                         },
                                                         "children": [
                                                           {
@@ -3087,9 +3087,9 @@
                                                                 "type": "Container",
                                                                 "id": "{{widgetId}}-act-color",
                                                                 "props": {
-                                                                  "width": 16,
-                                                                  "height": 16,
-                                                                  "borderRadius": 3,
+                                                                  "width": 32,
+                                                                  "height": 32,
+                                                                  "borderRadius": 8,
                                                                   "color": "{{item.colorToken}}"
                                                                 }
                                                               },
@@ -3097,24 +3097,23 @@
                                                                 "type": "SizedBox",
                                                                 "id": "{{widgetId}}-act-g1",
                                                                 "props": {
-                                                                  "width": 8
+                                                                  "width": 10
                                                                 }
                                                               },
                                                               {
-                                                                "type": "Expanded",
-                                                                "id": "{{widgetId}}-act-obj-exp",
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-act-type-box",
                                                                 "props": {
-                                                                  "flex": 3
+                                                                  "width": 52
                                                                 },
                                                                 "children": [
                                                                   {
                                                                     "type": "Text",
-                                                                    "id": "{{widgetId}}-act-obj",
+                                                                    "id": "{{widgetId}}-act-type",
                                                                     "props": {
-                                                                      "text": "{{item.objectName}}",
-                                                                      "textStyle": "labelLarge",
-                                                                      "color": "onSurface",
-                                                                      "maxLines": 1
+                                                                      "text": "{{item.type}}",
+                                                                      "textStyle": "bodySmall",
+                                                                      "color": "onSurfaceMuted"
                                                                     }
                                                                   }
                                                                 ]
@@ -3123,46 +3122,51 @@
                                                                 "type": "SizedBox",
                                                                 "id": "{{widgetId}}-act-g2",
                                                                 "props": {
-                                                                  "width": 8
+                                                                  "width": 10
                                                                 }
                                                               },
                                                               {
                                                                 "type": "Expanded",
-                                                                "id": "{{widgetId}}-act-proj-exp",
-                                                                "props": {
-                                                                  "flex": 2
-                                                                },
+                                                                "id": "{{widgetId}}-act-info",
                                                                 "children": [
                                                                   {
-                                                                    "type": "Text",
-                                                                    "id": "{{widgetId}}-act-proj",
+                                                                    "type": "Column",
+                                                                    "id": "{{widgetId}}-act-info-col",
                                                                     "props": {
-                                                                      "text": "{{item.projectName}}",
-                                                                      "textStyle": "bodySmall",
-                                                                      "color": "textTertiary",
-                                                                      "maxLines": 1
-                                                                    }
+                                                                      "crossAxisAlignment": "start"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-act-obj",
+                                                                        "props": {
+                                                                          "text": "{{item.objectName}}",
+                                                                          "textStyle": "labelLarge",
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-act-owner",
+                                                                        "props": {
+                                                                          "text": "{{item.projectName}}",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "onSurfaceMuted"
+                                                                        }
+                                                                      }
+                                                                    ]
                                                                   }
                                                                 ]
                                                               },
                                                               {
-                                                                "type": "SizedBox",
-                                                                "id": "{{widgetId}}-act-date-box",
+                                                                "type": "Text",
+                                                                "id": "{{widgetId}}-act-date",
                                                                 "props": {
-                                                                  "width": 100
-                                                                },
-                                                                "children": [
-                                                                  {
-                                                                    "type": "Text",
-                                                                    "id": "{{widgetId}}-act-date",
-                                                                    "props": {
-                                                                      "text": "{{item.date}}",
-                                                                      "textStyle": "bodySmall",
-                                                                      "color": "textTertiary",
-                                                                      "maxLines": 1
-                                                                    }
-                                                                  }
-                                                                ]
+                                                                  "text": "{{item.date}}",
+                                                                  "textStyle": "bodySmall",
+                                                                  "color": "onSurfaceMuted"
+                                                                }
                                                               }
                                                             ]
                                                           }
