@@ -1,0 +1,3699 @@
+{
+  "widgets": [
+    {
+      "metadata": {
+        "type": "WorkflowViewer",
+        "tier": 2,
+        "description": "Interactive directed graph viewer for Tercen workflows. Displays steps as shaped nodes (rounded rects, circles, hexagons) with elbow connectors, state-colored icons, zoom/pan, and selection with path highlighting. Publishes selection events when steps are clicked.",
+        "props": {
+          "workflowId": {
+            "type": "string",
+            "required": false,
+            "description": "Workflow ID. If omitted, prompts user."
+          }
+        },
+        "emittedEvents": [
+          "workflow.selection"
+        ],
+        "acceptedActions": [
+          "onTap"
+        ],
+        "handlesIntent": [
+          {
+            "intent": "openWorkflow",
+            "propsMap": {
+              "workflowId": "workflowId"
+            },
+            "windowTitle": "Workflow: {{workflowName}}",
+            "windowSize": "large"
+          },
+          {
+            "intent": "Workflow",
+            "propsMap": {
+              "id": "workflowId",
+              "name": "workflowName"
+            },
+            "windowTitle": "Workflow: {{name}}",
+            "windowSize": "large"
+          }
+        ],
+        "typeColor": "#9333EA"
+      },
+      "template": {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {
+              "name": "workflowId",
+              "label": "Workflow ID",
+              "default": "28e3c9888e9935f667aed6f07c007c7c"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch"
+            },
+            "children": [
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
+                  {
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-ds",
+                    "props": {
+                      "service": "workflowService",
+                      "method": "getWorkflowGraph",
+                      "args": [
+                        "{{workflowId}}"
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
+                        "props": {
+                          "visible": "{{loading}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
+                                "props": {
+                                  "variant": "skeleton",
+                                  "text": "Loading workflow\u2026"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-error",
+                        "props": {
+                          "visible": "{{error}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-err-center",
+                            "children": [
+                              {
+                                "type": "Column",
+                                "id": "{{widgetId}}-err-col",
+                                "props": {
+                                  "mainAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-err-icon",
+                                    "props": {
+                                      "icon": "error_outline",
+                                      "size": 32,
+                                      "color": "error"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-err-gap",
+                                    "props": {
+                                      "height": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-err-text",
+                                    "props": {
+                                      "text": "{{errorMessage}}",
+                                      "textStyle": "bodySmall",
+                                      "color": "error"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-content",
+                            "props": {
+                              "crossAxisAlignment": "stretch"
+                            },
+                            "children": [
+                              {
+                                "type": "Container",
+                                "id": "{{widgetId}}-toolbar",
+                                "props": {
+                                  "color": "surfaceContainerHigh",
+                                  "padding": "sm"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Row",
+                                    "id": "{{widgetId}}-toolbar-row",
+                                    "props": {
+                                      "mainAxisAlignment": "spaceBetween"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-toolbar-left",
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-icon",
+                                            "props": {
+                                              "icon": "account_tree",
+                                              "size": 16,
+                                              "color": "primary"
+                                            }
+                                          },
+                                          {
+                                            "type": "SizedBox",
+                                            "id": "{{widgetId}}-icon-gap",
+                                            "props": {
+                                              "width": 8
+                                            }
+                                          },
+                                          {
+                                            "type": "Text",
+                                            "id": "{{widgetId}}-title",
+                                            "props": {
+                                              "text": "{{data.name}}",
+                                              "textStyle": "labelMedium",
+                                              "color": "onSurface"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Text",
+                                        "id": "{{widgetId}}-count",
+                                        "props": {
+                                          "text": "{{data.nodes.length}} steps",
+                                          "textStyle": "labelSmall",
+                                          "color": "onSurfaceMuted"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Divider",
+                                "id": "{{widgetId}}-div",
+                                "props": {
+                                  "height": 1,
+                                  "color": "outlineVariant"
+                                }
+                              },
+                              {
+                                "type": "Expanded",
+                                "id": "{{widgetId}}-graph-area",
+                                "children": [
+                                  {
+                                    "type": "DirectedGraph",
+                                    "id": "{{widgetId}}-graph",
+                                    "props": {
+                                      "nodes": "{{data.nodes}}",
+                                      "edges": "{{data.edges}}",
+                                      "channel": "workflow.selection"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "DataTableViewer",
+        "tier": 2,
+        "description": "Tabular data viewer for Tercen workflow step tables. Fetches input or output tables for a step and displays them in browser-style tabs. Each tab shows a scrollable data table with column headers, types, and selectable cell values.",
+        "props": {
+          "workflowId": {
+            "type": "string",
+            "required": false,
+            "description": "Workflow ID. If omitted, prompts user."
+          },
+          "stepId": {
+            "type": "string",
+            "required": false,
+            "description": "Step ID within the workflow. If omitted, prompts user."
+          },
+          "tableType": {
+            "type": "string",
+            "required": false,
+            "default": "output",
+            "values": [
+              "input",
+              "output"
+            ],
+            "description": "Whether to show input or output tables for the step."
+          }
+        },
+        "emittedEvents": [
+          "system.selection.table"
+        ],
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openStepTables",
+          "propsMap": {
+            "workflowId": "workflowId",
+            "stepId": "stepId"
+          },
+          "windowTitle": "Tables: {{stepName}}",
+          "windowSize": "large"
+        },
+        "typeColor": "#FF8200"
+      },
+      "template": {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {
+              "name": "workflowId",
+              "label": "Workflow ID",
+              "default": "28e3c9888e9935f667aed6f07c007c7c"
+            },
+            {
+              "name": "stepId",
+              "label": "Step ID",
+              "default": "73ab0d32-cd1a-4ee5-bdec-b744b3767b32"
+            },
+            {
+              "name": "tableType",
+              "label": "Table type",
+              "default": "output",
+              "values": [
+                "output",
+                "input"
+              ]
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch"
+            },
+            "children": [
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
+                  {
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-ds",
+                    "props": {
+                      "service": "workflowService",
+                      "method": "getStepTables",
+                      "args": [
+                        "{{workflowId}}",
+                        "{{stepId}}",
+                        "{{tableType}}"
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
+                        "props": {
+                          "visible": "{{loading}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
+                                "props": {
+                                  "variant": "skeleton",
+                                  "text": "Loading step tables\u2026"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-error",
+                        "props": {
+                          "visible": "{{error}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-err-center",
+                            "children": [
+                              {
+                                "type": "Column",
+                                "id": "{{widgetId}}-err-col",
+                                "props": {
+                                  "mainAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-err-icon",
+                                    "props": {
+                                      "icon": "error_outline",
+                                      "size": 32,
+                                      "color": "error"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-err-gap",
+                                    "props": {
+                                      "height": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-err-text",
+                                    "props": {
+                                      "text": "{{errorMessage}}",
+                                      "textStyle": "bodySmall",
+                                      "color": "error"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-content",
+                            "props": {
+                              "crossAxisAlignment": "stretch"
+                            },
+                            "children": [
+                              {
+                                "type": "Container",
+                                "id": "{{widgetId}}-toolbar",
+                                "props": {
+                                  "color": "surfaceContainerHigh",
+                                  "padding": "sm"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Row",
+                                    "id": "{{widgetId}}-toolbar-row",
+                                    "props": {
+                                      "mainAxisAlignment": "spaceBetween"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-toolbar-left",
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-icon",
+                                            "props": {
+                                              "icon": "table_chart",
+                                              "size": 16,
+                                              "color": "primary"
+                                            }
+                                          },
+                                          {
+                                            "type": "SizedBox",
+                                            "id": "{{widgetId}}-icon-gap",
+                                            "props": {
+                                              "width": 8
+                                            }
+                                          },
+                                          {
+                                            "type": "Text",
+                                            "id": "{{widgetId}}-title",
+                                            "props": {
+                                              "text": "{{data.stepName}}",
+                                              "textStyle": "labelMedium",
+                                              "color": "onSurface"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Text",
+                                        "id": "{{widgetId}}-type-label",
+                                        "props": {
+                                          "text": "{{data.tableType}}",
+                                          "textStyle": "labelSmall",
+                                          "color": "onSurfaceMuted"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Divider",
+                                "id": "{{widgetId}}-div",
+                                "props": {
+                                  "height": 1,
+                                  "color": "outlineVariant"
+                                }
+                              },
+                              {
+                                "type": "Expanded",
+                                "id": "{{widgetId}}-tables-area",
+                                "children": [
+                                  {
+                                    "type": "TabbedDataTable",
+                                    "id": "{{widgetId}}-tdt",
+                                    "props": {
+                                      "tables": "{{data.tables}}",
+                                      "maxRows": 100
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "ChatBox",
+        "tier": 2,
+        "description": "LLM chat interface for Tercen. Displays a message thread with markdown-rich responses, syntax-highlighted code blocks, and streaming indicators. Sends user messages to the LLM via WebSocket and emits action intents on the EventBus.",
+        "props": {},
+        "emittedEvents": [
+          "chat.message.sent",
+          "createStep",
+          "openFile",
+          "openWorkflow",
+          "navigateToStep",
+          "navigateTo",
+          "refreshTree",
+          "workflowUpdated"
+        ],
+        "acceptedActions": [],
+        "handlesIntent": [
+          {
+            "intent": "openChat",
+            "propsMap": {},
+            "windowTitle": "Chat",
+            "windowSize": "column"
+          }
+        ],
+        "typeColor": "#0099FF"
+      },
+      "template": {
+        "type": "WindowShell",
+        "id": "{{widgetId}}-root",
+        "props": {
+          "toolbarActions": [
+            {
+              "icon": "plus",
+              "channel": "chat.newSession",
+              "isPrimary": true,
+              "tooltip": "New Session"
+            },
+            {
+              "icon": "comments",
+              "channel": "chat.showHistory",
+              "tooltip": "History"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "ChatStream",
+                "id": "{{widgetId}}-stream",
+                "props": {
+                  "inputId": "{{widgetId}}-input",
+                  "sendChannel": "chat.send",
+                  "clearChannel": "chat.inputCleared"
+                },
+                "children": [
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-empty-cond",
+                    "props": {
+                      "visible": "{{hasMessages}}",
+                      "negate": true
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-empty",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-empty-col",
+                            "props": {
+                              "mainAxisAlignment": "center"
+                            },
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-empty-icon",
+                                "props": {
+                                  "icon": "comments",
+                                  "size": 48,
+                                  "color": "onSurfaceMuted"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-empty-spacer",
+                                "props": {
+                                  "height": 12
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-empty-msg",
+                                "props": {
+                                  "text": "Start a conversation",
+                                  "textStyle": "titleMedium",
+                                  "color": "onSurfaceVariant"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-empty-spacer2",
+                                "props": {
+                                  "height": 4
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-empty-detail",
+                                "props": {
+                                  "text": "Ask a question or give an instruction",
+                                  "textStyle": "bodySmall",
+                                  "color": "onSurfaceMuted"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-active-cond",
+                    "props": {
+                      "visible": "{{hasMessages}}"
+                    },
+                    "children": [
+                      {
+                        "type": "ListView",
+                        "id": "{{widgetId}}-message-list",
+                        "children": [
+                          {
+                            "type": "ForEach",
+                            "id": "{{widgetId}}-messages",
+                            "props": {
+                              "items": "{{messages}}"
+                            },
+                            "children": [
+                              {
+                                "type": "Padding",
+                                "id": "{{widgetId}}-msg-pad",
+                                "props": {
+                                  "padding": 6
+                                },
+                                "children": [
+                                  {
+                                    "type": "Row",
+                                    "id": "{{widgetId}}-msg-row",
+                                    "props": {
+                                      "crossAxisAlignment": "start"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-user",
+                                        "props": {
+                                          "visible": "{{item.isUser}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-user",
+                                            "props": {
+                                              "icon": "message",
+                                              "iconStyle": "solid",
+                                              "size": 14,
+                                              "color": "warning"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-assistant",
+                                        "props": {
+                                          "visible": "{{item.isAssistant}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-assistant",
+                                            "props": {
+                                              "icon": "robot",
+                                              "size": 16,
+                                              "color": "tertiary"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-tool",
+                                        "props": {
+                                          "visible": "{{item.isTool}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-tool",
+                                            "props": {
+                                              "icon": "wrench",
+                                              "size": 16,
+                                              "color": "onSurfaceVariant"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-icon-error",
+                                        "props": {
+                                          "visible": "{{item.isError}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-ic-error",
+                                            "props": {
+                                              "icon": "circle-exclamation",
+                                              "size": 16,
+                                              "color": "error"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "SizedBox",
+                                        "id": "{{widgetId}}-msg-gap",
+                                        "props": {
+                                          "width": 8
+                                        }
+                                      },
+                                      {
+                                        "type": "Expanded",
+                                        "id": "{{widgetId}}-msg-content",
+                                        "children": [
+                                          {
+                                            "type": "Column",
+                                            "id": "{{widgetId}}-msg-content-col",
+                                            "props": {
+                                              "crossAxisAlignment": "stretch"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-user",
+                                                "props": {
+                                                  "visible": "{{item.isUser}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "SelectableText",
+                                                    "id": "{{widgetId}}-text-user",
+                                                    "props": {
+                                                      "text": "{{item.text}}",
+                                                      "color": "onSurface"
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-assistant",
+                                                "props": {
+                                                  "visible": "{{item.isAssistant}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Markdown",
+                                                    "id": "{{widgetId}}-md-assistant",
+                                                    "props": {
+                                                      "content": "{{item.text}}",
+                                                      "selectable": true
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-tool",
+                                                "props": {
+                                                  "visible": "{{item.isTool}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-text-tool",
+                                                    "props": {
+                                                      "text": "{{item.text}}",
+                                                      "color": "onSurfaceVariant"
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-content-error",
+                                                "props": {
+                                                  "visible": "{{item.isError}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-text-error",
+                                                    "props": {
+                                                      "text": "{{item.text}}",
+                                                      "color": "error"
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-streaming-ind",
+                                                "props": {
+                                                  "visible": "{{item.isStreaming}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Padding",
+                                                    "id": "{{widgetId}}-streaming-pad",
+                                                    "props": {
+                                                      "padding": 4
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Row",
+                                                        "id": "{{widgetId}}-streaming-row",
+                                                        "props": {
+                                                          "mainAxisAlignment": "start"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Image",
+                                                            "id": "{{widgetId}}-streaming-gif",
+                                                            "props": {
+                                                              "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
+                                                              "width": 28,
+                                                              "height": 28,
+                                                              "fit": "contain"
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Conditional",
+            "id": "{{widgetId}}-focus-cond",
+            "props": {
+              "visible": "{{focusLabel}}"
+            },
+            "children": [
+              {
+                "type": "Container",
+                "id": "{{widgetId}}-focus-bar",
+                "props": {
+                  "color": "surfaceContainerLow",
+                  "padding": 4
+                },
+                "children": [
+                  {
+                    "type": "Row",
+                    "id": "{{widgetId}}-focus-row",
+                    "props": {
+                      "crossAxisAlignment": "center"
+                    },
+                    "children": [
+                      {
+                        "type": "Icon",
+                        "id": "{{widgetId}}-focus-icon",
+                        "props": {
+                          "icon": "crosshairs",
+                          "size": 12,
+                          "color": "onSurfaceMuted"
+                        }
+                      },
+                      {
+                        "type": "SizedBox",
+                        "id": "{{widgetId}}-focus-gap",
+                        "props": {
+                          "width": 4
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "id": "{{widgetId}}-focus-text",
+                        "props": {
+                          "text": "Focus: {{focusLabel}}",
+                          "textStyle": "labelSmall",
+                          "color": "onSurfaceMuted"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Padding",
+            "id": "{{widgetId}}-compose-pad",
+            "props": {
+              "padding": "sm"
+            },
+            "children": [
+              {
+                "type": "Center",
+                "id": "{{widgetId}}-compose-center",
+                "children": [
+                  {
+                    "type": "Container",
+                    "id": "{{widgetId}}-compose",
+                "props": {
+                  "color": "surface",
+                  "borderColor": "primary",
+                  "borderWidth": 1.5,
+                  "borderRadius": 12,
+                  "elevation": 3,
+                  "maxWidth": 720
+                },
+                "children": [
+                  {
+                    "type": "Column",
+                    "id": "{{widgetId}}-compose-col",
+                    "props": {
+                      "crossAxisAlignment": "stretch"
+                    },
+                    "children": [
+                      {
+                        "type": "Padding",
+                        "id": "{{widgetId}}-input-pad",
+                        "props": {
+                          "padding": "sm"
+                        },
+                        "children": [
+                          {
+                            "type": "TextField",
+                            "id": "{{widgetId}}-input",
+                            "props": {
+                              "hint": "Type a message...",
+                              "maxLines": 8,
+                              "autofocus": true,
+                              "borderless": true,
+                              "submitOnEnter": true,
+                              "clearOn": "chat.inputCleared"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Divider",
+                        "id": "{{widgetId}}-compose-divider",
+                        "props": {
+                          "height": 1,
+                          "thickness": 0.5,
+                          "color": "outlineVariant"
+                        }
+                      },
+                      {
+                        "type": "Container",
+                        "id": "{{widgetId}}-bottom-bar",
+                        "props": {
+                          "height": 44
+                        },
+                        "children": [
+                          {
+                            "type": "Padding",
+                            "id": "{{widgetId}}-bottom-pad",
+                            "props": {
+                              "padding": 4
+                            },
+                            "children": [
+                              {
+                                "type": "Row",
+                                "id": "{{widgetId}}-bottom-row",
+                                "props": {
+                                  "crossAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-focus-cond",
+                                    "props": {
+                                      "visible": "{{focusLabel}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-focus-row",
+                                        "props": {
+                                          "crossAxisAlignment": "center"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-focus-icon",
+                                            "props": {
+                                              "icon": "crosshairs",
+                                              "size": 10,
+                                              "color": "onSurfaceMuted"
+                                            }
+                                          },
+                                          {
+                                            "type": "SizedBox",
+                                            "id": "{{widgetId}}-focus-gap",
+                                            "props": {
+                                              "width": 4
+                                            }
+                                          },
+                                          {
+                                            "type": "Text",
+                                            "id": "{{widgetId}}-focus-text",
+                                            "props": {
+                                              "text": "Focus: {{focusLabel}}",
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurfaceMuted"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Spacer",
+                                    "id": "{{widgetId}}-bottom-spacer",
+                                    "props": {}
+                                  },
+                                  {
+                                    "type": "Tooltip",
+                                    "id": "{{widgetId}}-send-tip",
+                                    "props": {
+                                      "message": "Send"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Action",
+                                        "id": "{{widgetId}}-send-action",
+                                        "props": {
+                                          "gesture": "onTap",
+                                          "channel": "chat.send",
+                                          "payload": {}
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Container",
+                                            "id": "{{widgetId}}-send",
+                                            "props": {
+                                              "width": 36,
+                                              "height": 36,
+                                              "color": "primary",
+                                              "borderRadius": 8
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Center",
+                                                "id": "{{widgetId}}-send-center",
+                                                "children": [
+                                                  {
+                                                    "type": "Icon",
+                                                    "id": "{{widgetId}}-send-icon",
+                                                    "props": {
+                                                      "icon": "send",
+                                                      "size": 14,
+                                                      "color": "onPrimary"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+              ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "DocumentViewer",
+        "tier": 2,
+        "description": "Document viewer for Tercen files. Fetches file metadata (name, owner, size, dates) and downloads file content as selectable text. If fileId is not provided, prompts the user.",
+        "props": {
+          "fileId": {
+            "type": "string",
+            "required": false,
+            "description": "Tercen file ID to view. If omitted, prompts user."
+          }
+        },
+        "emittedEvents": [
+          "system.selection.file"
+        ],
+        "acceptedActions": [],
+        "handlesIntent": [
+          {
+            "intent": "openFile",
+            "propsMap": {
+              "fileId": "fileId"
+            },
+            "windowTitle": "{{fileName}}",
+            "windowSize": "medium"
+          },
+          {
+            "intent": "FileDocument",
+            "propsMap": {
+              "id": "fileId",
+              "name": "fileName"
+            },
+            "windowTitle": "{{name}}",
+            "windowSize": "medium"
+          },
+          {
+            "intent": "ProjectDocument",
+            "propsMap": {
+              "id": "fileId",
+              "name": "fileName"
+            },
+            "windowTitle": "{{name}}",
+            "windowSize": "medium"
+          }
+        ],
+        "typeColor": "#EC4899"
+      },
+      "template": {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {
+              "name": "fileId",
+              "label": "File ID",
+              "default": "2076952ae523bb4d472e283b9e001298"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch"
+            },
+            "children": [
+              {
+                "type": "DataSource",
+                "id": "{{widgetId}}-meta-ds",
+                "props": {
+                  "service": "fileService",
+                  "method": "get",
+                  "args": [
+                    "{{fileId}}"
+                  ]
+                },
+                "children": [
+                  {
+                    "type": "Container",
+                    "id": "{{widgetId}}-toolbar",
+                    "props": {
+                      "color": "surfaceContainerHigh",
+                      "padding": "sm"
+                    },
+                    "children": [
+                      {
+                        "type": "Row",
+                        "id": "{{widgetId}}-toolbar-row",
+                        "props": {
+                          "mainAxisAlignment": "spaceBetween"
+                        },
+                        "children": [
+                          {
+                            "type": "Row",
+                            "id": "{{widgetId}}-toolbar-left",
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-icon",
+                                "props": {
+                                  "icon": "description",
+                                  "size": 16,
+                                  "color": "primary"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-icon-gap",
+                                "props": {
+                                  "width": 8
+                                }
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-has-name",
+                                "props": {
+                                  "visible": "{{ready}}"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-title",
+                                    "props": {
+                                      "text": "{{data.name}}",
+                                      "textStyle": "labelMedium",
+                                      "color": "onSurface"
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-no-name",
+                                "props": {
+                                  "visible": "{{loading}}"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-title-loading",
+                                    "props": {
+                                      "text": "Document Viewer",
+                                      "textStyle": "labelMedium",
+                                      "color": "onSurface"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-meta-ready",
+                            "props": {
+                              "visible": "{{ready}}"
+                            },
+                            "children": [
+                              {
+                                "type": "Row",
+                                "id": "{{widgetId}}-meta-row",
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-owner-icon",
+                                    "props": {
+                                      "icon": "person",
+                                      "size": 14,
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-og",
+                                    "props": {
+                                      "width": 4
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-owner",
+                                    "props": {
+                                      "text": "{{data.acl.owner}}",
+                                      "textStyle": "labelSmall",
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-sep1",
+                                    "props": {
+                                      "width": 16
+                                    }
+                                  },
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-size-icon",
+                                    "props": {
+                                      "icon": "storage",
+                                      "size": 14,
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-sg",
+                                    "props": {
+                                      "width": 4
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-size",
+                                    "props": {
+                                      "text": "{{data.size}} bytes",
+                                      "textStyle": "labelSmall",
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Divider",
+                "id": "{{widgetId}}-div-top",
+                "props": {
+                  "height": 1,
+                  "color": "outlineVariant"
+                }
+              },
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
+                  {
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-content-ds",
+                    "props": {
+                      "service": "fileService",
+                      "method": "download",
+                      "args": [
+                        "{{fileId}}"
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
+                        "props": {
+                          "visible": "{{loading}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
+                                "props": {
+                                  "variant": "skeleton",
+                                  "text": "Loading document\u2026"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-error",
+                        "props": {
+                          "visible": "{{error}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-err-center",
+                            "children": [
+                              {
+                                "type": "Column",
+                                "id": "{{widgetId}}-err-col",
+                                "props": {
+                                  "mainAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-err-icon",
+                                    "props": {
+                                      "icon": "error_outline",
+                                      "size": 32,
+                                      "color": "error"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-err-gap",
+                                    "props": {
+                                      "height": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-err-text",
+                                    "props": {
+                                      "text": "{{errorMessage}}",
+                                      "textStyle": "bodySmall",
+                                      "color": "error"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "ListView",
+                            "id": "{{widgetId}}-scroll",
+                            "props": {
+                              "padding": "md"
+                            },
+                            "children": [
+                              {
+                                "type": "SelectableText",
+                                "id": "{{widgetId}}-content",
+                                "props": {
+                                  "text": "{{data.content}}",
+                                  "textStyle": "bodyMedium",
+                                  "color": "onSurface"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "ProjectNavigator",
+        "tier": 2,
+        "description": "File browser for a Tercen project. Lists project documents (files, schemas, workflows) with selection support.",
+        "props": {
+          "projectId": {
+            "type": "string",
+            "required": false,
+            "description": "Project ID to browse. If omitted, prompts user."
+          }
+        },
+        "emittedEvents": [
+          "navigator.focusChanged",
+          "system.intent"
+        ],
+        "acceptedActions": [
+          "onTap",
+          "onDoubleTap"
+        ],
+        "handlesIntent": {
+          "intent": "openProjectNavigator",
+          "propsMap": {
+            "projectId": "projectId"
+          },
+          "windowTitle": "Files: {{projectName}}",
+          "windowSize": "medium"
+        },
+        "typeColor": "#FFBF00"
+      },
+      "template": {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {
+              "name": "projectId",
+              "label": "Project ID",
+              "default": "2076952ae523bb4d472e283b9e000121"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch"
+            },
+            "children": [
+              {
+                "type": "Container",
+                "id": "{{widgetId}}-toolbar",
+                "props": {
+                  "color": "surfaceContainerHigh",
+                  "padding": "sm"
+                },
+                "children": [
+                  {
+                    "type": "Row",
+                    "id": "{{widgetId}}-toolbar-row",
+                    "props": {
+                      "mainAxisAlignment": "spaceBetween"
+                    },
+                    "children": [
+                      {
+                        "type": "Text",
+                        "id": "{{widgetId}}-title",
+                        "props": {
+                          "text": "Navigator",
+                          "textStyle": "labelMedium",
+                          "color": "onSurface"
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "id": "{{widgetId}}-filter-label",
+                        "props": {
+                          "text": "All types",
+                          "textStyle": "labelSmall",
+                          "color": "onSurfaceMuted"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
+                  {
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-ds",
+                    "props": {
+                      "service": "projectDocumentService",
+                      "method": "findProjectObjectsByLastModifiedDate",
+                      "args": [
+                        [
+                          "{{projectId}}",
+                          ""
+                        ],
+                        [
+                          "{{projectId}}",
+                          "\uf000"
+                        ],
+                        50
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
+                        "props": {
+                          "visible": "{{loading}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
+                                "props": {
+                                  "variant": "skeleton",
+                                  "text": "Loading\u2026"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-error",
+                        "props": {
+                          "visible": "{{error}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-err-center",
+                            "children": [
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "Error: {{errorMessage}}",
+                                  "color": "error"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "ListView",
+                            "id": "{{widgetId}}-lv",
+                            "props": {
+                              "padding": 4
+                            },
+                            "children": [
+                              {
+                                "type": "ForEach",
+                                "id": "{{widgetId}}-fe",
+                                "props": {
+                                  "items": "{{data}}"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Action",
+                                    "id": "dbl-{{item.id}}",
+                                    "props": {
+                                      "gesture": "onDoubleTap",
+                                      "channel": "system.intent",
+                                      "payload": {
+                                        "intent": "{{item.kind}}",
+                                        "id": "{{item.id}}",
+                                        "name": "{{item.name}}",
+                                        "kind": "{{item.kind}}",
+                                        "subKind": "{{item.subKind}}"
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Action",
+                                        "id": "tap-{{item.id}}",
+                                        "props": {
+                                          "gesture": "onTap",
+                                          "channel": "navigator.focusChanged",
+                                          "payload": {
+                                            "nodeId": "{{item.id}}",
+                                            "nodeType": "{{item.kind}}",
+                                            "nodeName": "{{item.name}}"
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "ReactTo",
+                                            "id": "rt-{{item.id}}",
+                                            "props": {
+                                              "channel": "navigator.focusChanged",
+                                              "match": {
+                                                "nodeId": "{{item.id}}"
+                                              },
+                                              "overrideProps": {
+                                                "color": "primaryContainer"
+                                              }
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "pad-{{item.id}}",
+                                                "props": {
+                                                  "padding": "sm"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Row",
+                                                    "id": "row-{{item.id}}",
+                                                    "children": [
+                                                      {
+                                                        "type": "Icon",
+                                                        "id": "icon-{{item.id}}",
+                                                        "props": {
+                                                          "icon": "description",
+                                                          "size": 16,
+                                                          "color": "onSurfaceVariant"
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "SizedBox",
+                                                        "id": "gap-{{item.id}}",
+                                                        "props": {
+                                                          "width": 8
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "Expanded",
+                                                        "id": "exp-{{item.id}}",
+                                                        "children": [
+                                                          {
+                                                            "type": "Text",
+                                                            "id": "name-{{item.id}}",
+                                                            "props": {
+                                                              "text": "{{item.name}}",
+                                                              "textStyle": "bodySmall"
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "kind-{{item.id}}",
+                                                        "props": {
+                                                          "text": "{{item.kind}}",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "AuditTrail",
+        "tier": 2,
+        "description": "Compliance and regulatory log review tool for Tercen. Displays a unified timeline of platform activity events (object creation, modification, deletion, workflow execution) with resizable columns, sortable headers, column-level filters, and date-range filtering. Supports detail panel inspection, multi-select with send-to-Chat for hallucination checking, CSV export, and EventBus-driven scope control.",
+        "props": {},
+        "emittedEvents": [
+          "window.intent"
+        ],
+        "acceptedActions": [
+          "openAuditTrail"
+        ],
+        "typeColor": "#0000FF"
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": {
+          "crossAxisAlignment": "stretch"
+        },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": {
+              "color": "surfaceContainerHigh",
+              "padding": 8
+            },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-toolbar-row",
+                "props": {
+                  "mainAxisAlignment": "spaceBetween"
+                },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": {
+                      "text": "Audit Trail",
+                      "fontSize": 13,
+                      "fontWeight": "bold",
+                      "color": "primary"
+                    }
+                  },
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-scope-label",
+                    "props": {
+                      "text": "No scope selected",
+                      "fontSize": 11,
+                      "color": "onSurfaceMuted"
+                    }
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "Center",
+                "id": "{{widgetId}}-empty",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-empty-text",
+                    "props": {
+                      "text": "Select a scope to view audit events",
+                      "fontSize": 12,
+                      "color": "onSurfaceMuted"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "PngViewer",
+        "tier": 2,
+        "description": "Image viewer for Tercen workflow step outputs. Fetches generated images (PNG, SVG) from a step's computed results and displays them with zoom/pan. Multiple images shown in browser-style tabs.",
+        "props": {
+          "workflowId": {
+            "type": "string",
+            "required": false,
+            "description": "Workflow ID. If omitted, prompts user."
+          },
+          "stepId": {
+            "type": "string",
+            "required": false,
+            "description": "Step ID within the workflow. If omitted, prompts user."
+          }
+        },
+        "emittedEvents": [],
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openStepImages",
+          "propsMap": {
+            "workflowId": "workflowId",
+            "stepId": "stepId"
+          },
+          "windowTitle": "Images: {{stepName}}",
+          "windowSize": "large"
+        },
+        "typeColor": "#66FF7F"
+      },
+      "template": {
+        "type": "PromptRequired",
+        "id": "{{widgetId}}-prompt",
+        "props": {
+          "fields": [
+            {
+              "name": "workflowId",
+              "label": "Workflow ID",
+              "default": "28e3c9888e9935f667aed6f07c007c7c"
+            },
+            {
+              "name": "stepId",
+              "label": "Step ID",
+              "default": "a7a3aaea-33b9-4dfd-81f9-d86de12d6dcc"
+            }
+          ]
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch"
+            },
+            "children": [
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
+                  {
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-ds",
+                    "props": {
+                      "service": "tableSchemaService",
+                      "method": "getStepImages",
+                      "args": [
+                        "{{workflowId}}",
+                        "{{stepId}}"
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
+                        "props": {
+                          "visible": "{{loading}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
+                                "props": {
+                                  "variant": "skeleton",
+                                  "text": "Loading images\u2026"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-error",
+                        "props": {
+                          "visible": "{{error}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-err-center",
+                            "children": [
+                              {
+                                "type": "Column",
+                                "id": "{{widgetId}}-err-col",
+                                "props": {
+                                  "mainAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-err-icon",
+                                    "props": {
+                                      "icon": "error_outline",
+                                      "size": 32,
+                                      "color": "error"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-err-gap",
+                                    "props": {
+                                      "height": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-err-text",
+                                    "props": {
+                                      "text": "{{errorMessage}}",
+                                      "textStyle": "bodySmall",
+                                      "color": "error"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-content",
+                            "props": {
+                              "crossAxisAlignment": "stretch"
+                            },
+                            "children": [
+                              {
+                                "type": "Container",
+                                "id": "{{widgetId}}-toolbar",
+                                "props": {
+                                  "color": "surfaceContainerHigh",
+                                  "padding": "sm"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Row",
+                                    "id": "{{widgetId}}-toolbar-row",
+                                    "props": {
+                                      "mainAxisAlignment": "spaceBetween"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-toolbar-left",
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-icon",
+                                            "props": {
+                                              "icon": "image",
+                                              "size": 16,
+                                              "color": "primary"
+                                            }
+                                          },
+                                          {
+                                            "type": "SizedBox",
+                                            "id": "{{widgetId}}-icon-gap",
+                                            "props": {
+                                              "width": 8
+                                            }
+                                          },
+                                          {
+                                            "type": "Text",
+                                            "id": "{{widgetId}}-title",
+                                            "props": {
+                                              "text": "{{data.stepName}}",
+                                              "textStyle": "labelMedium",
+                                              "color": "onSurface"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Text",
+                                        "id": "{{widgetId}}-count",
+                                        "props": {
+                                          "text": "{{data.images.length}} images",
+                                          "textStyle": "labelSmall",
+                                          "color": "onSurfaceMuted"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Divider",
+                                "id": "{{widgetId}}-div",
+                                "props": {
+                                  "height": 1,
+                                  "color": "outlineVariant"
+                                }
+                              },
+                              {
+                                "type": "Expanded",
+                                "id": "{{widgetId}}-viewer-area",
+                                "children": [
+                                  {
+                                    "type": "TabbedImageViewer",
+                                    "id": "{{widgetId}}-viewer",
+                                    "props": {
+                                      "images": "{{data.images}}",
+                                      "authToken": "{{context.token}}"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "HomePanel",
+        "tier": 2,
+        "description": "Personalized landing dashboard for Tercen. Displays a four-card responsive grid: Recent Projects, Featured Apps, Help & Documentation, and Recent Activity. Toolbar provides quick actions (New Project, Teams, Audit). Cards load data independently via DataSource service calls. Publishes navigation intents on window.intent channel.",
+        "props": {},
+        "emittedEvents": [
+          "window.intent"
+        ],
+        "acceptedActions": [],
+        "typeColor": "#0D9488"
+      },
+      "template": {
+        "type": "WindowShell",
+        "id": "{{widgetId}}-root",
+        "props": {
+          "toolbarActions": [
+            {
+              "icon": "plus",
+              "label": "New Project",
+              "channel": "window.intent",
+              "payload": {
+                "intent": "createProject",
+                "placement": "samePane",
+                "sourceWindowId": "{{widgetId}}"
+              },
+              "isPrimary": true,
+              "tooltip": "New Project"
+            },
+            {
+              "icon": "people",
+              "label": "Teams",
+              "channel": "window.intent",
+              "payload": {
+                "intent": "openTeamManagement",
+                "placement": "samePane",
+                "sourceWindowId": "{{widgetId}}"
+              },
+              "tooltip": "Teams"
+            },
+            {
+              "icon": "checklist",
+              "label": "Audit",
+              "channel": "window.intent",
+              "payload": {
+                "intent": "openAuditTrail",
+                "placement": "samePane",
+                "sourceWindowId": "{{widgetId}}"
+              },
+              "tooltip": "Audit"
+            }
+          ]
+        },
+        "children": [
+          {
+                "type": "Container",
+                "id": "{{widgetId}}-bg",
+                "props": {
+                  "color": "surfaceContainerLow"
+                },
+                "children": [
+                  {
+                    "type": "ListView",
+                    "id": "{{widgetId}}-scroll",
+                    "props": {
+                      "padding": 8
+                    },
+                    "children": [
+                      {
+                        "type": "Grid",
+                        "id": "{{widgetId}}-grid",
+                        "props": {
+                          "columns": 2,
+                          "minColumnWidth": 300,
+                          "spacing": 16,
+                          "runSpacing": 16
+                        },
+                        "children": [
+                          {
+                            "type": "DashboardCard",
+                            "id": "{{widgetId}}-proj-card",
+                            "props": {
+                              "title": "Recent Projects",
+                              "icon": "folder_open",
+                              "footerSlot": 1,
+                              "searchable": true,
+                              "pageSizes": [5, 10, 20],
+                              "pageSizeChannel": "state.hp-proj-ps.set",
+                              "defaultPageSize": 5
+                            },
+                            "children": [
+                              {
+                                "type": "StateHolder",
+                                "id": "hp-proj-ps",
+                                "props": {
+                                  "initial": 5
+                                },
+                                "children": [
+                                  {
+                                    "type": "DataSource",
+                                    "id": "{{widgetId}}-proj-ds",
+                                    "props": {
+                                      "service": "projectService",
+                                      "method": "recentProjects",
+                                      "args": [
+                                        "{{context.username}}"
+                                      ],
+                                      "refreshOn": "home-panel.refresh",
+                                      "searchChannel": "card.{{widgetId}}-proj-card.filter",
+                                      "searchService": "documentService",
+                                      "searchMethod": "search",
+                                      "searchArgs": [100, false, ""],
+                                      "searchResultFilter": {"subKind": "Project"}
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-proj-loading",
+                                        "props": {
+                                          "visible": "{{loading}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Center",
+                                            "id": "{{widgetId}}-proj-spin-c",
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-proj-spin-p",
+                                                "props": {
+                                                  "padding": 16
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "LoadingIndicator",
+                                                    "id": "{{widgetId}}-proj-li",
+                                                    "props": {
+                                                      "variant": "spinner"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-proj-error",
+                                        "props": {
+                                          "visible": "{{error}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Center",
+                                            "id": "{{widgetId}}-proj-err-c",
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-proj-err-p",
+                                                "props": {
+                                                  "padding": 16
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-proj-err-txt",
+                                                    "props": {
+                                                      "text": "{{errorMessage}}",
+                                                      "textStyle": "bodySmall",
+                                                      "color": "error"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-proj-ready",
+                                        "props": {
+                                          "visible": "{{ready}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Column",
+                                            "id": "{{widgetId}}-proj-list",
+                                            "props": {
+                                              "mainAxisSize": "min"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "ForEach",
+                                                "id": "{{widgetId}}-proj-fe",
+                                                "props": {
+                                                  "items": "{{data}}",
+                                                  "limit": "{{state}}",
+                                                  "filterChannel": "card.{{widgetId}}-proj-card.filter",
+                                                  "filterFields": ["name"]
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Action",
+                                                    "id": "{{widgetId}}-proj-action",
+                                                    "props": {
+                                                      "gesture": "onTap",
+                                                      "channel": "window.intent",
+                                                      "payload": {
+                                                        "intent": "openResource",
+                                                        "resourceType": "project",
+                                                        "resourceId": "{{item.id}}",
+                                                        "resourceName": "{{item.name}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
+                                                      },
+                                                      "hoverColor": "surfaceContainerHigh"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Padding",
+                                                        "id": "{{widgetId}}-proj-row-pad",
+                                                        "props": {
+                                                          "padding": 10
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-proj-row",
+                                                            "props": {
+                                                              "crossAxisAlignment": "center"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Container",
+                                                                "id": "{{widgetId}}-proj-icon-box",
+                                                                "props": {
+                                                                  "width": 32,
+                                                                  "height": 32,
+                                                                  "borderColor": "outlineVariant",
+                                                                  "borderRadius": 8
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Center",
+                                                                    "id": "{{widgetId}}-proj-icon-c",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Icon",
+                                                                        "id": "{{widgetId}}-proj-icon",
+                                                                        "props": {
+                                                                          "icon": "folder",
+                                                                          "size": 14,
+                                                                          "color": "primary"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-proj-row-gap",
+                                                                "props": {
+                                                                  "width": 10
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Expanded",
+                                                                "id": "{{widgetId}}-proj-info",
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Column",
+                                                                    "id": "{{widgetId}}-proj-info-col",
+                                                                    "props": {
+                                                                      "crossAxisAlignment": "start"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-proj-name",
+                                                                        "props": {
+                                                                          "text": "{{item.name}}",
+                                                                          "textStyle": "labelLarge",
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-proj-owner",
+                                                                        "props": {
+                                                                          "text": "{{item.acl.owner}}",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "onSurfaceMuted"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "type": "Text",
+                                                                "id": "{{widgetId}}-proj-date",
+                                                                "props": {
+                                                                  "text": "{{item.lastModifiedDate}}",
+                                                                  "textStyle": "bodySmall",
+                                                                  "color": "onSurfaceMuted"
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "DashboardCard",
+                            "id": "{{widgetId}}-apps-card",
+                            "props": {
+                              "title": "Featured Apps",
+                              "icon": "extension",
+                              "footerSlot": 1,
+                              "searchable": true,
+                              "pageSizes": [5, 10, 20],
+                              "pageSizeChannel": "state.hp-apps-ps.set",
+                              "defaultPageSize": 5
+                            },
+                            "children": [
+                              {
+                                "type": "StateHolder",
+                                "id": "hp-apps-ps",
+                                "props": {
+                                  "initial": 5
+                                },
+                                "children": [
+                                  {
+                                    "type": "DataSource",
+                                    "id": "{{widgetId}}-apps-ds",
+                                    "props": {
+                                      "service": "documentService",
+                                      "method": "getLibrary",
+                                      "args": [
+                                        "",
+                                        [],
+                                        [],
+                                        [],
+                                        0,
+                                        200
+                                      ],
+                                      "refreshOn": "home-panel.refresh"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-apps-loading",
+                                        "props": {
+                                          "visible": "{{loading}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Center",
+                                            "id": "{{widgetId}}-apps-spin-c",
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-apps-spin-p",
+                                                "props": {
+                                                  "padding": 16
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "LoadingIndicator",
+                                                    "id": "{{widgetId}}-apps-li",
+                                                    "props": {
+                                                      "variant": "spinner"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-apps-error",
+                                        "props": {
+                                          "visible": "{{error}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Center",
+                                            "id": "{{widgetId}}-apps-err-c",
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-apps-err-p",
+                                                "props": {
+                                                  "padding": 16
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-apps-err-txt",
+                                                    "props": {
+                                                      "text": "{{errorMessage}}",
+                                                      "textStyle": "bodySmall",
+                                                      "color": "error"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-apps-ready",
+                                        "props": {
+                                          "visible": "{{ready}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Column",
+                                            "id": "{{widgetId}}-apps-list",
+                                            "props": {
+                                              "mainAxisSize": "min"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "ForEach",
+                                                "id": "{{widgetId}}-apps-fe",
+                                                "props": {
+                                                  "items": "{{data}}",
+                                                  "limit": "{{state}}",
+                                                  "where": {"kind": "WebAppOperator"},
+                                                  "filterChannel": "card.{{widgetId}}-apps-card.filter",
+                                                  "filterFields": ["name"]
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Action",
+                                                    "id": "{{widgetId}}-apps-action",
+                                                    "props": {
+                                                      "gesture": "onTap",
+                                                      "channel": "window.intent",
+                                                      "payload": {
+                                                        "intent": "openApp",
+                                                        "appId": "{{item.id}}",
+                                                        "appName": "{{item.name}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
+                                                      },
+                                                      "hoverColor": "surfaceContainerHigh"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Padding",
+                                                        "id": "{{widgetId}}-apps-row-pad",
+                                                        "props": {
+                                                          "padding": 8
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-apps-row",
+                                                            "props": {
+                                                              "crossAxisAlignment": "center"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Container",
+                                                                "id": "{{widgetId}}-apps-icon-box",
+                                                                "props": {
+                                                                  "width": 32,
+                                                                  "height": 32,
+                                                                  "borderColor": "outlineVariant",
+                                                                  "borderRadius": 8
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Center",
+                                                                    "id": "{{widgetId}}-apps-icon-c",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Icon",
+                                                                        "id": "{{widgetId}}-apps-icon",
+                                                                        "props": {
+                                                                          "icon": "extension",
+                                                                          "size": 14,
+                                                                          "color": "primary"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-apps-row-gap",
+                                                                "props": {
+                                                                  "width": 8
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Expanded",
+                                                                "id": "{{widgetId}}-apps-info",
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Column",
+                                                                    "id": "{{widgetId}}-apps-info-col",
+                                                                    "props": {
+                                                                      "crossAxisAlignment": "start"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-apps-name",
+                                                                        "props": {
+                                                                          "text": "{{item.name}}",
+                                                                          "textStyle": "labelLarge",
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-apps-desc",
+                                                                        "props": {
+                                                                          "text": "{{item.description}}",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "textTertiary"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "DashboardCard",
+                            "id": "{{widgetId}}-help-card",
+                            "props": {
+                              "title": "Help & Documentation",
+                              "icon": "help"
+                            },
+                            "children": [
+                              {
+                                "type": "Padding",
+                                "id": "{{widgetId}}-help-body-pad",
+                                "props": {
+                                  "padding": 12
+                                },
+                                "children": [
+                                  {
+                                    "type": "Wrap",
+                                    "id": "{{widgetId}}-help-links",
+                                    "props": {
+                                      "spacing": 16,
+                                      "runSpacing": 8
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Action",
+                                        "id": "{{widgetId}}-help-learn",
+                                        "props": {
+                                          "gesture": "onTap",
+                                          "channel": "window.intent",
+                                          "payload": {
+                                            "intent": "openUrl",
+                                            "url": "https://learn.tercen.com/en/"
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Row",
+                                            "id": "{{widgetId}}-help-learn-row",
+                                            "props": {
+                                              "mainAxisSize": "min"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-help-learn-icon",
+                                                "props": {
+                                                  "icon": "open_in_new",
+                                                  "size": 12,
+                                                  "color": "link"
+                                                }
+                                              },
+                                              {
+                                                "type": "SizedBox",
+                                                "id": "{{widgetId}}-help-learn-gap",
+                                                "props": {
+                                                  "width": 4
+                                                }
+                                              },
+                                              {
+                                                "type": "Text",
+                                                "id": "{{widgetId}}-help-learn-txt",
+                                                "props": {
+                                                  "text": "Learning Center",
+                                                  "textStyle": "labelLarge",
+                                                  "color": "link"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Action",
+                                        "id": "{{widgetId}}-help-starter",
+                                        "props": {
+                                          "gesture": "onTap",
+                                          "channel": "window.intent",
+                                          "payload": {
+                                            "intent": "openUrl",
+                                            "url": "https://tercen.github.io/starter_guide/"
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Row",
+                                            "id": "{{widgetId}}-help-starter-row",
+                                            "props": {
+                                              "mainAxisSize": "min"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-help-starter-icon",
+                                                "props": {
+                                                  "icon": "open_in_new",
+                                                  "size": 12,
+                                                  "color": "link"
+                                                }
+                                              },
+                                              {
+                                                "type": "SizedBox",
+                                                "id": "{{widgetId}}-help-starter-gap",
+                                                "props": {
+                                                  "width": 4
+                                                }
+                                              },
+                                              {
+                                                "type": "Text",
+                                                "id": "{{widgetId}}-help-starter-txt",
+                                                "props": {
+                                                  "text": "Starter Guide",
+                                                  "textStyle": "labelLarge",
+                                                  "color": "link"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Action",
+                                        "id": "{{widgetId}}-help-explore",
+                                        "props": {
+                                          "gesture": "onTap",
+                                          "channel": "window.intent",
+                                          "payload": {
+                                            "intent": "openUrl",
+                                            "url": "https://tercen.com/explore"
+                                          }
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Row",
+                                            "id": "{{widgetId}}-help-explore-row",
+                                            "props": {
+                                              "mainAxisSize": "min"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-help-explore-icon",
+                                                "props": {
+                                                  "icon": "open_in_new",
+                                                  "size": 12,
+                                                  "color": "link"
+                                                }
+                                              },
+                                              {
+                                                "type": "SizedBox",
+                                                "id": "{{widgetId}}-help-explore-gap",
+                                                "props": {
+                                                  "width": 4
+                                                }
+                                              },
+                                              {
+                                                "type": "Text",
+                                                "id": "{{widgetId}}-help-explore-txt",
+                                                "props": {
+                                                  "text": "Public Projects",
+                                                  "textStyle": "labelLarge",
+                                                  "color": "link"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "DashboardCard",
+                            "id": "{{widgetId}}-act-card",
+                            "props": {
+                              "title": "Recent Activity",
+                              "icon": "clock_rotate_left",
+                              "footerSlot": 1,
+                              "searchable": true,
+                              "pageSizes": [5, 10, 20],
+                              "pageSizeChannel": "state.hp-activity-ps.set",
+                              "defaultPageSize": 5
+                            },
+                            "children": [
+                              {
+                                "type": "StateHolder",
+                                "id": "hp-activity-ps",
+                                "props": {
+                                  "initial": 5
+                                },
+                                "children": [
+                                  {
+                                    "type": "DataSource",
+                                    "id": "{{widgetId}}-act-ds",
+                                    "props": {
+                                      "service": "activityService",
+                                      "method": "findStartKeys",
+                                      "args": [
+                                        "findByUserAndDate",
+                                        [
+                                          "{{context.userId}}",
+                                          ""
+                                        ],
+                                        [
+                                          "{{context.userId}}",
+                                          "\uf000"
+                                        ],
+                                        20,
+                                        0,
+                                        true
+                                      ],
+                                      "refreshOn": "home-panel.refresh"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-act-loading",
+                                        "props": {
+                                          "visible": "{{loading}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Center",
+                                            "id": "{{widgetId}}-act-spin-c",
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-act-spin-p",
+                                                "props": {
+                                                  "padding": 16
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "LoadingIndicator",
+                                                    "id": "{{widgetId}}-act-li",
+                                                    "props": {
+                                                      "variant": "spinner"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-act-error",
+                                        "props": {
+                                          "visible": "{{error}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Center",
+                                            "id": "{{widgetId}}-act-err-c",
+                                            "children": [
+                                              {
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-act-err-p",
+                                                "props": {
+                                                  "padding": 16
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-act-err-txt",
+                                                    "props": {
+                                                      "text": "{{errorMessage}}",
+                                                      "textStyle": "bodySmall",
+                                                      "color": "error"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-act-ready",
+                                        "props": {
+                                          "visible": "{{ready}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Column",
+                                            "id": "{{widgetId}}-act-list",
+                                            "props": {
+                                              "mainAxisSize": "min"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "ForEach",
+                                                "id": "{{widgetId}}-act-fe",
+                                                "props": {
+                                                  "items": "{{data}}",
+                                                  "limit": "{{state}}",
+                                                  "filterChannel": "card.{{widgetId}}-act-card.filter",
+                                                  "filterFields": ["objectName", "type"]
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Action",
+                                                    "id": "{{widgetId}}-act-action",
+                                                    "props": {
+                                                      "gesture": "onTap",
+                                                      "channel": "window.intent",
+                                                      "payload": {
+                                                        "intent": "openResource",
+                                                        "resourceType": "project",
+                                                        "resourceId": "{{item.projectId}}",
+                                                        "resourceName": "{{item.projectName}}",
+                                                        "placement": "samePane",
+                                                        "sourceWindowId": "{{widgetId}}"
+                                                      },
+                                                      "hoverColor": "surfaceContainerHigh"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Padding",
+                                                        "id": "{{widgetId}}-act-row-pad",
+                                                        "props": {
+                                                          "padding": 10
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-act-row",
+                                                            "props": {
+                                                              "crossAxisAlignment": "center"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Container",
+                                                                "id": "{{widgetId}}-act-color",
+                                                                "props": {
+                                                                  "width": 8,
+                                                                  "height": 8,
+                                                                  "borderRadius": 2,
+                                                                  "color": "{{item.colorToken}}"
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-act-g1",
+                                                                "props": {
+                                                                  "width": 6
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-act-type-box",
+                                                                "props": {
+                                                                  "width": 52
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-act-type",
+                                                                    "props": {
+                                                                      "text": "{{item.type}}",
+                                                                      "textStyle": "bodySmall",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-act-g2",
+                                                                "props": {
+                                                                  "width": 10
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Expanded",
+                                                                "id": "{{widgetId}}-act-info",
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Column",
+                                                                    "id": "{{widgetId}}-act-info-col",
+                                                                    "props": {
+                                                                      "crossAxisAlignment": "start"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-act-obj",
+                                                                        "props": {
+                                                                          "text": "{{item.objectName}}",
+                                                                          "textStyle": "labelLarge",
+                                                                          "color": "onSurface",
+                                                                          "maxLines": 1
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-act-owner",
+                                                                        "props": {
+                                                                          "text": "{{item.projectName}}",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "onSurfaceMuted"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "type": "Text",
+                                                                "id": "{{widgetId}}-act-date",
+                                                                "props": {
+                                                                  "text": "{{item.date}}",
+                                                                  "textStyle": "bodySmall",
+                                                                  "color": "onSurfaceMuted"
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "MainHeader",
+        "tier": 2,
+        "description": "Frame-level chrome bar for Tercen. 36px fixed height. Brand mark with theme-aware logo on the left (PNG, light/dark variants). User identicon avatar and dropdown menu on the right with actions: About, Save Layout, Theme Toggle, LLM Settings, Task Manager, Admin (admin-only), Sign Out. Publishes all actions to header.intent channel.",
+        "props": {},
+        "emittedEvents": [
+          "header.intent"
+        ],
+        "acceptedActions": [],
+        "typeColor": "#FF0000"
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": {
+          "crossAxisAlignment": "stretch"
+        },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-bar",
+            "props": {
+              "color": "surface",
+              "height": 36
+            },
+            "children": [
+              {
+                "type": "Row",
+                "id": "{{widgetId}}-row",
+                "props": {
+                  "mainAxisAlignment": "spaceBetween",
+                  "crossAxisAlignment": "center"
+                },
+                "children": [
+                  {
+                    "type": "Tooltip",
+                    "id": "{{widgetId}}-brand-tip",
+                    "props": {
+                      "message": "Home"
+                    },
+                    "children": [
+                      {
+                        "type": "Action",
+                        "id": "{{widgetId}}-brand-action",
+                        "props": {
+                          "gesture": "onTap",
+                          "channel": "header.intent",
+                          "payload": {
+                            "value": "navigateHome"
+                          }
+                        },
+                        "children": [
+                          {
+                            "type": "Row",
+                            "id": "{{widgetId}}-brand-row",
+                            "props": {
+                              "crossAxisAlignment": "center"
+                            },
+                            "children": [
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-logo-light",
+                                "props": {
+                                  "visible": "{{isDark}}",
+                                  "negate": true
+                                },
+                                "children": [
+                                  {
+                                    "type": "Image",
+                                    "id": "{{widgetId}}-logo-l",
+                                    "props": {
+                                      "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/Tercen%20Logo/TercenID_Final_C_no_tag.png",
+                                      "height": 36,
+                                      "fit": "contain"
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-logo-dark",
+                                "props": {
+                                  "visible": "{{isDark}}"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Image",
+                                    "id": "{{widgetId}}-logo-d",
+                                    "props": {
+                                      "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/Tercen%20Logo/TercenID_Final_C_no_tag_white.png",
+                                      "height": 36,
+                                      "fit": "contain"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Row",
+                    "id": "{{widgetId}}-right",
+                    "props": {
+                      "crossAxisAlignment": "center"
+                    },
+                    "children": [
+                      {
+                        "type": "PopupMenu",
+                        "id": "{{widgetId}}-user-menu",
+                        "props": {
+                          "tooltip": "{{context.username}}",
+                          "channel": "header.intent",
+                          "items": [
+                            {
+                              "value": "about",
+                              "label": "About",
+                              "icon": "info"
+                            },
+                            {
+                              "divider": true
+                            },
+                            {
+                              "value": "saveLayout",
+                              "label": "Save this layout",
+                              "icon": "save"
+                            },
+                            {
+                              "value": "toggleTheme",
+                              "label": "Toggle theme",
+                              "icon": "dark_mode"
+                            },
+                            {
+                              "value": "connectLlm",
+                              "label": "Connect an LLM",
+                              "icon": "smart_toy"
+                            },
+                            {
+                              "value": "taskManager",
+                              "label": "Task Manager",
+                              "icon": "checklist"
+                            },
+                            {
+                              "value": "openAdminPanel",
+                              "label": "Admin",
+                              "icon": "settings"
+                            },
+                            {
+                              "divider": true
+                            },
+                            {
+                              "value": "signOut",
+                              "label": "Sign Out",
+                              "icon": "logout"
+                            }
+                          ]
+                        },
+                        "children": [
+                          {
+                            "type": "Identicon",
+                            "id": "{{widgetId}}-avatar",
+                            "props": {
+                              "identity": "{{context.username}}",
+                              "size": 32,
+                              "borderColor": "primary"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "type": "Divider",
+            "id": "{{widgetId}}-border",
+            "props": {
+              "height": 1,
+              "thickness": 1,
+              "color": "outlineVariant"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "TaskMonitor",
+        "tier": 2,
+        "description": "Live task monitor showing running and recently completed tasks. Polls the Tercen task service and subscribes to event channels for real-time progress. Displays workflow name, project, step, elapsed time, and status. Supports cancelling running tasks.",
+        "props": {},
+        "emittedEvents": [
+          "task.cancel",
+          "system.intent"
+        ],
+        "acceptedActions": [
+          "openTaskMonitor"
+        ],
+        "handlesIntent": [
+          {
+            "intent": "openTaskMonitor",
+            "windowTitle": "Task Monitor",
+            "windowSize": "medium",
+            "windowAlign": "right"
+          }
+        ]
+      },
+      "template": {
+        "type": "TaskStream",
+        "id": "{{widgetId}}-stream",
+        "props": {
+          "cancelChannel": "task.cancel"
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch",
+              "mainAxisSize": "min"
+            },
+            "children": [
+              {
+                "type": "Container",
+                "id": "{{widgetId}}-toolbar",
+                "props": {
+                  "color": "surfaceContainerHigh",
+                  "padding": "sm"
+                },
+                "children": [
+                  {
+                    "type": "Row",
+                    "id": "{{widgetId}}-toolbar-row",
+                    "props": {
+                      "mainAxisAlignment": "spaceBetween",
+                      "crossAxisAlignment": "center"
+                    },
+                    "children": [
+                      {
+                        "type": "Row",
+                        "id": "{{widgetId}}-toolbar-left",
+                        "props": {
+                          "crossAxisAlignment": "center"
+                        },
+                        "children": [
+                          {
+                            "type": "Icon",
+                            "id": "{{widgetId}}-icon",
+                            "props": {
+                              "icon": "checklist",
+                              "size": 16,
+                              "color": "primary"
+                            }
+                          },
+                          {
+                            "type": "SizedBox",
+                            "id": "{{widgetId}}-icon-gap",
+                            "props": {
+                              "width": 8
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-title",
+                            "props": {
+                              "text": "Task Monitor",
+                              "textStyle": "labelMedium",
+                              "color": "onSurface"
+                            }
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-badge-cond",
+                        "props": {
+                          "visible": "{{hasRunning}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Chip",
+                            "id": "{{widgetId}}-badge",
+                            "props": {
+                              "label": "{{activeCount}} running",
+                              "color": "primary"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "ForEach",
+                "id": "{{widgetId}}-running-fe",
+                "props": {
+                  "items": "{{runningTasks}}"
+                },
+                "children": [
+                  {
+                    "type": "Padding",
+                    "id": "{{widgetId}}-run-pad-{{_index}}",
+                    "props": {
+                      "left": "sm",
+                      "right": "sm",
+                      "bottom": "xs"
+                    },
+                    "children": [
+                      {
+                        "type": "Card",
+                        "id": "{{widgetId}}-run-card-{{_index}}",
+                        "children": [
+                          {
+                            "type": "Padding",
+                            "id": "{{widgetId}}-run-card-pad-{{_index}}",
+                            "props": {
+                              "padding": "sm"
+                            },
+                            "children": [
+                              {
+                                "type": "Row",
+                                "id": "{{widgetId}}-run-row-{{_index}}",
+                                "props": {
+                                  "crossAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-run-spinner-cond-{{_index}}",
+                                    "props": {
+                                      "visible": "{{item.isRunning}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "LoadingIndicator",
+                                        "id": "{{widgetId}}-run-spinner-{{_index}}",
+                                        "props": {
+                                          "size": 16
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-run-pending-cond-{{_index}}",
+                                    "props": {
+                                      "visible": "{{item.isPending}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Icon",
+                                        "id": "{{widgetId}}-run-pending-{{_index}}",
+                                        "props": {
+                                          "icon": "pending",
+                                          "size": 16,
+                                          "color": "warning"
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-run-gap-{{_index}}",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "Expanded",
+                                    "id": "{{widgetId}}-run-info-{{_index}}",
+                                    "children": [
+                                      {
+                                        "type": "Column",
+                                        "id": "{{widgetId}}-run-info-col-{{_index}}",
+                                        "props": {
+                                          "crossAxisAlignment": "start",
+                                          "mainAxisSize": "min"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Text",
+                                            "id": "{{widgetId}}-run-wf-{{_index}}",
+                                            "props": {
+                                              "text": "{{item.workflowName}}",
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurface"
+                                            }
+                                          },
+                                          {
+                                            "type": "Row",
+                                            "id": "{{widgetId}}-run-detail-{{_index}}",
+                                            "children": [
+                                              {
+                                                "type": "Text",
+                                                "id": "{{widgetId}}-run-proj-{{_index}}",
+                                                "props": {
+                                                  "text": "{{item.projectName}}",
+                                                  "textStyle": "labelSmall",
+                                                  "color": "onSurfaceMuted"
+                                                }
+                                              },
+                                              {
+                                                "type": "SizedBox",
+                                                "id": "{{widgetId}}-run-sep-{{_index}}",
+                                                "props": {
+                                                  "width": 8
+                                                }
+                                              },
+                                              {
+                                                "type": "Text",
+                                                "id": "{{widgetId}}-run-elapsed-{{_index}}",
+                                                "props": {
+                                                  "text": "{{item.elapsed}}",
+                                                  "textStyle": "labelSmall",
+                                                  "color": "onSurfaceMuted"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "IconButton",
+                                    "id": "{{widgetId}}-run-cancel-{{_index}}",
+                                    "props": {
+                                      "icon": "close",
+                                      "size": 16,
+                                      "color": "error",
+                                      "tooltip": "Cancel",
+                                      "channel": "task.cancel",
+                                      "payload": {
+                                        "taskId": "{{item.taskId}}"
+                                      }
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "metadata": {
+        "type": "TeamManager",
+        "tier": 2,
+        "description": "Team management widget for viewing and editing team members, roles, and settings.",
+        "props": {
+          "teamId": {
+            "type": "string",
+            "required": false,
+            "description": "Team ID. If omitted, shows placeholder."
+          }
+        },
+        "emittedEvents": [],
+        "acceptedActions": [],
+        "handlesIntent": {
+          "intent": "openTeamWidget",
+          "propsMap": {
+            "teamId": "teamId"
+          },
+          "windowTitle": "Team Manager",
+          "windowSize": "large"
+        },
+        "typeColor": "#F59E0B"
+      },
+      "template": {
+        "type": "Column",
+        "id": "{{widgetId}}-root",
+        "props": {
+          "crossAxisAlignment": "stretch"
+        },
+        "children": [
+          {
+            "type": "Container",
+            "id": "{{widgetId}}-toolbar",
+            "props": {
+              "color": "surfaceContainerHigh",
+              "padding": 8
+            },
+            "children": [
+              {
+                "type": "Text",
+                "id": "{{widgetId}}-title",
+                "props": {
+                  "text": "Team Manager",
+                  "fontSize": 13,
+                  "fontWeight": "bold",
+                  "color": "warning"
+                }
+              }
+            ]
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
+              {
+                "type": "Center",
+                "id": "{{widgetId}}-placeholder",
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-placeholder-text",
+                    "props": {
+                      "text": "Team Manager — coming soon",
+                      "fontSize": 14,
+                      "color": "onSurfaceMuted"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "home": {
+    "regions": [
+      {
+        "type": "MainHeader",
+        "id": "main-header",
+        "region": "top"
+      }
+    ],
+    "windows": [
+      {"type": "HomePanel", "id": "home-panel", "title": "Home"},
+      {"type": "ChatBox", "id": "chat-box", "title": "Chat"}
+    ]
+  }
+}
