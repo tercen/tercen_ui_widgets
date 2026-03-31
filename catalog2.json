@@ -4666,10 +4666,7 @@
         "id": "{{widgetId}}-interaction",
         "props": {
           "channel": "activity2.selected",
-          "matchField": "id",
-          "selectedProps": {
-            "color": "primaryContainer"
-          }
+          "matchField": "id"
         },
         "children": [
           {
