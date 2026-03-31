@@ -4651,6 +4651,203 @@
           }
         ]
       }
+    },
+    {
+      "metadata": {
+        "type": "ActivityListV2",
+        "tier": 2,
+        "description": "Activity list using Interaction for selection (faster than per-item ReactTo)",
+        "emittedEvents": [
+          "activity2.selected"
+        ]
+      },
+      "template": {
+        "type": "Interaction",
+        "id": "{{widgetId}}-interaction",
+        "props": {
+          "channel": "activity2.selected",
+          "matchField": "id",
+          "selectedProps": {
+            "color": "primaryContainer"
+          }
+        },
+        "children": [
+          {
+            "type": "Column",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "crossAxisAlignment": "stretch"
+            },
+            "children": [
+              {
+                "type": "Container",
+                "id": "{{widgetId}}-toolbar",
+                "props": {
+                  "color": "surfaceContainerHigh",
+                  "padding": "sm"
+                },
+                "children": [
+                  {
+                    "type": "Text",
+                    "id": "{{widgetId}}-title",
+                    "props": {
+                      "text": "Activity (Interaction)",
+                      "textStyle": "labelMedium"
+                    }
+                  }
+                ]
+              },
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
+                  {
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-ds",
+                    "props": {
+                      "service": "activityService",
+                      "method": "findByUserAndDate",
+                      "args": [
+                        [
+                          false,
+                          "{{context.userId}}",
+                          ""
+                        ],
+                        [
+                          true,
+                          "{{context.userId}}",
+                          ""
+                        ],
+                        20
+                      ]
+                    },
+                    "children": [
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
+                        "props": {
+                          "visible": "{{loading}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
+                                "props": {
+                                  "variant": "skeleton",
+                                  "text": "Loading..."
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "ListView",
+                            "id": "{{widgetId}}-lv",
+                            "props": {
+                              "padding": "xs"
+                            },
+                            "children": [
+                              {
+                                "type": "ForEach",
+                                "id": "{{widgetId}}-fe",
+                                "props": {
+                                  "items": "{{data}}"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Action",
+                                    "id": "tap-{{item.id}}",
+                                    "props": {
+                                      "gesture": "onTap",
+                                      "channel": "activity2.selected",
+                                      "payload": {
+                                        "id": "{{item.id}}",
+                                        "description": "{{item.description}}"
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Padding",
+                                        "id": "pad-{{item.id}}",
+                                        "props": {
+                                          "padding": "sm"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Row",
+                                            "id": "row-{{item.id}}",
+                                            "children": [
+                                              {
+                                                "type": "Icon",
+                                                "id": "icon-{{item.id}}",
+                                                "props": {
+                                                  "icon": "history",
+                                                  "size": 16,
+                                                  "color": "onSurfaceVariant"
+                                                }
+                                              },
+                                              {
+                                                "type": "SizedBox",
+                                                "id": "gap-{{item.id}}",
+                                                "props": {
+                                                  "width": 8
+                                                }
+                                              },
+                                              {
+                                                "type": "Expanded",
+                                                "id": "exp-{{item.id}}",
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "name-{{item.id}}",
+                                                    "props": {
+                                                      "text": "{{item.description}}",
+                                                      "textStyle": "bodySmall"
+                                                    }
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Text",
+                                                "id": "date-{{item.id}}",
+                                                "props": {
+                                                  "text": "{{item.date.value}}",
+                                                  "textStyle": "labelSmall",
+                                                  "color": "onSurfaceMuted"
+                                                }
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
     }
   ],
   "home": {
