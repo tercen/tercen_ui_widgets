@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Navigator — Styled Mock</title>
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    crossorigin="anonymous" referrerpolicy="no-referrer">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Embedded tercen-tokens.css ─────────────────────────────────────────── */
+
+    :root {
+      --font-family: 'Fira Sans', sans-serif;
+
+      --spacing-xs: 4px;
+      --spacing-sm: 8px;
+      --spacing-md: 16px;
+      --spacing-lg: 24px;
+      --spacing-xl: 32px;
+      --spacing-xxl: 48px;
+
+      --radius-sm: 4px;
+      --radius-md: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --radius-full: 9999px;
+
+      --elevation-none: 0;
+      --elevation-low: 1;
+      --elevation-medium: 4;
+      --elevation-high: 8;
+
+      --line-weight-subtle: 1px;
+      --line-weight-standard: 1.5px;
+      --line-weight-emphasis: 2px;
+
+      --control-height-sm: 28px;
+      --control-height-md: 36px;
+      --control-height-lg: 44px;
+
+      --button-padding-h: 16px;
+      --button-padding-v: 8px;
+      --button-border-radius: 8px;
+      --button-border-width: 1.5px;
+
+      --icon-size-sm: 16px;
+      --icon-size-md: 24px;
+      --icon-size-lg: 32px;
+
+      --text-body-medium-size: 14px;
+      --text-body-medium-weight: 400;
+      --text-body-medium-line-height: 1.5;
+      --text-body-small-size: 12px;
+      --text-body-small-weight: 400;
+      --text-body-small-line-height: 1.5;
+      --text-label-large-size: 14px;
+      --text-label-large-weight: 500;
+      --text-label-small-size: 12px;
+      --text-label-small-weight: 500;
+      --text-section-header-size: 12px;
+      --text-section-header-weight: 600;
+      --text-section-header-letter-spacing: 0.5px;
+    }
+
+    [data-theme="light"], :root {
+      --color-primary: #1E40AF;
+      --color-on-primary: #FFFFFF;
+      --color-primary-container: #DBEAFE;
+      --color-on-primary-container: #1E3A8A;
+      --color-primary-fixed: #EFF6FF;
+      --color-tertiary: #6D28D9;
+      --color-error: #B91C1C;
+      --color-on-error: #FFFFFF;
+      --color-error-container: #FEE2E2;
+      --color-surface: #FFFFFF;
+      --color-on-surface: #111827;
+      --color-on-surface-variant: #374151;
+      --color-surface-container-low: #F9FAFB;
+      --color-surface-container: #F3F4F6;
+      --color-surface-container-high: #E5E7EB;
+      --color-outline: #D1D5DB;
+      --color-outline-variant: #E5E7EB;
+      --color-on-surface-muted: #6B7280;
+      --color-on-surface-disabled: #9CA3AF;
+      --color-warning: #B45309;
+      --color-on-warning: #FFFFFF;
+      --color-warning-container: #FEF3C7;
+      --color-on-warning-container: #B45309;
+      --color-success: #047857;
+      --color-on-success: #FFFFFF;
+      --color-success-container: #D1FAE5;
+      --color-on-success-container: #047857;
+      --color-info: #0E7490;
+      --color-on-info: #FFFFFF;
+      --color-info-container: #CFFAFE;
+      --color-on-info-container: #0E7490;
+      --color-link: #2563EB;
+      --color-link-hover: #1E40AF;
+      --color-text-tertiary: #4B5563;
+    }
+
+    [data-theme="dark"] {
+      --color-primary: #14B8A6;
+      --color-on-primary: #FFFFFF;
+      --color-primary-container: #153D47;
+      --color-on-primary-container: #2DD4BF;
+      --color-primary-fixed: #122E35;
+      --color-tertiary: #A78BFA;
+      --color-error: #F87171;
+      --color-on-error: #FFFFFF;
+      --color-error-container: #450A0A;
+      --color-surface: #111827;
+      --color-on-surface: #F9FAFB;
+      --color-on-surface-variant: #E5E7EB;
+      --color-surface-container-low: #111827;
+      --color-surface-container: #1F2937;
+      --color-surface-container-high: #1F2937;
+      --color-outline: #374151;
+      --color-outline-variant: #374151;
+      --color-on-surface-muted: #6B7280;
+      --color-on-surface-disabled: #4B5563;
+      --color-warning: #FBBF24;
+      --color-on-warning: #111827;
+      --color-warning-container: #451A03;
+      --color-on-warning-container: #FBBF24;
+      --color-success: #10B981;
+      --color-on-success: #111827;
+      --color-success-container: #14532D;
+      --color-on-success-container: #4ADE80;
+      --color-info: #60A5FA;
+      --color-on-info: #111827;
+      --color-info-container: #083344;
+      --color-on-info-container: #67E8F9;
+      --color-link: #60A5FA;
+      --color-link-hover: #3B82F6;
+      --color-text-tertiary: #9CA3AF;
+    }
+
+    /* ── Reset + Base ───────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-family);
+      font-size: var(--text-body-medium-size);
+      font-weight: var(--text-body-medium-weight);
+      line-height: var(--text-body-medium-line-height);
+      background: var(--color-surface-container-low);
+      color: var(--color-on-surface);
+      min-height: 100vh;
+      padding: var(--spacing-lg);
+    }
+
+    /* ── Page scaffold ──────────────────────────────────────────────────────── */
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .page-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--color-on-surface);
+    }
+
+    .page-sub {
+      font-size: var(--text-body-small-size);
+      color: var(--color-on-surface-muted);
+      margin-top: 2px;
+    }
+
+    /* ── Theme toggle ───────────────────────────────────────────────────────── */
+    .theme-toggle {
+      width: 36px;
+      height: 36px;
+      border: var(--line-weight-standard) solid var(--color-outline);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--color-on-surface-variant);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      transition: background 150ms ease, color 150ms ease;
+    }
+
+    .theme-toggle:hover {
+      background: var(--color-surface-container-high);
+      color: var(--color-on-surface);
+    }
+
+    /* ── States grid ────────────────────────────────────────────────────────── */
+    .states-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--spacing-md);
+      margin-bottom: var(--spacing-lg);
+    }
+
+    .state-label {
+      font-size: var(--text-section-header-size);
+      font-weight: var(--text-section-header-weight);
+      letter-spacing: var(--text-section-header-letter-spacing);
+      text-transform: uppercase;
+      color: var(--color-on-surface-muted);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      background: var(--color-surface-container-high);
+      border-bottom: var(--line-weight-subtle) solid var(--color-outline-variant);
+    }
+
+    /* ── Widget shell ───────────────────────────────────────────────────────── */
+    .widget {
+      background: var(--color-surface);
+      border: var(--line-weight-subtle) solid var(--color-outline-variant);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Toolbar ────────────────────────────────────────────────────────────── */
+    .toolbar {
+      height: 48px;
+      min-height: 48px;
+      background: var(--color-surface-container-high);
+      border-bottom: var(--line-weight-subtle) solid var(--color-outline-variant);
+      display: flex;
+      align-items: center;
+      padding: 0 var(--spacing-sm);
+      gap: var(--spacing-xs);
+      flex-shrink: 0;
+    }
+
+    .tb-divider {
+      width: var(--line-weight-subtle);
+      height: 20px;
+      background: var(--color-outline-variant);
+      margin: 0 2px;
+    }
+
+    /* ── Toolbar button — ghost ─────────────────────────────────────────────── */
+    .tb-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--color-on-surface-variant);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--icon-size-sm);
+      transition: background 150ms ease, color 150ms ease;
+      flex-shrink: 0;
+    }
+
+    .tb-btn:hover:not(:disabled) {
+      background: var(--color-surface-container-high);
+      color: var(--color-on-surface);
+    }
+
+    .tb-btn:disabled {
+      color: var(--color-on-surface-disabled);
+      cursor: default;
+    }
+
+    /* ── Toolbar button — primary (upload) ──────────────────────────────────── */
+    .tb-btn-primary {
+      background: var(--color-primary);
+      color: var(--color-on-primary);
+      border-radius: var(--radius-md);
+    }
+
+    .tb-btn-primary:hover:not(:disabled) {
+      background: var(--color-on-primary-container);
+      color: var(--color-on-primary);
+    }
+
+    .tb-btn-primary:disabled {
+      background: var(--color-surface-container-high);
+      color: var(--color-on-surface-disabled);
+      cursor: default;
+    }
+
+    /* ── Type filter dropdown button ────────────────────────────────────────── */
+    .tb-dropdown {
+      height: 32px;
+      padding: 0 var(--spacing-sm);
+      border: var(--line-weight-subtle) solid var(--color-outline);
+      border-radius: var(--radius-md);
+      background: transparent;
+      color: var(--color-on-surface-variant);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      font-size: var(--text-label-small-size);
+      font-weight: var(--text-label-small-weight);
+      font-family: var(--font-family);
+      transition: background 150ms ease;
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
+    .tb-dropdown:hover {
+      background: var(--color-surface-container);
+    }
+
+    /* ── Search input ────────────────────────────────────────────────────────── */
+    .tb-search {
+      flex: 1;
+      height: 28px;
+      border: var(--line-weight-subtle) solid var(--color-outline);
+      border-radius: var(--radius-md);
+      background: var(--color-surface);
+      color: var(--color-on-surface);
+      font-family: var(--font-family);
+      font-size: var(--text-body-small-size);
+      padding: 0 var(--spacing-sm);
+      outline: none;
+      min-width: 0;
+    }
+
+    .tb-search:focus {
+      border-color: var(--color-primary);
+      border-width: var(--line-weight-emphasis);
+    }
+
+    .tb-search::placeholder {
+      color: var(--color-on-surface-muted);
+    }
+
+    /* ── Tree view ───────────────────────────────────────────────────────────── */
+    .tree-view {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--spacing-xs) 0;
+    }
+
+    /* ── Tree row ────────────────────────────────────────────────────────────── */
+    .tree-row {
+      height: 28px;
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: 0 var(--spacing-sm);
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      transition: background 100ms ease;
+    }
+
+    .tree-row:hover {
+      background: var(--color-surface-container-low);
+    }
+
+    .tree-row.selected {
+      background: var(--color-primary-fixed);
+      border-left: 3px solid var(--color-primary);
+    }
+
+    /* Indentation levels */
+    .tree-row[data-level="0"] { padding-left: var(--spacing-sm); }
+    .tree-row[data-level="1"] { padding-left: 24px; }
+    .tree-row[data-level="2"] { padding-left: 40px; }
+    .tree-row[data-level="3"] { padding-left: 56px; }
+
+    /* ── Chevron ─────────────────────────────────────────────────────────────── */
+    .chevron {
+      width: 12px;
+      flex-shrink: 0;
+      color: var(--color-on-surface-muted);
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chevron-placeholder {
+      width: 12px;
+      flex-shrink: 0;
+    }
+
+    /* ── Node icon ───────────────────────────────────────────────────────────── */
+    .node-icon {
+      width: 14px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .icon-team     { color: var(--color-primary); }
+    .icon-project  { color: var(--color-warning); }
+    .icon-folder   { color: var(--color-warning); }
+    .icon-file     { color: var(--color-on-surface-muted); }
+    .icon-zip      { color: var(--color-on-surface-muted); }
+    .icon-image    { color: var(--color-tertiary); }
+    .icon-dataset  { color: var(--color-info); }
+    .icon-workflow { color: var(--color-primary); }
+
+    /* ── Node name ───────────────────────────────────────────────────────────── */
+    .node-name {
+      font-size: var(--text-body-small-size);
+      color: var(--color-on-surface);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .node-name-muted {
+      color: var(--color-on-surface-muted);
+    }
+
+    /* ── Status badges + indicators ──────────────────────────────────────────── */
+    .badge {
+      font-size: 10px;
+      font-weight: 500;
+      padding: 0 var(--spacing-xs);
+      border-radius: var(--radius-sm);
+      flex-shrink: 0;
+      line-height: 16px;
+    }
+
+    .badge-neutral {
+      background: var(--color-surface-container);
+      color: var(--color-on-surface-muted);
+    }
+
+    .badge-primary {
+      background: var(--color-primary-container);
+      color: var(--color-primary);
+    }
+
+    .badge-info {
+      background: var(--color-info-container);
+      color: var(--color-info);
+    }
+
+    .badge-success {
+      background: var(--color-success-container);
+      color: var(--color-success);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: var(--radius-full);
+      flex-shrink: 0;
+    }
+
+    .dot-idle     { background: var(--color-on-surface-muted); }
+    .dot-running  { background: var(--color-info); }
+    .dot-complete { background: var(--color-success); }
+    .dot-error    { background: var(--color-error); }
+    .dot-clean    { background: var(--color-success); }
+    .dot-modified { background: var(--color-warning); }
+
+    .external-link {
+      color: var(--color-on-surface-muted);
+      font-size: 10px;
+      flex-shrink: 0;
+      text-decoration: none;
+    }
+
+    .external-link:hover {
+      color: var(--color-link);
+    }
+
+    /* ── Upload progress ─────────────────────────────────────────────────────── */
+    .upload-row {
+      padding: 0 var(--spacing-sm) 4px;
+    }
+
+    .upload-progress-track {
+      height: 3px;
+      background: var(--color-surface-container);
+      border-radius: var(--radius-full);
+      margin-left: 52px;
+    }
+
+    .upload-progress-fill {
+      height: 100%;
+      width: 62%;
+      background: var(--color-primary);
+      border-radius: var(--radius-full);
+      transition: width 300ms ease;
+    }
+
+    .drop-target-row {
+      outline: 1.5px dashed var(--color-primary) !important;
+      background: var(--color-primary-fixed) !important;
+    }
+
+    /* ── Body states ─────────────────────────────────────────────────────────── */
+    .body-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-lg);
+      text-align: center;
+    }
+
+    .body-state-icon {
+      font-size: 32px;
+      color: var(--color-on-surface-disabled);
+    }
+
+    .body-state-icon-error {
+      color: var(--color-error);
+    }
+
+    .body-state-message {
+      font-size: var(--text-body-medium-size);
+      color: var(--color-on-surface-muted);
+    }
+
+    .body-state-message-error {
+      color: var(--color-error);
+    }
+
+    .body-state-detail {
+      font-size: var(--text-body-small-size);
+      color: var(--color-on-surface-disabled);
+    }
+
+    .body-state-btn {
+      height: var(--control-height-md);
+      padding: 0 var(--button-padding-h);
+      border: var(--button-border-width) solid var(--color-primary);
+      border-radius: var(--button-border-radius);
+      background: transparent;
+      color: var(--color-primary);
+      font-family: var(--font-family);
+      font-size: var(--text-label-large-size);
+      font-weight: var(--text-label-large-weight);
+      cursor: pointer;
+      transition: background 150ms ease;
+      margin-top: var(--spacing-xs);
+    }
+
+    .body-state-btn:hover {
+      background: var(--color-primary-container);
+    }
+
+    .body-state-btn-error {
+      border-color: var(--color-error);
+      color: var(--color-error);
+    }
+
+    .body-state-btn-error:hover {
+      background: var(--color-error-container);
+    }
+
+    /* Loading spinner */
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid var(--color-surface-container-high);
+      border-top-color: var(--color-primary);
+      border-radius: var(--radius-full);
+      animation: spin 0.8s linear infinite;
+    }
+
+    /* ── Section header ──────────────────────────────────────────────────────── */
+    .section-title {
+      font-size: var(--text-section-header-size);
+      font-weight: var(--text-section-header-weight);
+      letter-spacing: var(--text-section-header-letter-spacing);
+      text-transform: uppercase;
+      color: var(--color-on-surface-muted);
+      margin-bottom: var(--spacing-sm);
+      margin-top: var(--spacing-lg);
+    }
+
+    .section-title:first-child {
+      margin-top: 0;
+    }
+
+    /* ── Tree separator ──────────────────────────────────────────────────────── */
+    .tree-sep {
+      height: var(--line-weight-subtle);
+      background: var(--color-outline-variant);
+      margin: 2px 0;
+    }
+
+    /* ── Public globe icon on project row ───────────────────────────────────── */
+    .public-icon {
+      font-size: 9px;
+      color: var(--color-info);
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Page header ─────────────────────────────────────────────────────── -->
+  <div class="page-header">
+    <div>
+      <div class="page-title">Project Navigator — Styled Mock</div>
+      <div class="page-sub">All 4 body states · Tercen tokens · FontAwesome 6 Solid · Theme toggle</div>
+    </div>
+    <button class="theme-toggle" id="themeBtn" title="Toggle theme" aria-label="Toggle dark/light theme">
+      <i class="fa-solid fa-moon" id="themeIcon"></i>
+    </button>
+  </div>
+
+  <!-- ── State 1 & 2: LOADING + EMPTY ─────────────────────────────────────── -->
+  <div class="section-title">Body States</div>
+  <div class="states-grid">
+
+    <!-- LOADING -->
+    <div>
+      <div class="widget" style="height: 220px;">
+        <div class="state-label">Loading</div>
+        <div class="body-state">
+          <div class="spinner"></div>
+          <div class="body-state-message">Loading projects...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EMPTY -->
+    <div>
+      <div class="widget" style="height: 220px;">
+        <div class="state-label">Empty</div>
+        <div class="body-state">
+          <i class="fa-solid fa-folder-open body-state-icon" style="font-size: 32px;"></i>
+          <div class="body-state-message">No projects yet</div>
+          <div class="body-state-detail">Ask the AI to create a project</div>
+          <button class="body-state-btn">Ask the AI</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ERROR -->
+    <div>
+      <div class="widget" style="height: 220px;">
+        <div class="state-label">Error</div>
+        <div class="body-state">
+          <i class="fa-solid fa-circle-xmark body-state-icon body-state-icon-error" style="font-size: 32px;"></i>
+          <div class="body-state-message body-state-message-error">Something went wrong</div>
+          <div class="body-state-detail">Could not connect to Tercen. Check your network.</div>
+          <button class="body-state-btn body-state-btn-error">Retry</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── State 4: ACTIVE (main widget) ────────────────────────────────────── -->
+  <div class="section-title">Active State — Full Navigator</div>
+  <div style="max-width: 360px;">
+    <div class="widget" style="height: 560px;">
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+
+        <!-- Upload (primary — active because project is selected) -->
+        <button class="tb-btn tb-btn-primary" title="Upload file to selected project">
+          <i class="fa-solid fa-upload"></i>
+        </button>
+
+        <!-- Download (disabled — no file/dataset selected) -->
+        <button class="tb-btn" disabled title="Download — select a file or dataset first">
+          <i class="fa-solid fa-download"></i>
+        </button>
+
+        <!-- Refresh (always active) -->
+        <button class="tb-btn" title="Refresh tree">
+          <i class="fa-solid fa-rotate"></i>
+        </button>
+
+        <div class="tb-divider"></div>
+
+        <!-- Team (disabled — no team selected) -->
+        <button class="tb-btn" disabled title="Manage team — select a team first">
+          <i class="fa-solid fa-users"></i>
+        </button>
+
+        <div class="tb-divider"></div>
+
+        <!-- Type filter dropdown -->
+        <button class="tb-dropdown" title="Filter by document type">
+          <i class="fa-solid fa-filter" style="font-size: 10px;"></i>
+          All
+          <i class="fa-solid fa-chevron-down" style="font-size: 8px;"></i>
+        </button>
+
+        <!-- Text search -->
+        <input class="tb-search" type="text" placeholder="Search..." aria-label="Search tree">
+
+      </div>
+
+      <!-- Tree view (active, Personal team auto-expanded, Immunophenotyping user-expanded) -->
+      <div class="tree-view">
+
+        <!-- Personal team (level 0, expanded) -->
+        <div class="tree-row" data-level="0">
+          <span class="chevron"><i class="fa-solid fa-chevron-down"></i></span>
+          <span class="node-icon icon-team"><i class="fa-solid fa-user"></i></span>
+          <span class="node-name">Personal</span>
+          <span class="badge badge-neutral" style="font-size: 9px;">(me)</span>
+        </div>
+
+        <!-- Immunophenotyping project (level 1, expanded + selected) -->
+        <div class="tree-row selected" data-level="1">
+          <span class="chevron"><i class="fa-solid fa-chevron-down"></i></span>
+          <span class="node-icon icon-project"><i class="fa-solid fa-folder-open"></i></span>
+          <span class="node-name">Immunophenotyping</span>
+          <span class="badge badge-neutral">v2.3</span>
+          <span class="status-dot dot-clean" title="Git: clean"></span>
+          <i class="fa-solid fa-globe public-icon" title="Public project"></i>
+          <a href="#" class="external-link" title="View on GitHub"><i class="fa-brands fa-github"></i></a>
+        </div>
+
+        <!-- README.md (level 2, file, leaf) -->
+        <div class="tree-row" data-level="2">
+          <span class="chevron-placeholder"></span>
+          <span class="node-icon icon-file"><i class="fa-solid fa-file-lines"></i></span>
+          <span class="node-name">README.md</span>
+        </div>
+
+        <!-- omip69 zip (level 2, file/zip, leaf) -->
+        <div class="tree-row" data-level="2">
+          <span class="chevron-placeholder"></span>
+          <span class="node-icon icon-zip"><i class="fa-solid fa-file-zipper"></i></span>
+          <span class="node-name">omip69_1k_donor.zip</span>
+        </div>
+
+        <!-- Sample_annotation.csv (level 2, dataset, leaf) -->
+        <div class="tree-row" data-level="2">
+          <span class="chevron-placeholder"></span>
+          <span class="node-icon icon-dataset"><i class="fa-solid fa-table"></i></span>
+          <span class="node-name">Sample_annotation.csv</span>
+        </div>
+
+        <!-- OMIP-069 Channel Descriptions (level 2, dataset, leaf) -->
+        <div class="tree-row" data-level="2">
+          <span class="chevron-placeholder"></span>
+          <span class="node-icon icon-dataset"><i class="fa-solid fa-table"></i></span>
+          <span class="node-name">OMIP-069 - Channel Descriptions</span>
+        </div>
+
+        <!-- Flow Immunophenotyping workflow (level 2, leaf, complete) -->
+        <div class="tree-row" data-level="2">
+          <span class="chevron-placeholder"></span>
+          <span class="node-icon icon-workflow"><i class="fa-solid fa-diagram-project"></i></span>
+          <span class="node-name">Flow Immunophenotyping</span>
+          <span class="status-dot dot-complete" title="Workflow: complete"></span>
+        </div>
+
+        <!-- reports folder (level 2, collapsed, drop target + upload in progress) -->
+        <div class="tree-row drop-target-row" data-level="2">
+          <span class="chevron"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="node-icon icon-folder"><i class="fa-solid fa-folder"></i></span>
+          <span class="node-name">reports</span>
+        </div>
+        <!-- Upload progress bar below drop target -->
+        <div class="upload-row">
+          <div class="upload-progress-track">
+            <div class="upload-progress-fill"></div>
+          </div>
+        </div>
+
+        <!-- PCA Analysis project (level 1, collapsed) -->
+        <div class="tree-row" data-level="1">
+          <span class="chevron"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="node-icon icon-project"><i class="fa-solid fa-folder"></i></span>
+          <span class="node-name">PCA Analysis</span>
+          <span class="badge badge-neutral">v1.0</span>
+          <i class="fa-solid fa-globe public-icon" title="Public project"></i>
+          <a href="#" class="external-link" title="View on GitHub"><i class="fa-brands fa-github"></i></a>
+        </div>
+
+        <!-- flow_preprocessing project (level 1, collapsed) -->
+        <div class="tree-row" data-level="1">
+          <span class="chevron"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="node-icon icon-project"><i class="fa-solid fa-folder"></i></span>
+          <span class="node-name">flow_preprocessing</span>
+          <span class="badge badge-neutral">v2.3</span>
+          <a href="#" class="external-link" title="View on GitHub"><i class="fa-brands fa-github"></i></a>
+        </div>
+
+        <div class="tree-sep"></div>
+
+        <!-- MartinLibrary team (level 0, collapsed) -->
+        <div class="tree-row" data-level="0">
+          <span class="chevron"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="node-icon icon-team"><i class="fa-solid fa-users"></i></span>
+          <span class="node-name">MartinLibrary</span>
+          <span class="node-name-muted" style="font-size: 11px; flex: 0; white-space: nowrap;">(3)</span>
+        </div>
+
+        <!-- MyNewTeam (level 0, collapsed) -->
+        <div class="tree-row" data-level="0">
+          <span class="chevron"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="node-icon icon-team"><i class="fa-solid fa-users"></i></span>
+          <span class="node-name">MyNewTeam</span>
+          <span class="node-name-muted" style="font-size: 11px; flex: 0; white-space: nowrap;">(1)</span>
+        </div>
+
+        <!-- Team10Dec2025 (level 0, collapsed) -->
+        <div class="tree-row" data-level="0">
+          <span class="chevron"><i class="fa-solid fa-chevron-right"></i></span>
+          <span class="node-icon icon-team"><i class="fa-solid fa-users"></i></span>
+          <span class="node-name">Team10Dec2025</span>
+          <span class="node-name-muted" style="font-size: 11px; flex: 0; white-space: nowrap;">(2)</span>
+        </div>
+
+      </div><!-- /tree-view -->
+    </div><!-- /widget -->
+  </div>
+
+  <!-- ── Workflow status dot legend ────────────────────────────────────────── -->
+  <div class="section-title" style="margin-top: var(--spacing-lg);">Workflow Status Dot Legend</div>
+  <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap; font-size: 12px; color: var(--color-on-surface-variant); align-items: center;">
+    <span style="display: flex; align-items: center; gap: 4px;">
+      <span class="status-dot dot-idle"></span> Idle
+    </span>
+    <span style="display: flex; align-items: center; gap: 4px;">
+      <span class="status-dot dot-running"></span> Running
+    </span>
+    <span style="display: flex; align-items: center; gap: 4px;">
+      <span class="status-dot dot-complete"></span> Complete
+    </span>
+    <span style="display: flex; align-items: center; gap: 4px;">
+      <span class="status-dot dot-error"></span> Error
+    </span>
+    <span style="display: flex; align-items: center; gap: 4px;">
+      <span class="status-dot dot-clean"></span> Git clean
+    </span>
+    <span style="display: flex; align-items: center; gap: 4px;">
+      <span class="status-dot dot-modified"></span> Git modified
+    </span>
+  </div>
+
+  <!-- ── Type icon legend ──────────────────────────────────────────────────── -->
+  <div class="section-title" style="margin-top: var(--spacing-lg);">Node Icon Legend</div>
+  <div style="display: flex; gap: var(--spacing-md); flex-wrap: wrap; font-size: 12px; color: var(--color-on-surface-variant); align-items: center;">
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-user icon-team"></i> Personal Team
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-users icon-team"></i> Team
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-folder icon-project"></i> Project
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-folder icon-folder"></i> Folder
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-file-lines icon-file"></i> File
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-file-zipper icon-zip"></i> ZIP
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-image icon-image"></i> Image
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-table icon-dataset"></i> Dataset
+    </span>
+    <span style="display: flex; align-items: center; gap: 6px;">
+      <i class="fa-solid fa-diagram-project icon-workflow"></i> Workflow
+    </span>
+  </div>
+
+  <!-- ── Theme toggle script ───────────────────────────────────────────────── -->
+  <script>
+    const btn = document.getElementById('themeBtn');
+    const icon = document.getElementById('themeIcon');
+    const html = document.documentElement;
+
+    btn.addEventListener('click', () => {
+      const isDark = html.getAttribute('data-theme') === 'dark';
+      if (isDark) {
+        html.setAttribute('data-theme', 'light');
+        icon.className = 'fa-solid fa-moon';
+        btn.title = 'Switch to dark mode';
+      } else {
+        html.setAttribute('data-theme', 'dark');
+        icon.className = 'fa-solid fa-sun';
+        btn.title = 'Switch to light mode';
+      }
+    });
+  </script>
+</body>
+</html>
