@@ -1551,229 +1551,239 @@
             },
             "children": [
               {
-                "type": "PromptRequired",
-                "id": "{{widgetId}}-prompt",
+                "type": "Interaction",
+                "id": "{{widgetId}}-interaction",
                 "props": {
-                  "fields": [
-                    {
-                      "name": "projectId",
-                      "label": "Project ID",
-                      "default": "2076952ae523bb4d472e283b9e000121"
-                    }
-                  ]
+                  "channel": "navigator.focusChanged",
+                  "matchField": "nodeId"
                 },
                 "children": [
                   {
-                    "type": "Column",
-                    "id": "{{widgetId}}-root",
+                    "type": "PromptRequired",
+                    "id": "{{widgetId}}-prompt",
                     "props": {
-                      "crossAxisAlignment": "stretch"
+                      "fields": [
+                        {
+                          "name": "projectId",
+                          "label": "Project ID",
+                          "default": "2076952ae523bb4d472e283b9e000121"
+                        }
+                      ]
                     },
                     "children": [
                       {
-                        "type": "Container",
-                        "id": "{{widgetId}}-toolbar",
+                        "type": "Column",
+                        "id": "{{widgetId}}-root",
                         "props": {
-                          "color": "surfaceContainerHigh",
-                          "padding": "sm"
+                          "crossAxisAlignment": "stretch"
                         },
                         "children": [
                           {
-                            "type": "Row",
-                            "id": "{{widgetId}}-toolbar-row",
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
                             "props": {
-                              "mainAxisAlignment": "spaceBetween"
+                              "color": "surfaceContainerHigh",
+                              "padding": "sm"
                             },
                             "children": [
                               {
-                                "type": "Text",
-                                "id": "{{widgetId}}-title",
+                                "type": "Row",
+                                "id": "{{widgetId}}-toolbar-row",
                                 "props": {
-                                  "text": "Navigator",
-                                  "textStyle": "labelMedium",
-                                  "color": "onSurface"
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-filter-label",
-                                "props": {
-                                  "text": "All types",
-                                  "textStyle": "labelSmall",
-                                  "color": "onSurfaceMuted"
-                                }
+                                  "mainAxisAlignment": "spaceBetween"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-title",
+                                    "props": {
+                                      "text": "Navigator",
+                                      "textStyle": "labelMedium",
+                                      "color": "onSurface"
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-filter-label",
+                                    "props": {
+                                      "text": "All types",
+                                      "textStyle": "labelSmall",
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  }
+                                ]
                               }
                             ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Expanded",
-                        "id": "{{widgetId}}-body",
-                        "children": [
+                          },
                           {
-                            "type": "DataSource",
-                            "id": "{{widgetId}}-ds",
-                            "props": {
-                              "service": "projectDocumentService",
-                              "method": "findProjectObjectsByLastModifiedDate",
-                              "args": [
-                                [
-                                  "{{projectId}}",
-                                  ""
-                                ],
-                                [
-                                  "{{projectId}}",
-                                  ""
-                                ],
-                                50
-                              ]
-                            },
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-body",
                             "children": [
                               {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-loading",
+                                "type": "DataSource",
+                                "id": "{{widgetId}}-ds",
                                 "props": {
-                                  "visible": "{{loading}}"
+                                  "service": "projectDocumentService",
+                                  "method": "findProjectObjectsByLastModifiedDate",
+                                  "args": [
+                                    [
+                                      "{{projectId}}",
+                                      ""
+                                    ],
+                                    [
+                                      "{{projectId}}",
+                                      ""
+                                    ],
+                                    50
+                                  ]
                                 },
                                 "children": [
                                   {
-                                    "type": "Center",
-                                    "id": "{{widgetId}}-spinner",
-                                    "children": [
-                                      {
-                                        "type": "LoadingIndicator",
-                                        "id": "{{widgetId}}-li",
-                                        "props": {
-                                          "variant": "skeleton",
-                                          "text": "Loading…"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-error",
-                                "props": {
-                                  "visible": "{{error}}"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Center",
-                                    "id": "{{widgetId}}-err-center",
-                                    "children": [
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-err-text",
-                                        "props": {
-                                          "text": "Error: {{errorMessage}}",
-                                          "color": "error"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-ready",
-                                "props": {
-                                  "visible": "{{ready}}"
-                                },
-                                "children": [
-                                  {
-                                    "type": "ListView",
-                                    "id": "{{widgetId}}-lv",
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-loading",
                                     "props": {
-                                      "padding": 4
+                                      "visible": "{{loading}}"
                                     },
                                     "children": [
                                       {
-                                        "type": "ForEach",
-                                        "id": "{{widgetId}}-fe",
+                                        "type": "Center",
+                                        "id": "{{widgetId}}-spinner",
+                                        "children": [
+                                          {
+                                            "type": "LoadingIndicator",
+                                            "id": "{{widgetId}}-li",
+                                            "props": {
+                                              "variant": "skeleton",
+                                              "text": "Loading…"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-error",
+                                    "props": {
+                                      "visible": "{{error}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Center",
+                                        "id": "{{widgetId}}-err-center",
+                                        "children": [
+                                          {
+                                            "type": "Text",
+                                            "id": "{{widgetId}}-err-text",
+                                            "props": {
+                                              "text": "Error: {{errorMessage}}",
+                                              "color": "error"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-ready",
+                                    "props": {
+                                      "visible": "{{ready}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "ListView",
+                                        "id": "{{widgetId}}-lv",
                                         "props": {
-                                          "items": "{{data}}"
+                                          "padding": 4
                                         },
                                         "children": [
                                           {
-                                            "type": "Action",
-                                            "id": "dbl-{{item.id}}",
+                                            "type": "ForEach",
+                                            "id": "{{widgetId}}-fe",
                                             "props": {
-                                              "gesture": "onDoubleTap",
-                                              "channel": "system.intent",
-                                              "payload": {
-                                                "intent": "{{item.kind}}",
-                                                "id": "{{item.id}}",
-                                                "name": "{{item.name}}",
-                                                "kind": "{{item.kind}}",
-                                                "subKind": "{{item.subKind}}"
-                                              }
+                                              "items": "{{data}}"
                                             },
                                             "children": [
                                               {
                                                 "type": "Action",
-                                                "id": "tap-{{item.id}}",
+                                                "id": "dbl-{{item.id}}",
                                                 "props": {
-                                                  "gesture": "onTap",
-                                                  "channel": "navigator.focusChanged",
+                                                  "gesture": "onDoubleTap",
+                                                  "channel": "system.intent",
                                                   "payload": {
-                                                    "nodeId": "{{item.id}}",
-                                                    "nodeType": "{{item.kind}}",
-                                                    "nodeName": "{{item.name}}"
+                                                    "intent": "{{item.kind}}",
+                                                    "id": "{{item.id}}",
+                                                    "name": "{{item.name}}",
+                                                    "kind": "{{item.kind}}",
+                                                    "subKind": "{{item.subKind}}"
                                                   }
                                                 },
                                                 "children": [
                                                   {
-                                                    "type": "Padding",
-                                                    "id": "pad-{{item.id}}",
+                                                    "type": "Action",
+                                                    "id": "tap-{{item.id}}",
                                                     "props": {
-                                                      "padding": "sm"
+                                                      "gesture": "onTap",
+                                                      "channel": "navigator.focusChanged",
+                                                      "payload": {
+                                                        "nodeId": "{{item.id}}",
+                                                        "nodeType": "{{item.kind}}",
+                                                        "nodeName": "{{item.name}}"
+                                                      }
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "Row",
-                                                        "id": "row-{{item.id}}",
+                                                        "type": "Padding",
+                                                        "id": "pad-{{item.id}}",
+                                                        "props": {
+                                                          "padding": "sm"
+                                                        },
                                                         "children": [
                                                           {
-                                                            "type": "Icon",
-                                                            "id": "icon-{{item.id}}",
-                                                            "props": {
-                                                              "icon": "description",
-                                                              "size": 16,
-                                                              "color": "onSurfaceVariant"
-                                                            }
-                                                          },
-                                                          {
-                                                            "type": "SizedBox",
-                                                            "id": "gap-{{item.id}}",
-                                                            "props": {
-                                                              "width": 8
-                                                            }
-                                                          },
-                                                          {
-                                                            "type": "Expanded",
-                                                            "id": "exp-{{item.id}}",
+                                                            "type": "Row",
+                                                            "id": "row-{{item.id}}",
                                                             "children": [
                                                               {
-                                                                "type": "Text",
-                                                                "id": "name-{{item.id}}",
+                                                                "type": "Icon",
+                                                                "id": "icon-{{item.id}}",
                                                                 "props": {
-                                                                  "text": "{{item.name}}",
-                                                                  "textStyle": "bodySmall"
+                                                                  "icon": "description",
+                                                                  "size": 16,
+                                                                  "color": "onSurfaceVariant"
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "gap-{{item.id}}",
+                                                                "props": {
+                                                                  "width": 8
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Expanded",
+                                                                "id": "exp-{{item.id}}",
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "name-{{item.id}}",
+                                                                    "props": {
+                                                                      "text": "{{item.name}}",
+                                                                      "textStyle": "bodySmall"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "type": "Text",
+                                                                "id": "kind-{{item.id}}",
+                                                                "props": {
+                                                                  "text": "{{item.kind}}",
+                                                                  "textStyle": "labelSmall",
+                                                                  "color": "onSurfaceMuted"
                                                                 }
                                                               }
                                                             ]
-                                                          },
-                                                          {
-                                                            "type": "Text",
-                                                            "id": "kind-{{item.id}}",
-                                                            "props": {
-                                                              "text": "{{item.kind}}",
-                                                              "textStyle": "labelSmall",
-                                                              "color": "onSurfaceMuted"
-                                                            }
                                                           }
                                                         ]
                                                       }
@@ -3893,7 +3903,7 @@
                                             "props": {
                                               "text": "Name",
                                               "textStyle": "labelSmall",
-                                              "color": "onSurfaceVariant"
+                                              "color": "onSurfaceMuted"
                                             }
                                           }
                                         ]
@@ -3907,7 +3917,8 @@
                                             "id": "{{widgetId}}-fval-0",
                                             "props": {
                                               "text": "{{data.name}}",
-                                              "textStyle": "bodySmall"
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurface"
                                             }
                                           }
                                         ]
@@ -3940,7 +3951,7 @@
                                             "props": {
                                               "text": "Description",
                                               "textStyle": "labelSmall",
-                                              "color": "onSurfaceVariant"
+                                              "color": "onSurfaceMuted"
                                             }
                                           }
                                         ]
@@ -3954,7 +3965,8 @@
                                             "id": "{{widgetId}}-fval-1",
                                             "props": {
                                               "text": "{{data.description}}",
-                                              "textStyle": "bodySmall"
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurface"
                                             }
                                           }
                                         ]
@@ -3987,7 +3999,7 @@
                                             "props": {
                                               "text": "Owner",
                                               "textStyle": "labelSmall",
-                                              "color": "onSurfaceVariant"
+                                              "color": "onSurfaceMuted"
                                             }
                                           }
                                         ]
@@ -4001,7 +4013,8 @@
                                             "id": "{{widgetId}}-fval-2",
                                             "props": {
                                               "text": "{{data.acl.owner}}",
-                                              "textStyle": "bodySmall"
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurface"
                                             }
                                           }
                                         ]
@@ -4034,7 +4047,7 @@
                                             "props": {
                                               "text": "Last Modified",
                                               "textStyle": "labelSmall",
-                                              "color": "onSurfaceVariant"
+                                              "color": "onSurfaceMuted"
                                             }
                                           }
                                         ]
@@ -4048,7 +4061,8 @@
                                             "id": "{{widgetId}}-fval-3",
                                             "props": {
                                               "text": "{{data.lastModifiedDate.value}}",
-                                              "textStyle": "bodySmall"
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurface"
                                             }
                                           }
                                         ]
@@ -4194,7 +4208,8 @@
                                             "id": "{{widgetId}}-item-name",
                                             "props": {
                                               "text": "{{item.name}}",
-                                              "textStyle": "bodySmall"
+                                              "textStyle": "bodySmall",
+                                              "color": "onSurface"
                                             }
                                           }
                                         ]
@@ -4313,7 +4328,7 @@
                                 "props": {
                                   "text": "Project Name",
                                   "textStyle": "labelSmall",
-                                  "color": "onSurfaceVariant"
+                                  "color": "onSurfaceMuted"
                                 }
                               },
                               {
@@ -4354,7 +4369,7 @@
                                 "props": {
                                   "text": "Description",
                                   "textStyle": "labelSmall",
-                                  "color": "onSurfaceVariant"
+                                  "color": "onSurfaceMuted"
                                 }
                               },
                               {
