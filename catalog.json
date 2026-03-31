@@ -915,7 +915,7 @@
                         "type": "Image",
                         "id": "{{widgetId}}-thinking-gif",
                         "props": {
-                          "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/Tercen%20Logo/animated_five_level.gif",
+                          "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/widgets/chat-box/assets/thinking_indicator.gif",
                           "width": 16,
                           "height": 16,
                           "fit": "contain"
@@ -1013,8 +1013,12 @@
             },
             "children": [
               {
-                "type": "Container",
-                "id": "{{widgetId}}-compose",
+                "type": "Center",
+                "id": "{{widgetId}}-compose-center",
+                "children": [
+                  {
+                    "type": "Container",
+                    "id": "{{widgetId}}-compose",
                 "props": {
                   "color": "surface",
                   "borderColor": "primary",
@@ -1185,6 +1189,8 @@
                     ]
                   }
                 ]
+              }
+              ]
               }
             ]
           }
