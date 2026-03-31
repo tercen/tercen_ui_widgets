@@ -859,13 +859,40 @@
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "LoadingIndicator",
-                                                        "id": "{{widgetId}}-spinner",
+                                                        "type": "Row",
+                                                        "id": "{{widgetId}}-streaming-row",
                                                         "props": {
-                                                          "variant": "spinner",
-                                                          "width": 14,
-                                                          "height": 14
-                                                        }
+                                                          "crossAxisAlignment": "center",
+                                                          "mainAxisSize": "min"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Image",
+                                                            "id": "{{widgetId}}-streaming-gif",
+                                                            "props": {
+                                                              "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
+                                                              "width": 18,
+                                                              "height": 18,
+                                                              "fit": "contain"
+                                                            }
+                                                          },
+                                                          {
+                                                            "type": "SizedBox",
+                                                            "id": "{{widgetId}}-streaming-gap",
+                                                            "props": {
+                                                              "width": 6
+                                                            }
+                                                          },
+                                                          {
+                                                            "type": "Text",
+                                                            "id": "{{widgetId}}-streaming-text",
+                                                            "props": {
+                                                              "text": "Thinking...",
+                                                              "textStyle": "bodySmall",
+                                                              "color": "onSurfaceMuted"
+                                                            }
+                                                          }
+                                                        ]
                                                       }
                                                     ]
                                                   }
@@ -878,61 +905,6 @@
                                     ]
                                   }
                                 ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-thinking-cond",
-                    "props": {
-                      "visible": "{{isThinking}}"
-                    },
-                    "children": [
-                      {
-                        "type": "Padding",
-                        "id": "{{widgetId}}-thinking-pad",
-                        "props": {
-                          "padding": "sm"
-                        },
-                        "children": [
-                          {
-                            "type": "Row",
-                            "id": "{{widgetId}}-thinking-row",
-                            "props": {
-                              "crossAxisAlignment": "center",
-                              "mainAxisSize": "min"
-                            },
-                            "children": [
-                              {
-                                "type": "Image",
-                                "id": "{{widgetId}}-thinking-gif",
-                                "props": {
-                                  "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
-                                  "width": 24,
-                                  "height": 24,
-                                  "fit": "contain"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-thinking-gap",
-                                "props": {
-                                  "width": 8
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-thinking-text",
-                                "props": {
-                                  "text": "Thinking...",
-                                  "textStyle": "bodySmall",
-                                  "color": "onSurfaceMuted",
-                                  "fontStyle": "italic"
-                                }
                               }
                             ]
                           }
