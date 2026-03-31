@@ -3149,7 +3149,7 @@
                                                                 "type": "SizedBox",
                                                                 "id": "{{widgetId}}-act-date-box",
                                                                 "props": {
-                                                                  "width": 72
+                                                                  "width": 100
                                                                 },
                                                                 "children": [
                                                                   {
@@ -3158,7 +3158,8 @@
                                                                     "props": {
                                                                       "text": "{{item.date}}",
                                                                       "textStyle": "bodySmall",
-                                                                      "color": "textTertiary"
+                                                                      "color": "textTertiary",
+                                                                      "maxLines": 1
                                                                     }
                                                                   }
                                                                 ]
