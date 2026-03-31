@@ -699,7 +699,7 @@
                                               "icon": "message",
                                               "iconStyle": "solid",
                                               "size": 14,
-                                              "color": "#FF8200"
+                                              "color": "warning"
                                             }
                                           }
                                         ]
@@ -1822,7 +1822,7 @@
             "type": "Container",
             "id": "{{widgetId}}-toolbar",
             "props": {
-              "color": "#1E1E1E",
+              "color": "surfaceContainerHigh",
               "padding": 8
             },
             "children": [
@@ -1840,7 +1840,7 @@
                       "text": "Audit Trail",
                       "fontSize": 13,
                       "fontWeight": "bold",
-                      "color": "#0D9488"
+                      "color": "primary"
                     }
                   },
                   {
@@ -1849,7 +1849,7 @@
                     "props": {
                       "text": "No scope selected",
                       "fontSize": 11,
-                      "color": "grey"
+                      "color": "onSurfaceMuted"
                     }
                   }
                 ]
@@ -1870,7 +1870,7 @@
                     "props": {
                       "text": "Select a scope to view audit events",
                       "fontSize": 12,
-                      "color": "grey"
+                      "color": "onSurfaceMuted"
                     }
                   }
                 ]
@@ -3642,7 +3642,7 @@
             "type": "Container",
             "id": "{{widgetId}}-toolbar",
             "props": {
-              "color": "#1E1E1E",
+              "color": "surfaceContainerHigh",
               "padding": 8
             },
             "children": [
@@ -3653,7 +3653,7 @@
                   "text": "Team Manager",
                   "fontSize": 13,
                   "fontWeight": "bold",
-                  "color": "#F59E0B"
+                  "color": "warning"
                 }
               }
             ]
@@ -3672,7 +3672,7 @@
                     "props": {
                       "text": "Team Manager — coming soon",
                       "fontSize": 14,
-                      "color": "grey"
+                      "color": "onSurfaceMuted"
                     }
                   }
                 ]
