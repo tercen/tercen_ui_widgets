@@ -40,207 +40,192 @@
         "typeColor": "#9333EA"
       },
       "template": {
-        "type": "PromptRequired",
-        "id": "{{widgetId}}-prompt",
+        "type": "Column",
+        "id": "{{widgetId}}-root",
         "props": {
-          "fields": [
-            {
-              "name": "workflowId",
-              "label": "Workflow ID",
-              "default": "28e3c9888e9935f667aed6f07c007c7c"
-            }
-          ]
+          "crossAxisAlignment": "stretch"
         },
         "children": [
           {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
-            "props": {
-              "crossAxisAlignment": "stretch"
-            },
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
             "children": [
               {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "workflowService",
+                  "method": "getWorkflowGraph",
+                  "args": [
+                    "{{workflowId}}"
+                  ]
+                },
                 "children": [
                   {
-                    "type": "DataSource",
-                    "id": "{{widgetId}}-ds",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "service": "workflowService",
-                      "method": "getWorkflowGraph",
-                      "args": [
-                        "{{workflowId}}"
-                      ]
+                      "visible": "{{loading}}"
                     },
                     "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-loading",
-                        "props": {
-                          "visible": "{{loading}}"
-                        },
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-spinner",
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": {
+                              "variant": "skeleton",
+                              "text": "Loading workflow…"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-err-col",
+                            "props": {
+                              "mainAxisAlignment": "center"
+                            },
                             "children": [
                               {
-                                "type": "LoadingIndicator",
-                                "id": "{{widgetId}}-li",
+                                "type": "Icon",
+                                "id": "{{widgetId}}-err-icon",
                                 "props": {
-                                  "variant": "skeleton",
-                                  "text": "Loading workflow…"
+                                  "icon": "error_outline",
+                                  "size": 32,
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap",
+                                "props": {
+                                  "height": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "{{errorMessage}}",
+                                  "textStyle": "bodySmall",
+                                  "color": "error"
                                 }
                               }
                             ]
                           }
                         ]
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-error",
+                        "type": "Column",
+                        "id": "{{widgetId}}-content",
                         "props": {
-                          "visible": "{{error}}"
+                          "crossAxisAlignment": "stretch"
                         },
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-err-center",
-                            "children": [
-                              {
-                                "type": "Column",
-                                "id": "{{widgetId}}-err-col",
-                                "props": {
-                                  "mainAxisAlignment": "center"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-err-icon",
-                                    "props": {
-                                      "icon": "error_outline",
-                                      "size": 32,
-                                      "color": "error"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-err-gap",
-                                    "props": {
-                                      "height": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-err-text",
-                                    "props": {
-                                      "text": "{{errorMessage}}",
-                                      "textStyle": "bodySmall",
-                                      "color": "error"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-ready",
-                        "props": {
-                          "visible": "{{ready}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Column",
-                            "id": "{{widgetId}}-content",
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
                             "props": {
-                              "crossAxisAlignment": "stretch"
+                              "color": "surfaceContainerHigh",
+                              "padding": "sm"
                             },
                             "children": [
                               {
-                                "type": "Container",
-                                "id": "{{widgetId}}-toolbar",
+                                "type": "Row",
+                                "id": "{{widgetId}}-toolbar-row",
                                 "props": {
-                                  "color": "surfaceContainerHigh",
-                                  "padding": "sm"
+                                  "mainAxisAlignment": "spaceBetween"
                                 },
                                 "children": [
                                   {
                                     "type": "Row",
-                                    "id": "{{widgetId}}-toolbar-row",
-                                    "props": {
-                                      "mainAxisAlignment": "spaceBetween"
-                                    },
+                                    "id": "{{widgetId}}-toolbar-left",
                                     "children": [
                                       {
-                                        "type": "Row",
-                                        "id": "{{widgetId}}-toolbar-left",
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-icon",
-                                            "props": {
-                                              "icon": "account_tree",
-                                              "size": 16,
-                                              "color": "primary"
-                                            }
-                                          },
-                                          {
-                                            "type": "SizedBox",
-                                            "id": "{{widgetId}}-icon-gap",
-                                            "props": {
-                                              "width": 8
-                                            }
-                                          },
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-title",
-                                            "props": {
-                                              "text": "{{data.name}}",
-                                              "textStyle": "labelMedium",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
+                                        "type": "Icon",
+                                        "id": "{{widgetId}}-icon",
+                                        "props": {
+                                          "icon": "account_tree",
+                                          "size": 16,
+                                          "color": "primary"
+                                        }
+                                      },
+                                      {
+                                        "type": "SizedBox",
+                                        "id": "{{widgetId}}-icon-gap",
+                                        "props": {
+                                          "width": 8
+                                        }
                                       },
                                       {
                                         "type": "Text",
-                                        "id": "{{widgetId}}-count",
+                                        "id": "{{widgetId}}-title",
                                         "props": {
-                                          "text": "{{data.nodes.length}} steps",
-                                          "textStyle": "labelSmall",
-                                          "color": "onSurfaceMuted"
+                                          "text": "{{data.name}}",
+                                          "textStyle": "labelMedium",
+                                          "color": "onSurface"
                                         }
                                       }
                                     ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Divider",
-                                "id": "{{widgetId}}-div",
-                                "props": {
-                                  "height": 1,
-                                  "color": "outlineVariant"
-                                }
-                              },
-                              {
-                                "type": "Expanded",
-                                "id": "{{widgetId}}-graph-area",
-                                "children": [
+                                  },
                                   {
-                                    "type": "DirectedGraph",
-                                    "id": "{{widgetId}}-graph",
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-count",
                                     "props": {
-                                      "nodes": "{{data.nodes}}",
-                                      "edges": "{{data.edges}}",
-                                      "channel": "workflow.selection"
+                                      "text": "{{data.nodes.length}} steps",
+                                      "textStyle": "labelSmall",
+                                      "color": "onSurfaceMuted"
                                     }
                                   }
                                 ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Divider",
+                            "id": "{{widgetId}}-div",
+                            "props": {
+                              "height": 1,
+                              "color": "outlineVariant"
+                            }
+                          },
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-graph-area",
+                            "children": [
+                              {
+                                "type": "DirectedGraph",
+                                "id": "{{widgetId}}-graph",
+                                "props": {
+                                  "nodes": "{{data.nodes}}",
+                                  "edges": "{{data.edges}}",
+                                  "channel": "workflow.selection"
+                                }
                               }
                             ]
                           }
@@ -298,222 +283,193 @@
         "typeColor": "#FF8200"
       },
       "template": {
-        "type": "PromptRequired",
-        "id": "{{widgetId}}-prompt",
+        "type": "Column",
+        "id": "{{widgetId}}-root",
         "props": {
-          "fields": [
-            {
-              "name": "workflowId",
-              "label": "Workflow ID",
-              "default": "28e3c9888e9935f667aed6f07c007c7c"
-            },
-            {
-              "name": "stepId",
-              "label": "Step ID",
-              "default": "73ab0d32-cd1a-4ee5-bdec-b744b3767b32"
-            },
-            {
-              "name": "tableType",
-              "label": "Table type",
-              "default": "output",
-              "values": [
-                "output",
-                "input"
-              ]
-            }
-          ]
+          "crossAxisAlignment": "stretch"
         },
         "children": [
           {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
-            "props": {
-              "crossAxisAlignment": "stretch"
-            },
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
             "children": [
               {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "workflowService",
+                  "method": "getStepTables",
+                  "args": [
+                    "{{workflowId}}",
+                    "{{stepId}}",
+                    "{{tableType}}"
+                  ]
+                },
                 "children": [
                   {
-                    "type": "DataSource",
-                    "id": "{{widgetId}}-ds",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "service": "workflowService",
-                      "method": "getStepTables",
-                      "args": [
-                        "{{workflowId}}",
-                        "{{stepId}}",
-                        "{{tableType}}"
-                      ]
+                      "visible": "{{loading}}"
                     },
                     "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-loading",
-                        "props": {
-                          "visible": "{{loading}}"
-                        },
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-spinner",
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": {
+                              "variant": "skeleton",
+                              "text": "Loading step tables…"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-err-col",
+                            "props": {
+                              "mainAxisAlignment": "center"
+                            },
                             "children": [
                               {
-                                "type": "LoadingIndicator",
-                                "id": "{{widgetId}}-li",
+                                "type": "Icon",
+                                "id": "{{widgetId}}-err-icon",
                                 "props": {
-                                  "variant": "skeleton",
-                                  "text": "Loading step tables…"
+                                  "icon": "error_outline",
+                                  "size": 32,
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap",
+                                "props": {
+                                  "height": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "{{errorMessage}}",
+                                  "textStyle": "bodySmall",
+                                  "color": "error"
                                 }
                               }
                             ]
                           }
                         ]
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-error",
+                        "type": "Column",
+                        "id": "{{widgetId}}-content",
                         "props": {
-                          "visible": "{{error}}"
+                          "crossAxisAlignment": "stretch"
                         },
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-err-center",
-                            "children": [
-                              {
-                                "type": "Column",
-                                "id": "{{widgetId}}-err-col",
-                                "props": {
-                                  "mainAxisAlignment": "center"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-err-icon",
-                                    "props": {
-                                      "icon": "error_outline",
-                                      "size": 32,
-                                      "color": "error"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-err-gap",
-                                    "props": {
-                                      "height": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-err-text",
-                                    "props": {
-                                      "text": "{{errorMessage}}",
-                                      "textStyle": "bodySmall",
-                                      "color": "error"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-ready",
-                        "props": {
-                          "visible": "{{ready}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Column",
-                            "id": "{{widgetId}}-content",
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
                             "props": {
-                              "crossAxisAlignment": "stretch"
+                              "color": "surfaceContainerHigh",
+                              "padding": "sm"
                             },
                             "children": [
                               {
-                                "type": "Container",
-                                "id": "{{widgetId}}-toolbar",
+                                "type": "Row",
+                                "id": "{{widgetId}}-toolbar-row",
                                 "props": {
-                                  "color": "surfaceContainerHigh",
-                                  "padding": "sm"
+                                  "mainAxisAlignment": "spaceBetween"
                                 },
                                 "children": [
                                   {
                                     "type": "Row",
-                                    "id": "{{widgetId}}-toolbar-row",
-                                    "props": {
-                                      "mainAxisAlignment": "spaceBetween"
-                                    },
+                                    "id": "{{widgetId}}-toolbar-left",
                                     "children": [
                                       {
-                                        "type": "Row",
-                                        "id": "{{widgetId}}-toolbar-left",
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-icon",
-                                            "props": {
-                                              "icon": "table_chart",
-                                              "size": 16,
-                                              "color": "primary"
-                                            }
-                                          },
-                                          {
-                                            "type": "SizedBox",
-                                            "id": "{{widgetId}}-icon-gap",
-                                            "props": {
-                                              "width": 8
-                                            }
-                                          },
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-title",
-                                            "props": {
-                                              "text": "{{data.stepName}}",
-                                              "textStyle": "labelMedium",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
+                                        "type": "Icon",
+                                        "id": "{{widgetId}}-icon",
+                                        "props": {
+                                          "icon": "table_chart",
+                                          "size": 16,
+                                          "color": "primary"
+                                        }
+                                      },
+                                      {
+                                        "type": "SizedBox",
+                                        "id": "{{widgetId}}-icon-gap",
+                                        "props": {
+                                          "width": 8
+                                        }
                                       },
                                       {
                                         "type": "Text",
-                                        "id": "{{widgetId}}-type-label",
+                                        "id": "{{widgetId}}-title",
                                         "props": {
-                                          "text": "{{data.tableType}}",
-                                          "textStyle": "labelSmall",
-                                          "color": "onSurfaceMuted"
+                                          "text": "{{data.stepName}}",
+                                          "textStyle": "labelMedium",
+                                          "color": "onSurface"
                                         }
                                       }
                                     ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Divider",
-                                "id": "{{widgetId}}-div",
-                                "props": {
-                                  "height": 1,
-                                  "color": "outlineVariant"
-                                }
-                              },
-                              {
-                                "type": "Expanded",
-                                "id": "{{widgetId}}-tables-area",
-                                "children": [
+                                  },
                                   {
-                                    "type": "TabbedDataTable",
-                                    "id": "{{widgetId}}-tdt",
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-type-label",
                                     "props": {
-                                      "tables": "{{data.tables}}",
-                                      "maxRows": 100
+                                      "text": "{{data.tableType}}",
+                                      "textStyle": "labelSmall",
+                                      "color": "onSurfaceMuted"
                                     }
                                   }
                                 ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Divider",
+                            "id": "{{widgetId}}-div",
+                            "props": {
+                              "height": 1,
+                              "color": "outlineVariant"
+                            }
+                          },
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-tables-area",
+                            "children": [
+                              {
+                                "type": "TabbedDataTable",
+                                "id": "{{widgetId}}-tdt",
+                                "props": {
+                                  "tables": "{{data.tables}}",
+                                  "maxRows": 100
+                                }
                               }
                             ]
                           }
@@ -1192,178 +1148,163 @@
         "typeColor": "#EC4899"
       },
       "template": {
-        "type": "PromptRequired",
-        "id": "{{widgetId}}-prompt",
+        "type": "Column",
+        "id": "{{widgetId}}-root",
         "props": {
-          "fields": [
-            {
-              "name": "fileId",
-              "label": "File ID",
-              "default": "2076952ae523bb4d472e283b9e001298"
-            }
-          ]
+          "crossAxisAlignment": "stretch"
         },
         "children": [
           {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
+            "type": "DataSource",
+            "id": "{{widgetId}}-meta-ds",
             "props": {
-              "crossAxisAlignment": "stretch"
+              "service": "fileService",
+              "method": "get",
+              "args": [
+                "{{fileId}}"
+              ]
             },
             "children": [
               {
-                "type": "DataSource",
-                "id": "{{widgetId}}-meta-ds",
+                "type": "Container",
+                "id": "{{widgetId}}-toolbar",
                 "props": {
-                  "service": "fileService",
-                  "method": "get",
-                  "args": [
-                    "{{fileId}}"
-                  ]
+                  "color": "surfaceContainerHigh",
+                  "padding": "sm"
                 },
                 "children": [
                   {
-                    "type": "Container",
-                    "id": "{{widgetId}}-toolbar",
+                    "type": "Row",
+                    "id": "{{widgetId}}-toolbar-row",
                     "props": {
-                      "color": "surfaceContainerHigh",
-                      "padding": "sm"
+                      "mainAxisAlignment": "spaceBetween"
                     },
                     "children": [
                       {
                         "type": "Row",
-                        "id": "{{widgetId}}-toolbar-row",
-                        "props": {
-                          "mainAxisAlignment": "spaceBetween"
-                        },
+                        "id": "{{widgetId}}-toolbar-left",
                         "children": [
                           {
-                            "type": "Row",
-                            "id": "{{widgetId}}-toolbar-left",
-                            "children": [
-                              {
-                                "type": "Icon",
-                                "id": "{{widgetId}}-icon",
-                                "props": {
-                                  "icon": "description",
-                                  "size": 16,
-                                  "color": "primary"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-icon-gap",
-                                "props": {
-                                  "width": 8
-                                }
-                              },
-                              {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-has-name",
-                                "props": {
-                                  "visible": "{{ready}}"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-title",
-                                    "props": {
-                                      "text": "{{data.name}}",
-                                      "textStyle": "labelMedium",
-                                      "color": "onSurface"
-                                    }
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-no-name",
-                                "props": {
-                                  "visible": "{{loading}}"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-title-loading",
-                                    "props": {
-                                      "text": "Document Viewer",
-                                      "textStyle": "labelMedium",
-                                      "color": "onSurface"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
+                            "type": "Icon",
+                            "id": "{{widgetId}}-icon",
+                            "props": {
+                              "icon": "description",
+                              "size": 16,
+                              "color": "primary"
+                            }
+                          },
+                          {
+                            "type": "SizedBox",
+                            "id": "{{widgetId}}-icon-gap",
+                            "props": {
+                              "width": 8
+                            }
                           },
                           {
                             "type": "Conditional",
-                            "id": "{{widgetId}}-meta-ready",
+                            "id": "{{widgetId}}-has-name",
                             "props": {
                               "visible": "{{ready}}"
                             },
                             "children": [
                               {
-                                "type": "Row",
-                                "id": "{{widgetId}}-meta-row",
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-owner-icon",
-                                    "props": {
-                                      "icon": "person",
-                                      "size": 14,
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-og",
-                                    "props": {
-                                      "width": 4
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-owner",
-                                    "props": {
-                                      "text": "{{data.acl.owner}}",
-                                      "textStyle": "labelSmall",
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-sep1",
-                                    "props": {
-                                      "width": 16
-                                    }
-                                  },
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-size-icon",
-                                    "props": {
-                                      "icon": "storage",
-                                      "size": 14,
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-sg",
-                                    "props": {
-                                      "width": 4
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-size",
-                                    "props": {
-                                      "text": "{{data.size}} bytes",
-                                      "textStyle": "labelSmall",
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  }
-                                ]
+                                "type": "Text",
+                                "id": "{{widgetId}}-title",
+                                "props": {
+                                  "text": "{{data.name}}",
+                                  "textStyle": "labelMedium",
+                                  "color": "onSurface"
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-no-name",
+                            "props": {
+                              "visible": "{{loading}}"
+                            },
+                            "children": [
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-title-loading",
+                                "props": {
+                                  "text": "Document Viewer",
+                                  "textStyle": "labelMedium",
+                                  "color": "onSurface"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-meta-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Row",
+                            "id": "{{widgetId}}-meta-row",
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-owner-icon",
+                                "props": {
+                                  "icon": "person",
+                                  "size": 14,
+                                  "color": "onSurfaceMuted"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-og",
+                                "props": {
+                                  "width": 4
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-owner",
+                                "props": {
+                                  "text": "{{data.acl.owner}}",
+                                  "textStyle": "labelSmall",
+                                  "color": "onSurfaceMuted"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-sep1",
+                                "props": {
+                                  "width": 16
+                                }
+                              },
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-size-icon",
+                                "props": {
+                                  "icon": "storage",
+                                  "size": 14,
+                                  "color": "onSurfaceMuted"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-sg",
+                                "props": {
+                                  "width": 4
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-size",
+                                "props": {
+                                  "text": "{{data.size}} bytes",
+                                  "textStyle": "labelSmall",
+                                  "color": "onSurfaceMuted"
+                                }
                               }
                             ]
                           }
@@ -1372,126 +1313,126 @@
                     ]
                   }
                 ]
-              },
+              }
+            ]
+          },
+          {
+            "type": "Divider",
+            "id": "{{widgetId}}-div-top",
+            "props": {
+              "height": 1,
+              "color": "outlineVariant"
+            }
+          },
+          {
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
+            "children": [
               {
-                "type": "Divider",
-                "id": "{{widgetId}}-div-top",
+                "type": "DataSource",
+                "id": "{{widgetId}}-content-ds",
                 "props": {
-                  "height": 1,
-                  "color": "outlineVariant"
-                }
-              },
-              {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
+                  "service": "fileService",
+                  "method": "download",
+                  "args": [
+                    "{{fileId}}"
+                  ]
+                },
                 "children": [
                   {
-                    "type": "DataSource",
-                    "id": "{{widgetId}}-content-ds",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "service": "fileService",
-                      "method": "download",
-                      "args": [
-                        "{{fileId}}"
-                      ]
+                      "visible": "{{loading}}"
                     },
                     "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-loading",
-                        "props": {
-                          "visible": "{{loading}}"
-                        },
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-spinner",
-                            "children": [
-                              {
-                                "type": "LoadingIndicator",
-                                "id": "{{widgetId}}-li",
-                                "props": {
-                                  "variant": "skeleton",
-                                  "text": "Loading document…"
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-error",
-                        "props": {
-                          "visible": "{{error}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Center",
-                            "id": "{{widgetId}}-err-center",
-                            "children": [
-                              {
-                                "type": "Column",
-                                "id": "{{widgetId}}-err-col",
-                                "props": {
-                                  "mainAxisAlignment": "center"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-err-icon",
-                                    "props": {
-                                      "icon": "error_outline",
-                                      "size": 32,
-                                      "color": "error"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-err-gap",
-                                    "props": {
-                                      "height": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-err-text",
-                                    "props": {
-                                      "text": "{{errorMessage}}",
-                                      "textStyle": "bodySmall",
-                                      "color": "error"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-ready",
-                        "props": {
-                          "visible": "{{ready}}"
-                        },
-                        "children": [
-                          {
-                            "type": "ListView",
-                            "id": "{{widgetId}}-scroll",
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
                             "props": {
-                              "padding": "md"
+                              "variant": "skeleton",
+                              "text": "Loading document…"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-err-col",
+                            "props": {
+                              "mainAxisAlignment": "center"
                             },
                             "children": [
                               {
-                                "type": "SelectableText",
-                                "id": "{{widgetId}}-content",
+                                "type": "Icon",
+                                "id": "{{widgetId}}-err-icon",
                                 "props": {
-                                  "text": "{{data.content}}",
-                                  "textStyle": "bodyMedium",
-                                  "color": "onSurface"
+                                  "icon": "error_outline",
+                                  "size": 32,
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap",
+                                "props": {
+                                  "height": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "{{errorMessage}}",
+                                  "textStyle": "bodySmall",
+                                  "color": "error"
                                 }
                               }
                             ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
+                      {
+                        "type": "ListView",
+                        "id": "{{widgetId}}-scroll",
+                        "props": {
+                          "padding": "md"
+                        },
+                        "children": [
+                          {
+                            "type": "SelectableText",
+                            "id": "{{widgetId}}-content",
+                            "props": {
+                              "text": "{{data.content}}",
+                              "textStyle": "bodyMedium",
+                              "color": "onSurface"
+                            }
                           }
                         ]
                       }
@@ -1543,231 +1484,216 @@
         },
         "children": [
           {
-            "type": "PromptRequired",
-            "id": "{{widgetId}}-prompt",
+            "type": "Column",
+            "id": "{{widgetId}}-root",
             "props": {
-              "fields": [
-                {
-                  "name": "projectId",
-                  "label": "Project ID",
-                  "default": "2076952ae523bb4d472e283b9e000121"
-                }
-              ]
+              "crossAxisAlignment": "stretch"
             },
             "children": [
               {
-                "type": "Column",
-                "id": "{{widgetId}}-root",
+                "type": "Container",
+                "id": "{{widgetId}}-toolbar",
                 "props": {
-                  "crossAxisAlignment": "stretch"
+                  "color": "surfaceContainerHigh",
+                  "padding": "sm"
                 },
                 "children": [
                   {
-                    "type": "Container",
-                    "id": "{{widgetId}}-toolbar",
+                    "type": "Row",
+                    "id": "{{widgetId}}-toolbar-row",
                     "props": {
-                      "color": "surfaceContainerHigh",
-                      "padding": "sm"
+                      "mainAxisAlignment": "spaceBetween"
                     },
                     "children": [
                       {
-                        "type": "Row",
-                        "id": "{{widgetId}}-toolbar-row",
+                        "type": "Text",
+                        "id": "{{widgetId}}-title",
                         "props": {
-                          "mainAxisAlignment": "spaceBetween"
-                        },
-                        "children": [
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-title",
-                            "props": {
-                              "text": "Navigator",
-                              "textStyle": "labelMedium",
-                              "color": "onSurface"
-                            }
-                          },
-                          {
-                            "type": "Text",
-                            "id": "{{widgetId}}-filter-label",
-                            "props": {
-                              "text": "All types",
-                              "textStyle": "labelSmall",
-                              "color": "onSurfaceMuted"
-                            }
-                          }
-                        ]
+                          "text": "Navigator",
+                          "textStyle": "labelMedium",
+                          "color": "onSurface"
+                        }
+                      },
+                      {
+                        "type": "Text",
+                        "id": "{{widgetId}}-filter-label",
+                        "props": {
+                          "text": "All types",
+                          "textStyle": "labelSmall",
+                          "color": "onSurfaceMuted"
+                        }
                       }
                     ]
-                  },
+                  }
+                ]
+              },
+              {
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
+                "children": [
                   {
-                    "type": "Expanded",
-                    "id": "{{widgetId}}-body",
+                    "type": "DataSource",
+                    "id": "{{widgetId}}-ds",
+                    "props": {
+                      "service": "projectDocumentService",
+                      "method": "findProjectObjectsByLastModifiedDate",
+                      "args": [
+                        [
+                          "{{projectId}}",
+                          ""
+                        ],
+                        [
+                          "{{projectId}}",
+                          ""
+                        ],
+                        50
+                      ]
+                    },
                     "children": [
                       {
-                        "type": "DataSource",
-                        "id": "{{widgetId}}-ds",
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-loading",
                         "props": {
-                          "service": "projectDocumentService",
-                          "method": "findProjectObjectsByLastModifiedDate",
-                          "args": [
-                            [
-                              "{{projectId}}",
-                              ""
-                            ],
-                            [
-                              "{{projectId}}",
-                              ""
-                            ],
-                            50
-                          ]
+                          "visible": "{{loading}}"
                         },
                         "children": [
                           {
-                            "type": "Conditional",
-                            "id": "{{widgetId}}-loading",
-                            "props": {
-                              "visible": "{{loading}}"
-                            },
+                            "type": "Center",
+                            "id": "{{widgetId}}-spinner",
                             "children": [
                               {
-                                "type": "Center",
-                                "id": "{{widgetId}}-spinner",
-                                "children": [
-                                  {
-                                    "type": "LoadingIndicator",
-                                    "id": "{{widgetId}}-li",
-                                    "props": {
-                                      "variant": "skeleton",
-                                      "text": "Loading…"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "type": "Conditional",
-                            "id": "{{widgetId}}-error",
-                            "props": {
-                              "visible": "{{error}}"
-                            },
-                            "children": [
-                              {
-                                "type": "Center",
-                                "id": "{{widgetId}}-err-center",
-                                "children": [
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-err-text",
-                                    "props": {
-                                      "text": "Error: {{errorMessage}}",
-                                      "color": "error"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "type": "Conditional",
-                            "id": "{{widgetId}}-ready",
-                            "props": {
-                              "visible": "{{ready}}"
-                            },
-                            "children": [
-                              {
-                                "type": "ListView",
-                                "id": "{{widgetId}}-lv",
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-li",
                                 "props": {
-                                  "padding": "xs"
+                                  "variant": "skeleton",
+                                  "text": "Loading…"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-error",
+                        "props": {
+                          "visible": "{{error}}"
+                        },
+                        "children": [
+                          {
+                            "type": "Center",
+                            "id": "{{widgetId}}-err-center",
+                            "children": [
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "Error: {{errorMessage}}",
+                                  "color": "error"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      },
+                      {
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-ready",
+                        "props": {
+                          "visible": "{{ready}}"
+                        },
+                        "children": [
+                          {
+                            "type": "ListView",
+                            "id": "{{widgetId}}-lv",
+                            "props": {
+                              "padding": "xs"
+                            },
+                            "children": [
+                              {
+                                "type": "ForEach",
+                                "id": "{{widgetId}}-fe",
+                                "props": {
+                                  "items": "{{data}}"
                                 },
                                 "children": [
                                   {
-                                    "type": "ForEach",
-                                    "id": "{{widgetId}}-fe",
+                                    "type": "Action",
+                                    "id": "dbl-{{item.id}}",
                                     "props": {
-                                      "items": "{{data}}"
+                                      "gesture": "onDoubleTap",
+                                      "channel": "system.intent",
+                                      "payload": {
+                                        "intent": "{{item.kind}}",
+                                        "id": "{{item.id}}",
+                                        "name": "{{item.name}}",
+                                        "kind": "{{item.kind}}",
+                                        "subKind": "{{item.subKind}}"
+                                      }
                                     },
                                     "children": [
                                       {
                                         "type": "Action",
-                                        "id": "dbl-{{item.id}}",
+                                        "id": "tap-{{item.id}}",
                                         "props": {
-                                          "gesture": "onDoubleTap",
-                                          "channel": "system.intent",
+                                          "gesture": "onTap",
+                                          "channel": "navigator.focusChanged",
                                           "payload": {
-                                            "intent": "{{item.kind}}",
-                                            "id": "{{item.id}}",
-                                            "name": "{{item.name}}",
-                                            "kind": "{{item.kind}}",
-                                            "subKind": "{{item.subKind}}"
+                                            "nodeId": "{{item.id}}",
+                                            "nodeType": "{{item.kind}}",
+                                            "nodeName": "{{item.name}}"
                                           }
                                         },
                                         "children": [
                                           {
-                                            "type": "Action",
-                                            "id": "tap-{{item.id}}",
+                                            "type": "Padding",
+                                            "id": "pad-{{item.id}}",
                                             "props": {
-                                              "gesture": "onTap",
-                                              "channel": "navigator.focusChanged",
-                                              "payload": {
-                                                "nodeId": "{{item.id}}",
-                                                "nodeType": "{{item.kind}}",
-                                                "nodeName": "{{item.name}}"
-                                              }
+                                              "padding": "sm"
                                             },
                                             "children": [
                                               {
-                                                "type": "Padding",
-                                                "id": "pad-{{item.id}}",
-                                                "props": {
-                                                  "padding": "sm"
-                                                },
+                                                "type": "Row",
+                                                "id": "row-{{item.id}}",
                                                 "children": [
                                                   {
-                                                    "type": "Row",
-                                                    "id": "row-{{item.id}}",
+                                                    "type": "Icon",
+                                                    "id": "icon-{{item.id}}",
+                                                    "props": {
+                                                      "icon": "description",
+                                                      "size": 16,
+                                                      "color": "onSurfaceVariant"
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "SizedBox",
+                                                    "id": "gap-{{item.id}}",
+                                                    "props": {
+                                                      "width": 8
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "exp-{{item.id}}",
                                                     "children": [
                                                       {
-                                                        "type": "Icon",
-                                                        "id": "icon-{{item.id}}",
-                                                        "props": {
-                                                          "icon": "description",
-                                                          "size": 16,
-                                                          "color": "onSurfaceVariant"
-                                                        }
-                                                      },
-                                                      {
-                                                        "type": "SizedBox",
-                                                        "id": "gap-{{item.id}}",
-                                                        "props": {
-                                                          "width": 8
-                                                        }
-                                                      },
-                                                      {
-                                                        "type": "Expanded",
-                                                        "id": "exp-{{item.id}}",
-                                                        "children": [
-                                                          {
-                                                            "type": "Text",
-                                                            "id": "name-{{item.id}}",
-                                                            "props": {
-                                                              "text": "{{item.name}}",
-                                                              "textStyle": "bodySmall"
-                                                            }
-                                                          }
-                                                        ]
-                                                      },
-                                                      {
                                                         "type": "Text",
-                                                        "id": "kind-{{item.id}}",
+                                                        "id": "name-{{item.id}}",
                                                         "props": {
-                                                          "text": "{{item.kind}}",
-                                                          "textStyle": "labelSmall",
-                                                          "color": "onSurfaceMuted"
+                                                          "text": "{{item.name}}",
+                                                          "textStyle": "bodySmall"
                                                         }
                                                       }
                                                     ]
+                                                  },
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "kind-{{item.id}}",
+                                                    "props": {
+                                                      "text": "{{item.kind}}",
+                                                      "textStyle": "labelSmall",
+                                                      "color": "onSurfaceMuted"
+                                                    }
                                                   }
                                                 ]
                                               }
@@ -1906,212 +1832,192 @@
         "typeColor": "#66FF7F"
       },
       "template": {
-        "type": "PromptRequired",
-        "id": "{{widgetId}}-prompt",
+        "type": "Column",
+        "id": "{{widgetId}}-root",
         "props": {
-          "fields": [
-            {
-              "name": "workflowId",
-              "label": "Workflow ID",
-              "default": "28e3c9888e9935f667aed6f07c007c7c"
-            },
-            {
-              "name": "stepId",
-              "label": "Step ID",
-              "default": "a7a3aaea-33b9-4dfd-81f9-d86de12d6dcc"
-            }
-          ]
+          "crossAxisAlignment": "stretch"
         },
         "children": [
           {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
-            "props": {
-              "crossAxisAlignment": "stretch"
-            },
+            "type": "Expanded",
+            "id": "{{widgetId}}-body",
             "children": [
               {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "tableSchemaService",
+                  "method": "getStepImages",
+                  "args": [
+                    "{{workflowId}}",
+                    "{{stepId}}"
+                  ]
+                },
                 "children": [
                   {
-                    "type": "DataSource",
-                    "id": "{{widgetId}}-ds",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "service": "tableSchemaService",
-                      "method": "getStepImages",
-                      "args": [
-                        "{{workflowId}}",
-                        "{{stepId}}"
-                      ]
+                      "visible": "{{loading}}"
                     },
                     "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-loading",
-                        "props": {
-                          "visible": "{{loading}}"
-                        },
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-spinner",
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": {
+                              "variant": "skeleton",
+                              "text": "Loading images…"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-err-col",
+                            "props": {
+                              "mainAxisAlignment": "center"
+                            },
                             "children": [
                               {
-                                "type": "LoadingIndicator",
-                                "id": "{{widgetId}}-li",
+                                "type": "Icon",
+                                "id": "{{widgetId}}-err-icon",
                                 "props": {
-                                  "variant": "skeleton",
-                                  "text": "Loading images…"
+                                  "icon": "error_outline",
+                                  "size": 32,
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap",
+                                "props": {
+                                  "height": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "{{errorMessage}}",
+                                  "textStyle": "bodySmall",
+                                  "color": "error"
                                 }
                               }
                             ]
                           }
                         ]
-                      },
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
                       {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-error",
+                        "type": "Column",
+                        "id": "{{widgetId}}-content",
                         "props": {
-                          "visible": "{{error}}"
+                          "crossAxisAlignment": "stretch"
                         },
                         "children": [
                           {
-                            "type": "Center",
-                            "id": "{{widgetId}}-err-center",
-                            "children": [
-                              {
-                                "type": "Column",
-                                "id": "{{widgetId}}-err-col",
-                                "props": {
-                                  "mainAxisAlignment": "center"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-err-icon",
-                                    "props": {
-                                      "icon": "error_outline",
-                                      "size": 32,
-                                      "color": "error"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-err-gap",
-                                    "props": {
-                                      "height": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-err-text",
-                                    "props": {
-                                      "text": "{{errorMessage}}",
-                                      "textStyle": "bodySmall",
-                                      "color": "error"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-ready",
-                        "props": {
-                          "visible": "{{ready}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Column",
-                            "id": "{{widgetId}}-content",
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
                             "props": {
-                              "crossAxisAlignment": "stretch"
+                              "color": "surfaceContainerHigh",
+                              "padding": "sm"
                             },
                             "children": [
                               {
-                                "type": "Container",
-                                "id": "{{widgetId}}-toolbar",
+                                "type": "Row",
+                                "id": "{{widgetId}}-toolbar-row",
                                 "props": {
-                                  "color": "surfaceContainerHigh",
-                                  "padding": "sm"
+                                  "mainAxisAlignment": "spaceBetween"
                                 },
                                 "children": [
                                   {
                                     "type": "Row",
-                                    "id": "{{widgetId}}-toolbar-row",
-                                    "props": {
-                                      "mainAxisAlignment": "spaceBetween"
-                                    },
+                                    "id": "{{widgetId}}-toolbar-left",
                                     "children": [
                                       {
-                                        "type": "Row",
-                                        "id": "{{widgetId}}-toolbar-left",
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-icon",
-                                            "props": {
-                                              "icon": "image",
-                                              "size": 16,
-                                              "color": "primary"
-                                            }
-                                          },
-                                          {
-                                            "type": "SizedBox",
-                                            "id": "{{widgetId}}-icon-gap",
-                                            "props": {
-                                              "width": 8
-                                            }
-                                          },
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-title",
-                                            "props": {
-                                              "text": "{{data.stepName}}",
-                                              "textStyle": "labelMedium",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
+                                        "type": "Icon",
+                                        "id": "{{widgetId}}-icon",
+                                        "props": {
+                                          "icon": "image",
+                                          "size": 16,
+                                          "color": "primary"
+                                        }
+                                      },
+                                      {
+                                        "type": "SizedBox",
+                                        "id": "{{widgetId}}-icon-gap",
+                                        "props": {
+                                          "width": 8
+                                        }
                                       },
                                       {
                                         "type": "Text",
-                                        "id": "{{widgetId}}-count",
+                                        "id": "{{widgetId}}-title",
                                         "props": {
-                                          "text": "{{data.images.length}} images",
-                                          "textStyle": "labelSmall",
-                                          "color": "onSurfaceMuted"
+                                          "text": "{{data.stepName}}",
+                                          "textStyle": "labelMedium",
+                                          "color": "onSurface"
                                         }
                                       }
                                     ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Divider",
-                                "id": "{{widgetId}}-div",
-                                "props": {
-                                  "height": 1,
-                                  "color": "outlineVariant"
-                                }
-                              },
-                              {
-                                "type": "Expanded",
-                                "id": "{{widgetId}}-viewer-area",
-                                "children": [
+                                  },
                                   {
-                                    "type": "TabbedImageViewer",
-                                    "id": "{{widgetId}}-viewer",
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-count",
                                     "props": {
-                                      "images": "{{data.images}}",
-                                      "authToken": "{{context.token}}"
+                                      "text": "{{data.images.length}} images",
+                                      "textStyle": "labelSmall",
+                                      "color": "onSurfaceMuted"
                                     }
                                   }
                                 ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Divider",
+                            "id": "{{widgetId}}-div",
+                            "props": {
+                              "height": 1,
+                              "color": "outlineVariant"
+                            }
+                          },
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-viewer-area",
+                            "children": [
+                              {
+                                "type": "TabbedImageViewer",
+                                "id": "{{widgetId}}-viewer",
+                                "props": {
+                                  "images": "{{data.images}}",
+                                  "authToken": "{{context.token}}"
+                                }
                               }
                             ]
                           }
