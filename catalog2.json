@@ -1543,72 +1543,102 @@
         },
         "children": [
           {
-            "type": "Interaction",
-            "id": "{{widgetId}}-interaction",
+            "type": "PromptRequired",
+            "id": "{{widgetId}}-prompt",
             "props": {
-              "channel": "navigator.focusChanged",
-              "matchField": "nodeId"
+              "fields": [
+                {
+                  "name": "projectId",
+                  "label": "Project ID",
+                  "default": "2076952ae523bb4d472e283b9e000121"
+                }
+              ]
             },
             "children": [
               {
-                "type": "Interaction",
-                "id": "{{widgetId}}-interaction",
+                "type": "Column",
+                "id": "{{widgetId}}-root",
                 "props": {
-                  "channel": "navigator.focusChanged",
-                  "matchField": "nodeId"
+                  "crossAxisAlignment": "stretch"
                 },
                 "children": [
                   {
-                    "type": "PromptRequired",
-                    "id": "{{widgetId}}-prompt",
+                    "type": "Container",
+                    "id": "{{widgetId}}-toolbar",
                     "props": {
-                      "fields": [
-                        {
-                          "name": "projectId",
-                          "label": "Project ID",
-                          "default": "2076952ae523bb4d472e283b9e000121"
-                        }
-                      ]
+                      "color": "surfaceContainerHigh",
+                      "padding": "sm"
                     },
                     "children": [
                       {
-                        "type": "Column",
-                        "id": "{{widgetId}}-root",
+                        "type": "Row",
+                        "id": "{{widgetId}}-toolbar-row",
                         "props": {
-                          "crossAxisAlignment": "stretch"
+                          "mainAxisAlignment": "spaceBetween"
                         },
                         "children": [
                           {
-                            "type": "Container",
-                            "id": "{{widgetId}}-toolbar",
+                            "type": "Text",
+                            "id": "{{widgetId}}-title",
                             "props": {
-                              "color": "surfaceContainerHigh",
-                              "padding": "sm"
+                              "text": "Navigator",
+                              "textStyle": "labelMedium",
+                              "color": "onSurface"
+                            }
+                          },
+                          {
+                            "type": "Text",
+                            "id": "{{widgetId}}-filter-label",
+                            "props": {
+                              "text": "All types",
+                              "textStyle": "labelSmall",
+                              "color": "onSurfaceMuted"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Expanded",
+                    "id": "{{widgetId}}-body",
+                    "children": [
+                      {
+                        "type": "DataSource",
+                        "id": "{{widgetId}}-ds",
+                        "props": {
+                          "service": "projectDocumentService",
+                          "method": "findProjectObjectsByLastModifiedDate",
+                          "args": [
+                            [
+                              "{{projectId}}",
+                              ""
+                            ],
+                            [
+                              "{{projectId}}",
+                              ""
+                            ],
+                            50
+                          ]
+                        },
+                        "children": [
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-loading",
+                            "props": {
+                              "visible": "{{loading}}"
                             },
                             "children": [
                               {
-                                "type": "Row",
-                                "id": "{{widgetId}}-toolbar-row",
-                                "props": {
-                                  "mainAxisAlignment": "spaceBetween"
-                                },
+                                "type": "Center",
+                                "id": "{{widgetId}}-spinner",
                                 "children": [
                                   {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-title",
+                                    "type": "LoadingIndicator",
+                                    "id": "{{widgetId}}-li",
                                     "props": {
-                                      "text": "Navigator",
-                                      "textStyle": "labelMedium",
-                                      "color": "onSurface"
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-filter-label",
-                                    "props": {
-                                      "text": "All types",
-                                      "textStyle": "labelSmall",
-                                      "color": "onSurfaceMuted"
+                                      "variant": "skeleton",
+                                      "text": "Loading…"
                                     }
                                   }
                                 ]
@@ -1616,176 +1646,126 @@
                             ]
                           },
                           {
-                            "type": "Expanded",
-                            "id": "{{widgetId}}-body",
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-error",
+                            "props": {
+                              "visible": "{{error}}"
+                            },
                             "children": [
                               {
-                                "type": "DataSource",
-                                "id": "{{widgetId}}-ds",
+                                "type": "Center",
+                                "id": "{{widgetId}}-err-center",
+                                "children": [
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-err-text",
+                                    "props": {
+                                      "text": "Error: {{errorMessage}}",
+                                      "color": "error"
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Conditional",
+                            "id": "{{widgetId}}-ready",
+                            "props": {
+                              "visible": "{{ready}}"
+                            },
+                            "children": [
+                              {
+                                "type": "ListView",
+                                "id": "{{widgetId}}-lv",
                                 "props": {
-                                  "service": "projectDocumentService",
-                                  "method": "findProjectObjectsByLastModifiedDate",
-                                  "args": [
-                                    [
-                                      "{{projectId}}",
-                                      ""
-                                    ],
-                                    [
-                                      "{{projectId}}",
-                                      ""
-                                    ],
-                                    50
-                                  ]
+                                  "padding": 4
                                 },
                                 "children": [
                                   {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-loading",
+                                    "type": "ForEach",
+                                    "id": "{{widgetId}}-fe",
                                     "props": {
-                                      "visible": "{{loading}}"
+                                      "items": "{{data}}"
                                     },
                                     "children": [
                                       {
-                                        "type": "Center",
-                                        "id": "{{widgetId}}-spinner",
-                                        "children": [
-                                          {
-                                            "type": "LoadingIndicator",
-                                            "id": "{{widgetId}}-li",
-                                            "props": {
-                                              "variant": "skeleton",
-                                              "text": "Loading…"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-error",
-                                    "props": {
-                                      "visible": "{{error}}"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Center",
-                                        "id": "{{widgetId}}-err-center",
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-err-text",
-                                            "props": {
-                                              "text": "Error: {{errorMessage}}",
-                                              "color": "error"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-ready",
-                                    "props": {
-                                      "visible": "{{ready}}"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "ListView",
-                                        "id": "{{widgetId}}-lv",
+                                        "type": "Action",
+                                        "id": "dbl-{{item.id}}",
                                         "props": {
-                                          "padding": 4
+                                          "gesture": "onDoubleTap",
+                                          "channel": "system.intent",
+                                          "payload": {
+                                            "intent": "{{item.kind}}",
+                                            "id": "{{item.id}}",
+                                            "name": "{{item.name}}",
+                                            "kind": "{{item.kind}}",
+                                            "subKind": "{{item.subKind}}"
+                                          }
                                         },
                                         "children": [
                                           {
-                                            "type": "ForEach",
-                                            "id": "{{widgetId}}-fe",
+                                            "type": "Action",
+                                            "id": "tap-{{item.id}}",
                                             "props": {
-                                              "items": "{{data}}"
+                                              "gesture": "onTap",
+                                              "channel": "navigator.focusChanged",
+                                              "payload": {
+                                                "nodeId": "{{item.id}}",
+                                                "nodeType": "{{item.kind}}",
+                                                "nodeName": "{{item.name}}"
+                                              }
                                             },
                                             "children": [
                                               {
-                                                "type": "Action",
-                                                "id": "dbl-{{item.id}}",
+                                                "type": "Padding",
+                                                "id": "pad-{{item.id}}",
                                                 "props": {
-                                                  "gesture": "onDoubleTap",
-                                                  "channel": "system.intent",
-                                                  "payload": {
-                                                    "intent": "{{item.kind}}",
-                                                    "id": "{{item.id}}",
-                                                    "name": "{{item.name}}",
-                                                    "kind": "{{item.kind}}",
-                                                    "subKind": "{{item.subKind}}"
-                                                  }
+                                                  "padding": "sm"
                                                 },
                                                 "children": [
                                                   {
-                                                    "type": "Action",
-                                                    "id": "tap-{{item.id}}",
-                                                    "props": {
-                                                      "gesture": "onTap",
-                                                      "channel": "navigator.focusChanged",
-                                                      "payload": {
-                                                        "nodeId": "{{item.id}}",
-                                                        "nodeType": "{{item.kind}}",
-                                                        "nodeName": "{{item.name}}"
-                                                      }
-                                                    },
+                                                    "type": "Row",
+                                                    "id": "row-{{item.id}}",
                                                     "children": [
                                                       {
-                                                        "type": "Padding",
-                                                        "id": "pad-{{item.id}}",
+                                                        "type": "Icon",
+                                                        "id": "icon-{{item.id}}",
                                                         "props": {
-                                                          "padding": "sm"
-                                                        },
+                                                          "icon": "description",
+                                                          "size": 16,
+                                                          "color": "onSurfaceVariant"
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "SizedBox",
+                                                        "id": "gap-{{item.id}}",
+                                                        "props": {
+                                                          "width": 8
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "Expanded",
+                                                        "id": "exp-{{item.id}}",
                                                         "children": [
                                                           {
-                                                            "type": "Row",
-                                                            "id": "row-{{item.id}}",
-                                                            "children": [
-                                                              {
-                                                                "type": "Icon",
-                                                                "id": "icon-{{item.id}}",
-                                                                "props": {
-                                                                  "icon": "description",
-                                                                  "size": 16,
-                                                                  "color": "onSurfaceVariant"
-                                                                }
-                                                              },
-                                                              {
-                                                                "type": "SizedBox",
-                                                                "id": "gap-{{item.id}}",
-                                                                "props": {
-                                                                  "width": 8
-                                                                }
-                                                              },
-                                                              {
-                                                                "type": "Expanded",
-                                                                "id": "exp-{{item.id}}",
-                                                                "children": [
-                                                                  {
-                                                                    "type": "Text",
-                                                                    "id": "name-{{item.id}}",
-                                                                    "props": {
-                                                                      "text": "{{item.name}}",
-                                                                      "textStyle": "bodySmall"
-                                                                    }
-                                                                  }
-                                                                ]
-                                                              },
-                                                              {
-                                                                "type": "Text",
-                                                                "id": "kind-{{item.id}}",
-                                                                "props": {
-                                                                  "text": "{{item.kind}}",
-                                                                  "textStyle": "labelSmall",
-                                                                  "color": "onSurfaceMuted"
-                                                                }
-                                                              }
-                                                            ]
+                                                            "type": "Text",
+                                                            "id": "name-{{item.id}}",
+                                                            "props": {
+                                                              "text": "{{item.name}}",
+                                                              "textStyle": "bodySmall"
+                                                            }
                                                           }
                                                         ]
+                                                      },
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "kind-{{item.id}}",
+                                                        "props": {
+                                                          "text": "{{item.kind}}",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
                                                       }
                                                     ]
                                                   }
@@ -3716,890 +3696,6 @@
                       "fontSize": 14,
                       "color": "grey"
                     }
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "metadata": {
-        "type": "ProjectDetail",
-        "tier": 2,
-        "description": "Displays project metadata fields"
-      },
-      "template": {
-        "type": "PromptRequired",
-        "id": "{{widgetId}}-prompt",
-        "props": {
-          "fields": [
-            {
-              "name": "projectId",
-              "label": "Project ID",
-              "default": "mock-project-id"
-            }
-          ]
-        },
-        "children": [
-          {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
-            "props": {
-              "crossAxisAlignment": "stretch"
-            },
-            "children": [
-              {
-                "type": "Container",
-                "id": "{{widgetId}}-toolbar",
-                "props": {
-                  "color": "surfaceContainerHigh",
-                  "padding": "sm"
-                },
-                "children": [
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-toolbar-row",
-                    "props": {
-                      "mainAxisAlignment": "spaceBetween"
-                    },
-                    "children": [
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-title",
-                        "props": {
-                          "text": "Project Details",
-                          "textStyle": "labelMedium",
-                          "color": "onSurface"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
-                "children": [
-                  {
-                    "type": "DataSource",
-                    "id": "{{widgetId}}-ds",
-                    "props": {
-                      "service": "projectService",
-                      "method": "get",
-                      "args": [
-                        "{{projectId}}"
-                      ]
-                    },
-                    "children": [
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-loading",
-                        "props": {
-                          "visible": "{{loading}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Center",
-                            "id": "{{widgetId}}-spinner",
-                            "children": [
-                              {
-                                "type": "LoadingIndicator",
-                                "id": "{{widgetId}}-li",
-                                "props": {
-                                  "variant": "skeleton",
-                                  "text": "Loading..."
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-error",
-                        "props": {
-                          "visible": "{{error}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Center",
-                            "id": "{{widgetId}}-err-center",
-                            "children": [
-                              {
-                                "type": "Column",
-                                "id": "{{widgetId}}-err-col",
-                                "props": {
-                                  "mainAxisAlignment": "center"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-err-icon",
-                                    "props": {
-                                      "icon": "error_outline",
-                                      "size": 32,
-                                      "color": "error"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-err-gap",
-                                    "props": {
-                                      "height": 8.0
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-err-text",
-                                    "props": {
-                                      "text": "{{errorMessage}}",
-                                      "textStyle": "bodySmall",
-                                      "color": "error"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-ready",
-                        "props": {
-                          "visible": "{{ready}}"
-                        },
-                        "children": [
-                          {
-                            "type": "ListView",
-                            "id": "{{widgetId}}-fields",
-                            "props": {
-                              "padding": "sm"
-                            },
-                            "children": [
-                              {
-                                "type": "Padding",
-                                "id": "{{widgetId}}-field-0",
-                                "props": {
-                                  "padding": "sm"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-frow-0",
-                                    "children": [
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-flbl-box-0",
-                                        "props": {
-                                          "width": 120.0
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-flbl-0",
-                                            "props": {
-                                              "text": "Name",
-                                              "textStyle": "labelSmall",
-                                              "color": "onSurfaceMuted"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Expanded",
-                                        "id": "{{widgetId}}-fval-exp-0",
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-fval-0",
-                                            "props": {
-                                              "text": "{{data.name}}",
-                                              "textStyle": "bodySmall",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Padding",
-                                "id": "{{widgetId}}-field-1",
-                                "props": {
-                                  "padding": "sm"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-frow-1",
-                                    "children": [
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-flbl-box-1",
-                                        "props": {
-                                          "width": 120.0
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-flbl-1",
-                                            "props": {
-                                              "text": "Description",
-                                              "textStyle": "labelSmall",
-                                              "color": "onSurfaceMuted"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Expanded",
-                                        "id": "{{widgetId}}-fval-exp-1",
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-fval-1",
-                                            "props": {
-                                              "text": "{{data.description}}",
-                                              "textStyle": "bodySmall",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Padding",
-                                "id": "{{widgetId}}-field-2",
-                                "props": {
-                                  "padding": "sm"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-frow-2",
-                                    "children": [
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-flbl-box-2",
-                                        "props": {
-                                          "width": 120.0
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-flbl-2",
-                                            "props": {
-                                              "text": "Owner",
-                                              "textStyle": "labelSmall",
-                                              "color": "onSurfaceMuted"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Expanded",
-                                        "id": "{{widgetId}}-fval-exp-2",
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-fval-2",
-                                            "props": {
-                                              "text": "{{data.acl.owner}}",
-                                              "textStyle": "bodySmall",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Padding",
-                                "id": "{{widgetId}}-field-3",
-                                "props": {
-                                  "padding": "sm"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-frow-3",
-                                    "children": [
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-flbl-box-3",
-                                        "props": {
-                                          "width": 120.0
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-flbl-3",
-                                            "props": {
-                                              "text": "Last Modified",
-                                              "textStyle": "labelSmall",
-                                              "color": "onSurfaceMuted"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Expanded",
-                                        "id": "{{widgetId}}-fval-exp-3",
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-fval-3",
-                                            "props": {
-                                              "text": "{{data.lastModifiedDate.value}}",
-                                              "textStyle": "bodySmall",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "metadata": {
-        "type": "ProjectSummaryCard",
-        "tier": 2,
-        "description": "Dashboard card showing project count and list"
-      },
-      "template": {
-        "type": "DashboardCard",
-        "id": "{{widgetId}}-card",
-        "props": {
-          "title": "My Projects",
-          "icon": "folder"
-        },
-        "children": [
-          {
-            "type": "DataSource",
-            "id": "{{widgetId}}-ds",
-            "props": {
-              "service": "projectService",
-              "method": "findByIsPublicAndLastModifiedDate",
-              "args": [
-                [
-                  false,
-                  false,
-                  ""
-                ],
-                [
-                  true,
-                  false,
-                  ""
-                ],
-                5
-              ]
-            },
-            "children": [
-              {
-                "type": "Conditional",
-                "id": "{{widgetId}}-loading",
-                "props": {
-                  "visible": "{{loading}}"
-                },
-                "children": [
-                  {
-                    "type": "Center",
-                    "id": "{{widgetId}}-spinner",
-                    "children": [
-                      {
-                        "type": "LoadingIndicator",
-                        "id": "{{widgetId}}-li",
-                        "props": {
-                          "variant": "skeleton",
-                          "text": "Loading..."
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "Conditional",
-                "id": "{{widgetId}}-ready",
-                "props": {
-                  "visible": "{{ready}}"
-                },
-                "children": [
-                  {
-                    "type": "Column",
-                    "id": "{{widgetId}}-list",
-                    "children": [
-                      {
-                        "type": "ForEach",
-                        "id": "{{widgetId}}-fe",
-                        "props": {
-                          "items": "{{data}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Action",
-                            "id": "{{widgetId}}-item-action",
-                            "props": {
-                              "gesture": "onTap",
-                              "channel": "project.card.selected",
-                              "payload": {
-                                "id": "{{item.id}}",
-                                "name": "{{item.name}}"
-                              }
-                            },
-                            "children": [
-                              {
-                                "type": "Padding",
-                                "id": "{{widgetId}}-item-pad",
-                                "props": {
-                                  "padding": "sm"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-item-row",
-                                    "children": [
-                                      {
-                                        "type": "Icon",
-                                        "id": "{{widgetId}}-item-icon",
-                                        "props": {
-                                          "icon": "folder",
-                                          "size": 14,
-                                          "color": "onSurfaceVariant"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-item-gap",
-                                        "props": {
-                                          "width": 8.0
-                                        }
-                                      },
-                                      {
-                                        "type": "Expanded",
-                                        "id": "{{widgetId}}-item-name-exp",
-                                        "children": [
-                                          {
-                                            "type": "Text",
-                                            "id": "{{widgetId}}-item-name",
-                                            "props": {
-                                              "text": "{{item.name}}",
-                                              "textStyle": "bodySmall",
-                                              "color": "onSurface"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Text",
-                                        "id": "{{widgetId}}-item-sub",
-                                        "props": {
-                                          "text": "{{item.description}}",
-                                          "textStyle": "labelSmall",
-                                          "color": "onSurfaceMuted"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "metadata": {
-        "type": "NewProjectForm",
-        "tier": 2,
-        "description": "Form to create a new project",
-        "emittedEvents": [
-          "project.create"
-        ]
-      },
-      "template": {
-        "type": "StateHolder",
-        "id": "{{widgetId}}-state",
-        "props": {
-          "initialState": {
-            "name": "",
-            "description": ""
-          }
-        },
-        "children": [
-          {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
-            "props": {
-              "crossAxisAlignment": "stretch"
-            },
-            "children": [
-              {
-                "type": "Container",
-                "id": "{{widgetId}}-toolbar",
-                "props": {
-                  "color": "surfaceContainerHigh",
-                  "padding": "sm"
-                },
-                "children": [
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-toolbar-row",
-                    "props": {
-                      "mainAxisAlignment": "spaceBetween"
-                    },
-                    "children": [
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-title",
-                        "props": {
-                          "text": "New Project",
-                          "textStyle": "labelMedium",
-                          "color": "onSurface"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "Padding",
-                "id": "{{widgetId}}-form-pad",
-                "props": {
-                  "padding": "md"
-                },
-                "children": [
-                  {
-                    "type": "Column",
-                    "id": "{{widgetId}}-fields",
-                    "props": {
-                      "crossAxisAlignment": "stretch"
-                    },
-                    "children": [
-                      {
-                        "type": "Padding",
-                        "id": "{{widgetId}}-field-0",
-                        "props": {
-                          "padding": "sm"
-                        },
-                        "children": [
-                          {
-                            "type": "Column",
-                            "id": "{{widgetId}}-fcol-0",
-                            "props": {
-                              "crossAxisAlignment": "stretch"
-                            },
-                            "children": [
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-flbl-0",
-                                "props": {
-                                  "text": "Project Name",
-                                  "textStyle": "labelSmall",
-                                  "color": "onSurfaceMuted"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-fgap-0",
-                                "props": {
-                                  "height": 4.0
-                                }
-                              },
-                              {
-                                "type": "TextField",
-                                "id": "{{widgetId}}-finput-0",
-                                "props": {
-                                  "hint": "Project Name"
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Padding",
-                        "id": "{{widgetId}}-field-1",
-                        "props": {
-                          "padding": "sm"
-                        },
-                        "children": [
-                          {
-                            "type": "Column",
-                            "id": "{{widgetId}}-fcol-1",
-                            "props": {
-                              "crossAxisAlignment": "stretch"
-                            },
-                            "children": [
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-flbl-1",
-                                "props": {
-                                  "text": "Description",
-                                  "textStyle": "labelSmall",
-                                  "color": "onSurfaceMuted"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-fgap-1",
-                                "props": {
-                                  "height": 4.0
-                                }
-                              },
-                              {
-                                "type": "TextField",
-                                "id": "{{widgetId}}-finput-1",
-                                "props": {
-                                  "hint": "Description"
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-submit-gap",
-                        "props": {
-                          "height": 16.0
-                        }
-                      },
-                      {
-                        "type": "ElevatedButton",
-                        "id": "{{widgetId}}-submit",
-                        "props": {
-                          "text": "Create Project",
-                          "channel": "project.create"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          }
-        ]
-      }
-    },
-    {
-      "metadata": {
-        "type": "ActivityListV2",
-        "tier": 2,
-        "description": "Activity list using Interaction for selection (faster than per-item ReactTo)",
-        "emittedEvents": [
-          "activity2.selected"
-        ]
-      },
-      "template": {
-        "type": "Interaction",
-        "id": "{{widgetId}}-interaction",
-        "props": {
-          "channel": "activity2.selected",
-          "matchField": "id"
-        },
-        "children": [
-          {
-            "type": "Column",
-            "id": "{{widgetId}}-root",
-            "props": {
-              "crossAxisAlignment": "stretch"
-            },
-            "children": [
-              {
-                "type": "Container",
-                "id": "{{widgetId}}-toolbar",
-                "props": {
-                  "color": "surfaceContainerHigh",
-                  "padding": "sm"
-                },
-                "children": [
-                  {
-                    "type": "Text",
-                    "id": "{{widgetId}}-title",
-                    "props": {
-                      "text": "Activity (Interaction)",
-                      "textStyle": "labelMedium"
-                    }
-                  }
-                ]
-              },
-              {
-                "type": "Expanded",
-                "id": "{{widgetId}}-body",
-                "children": [
-                  {
-                    "type": "DataSource",
-                    "id": "{{widgetId}}-ds",
-                    "props": {
-                      "service": "activityService",
-                      "method": "findByUserAndDate",
-                      "args": [
-                        [
-                          false,
-                          "{{context.userId}}",
-                          ""
-                        ],
-                        [
-                          true,
-                          "{{context.userId}}",
-                          ""
-                        ],
-                        20
-                      ]
-                    },
-                    "children": [
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-loading",
-                        "props": {
-                          "visible": "{{loading}}"
-                        },
-                        "children": [
-                          {
-                            "type": "Center",
-                            "id": "{{widgetId}}-spinner",
-                            "children": [
-                              {
-                                "type": "LoadingIndicator",
-                                "id": "{{widgetId}}-li",
-                                "props": {
-                                  "variant": "skeleton",
-                                  "text": "Loading..."
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      },
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-ready",
-                        "props": {
-                          "visible": "{{ready}}"
-                        },
-                        "children": [
-                          {
-                            "type": "ListView",
-                            "id": "{{widgetId}}-lv",
-                            "props": {
-                              "padding": "xs"
-                            },
-                            "children": [
-                              {
-                                "type": "ForEach",
-                                "id": "{{widgetId}}-fe",
-                                "props": {
-                                  "items": "{{data}}"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Action",
-                                    "id": "tap-{{item.id}}",
-                                    "props": {
-                                      "gesture": "onTap",
-                                      "channel": "activity2.selected",
-                                      "payload": {
-                                        "id": "{{item.id}}",
-                                        "description": "{{item.description}}"
-                                      }
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "Padding",
-                                        "id": "pad-{{item.id}}",
-                                        "props": {
-                                          "padding": "sm"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Row",
-                                            "id": "row-{{item.id}}",
-                                            "children": [
-                                              {
-                                                "type": "Icon",
-                                                "id": "icon-{{item.id}}",
-                                                "props": {
-                                                  "icon": "history",
-                                                  "size": 16,
-                                                  "color": "onSurfaceVariant"
-                                                }
-                                              },
-                                              {
-                                                "type": "SizedBox",
-                                                "id": "gap-{{item.id}}",
-                                                "props": {
-                                                  "width": 8
-                                                }
-                                              },
-                                              {
-                                                "type": "Expanded",
-                                                "id": "exp-{{item.id}}",
-                                                "children": [
-                                                  {
-                                                    "type": "Text",
-                                                    "id": "name-{{item.id}}",
-                                                    "props": {
-                                                      "text": "{{item.description}}",
-                                                      "textStyle": "bodySmall"
-                                                    }
-                                                  }
-                                                ]
-                                              },
-                                              {
-                                                "type": "Text",
-                                                "id": "date-{{item.id}}",
-                                                "props": {
-                                                  "text": "{{item.date.value}}",
-                                                  "textStyle": "labelSmall",
-                                                  "color": "onSurfaceMuted"
-                                                }
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  }
-                                ]
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
                   }
                 ]
               }
