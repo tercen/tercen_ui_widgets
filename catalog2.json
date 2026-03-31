@@ -699,7 +699,7 @@
                                               "icon": "message",
                                               "iconStyle": "solid",
                                               "size": 14,
-                                              "color": "#FF8200"
+                                              "color": "warning"
                                             }
                                           }
                                         ]
@@ -855,7 +855,7 @@
                                                     "type": "Padding",
                                                     "id": "{{widgetId}}-streaming-pad",
                                                     "props": {
-                                                      "padding": 4
+                                                      "padding": "xs"
                                                     },
                                                     "children": [
                                                       {
@@ -911,7 +911,7 @@
                 "id": "{{widgetId}}-focus-bar",
                 "props": {
                   "color": "surfaceContainerLow",
-                  "padding": 4
+                  "padding": "xs"
                 },
                 "children": [
                   {
@@ -1023,7 +1023,7 @@
                                 "type": "Padding",
                                 "id": "{{widgetId}}-bottom-pad",
                                 "props": {
-                                  "padding": 4
+                                  "padding": "xs"
                                 },
                                 "children": [
                                   {
@@ -1679,7 +1679,7 @@
                                 "type": "ListView",
                                 "id": "{{widgetId}}-lv",
                                 "props": {
-                                  "padding": 4
+                                  "padding": "xs"
                                 },
                                 "children": [
                                   {
@@ -1817,8 +1817,8 @@
             "type": "Container",
             "id": "{{widgetId}}-toolbar",
             "props": {
-              "color": "#1E1E1E",
-              "padding": 8
+              "color": "surfaceContainerHighest",
+              "padding": "sm"
             },
             "children": [
               {
@@ -1833,9 +1833,9 @@
                     "id": "{{widgetId}}-title",
                     "props": {
                       "text": "Audit Trail",
-                      "fontSize": 13,
                       "fontWeight": "bold",
-                      "color": "#0D9488"
+                      "color": "primary",
+                      "textStyle": "labelMedium"
                     }
                   },
                   {
@@ -1843,8 +1843,8 @@
                     "id": "{{widgetId}}-scope-label",
                     "props": {
                       "text": "No scope selected",
-                      "fontSize": 11,
-                      "color": "grey"
+                      "color": "grey",
+                      "textStyle": "labelSmall"
                     }
                   }
                 ]
@@ -1864,8 +1864,8 @@
                     "id": "{{widgetId}}-empty-text",
                     "props": {
                       "text": "Select a scope to view audit events",
-                      "fontSize": 12,
-                      "color": "grey"
+                      "color": "grey",
+                      "textStyle": "bodySmall"
                     }
                   }
                 ]
@@ -2191,7 +2191,7 @@
                 "type": "ListView",
                 "id": "{{widgetId}}-scroll",
                 "props": {
-                  "padding": 8
+                  "padding": "sm"
                 },
                 "children": [
                   {
@@ -2266,7 +2266,7 @@
                                             "type": "Padding",
                                             "id": "{{widgetId}}-proj-spin-p",
                                             "props": {
-                                              "padding": 16
+                                              "padding": "lg"
                                             },
                                             "children": [
                                               {
@@ -2297,7 +2297,7 @@
                                             "type": "Padding",
                                             "id": "{{widgetId}}-proj-err-p",
                                             "props": {
-                                              "padding": 16
+                                              "padding": "lg"
                                             },
                                             "children": [
                                               {
@@ -2523,7 +2523,7 @@
                                             "type": "Padding",
                                             "id": "{{widgetId}}-apps-spin-p",
                                             "props": {
-                                              "padding": 16
+                                              "padding": "lg"
                                             },
                                             "children": [
                                               {
@@ -2554,7 +2554,7 @@
                                             "type": "Padding",
                                             "id": "{{widgetId}}-apps-err-p",
                                             "props": {
-                                              "padding": 16
+                                              "padding": "lg"
                                             },
                                             "children": [
                                               {
@@ -2621,7 +2621,7 @@
                                                     "type": "Padding",
                                                     "id": "{{widgetId}}-apps-row-pad",
                                                     "props": {
-                                                      "padding": 8
+                                                      "padding": "sm"
                                                     },
                                                     "children": [
                                                       {
@@ -2729,7 +2729,7 @@
                             "type": "Padding",
                             "id": "{{widgetId}}-help-body-pad",
                             "props": {
-                              "padding": 12
+                              "padding": "md"
                             },
                             "children": [
                               {
@@ -2952,7 +2952,7 @@
                                             "type": "Padding",
                                             "id": "{{widgetId}}-act-spin-p",
                                             "props": {
-                                              "padding": 16
+                                              "padding": "lg"
                                             },
                                             "children": [
                                               {
@@ -2983,7 +2983,7 @@
                                             "type": "Padding",
                                             "id": "{{widgetId}}-act-err-p",
                                             "props": {
-                                              "padding": 16
+                                              "padding": "lg"
                                             },
                                             "children": [
                                               {
@@ -3664,8 +3664,8 @@
             "type": "Container",
             "id": "{{widgetId}}-toolbar",
             "props": {
-              "color": "#1E1E1E",
-              "padding": 8
+              "color": "surfaceContainerHighest",
+              "padding": "sm"
             },
             "children": [
               {
@@ -3673,9 +3673,9 @@
                 "id": "{{widgetId}}-title",
                 "props": {
                   "text": "Team Manager",
-                  "fontSize": 13,
                   "fontWeight": "bold",
-                  "color": "#F59E0B"
+                  "color": "warning",
+                  "textStyle": "labelMedium"
                 }
               }
             ]
@@ -3693,8 +3693,8 @@
                     "id": "{{widgetId}}-placeholder-text",
                     "props": {
                       "text": "Team Manager — coming soon",
-                      "fontSize": 14,
-                      "color": "grey"
+                      "color": "grey",
+                      "textStyle": "bodyMedium"
                     }
                   }
                 ]
