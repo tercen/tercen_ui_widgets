@@ -279,7 +279,7 @@
                         },
                         "children": [
                           {
-                            "_comment": "Toolbar: 48px fixed height, surfaceContainerHigh background, horizontal button row",
+                            "_comment": "Toolbar: 48px fixed height, surface background",
                             "type": "Container",
                             "id": "{{widgetId}}-toolbar",
                             "props": {
@@ -296,7 +296,6 @@
                                 },
                                 "children": [
                                   {
-                                    "_comment": "Upload button \u2014 primary, enabled when project or folder selected",
                                     "type": "Tooltip",
                                     "id": "{{widgetId}}-tb-upload-tip",
                                     "props": {
@@ -326,7 +325,6 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Download button \u2014 primary, enabled when file/dataset selected",
                                     "type": "Tooltip",
                                     "id": "{{widgetId}}-tb-download-tip",
                                     "props": {
@@ -356,7 +354,6 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Team button \u2014 secondary (outlined), emits openTeamWidget",
                                     "type": "Tooltip",
                                     "id": "{{widgetId}}-tb-team-tip",
                                     "props": {
@@ -386,7 +383,6 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Type filter \u2014 PopupMenu with icon-only items per design decisions",
                                     "type": "PopupMenu",
                                     "id": "{{widgetId}}-tb-filter",
                                     "props": {
@@ -426,7 +422,6 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Search field \u2014 flex-grow text input with magnifying glass",
                                     "type": "Expanded",
                                     "id": "{{widgetId}}-tb-search-exp",
                                     "children": [
@@ -453,7 +448,7 @@
                             }
                           },
                           {
-                            "_comment": "Tree body \u2014 scrollable list of team/project/file rows",
+                            "_comment": "Tree body — scrollable list of team rows with nested project DataSources",
                             "type": "Expanded",
                             "id": "{{widgetId}}-tree-exp",
                             "children": [
@@ -465,7 +460,7 @@
                                 },
                                 "children": [
                                   {
-                                    "_comment": "Iterate over teams. Data shape: [{id, name, type:team, isPersonal, children:[projects]}]",
+                                    "_comment": "Iterate over teams from outer DataSource",
                                     "type": "ForEach",
                                     "id": "{{widgetId}}-fe-teams",
                                     "props": {
@@ -477,7 +472,7 @@
                                     },
                                     "children": [
                                       {
-                                        "_comment": "TEAM ROW \u2014 level 0. Click expands/collapses only (no focusChanged per spec).",
+                                        "_comment": "TEAM ROW — level 0. Click expands/collapses.",
                                         "type": "Action",
                                         "id": "{{widgetId}}-team-tap-{{item.id}}",
                                         "props": {
@@ -505,7 +500,6 @@
                                                 },
                                                 "children": [
                                                   {
-                                                    "_comment": "Indent: 4px base for level 0",
                                                     "type": "SizedBox",
                                                     "id": "{{widgetId}}-team-indent-{{item.id}}",
                                                     "props": {
@@ -513,7 +507,6 @@
                                                     }
                                                   },
                                                   {
-                                                    "_comment": "Chevron: 16px square, right or down",
                                                     "type": "Icon",
                                                     "id": "{{widgetId}}-team-chev-{{item.id}}",
                                                     "props": {
@@ -530,7 +523,6 @@
                                                     }
                                                   },
                                                   {
-                                                    "_comment": "Team icon: solid user-group, primary colour",
                                                     "type": "Icon",
                                                     "id": "{{widgetId}}-team-icon-{{item.id}}",
                                                     "props": {
@@ -569,276 +561,184 @@
                                         ]
                                       },
                                       {
-                                        "_comment": "PROJECT ROWS \u2014 nested ForEach for projects within each team",
-                                        "type": "ForEach",
-                                        "id": "{{widgetId}}-fe-projects-{{item.id}}",
+                                        "_comment": "NESTED DataSource — fetches projects for THIS team by name (acl.owner)",
+                                        "type": "DataSource",
+                                        "id": "{{widgetId}}-proj-ds-{{item.id}}",
                                         "props": {
-                                          "items": "{{item.children}}"
+                                          "service": "projectService",
+                                          "method": "findByTeamAndIsPublicAndLastModifiedDate",
+                                          "args": [
+                                            [
+                                              "{{item.name}}",
+                                              false,
+                                              ""
+                                            ],
+                                            [
+                                              "{{item.name}}",
+                                              true,
+                                              ""
+                                            ],
+                                            200
+                                          ],
+                                          "refreshOn": "navigator.refreshTree"
                                         },
                                         "children": [
                                           {
-                                            "_comment": "Project row \u2014 level 1, indent 24px (4+20). Single-click emits focusChanged.",
-                                            "type": "Action",
-                                            "id": "{{widgetId}}-proj-tap-{{item.id}}",
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-proj-loading-{{item.id}}",
                                             "props": {
-                                              "gesture": "onTap",
-                                              "channel": "navigator.focusChanged",
-                                              "payload": {
-                                                "nodeId": "{{item.id}}",
-                                                "nodeType": "project",
-                                                "nodeName": "{{item.name}}",
-                                                "nodePath": "{{item.path}}"
-                                              },
-                                              "hoverColor": "surfaceContainer"
+                                              "visible": "{{loading}}"
                                             },
                                             "children": [
                                               {
                                                 "type": "Padding",
-                                                "id": "{{widgetId}}-proj-pad-{{item.id}}",
+                                                "id": "{{widgetId}}-proj-loading-pad-{{item.id}}",
                                                 "props": {
-                                                  "padding": 4
+                                                  "padding": [
+                                                    4,
+                                                    4,
+                                                    4,
+                                                    24
+                                                  ]
                                                 },
                                                 "children": [
                                                   {
-                                                    "type": "Row",
-                                                    "id": "{{widgetId}}-proj-row-{{item.id}}",
+                                                    "type": "LoadingIndicator",
+                                                    "id": "{{widgetId}}-proj-spinner-{{item.id}}",
                                                     "props": {
-                                                      "crossAxisAlignment": "center"
-                                                    },
-                                                    "children": [
-                                                      {
-                                                        "_comment": "Indent: 4px base + 20px * 1 level = 24px",
-                                                        "type": "SizedBox",
-                                                        "id": "{{widgetId}}-proj-indent-{{item.id}}",
-                                                        "props": {
-                                                          "width": 24
-                                                        }
-                                                      },
-                                                      {
-                                                        "type": "Icon",
-                                                        "id": "{{widgetId}}-proj-chev-{{item.id}}",
-                                                        "props": {
-                                                          "icon": "chevron_right",
-                                                          "size": 10,
-                                                          "color": "onSurfaceMuted"
-                                                        }
-                                                      },
-                                                      {
-                                                        "type": "SizedBox",
-                                                        "id": "{{widgetId}}-proj-gap1-{{item.id}}",
-                                                        "props": {
-                                                          "width": 4
-                                                        }
-                                                      },
-                                                      {
-                                                        "_comment": "Project icon: solid folder, primary colour",
-                                                        "type": "Icon",
-                                                        "id": "{{widgetId}}-proj-icon-{{item.id}}",
-                                                        "props": {
-                                                          "icon": "folder",
-                                                          "size": 14,
-                                                          "color": "primary",
-                                                          "weight": "solid"
-                                                        }
-                                                      },
-                                                      {
-                                                        "type": "SizedBox",
-                                                        "id": "{{widgetId}}-proj-gap2-{{item.id}}",
-                                                        "props": {
-                                                          "width": 8
-                                                        }
-                                                      },
-                                                      {
-                                                        "type": "Expanded",
-                                                        "id": "{{widgetId}}-proj-name-exp-{{item.id}}",
-                                                        "children": [
-                                                          {
-                                                            "type": "Text",
-                                                            "id": "{{widgetId}}-proj-name-{{item.id}}",
-                                                            "props": {
-                                                              "text": "{{item.name}}",
-                                                              "textStyle": "bodyMedium",
-                                                              "color": "onSurface"
-                                                            }
-                                                          }
-                                                        ]
-                                                      },
-                                                      {
-                                                        "_comment": "Git version chip \u2014 only shown when item.gitVersion is present",
-                                                        "type": "Conditional",
-                                                        "id": "{{widgetId}}-proj-git-cond-{{item.id}}",
-                                                        "props": {
-                                                          "visible": "{{item.gitVersion}}"
-                                                        },
-                                                        "children": [
-                                                          {
-                                                            "type": "Tooltip",
-                                                            "id": "{{widgetId}}-proj-git-tip-{{item.id}}",
-                                                            "props": {
-                                                              "message": "{{item.githubUrl}}"
-                                                            },
-                                                            "children": [
-                                                              {
-                                                                "type": "Badge",
-                                                                "id": "{{widgetId}}-proj-git-badge-{{item.id}}",
-                                                                "props": {
-                                                                  "text": "{{item.gitVersion}}",
-                                                                  "variant": "neutral"
-                                                                }
-                                                              }
-                                                            ]
-                                                          }
-                                                        ]
-                                                      },
-                                                      {
-                                                        "_comment": "Public globe icon \u2014 onSurfaceMuted per design decisions (NOT info)",
-                                                        "type": "Conditional",
-                                                        "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
-                                                        "props": {
-                                                          "visible": "{{item.isPublic}}"
-                                                        },
-                                                        "children": [
-                                                          {
-                                                            "type": "Row",
-                                                            "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
-                                                            "children": [
-                                                              {
-                                                                "type": "SizedBox",
-                                                                "id": "{{widgetId}}-proj-pub-gap-{{item.id}}",
-                                                                "props": {
-                                                                  "width": 8
-                                                                }
-                                                              },
-                                                              {
-                                                                "type": "Icon",
-                                                                "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
-                                                                "props": {
-                                                                  "icon": "visibility",
-                                                                  "size": 12,
-                                                                  "color": "onSurfaceMuted"
-                                                                }
-                                                              }
-                                                            ]
-                                                          }
-                                                        ]
-                                                      }
-                                                    ]
+                                                      "variant": "spinner",
+                                                      "size": 16
+                                                    }
                                                   }
                                                 ]
                                               }
                                             ]
                                           },
                                           {
-                                            "_comment": "CONTENT ROWS \u2014 children within each project (files, datasets, workflows, folders). Sorted: README first, then workflows, datasets, files, folders.",
-                                            "type": "Sort",
-                                            "id": "{{widgetId}}-sort-{{item.id}}",
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-proj-ready-{{item.id}}",
                                             "props": {
-                                              "items": "{{item.children}}",
-                                              "key": "sortPriority",
-                                              "direction": "asc"
+                                              "visible": "{{ready}}"
                                             },
                                             "children": [
                                               {
                                                 "type": "ForEach",
-                                                "id": "{{widgetId}}-fe-content-{{item.id}}",
+                                                "id": "{{widgetId}}-fe-projects-{{item.id}}",
                                                 "props": {
-                                                  "items": "{{sorted}}"
+                                                  "items": "{{data}}"
                                                 },
                                                 "children": [
                                                   {
-                                                    "_comment": "Content row \u2014 leaf nodes (file/dataset/workflow). Double-click emits openViewer, single-click emits focusChanged.",
+                                                    "_comment": "Project row — level 1, indent 24px. Single-click emits focusChanged.",
                                                     "type": "Action",
-                                                    "id": "{{widgetId}}-dbl-{{item.id}}",
+                                                    "id": "{{widgetId}}-proj-tap-{{item.id}}",
                                                     "props": {
-                                                      "gesture": "onDoubleTap",
-                                                      "channel": "navigator.openViewer",
+                                                      "gesture": "onTap",
+                                                      "channel": "navigator.focusChanged",
                                                       "payload": {
                                                         "nodeId": "{{item.id}}",
-                                                        "nodeType": "{{item.type}}"
-                                                      }
+                                                        "nodeType": "project",
+                                                        "nodeName": "{{item.name}}",
+                                                        "nodePath": "{{item.path}}"
+                                                      },
+                                                      "hoverColor": "surfaceContainer"
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "Action",
-                                                        "id": "{{widgetId}}-tap-{{item.id}}",
+                                                        "type": "Padding",
+                                                        "id": "{{widgetId}}-proj-pad-{{item.id}}",
                                                         "props": {
-                                                          "gesture": "onTap",
-                                                          "channel": "navigator.focusChanged",
-                                                          "payload": {
-                                                            "nodeId": "{{item.id}}",
-                                                            "nodeType": "{{item.type}}",
-                                                            "nodeName": "{{item.name}}",
-                                                            "nodePath": "{{item.path}}"
-                                                          },
-                                                          "hoverColor": "surfaceContainer"
+                                                          "padding": 4
                                                         },
                                                         "children": [
                                                           {
-                                                            "type": "Padding",
-                                                            "id": "{{widgetId}}-content-pad-{{item.id}}",
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-proj-row-{{item.id}}",
                                                             "props": {
-                                                              "padding": 4
+                                                              "crossAxisAlignment": "center"
                                                             },
                                                             "children": [
                                                               {
-                                                                "type": "Row",
-                                                                "id": "{{widgetId}}-content-row-{{item.id}}",
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-proj-indent-{{item.id}}",
                                                                 "props": {
-                                                                  "crossAxisAlignment": "center"
+                                                                  "width": 24
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Icon",
+                                                                "id": "{{widgetId}}-proj-chev-{{item.id}}",
+                                                                "props": {
+                                                                  "icon": "chevron_right",
+                                                                  "size": 10,
+                                                                  "color": "onSurfaceMuted"
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-proj-gap1-{{item.id}}",
+                                                                "props": {
+                                                                  "width": 4
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Icon",
+                                                                "id": "{{widgetId}}-proj-icon-{{item.id}}",
+                                                                "props": {
+                                                                  "icon": "folder",
+                                                                  "size": 14,
+                                                                  "color": "primary",
+                                                                  "weight": "solid"
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-proj-gap2-{{item.id}}",
+                                                                "props": {
+                                                                  "width": 8
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Expanded",
+                                                                "id": "{{widgetId}}-proj-name-exp-{{item.id}}",
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-proj-name-{{item.id}}",
+                                                                    "props": {
+                                                                      "text": "{{item.name}}",
+                                                                      "textStyle": "bodyMedium",
+                                                                      "color": "onSurface"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              },
+                                                              {
+                                                                "_comment": "Public globe icon",
+                                                                "type": "Conditional",
+                                                                "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
+                                                                "props": {
+                                                                  "visible": "{{item.isPublic}}"
                                                                 },
                                                                 "children": [
                                                                   {
-                                                                    "_comment": "Indent: 4px base + 20px * 2 levels = 44px (leaf inside project)",
-                                                                    "type": "SizedBox",
-                                                                    "id": "{{widgetId}}-content-indent-{{item.id}}",
-                                                                    "props": {
-                                                                      "width": 44
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    "_comment": "No chevron for leaf nodes \u2014 16px spacer to align with branch chevrons",
-                                                                    "type": "SizedBox",
-                                                                    "id": "{{widgetId}}-content-chev-spacer-{{item.id}}",
-                                                                    "props": {
-                                                                      "width": 16
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    "type": "SizedBox",
-                                                                    "id": "{{widgetId}}-content-gap1-{{item.id}}",
-                                                                    "props": {
-                                                                      "width": 4
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    "_comment": "Type icon \u2014 colour and icon set by dispatcher based on item.type and item.fileCategory",
-                                                                    "type": "Icon",
-                                                                    "id": "{{widgetId}}-content-icon-{{item.id}}",
-                                                                    "props": {
-                                                                      "icon": "{{item.iconName}}",
-                                                                      "size": 14,
-                                                                      "color": "{{item.iconColor}}",
-                                                                      "weight": "{{item.iconWeight}}"
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    "type": "SizedBox",
-                                                                    "id": "{{widgetId}}-content-gap2-{{item.id}}",
-                                                                    "props": {
-                                                                      "width": 8
-                                                                    }
-                                                                  },
-                                                                  {
-                                                                    "type": "Expanded",
-                                                                    "id": "{{widgetId}}-content-name-exp-{{item.id}}",
+                                                                    "type": "Row",
+                                                                    "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
                                                                     "children": [
                                                                       {
-                                                                        "type": "Text",
-                                                                        "id": "{{widgetId}}-content-name-{{item.id}}",
+                                                                        "type": "SizedBox",
+                                                                        "id": "{{widgetId}}-proj-pub-gap-{{item.id}}",
                                                                         "props": {
-                                                                          "text": "{{item.name}}",
-                                                                          "textStyle": "bodyMedium",
-                                                                          "color": "onSurface"
+                                                                          "width": 8
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Icon",
+                                                                        "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
+                                                                        "props": {
+                                                                          "icon": "visibility",
+                                                                          "size": 12,
+                                                                          "color": "onSurfaceMuted"
                                                                         }
                                                                       }
                                                                     ]
@@ -940,7 +840,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -1158,7 +1058,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -1440,7 +1340,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -1583,7 +1483,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -3318,7 +3218,7 @@
                                 ],
                                 [
                                   "{{context.userId}}",
-                                  "\uf000"
+                                  ""
                                 ],
                                 20,
                                 0,
