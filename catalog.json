@@ -884,6 +884,121 @@
                                                                     "children": [
                                                                       {
                                                                         "type": "ForEach",
+                                                                        "id": "{{widgetId}}-pfe-rdm-{{item.id}}",
+                                                                        "props": {
+                                                                          "items": "{{data}}",
+                                                                          "where": {
+                                                                            "kind": "FileDocument",
+                                                                            "name": "README.md"
+                                                                          },
+                                                                          "emptyText": ""
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Action",
+                                                                            "id": "{{widgetId}}-prdm-dbl-{{item.id}}",
+                                                                            "props": {
+                                                                              "gesture": "onDoubleTap",
+                                                                              "channel": "navigator.openViewer",
+                                                                              "payload": {
+                                                                                "nodeId": "{{item.id}}",
+                                                                                "nodeType": "{{item.kind}}",
+                                                                                "nodeName": "{{item.name}}"
+                                                                              }
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "Action",
+                                                                                "id": "{{widgetId}}-prdm-tap-{{item.id}}",
+                                                                                "props": {
+                                                                                  "gesture": "onTap",
+                                                                                  "channel": "navigator.focusChanged",
+                                                                                  "payload": {
+                                                                                    "nodeId": "{{item.id}}",
+                                                                                    "nodeType": "{{item.kind}}",
+                                                                                    "nodeName": "{{item.name}}"
+                                                                                  },
+                                                                                  "hoverColor": "surfaceContainer"
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Padding",
+                                                                                    "id": "{{widgetId}}-prdm-pad-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "padding": 4
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Row",
+                                                                                        "id": "{{widgetId}}-prdm-row-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "crossAxisAlignment": "center"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "SizedBox",
+                                                                                            "id": "{{widgetId}}-prdm-indent-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "width": 44
+                                                                                            }
+                                                                                          },
+                                                                                          {
+                                                                                            "type": "SizedBox",
+                                                                                            "id": "{{widgetId}}-prdm-chspc-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "width": 16
+                                                                                            }
+                                                                                          },
+                                                                                          {
+                                                                                            "type": "SizedBox",
+                                                                                            "id": "{{widgetId}}-prdm-g1-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "width": 4
+                                                                                            }
+                                                                                          },
+                                                                                          {
+                                                                                            "type": "Icon",
+                                                                                            "id": "{{widgetId}}-prdm-icon-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "icon": "file",
+                                                                                              "size": 14,
+                                                                                              "color": "onSurfaceVariant"
+                                                                                            }
+                                                                                          },
+                                                                                          {
+                                                                                            "type": "SizedBox",
+                                                                                            "id": "{{widgetId}}-prdm-g2-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "width": 8
+                                                                                            }
+                                                                                          },
+                                                                                          {
+                                                                                            "type": "Expanded",
+                                                                                            "id": "{{widgetId}}-prdm-name-exp-{{item.id}}",
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Text",
+                                                                                                "id": "{{widgetId}}-prdm-name-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "text": "{{item.name}}",
+                                                                                                  "textStyle": "bodyMedium",
+                                                                                                  "color": "onSurface"
+                                                                                                }
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "type": "ForEach",
                                                                         "id": "{{widgetId}}-pfe-wf-{{item.id}}",
                                                                         "props": {
                                                                           "items": "{{data}}",
@@ -1235,7 +1350,10 @@
                                                                           "where": {
                                                                             "kind": "FileDocument"
                                                                           },
-                                                                          "emptyText": ""
+                                                                          "emptyText": "",
+                                                                          "whereNot": {
+                                                                            "name": "README.md"
+                                                                          }
                                                                         },
                                                                         "children": [
                                                                           {
@@ -1553,6 +1671,121 @@
                                                                                           "visible": "{{ready}}"
                                                                                         },
                                                                                         "children": [
+                                                                                          {
+                                                                                            "type": "ForEach",
+                                                                                            "id": "{{widgetId}}-psfe-rdm-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "items": "{{data}}",
+                                                                                              "where": {
+                                                                                                "kind": "FileDocument",
+                                                                                                "name": "README.md"
+                                                                                              },
+                                                                                              "emptyText": ""
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Action",
+                                                                                                "id": "{{widgetId}}-srdm-dbl-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "gesture": "onDoubleTap",
+                                                                                                  "channel": "navigator.openViewer",
+                                                                                                  "payload": {
+                                                                                                    "nodeId": "{{item.id}}",
+                                                                                                    "nodeType": "{{item.kind}}",
+                                                                                                    "nodeName": "{{item.name}}"
+                                                                                                  }
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "Action",
+                                                                                                    "id": "{{widgetId}}-srdm-tap-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "gesture": "onTap",
+                                                                                                      "channel": "navigator.focusChanged",
+                                                                                                      "payload": {
+                                                                                                        "nodeId": "{{item.id}}",
+                                                                                                        "nodeType": "{{item.kind}}",
+                                                                                                        "nodeName": "{{item.name}}"
+                                                                                                      },
+                                                                                                      "hoverColor": "surfaceContainer"
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Padding",
+                                                                                                        "id": "{{widgetId}}-srdm-pad-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "padding": 4
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Row",
+                                                                                                            "id": "{{widgetId}}-srdm-row-{{item.id}}",
+                                                                                                            "props": {
+                                                                                                              "crossAxisAlignment": "center"
+                                                                                                            },
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "type": "SizedBox",
+                                                                                                                "id": "{{widgetId}}-srdm-indent-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "width": 64
+                                                                                                                }
+                                                                                                              },
+                                                                                                              {
+                                                                                                                "type": "SizedBox",
+                                                                                                                "id": "{{widgetId}}-srdm-chspc-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "width": 16
+                                                                                                                }
+                                                                                                              },
+                                                                                                              {
+                                                                                                                "type": "SizedBox",
+                                                                                                                "id": "{{widgetId}}-srdm-g1-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "width": 4
+                                                                                                                }
+                                                                                                              },
+                                                                                                              {
+                                                                                                                "type": "Icon",
+                                                                                                                "id": "{{widgetId}}-srdm-icon-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "icon": "file",
+                                                                                                                  "size": 14,
+                                                                                                                  "color": "onSurfaceVariant"
+                                                                                                                }
+                                                                                                              },
+                                                                                                              {
+                                                                                                                "type": "SizedBox",
+                                                                                                                "id": "{{widgetId}}-srdm-g2-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "width": 8
+                                                                                                                }
+                                                                                                              },
+                                                                                                              {
+                                                                                                                "type": "Expanded",
+                                                                                                                "id": "{{widgetId}}-srdm-name-exp-{{item.id}}",
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "type": "Text",
+                                                                                                                    "id": "{{widgetId}}-srdm-name-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "text": "{{item.name}}",
+                                                                                                                      "textStyle": "bodyMedium",
+                                                                                                                      "color": "onSurface"
+                                                                                                                    }
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          },
                                                                                           {
                                                                                             "type": "ForEach",
                                                                                             "id": "{{widgetId}}-psfe-wf-{{item.id}}",
@@ -1906,7 +2139,10 @@
                                                                                               "where": {
                                                                                                 "kind": "FileDocument"
                                                                                               },
-                                                                                              "emptyText": ""
+                                                                                              "emptyText": "",
+                                                                                              "whereNot": {
+                                                                                                "name": "README.md"
+                                                                                              }
                                                                                             },
                                                                                             "children": [
                                                                                               {
@@ -2557,6 +2793,121 @@
                                                                             "children": [
                                                                               {
                                                                                 "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-rdm-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "where": {
+                                                                                    "kind": "FileDocument",
+                                                                                    "name": "README.md"
+                                                                                  },
+                                                                                  "emptyText": ""
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Action",
+                                                                                    "id": "{{widgetId}}-rdm-dbl-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "gesture": "onDoubleTap",
+                                                                                      "channel": "navigator.openViewer",
+                                                                                      "payload": {
+                                                                                        "nodeId": "{{item.id}}",
+                                                                                        "nodeType": "{{item.kind}}",
+                                                                                        "nodeName": "{{item.name}}"
+                                                                                      }
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-rdm-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.focusChanged",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "{{item.kind}}",
+                                                                                            "nodeName": "{{item.name}}"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-rdm-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-rdm-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-rdm-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-rdm-chspc-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 16
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-rdm-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-rdm-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "file",
+                                                                                                      "size": 14,
+                                                                                                      "color": "onSurfaceVariant"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-rdm-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-rdm-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-rdm-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "ForEach",
                                                                                 "id": "{{widgetId}}-fe-wf-{{item.id}}",
                                                                                 "props": {
                                                                                   "items": "{{data}}",
@@ -2906,7 +3257,7 @@
                                                                                 "props": {
                                                                                   "items": "{{data}}",
                                                                                   "whereNot": {
-                                                                                    "kind": "FolderDocument"
+                                                                                    "name": "README.md"
                                                                                   },
                                                                                   "where": {
                                                                                     "kind": "FileDocument"
@@ -3229,6 +3580,121 @@
                                                                                                   "visible": "{{ready}}"
                                                                                                 },
                                                                                                 "children": [
+                                                                                                  {
+                                                                                                    "type": "ForEach",
+                                                                                                    "id": "{{widgetId}}-sfe-rdm-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "items": "{{data}}",
+                                                                                                      "where": {
+                                                                                                        "kind": "FileDocument",
+                                                                                                        "name": "README.md"
+                                                                                                      },
+                                                                                                      "emptyText": ""
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Action",
+                                                                                                        "id": "{{widgetId}}-srdm-dbl-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "gesture": "onDoubleTap",
+                                                                                                          "channel": "navigator.openViewer",
+                                                                                                          "payload": {
+                                                                                                            "nodeId": "{{item.id}}",
+                                                                                                            "nodeType": "{{item.kind}}",
+                                                                                                            "nodeName": "{{item.name}}"
+                                                                                                          }
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Action",
+                                                                                                            "id": "{{widgetId}}-srdm-tap-{{item.id}}",
+                                                                                                            "props": {
+                                                                                                              "gesture": "onTap",
+                                                                                                              "channel": "navigator.focusChanged",
+                                                                                                              "payload": {
+                                                                                                                "nodeId": "{{item.id}}",
+                                                                                                                "nodeType": "{{item.kind}}",
+                                                                                                                "nodeName": "{{item.name}}"
+                                                                                                              },
+                                                                                                              "hoverColor": "surfaceContainer"
+                                                                                                            },
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "type": "Padding",
+                                                                                                                "id": "{{widgetId}}-srdm-pad-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "padding": 4
+                                                                                                                },
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "type": "Row",
+                                                                                                                    "id": "{{widgetId}}-srdm-row-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "crossAxisAlignment": "center"
+                                                                                                                    },
+                                                                                                                    "children": [
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-srdm-indent-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 64
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-srdm-chspc-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 16
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-srdm-g1-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 4
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Icon",
+                                                                                                                        "id": "{{widgetId}}-srdm-icon-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "icon": "file",
+                                                                                                                          "size": 14,
+                                                                                                                          "color": "onSurfaceVariant"
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-srdm-g2-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 8
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Expanded",
+                                                                                                                        "id": "{{widgetId}}-srdm-name-exp-{{item.id}}",
+                                                                                                                        "children": [
+                                                                                                                          {
+                                                                                                                            "type": "Text",
+                                                                                                                            "id": "{{widgetId}}-srdm-name-{{item.id}}",
+                                                                                                                            "props": {
+                                                                                                                              "text": "{{item.name}}",
+                                                                                                                              "textStyle": "bodyMedium",
+                                                                                                                              "color": "onSurface"
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        ]
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  },
                                                                                                   {
                                                                                                     "type": "ForEach",
                                                                                                     "id": "{{widgetId}}-sfe-wf-{{item.id}}",
@@ -3582,7 +4048,10 @@
                                                                                                       "where": {
                                                                                                         "kind": "FileDocument"
                                                                                                       },
-                                                                                                      "emptyText": ""
+                                                                                                      "emptyText": "",
+                                                                                                      "whereNot": {
+                                                                                                        "name": "README.md"
+                                                                                                      }
                                                                                                     },
                                                                                                     "children": [
                                                                                                       {
