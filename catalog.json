@@ -701,27 +701,21 @@
                                                                         "id": "{{widgetId}}-pproj-name-exp-{{item.id}}",
                                                                         "children": [
                                                                           {
-                                                                            "type": "Text",
-                                                                            "id": "{{widgetId}}-pproj-name-{{item.id}}",
-                                                                            "props": {
-                                                                              "text": "{{item.name}}",
-                                                                              "textStyle": "bodyMedium",
-                                                                              "color": "onSurface"
-                                                                            }
-                                                                          }
-                                                                        ]
-                                                                      },
-                                                                      {
-                                                                        "type": "Conditional",
-                                                                        "id": "{{widgetId}}-pproj-pub-cond-{{item.id}}",
-                                                                        "props": {
-                                                                          "visible": "{{item.isPublic}}"
-                                                                        },
-                                                                        "children": [
-                                                                          {
                                                                             "type": "Row",
-                                                                            "id": "{{widgetId}}-pproj-pub-row-{{item.id}}",
+                                                                            "id": "{{widgetId}}-pproj-name-inner-row-{{item.id}}",
+                                                                            "props": {
+                                                                              "crossAxisAlignment": "center"
+                                                                            },
                                                                             "children": [
+                                                                              {
+                                                                                "type": "Text",
+                                                                                "id": "{{widgetId}}-pproj-name-{{item.id}}",
+                                                                                "props": {
+                                                                                  "text": "{{item.name}}",
+                                                                                  "textStyle": "bodyMedium",
+                                                                                  "color": "onSurface"
+                                                                                }
+                                                                              },
                                                                               {
                                                                                 "type": "SizedBox",
                                                                                 "id": "{{widgetId}}-pproj-pub-g-{{item.id}}",
@@ -730,48 +724,84 @@
                                                                                 }
                                                                               },
                                                                               {
-                                                                                "type": "Tooltip",
-                                                                                "id": "{{widgetId}}-pproj-pub-tip-{{item.id}}",
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-pproj-pub-cond-{{item.id}}",
                                                                                 "props": {
-                                                                                  "message": "Public"
+                                                                                  "visible": "{{item.isPublic}}"
                                                                                 },
                                                                                 "children": [
                                                                                   {
-                                                                                    "type": "Icon",
-                                                                                    "id": "{{widgetId}}-pproj-pub-icon-{{item.id}}",
-                                                                                    "props": {
-                                                                                      "icon": "visibility",
-                                                                                      "size": 12,
-                                                                                      "color": "onSurfaceMuted"
-                                                                                    }
+                                                                                    "type": "Row",
+                                                                                    "id": "{{widgetId}}-pproj-pub-row-{{item.id}}",
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Tooltip",
+                                                                                        "id": "{{widgetId}}-pproj-pub-tip-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "message": "Public"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Icon",
+                                                                                            "id": "{{widgetId}}-pproj-pub-icon-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "icon": "visibility",
+                                                                                              "size": 12,
+                                                                                              "color": "onSurfaceMuted"
+                                                                                            }
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
                                                                                   }
                                                                                 ]
-                                                                              }
-                                                                            ]
-                                                                          }
-                                                                        ]
-                                                                      },
-                                                                      {
-                                                                        "type": "Conditional",
-                                                                        "id": "{{widgetId}}-pproj-git-cond-{{item.id}}",
-                                                                        "props": {
-                                                                          "visible": "{{item.version}}"
-                                                                        },
-                                                                        "children": [
-                                                                          {
-                                                                            "type": "Tooltip",
-                                                                            "id": "{{widgetId}}-pproj-git-tip-{{item.id}}",
-                                                                            "props": {
-                                                                              "message": "{{item.version}}"
-                                                                            },
-                                                                            "children": [
+                                                                              },
                                                                               {
-                                                                                "type": "Badge",
-                                                                                "id": "{{widgetId}}-pproj-git-badge-{{item.id}}",
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-pproj-git-g-{{item.id}}",
                                                                                 "props": {
-                                                                                  "text": "{{item.shortVersion}}",
-                                                                                  "variant": "neutral"
+                                                                                  "width": 8
                                                                                 }
+                                                                              },
+                                                                              {
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-pproj-git-cond-{{item.id}}",
+                                                                                "props": {
+                                                                                  "visible": "{{item.version}}"
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Tooltip",
+                                                                                    "id": "{{widgetId}}-pproj-git-tip-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "message": "{{item.url.uri}}"
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-pproj-git-click-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "system.intent",
+                                                                                          "payload": {
+                                                                                            "intent": "openUrl",
+                                                                                            "url": "{{item.url.uri}}"
+                                                                                          }
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Badge",
+                                                                                            "id": "{{widgetId}}-pproj-git-badge-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "text": "{{item.shortVersion}}",
+                                                                                              "variant": "neutral"
+                                                                                            }
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
                                                                               }
                                                                             ]
                                                                           }
@@ -2388,27 +2418,21 @@
                                                                                 "id": "{{widgetId}}-proj-name-exp-{{item.id}}",
                                                                                 "children": [
                                                                                   {
-                                                                                    "type": "Text",
-                                                                                    "id": "{{widgetId}}-proj-name-{{item.id}}",
-                                                                                    "props": {
-                                                                                      "text": "{{item.name}}",
-                                                                                      "textStyle": "bodyMedium",
-                                                                                      "color": "onSurface"
-                                                                                    }
-                                                                                  }
-                                                                                ]
-                                                                              },
-                                                                              {
-                                                                                "type": "Conditional",
-                                                                                "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
-                                                                                "props": {
-                                                                                  "visible": "{{item.isPublic}}"
-                                                                                },
-                                                                                "children": [
-                                                                                  {
                                                                                     "type": "Row",
-                                                                                    "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
+                                                                                    "id": "{{widgetId}}-proj-name-inner-row-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "crossAxisAlignment": "center"
+                                                                                    },
                                                                                     "children": [
+                                                                                      {
+                                                                                        "type": "Text",
+                                                                                        "id": "{{widgetId}}-proj-name-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "text": "{{item.name}}",
+                                                                                          "textStyle": "bodyMedium",
+                                                                                          "color": "onSurface"
+                                                                                        }
+                                                                                      },
                                                                                       {
                                                                                         "type": "SizedBox",
                                                                                         "id": "{{widgetId}}-proj-pub-g-{{item.id}}",
@@ -2417,48 +2441,84 @@
                                                                                         }
                                                                                       },
                                                                                       {
-                                                                                        "type": "Tooltip",
-                                                                                        "id": "{{widgetId}}-proj-pub-tip-{{item.id}}",
+                                                                                        "type": "Conditional",
+                                                                                        "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
                                                                                         "props": {
-                                                                                          "message": "Public"
+                                                                                          "visible": "{{item.isPublic}}"
                                                                                         },
                                                                                         "children": [
                                                                                           {
-                                                                                            "type": "Icon",
-                                                                                            "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
-                                                                                            "props": {
-                                                                                              "icon": "visibility",
-                                                                                              "size": 12,
-                                                                                              "color": "onSurfaceMuted"
-                                                                                            }
+                                                                                            "type": "Row",
+                                                                                            "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Tooltip",
+                                                                                                "id": "{{widgetId}}-proj-pub-tip-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "message": "Public"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "visibility",
+                                                                                                      "size": 12,
+                                                                                                      "color": "onSurfaceMuted"
+                                                                                                    }
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
                                                                                           }
                                                                                         ]
-                                                                                      }
-                                                                                    ]
-                                                                                  }
-                                                                                ]
-                                                                              },
-                                                                              {
-                                                                                "type": "Conditional",
-                                                                                "id": "{{widgetId}}-proj-git-cond-{{item.id}}",
-                                                                                "props": {
-                                                                                  "visible": "{{item.version}}"
-                                                                                },
-                                                                                "children": [
-                                                                                  {
-                                                                                    "type": "Tooltip",
-                                                                                    "id": "{{widgetId}}-proj-git-tip-{{item.id}}",
-                                                                                    "props": {
-                                                                                      "message": "{{item.version}}"
-                                                                                    },
-                                                                                    "children": [
+                                                                                      },
                                                                                       {
-                                                                                        "type": "Badge",
-                                                                                        "id": "{{widgetId}}-proj-git-badge-{{item.id}}",
+                                                                                        "type": "SizedBox",
+                                                                                        "id": "{{widgetId}}-proj-git-g-{{item.id}}",
                                                                                         "props": {
-                                                                                          "text": "{{item.shortVersion}}",
-                                                                                          "variant": "neutral"
+                                                                                          "width": 8
                                                                                         }
+                                                                                      },
+                                                                                      {
+                                                                                        "type": "Conditional",
+                                                                                        "id": "{{widgetId}}-proj-git-cond-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "visible": "{{item.version}}"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Tooltip",
+                                                                                            "id": "{{widgetId}}-proj-git-tip-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "message": "{{item.url.uri}}"
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Action",
+                                                                                                "id": "{{widgetId}}-proj-git-click-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "gesture": "onTap",
+                                                                                                  "channel": "system.intent",
+                                                                                                  "payload": {
+                                                                                                    "intent": "openUrl",
+                                                                                                    "url": "{{item.url.uri}}"
+                                                                                                  }
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "Badge",
+                                                                                                    "id": "{{widgetId}}-proj-git-badge-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "text": "{{item.shortVersion}}",
+                                                                                                      "variant": "neutral"
+                                                                                                    }
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
                                                                                       }
                                                                                     ]
                                                                                   }
