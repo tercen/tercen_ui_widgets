@@ -4,7 +4,7 @@
       "metadata": {
         "type": "ProjectNavigator",
         "tier": 2,
-        "description": "File browser for a Tercen project. Lists project documents with selection and intent navigation.",
+        "description": "Browsable list of all projects with search, selection, and intent-based navigation. Use when the user wants to see, find, or select projects.",
         "emittedEvents": [
           "navigator.focusChanged",
           "system.intent"
@@ -26,7 +26,16 @@
           "publishTo": [
             "navigator.focusChanged"
           ]
-        }
+        },
+        "domain": "project",
+        "capabilities": [
+          "browse",
+          "search",
+          "select",
+          "navigate"
+        ],
+        "selectionMode": "single",
+        "dataSource": "projectService.findByTeamCreatedDate"
       },
       "template": {
         "type": "Column",
@@ -124,7 +133,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -304,7 +313,7 @@
       "metadata": {
         "type": "WorkflowViewer",
         "tier": 2,
-        "description": "Interactive directed graph viewer for Tercen workflows.",
+        "description": "Interactive directed graph viewer for a workflow. Shows steps as nodes with connections. Use when the user wants to see or navigate a workflow.",
         "emittedEvents": [
           "workflow.selection"
         ],
@@ -326,7 +335,15 @@
             "windowTitle": "Workflow: {{name}}",
             "windowSize": "large"
           }
-        ]
+        ],
+        "domain": "workflow",
+        "capabilities": [
+          "browse",
+          "select",
+          "navigate"
+        ],
+        "selectionMode": "single",
+        "dataSource": "workflowService.get"
       },
       "template": {
         "type": "Column",
@@ -366,7 +383,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -530,7 +547,7 @@
       "metadata": {
         "type": "DataTableViewer",
         "tier": 2,
-        "description": "Tabular data viewer for Tercen workflow step tables.",
+        "description": "Tabular data viewer for workflow step input/output tables. Use when the user wants to inspect data produced by a workflow step.",
         "emittedEvents": [
           "system.selection.table"
         ],
@@ -542,7 +559,14 @@
           },
           "windowTitle": "Tables: {{stepName}}",
           "windowSize": "large"
-        }
+        },
+        "domain": "data",
+        "capabilities": [
+          "browse",
+          "select"
+        ],
+        "selectionMode": "single",
+        "dataSource": "tableSchemaService.findByWorkflowIdAndStepId"
       },
       "template": {
         "type": "Column",
@@ -584,7 +608,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -745,7 +769,7 @@
       "metadata": {
         "type": "DocumentViewer",
         "tier": 2,
-        "description": "Document viewer for Tercen files. Fetches metadata and content.",
+        "description": "Viewer for file content and metadata. Use when the user wants to read or preview a document or file.",
         "emittedEvents": [
           "system.selection.file"
         ],
@@ -776,7 +800,13 @@
             "windowTitle": "{{name}}",
             "windowSize": "medium"
           }
-        ]
+        ],
+        "domain": "file",
+        "capabilities": [
+          "browse"
+        ],
+        "selectionMode": "none",
+        "dataSource": "fileService.get"
       },
       "template": {
         "type": "Column",
@@ -866,7 +896,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -959,7 +989,7 @@
       "metadata": {
         "type": "PngViewer",
         "tier": 2,
-        "description": "Image viewer for Tercen workflow step outputs.",
+        "description": "Image viewer for workflow step output plots. Use when the user wants to see charts or images generated by a step.",
         "handlesIntent": {
           "intent": "openStepImages",
           "propsMap": {
@@ -968,7 +998,13 @@
           },
           "windowTitle": "Images: {{stepName}}",
           "windowSize": "large"
-        }
+        },
+        "domain": "image",
+        "capabilities": [
+          "browse"
+        ],
+        "selectionMode": "none",
+        "dataSource": "workflowService.getStepImages"
       },
       "template": {
         "type": "Column",
@@ -1009,7 +1045,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -1170,10 +1206,16 @@
       "metadata": {
         "type": "AuditTrail",
         "tier": 2,
-        "description": "Audit trail log viewer (stub).",
+        "description": "Chronological log of user actions and system events. Use when the user wants to review recent activity or audit history.",
         "emittedEvents": [
           "window.intent"
-        ]
+        ],
+        "domain": "activity",
+        "capabilities": [
+          "browse"
+        ],
+        "selectionMode": "none",
+        "dataSource": "activityService.findByOwner"
       },
       "template": {
         "type": "Column",
@@ -1260,7 +1302,7 @@
       "metadata": {
         "type": "TeamManager",
         "tier": 2,
-        "description": "Team management widget for viewing and editing team members.",
+        "description": "Team member management. View, add, and remove team members. Use when the user wants to manage team membership.",
         "handlesIntent": {
           "intent": "openTeamWidget",
           "propsMap": {
@@ -1268,7 +1310,15 @@
           },
           "windowTitle": "Team Manager",
           "windowSize": "large"
-        }
+        },
+        "domain": "team",
+        "capabilities": [
+          "browse",
+          "create",
+          "delete"
+        ],
+        "selectionMode": "none",
+        "dataSource": "teamService.getMembers"
       },
       "template": {
         "type": "Column",
@@ -1355,7 +1405,7 @@
       "metadata": {
         "type": "ChatBox",
         "tier": 2,
-        "description": "LLM chat interface for Tercen. Displays a message thread with markdown-rich responses, syntax-highlighted code blocks, and streaming indicators. Sends user messages to the LLM via WebSocket and emits action intents on the EventBus.",
+        "description": "LLM chat interface. Displays message thread with markdown, code blocks, and streaming. Use when the user needs a chat window.",
         "props": {},
         "emittedEvents": [
           "chat.message.sent",
@@ -1376,7 +1426,12 @@
             "windowSize": "column"
           }
         ],
-        "typeColor": "#0099FF"
+        "typeColor": "#0099FF",
+        "domain": "system",
+        "capabilities": [
+          "chat"
+        ],
+        "selectionMode": "none"
       },
       "template": {
         "type": "WindowShell",
@@ -1972,13 +2027,21 @@
       "metadata": {
         "type": "HomePanel",
         "tier": 2,
-        "description": "Personalized landing dashboard for Tercen. Displays a four-card responsive grid: Recent Projects, Featured Apps, Help & Documentation, and Recent Activity. Toolbar provides quick actions (New Project, Teams, Audit). Cards load data independently via DataSource service calls. Publishes navigation intents on window.intent channel.",
+        "description": "Landing dashboard with recent projects, featured apps, help links, and recent activity in a card grid. Shown on startup.",
         "props": {},
         "emittedEvents": [
           "window.intent"
         ],
         "acceptedActions": [],
-        "typeColor": "#0D9488"
+        "typeColor": "#0D9488",
+        "domain": "system",
+        "capabilities": [
+          "browse",
+          "search",
+          "navigate"
+        ],
+        "selectionMode": "none",
+        "dataSource": "projectService.findByTeamCreatedDate"
       },
       "template": {
         "type": "WindowShell",
@@ -2740,7 +2803,7 @@
                                 ],
                                 [
                                   "{{context.userId}}",
-                                  ""
+                                  "\uf000"
                                 ],
                                 20,
                                 0,
@@ -2984,13 +3047,18 @@
       "metadata": {
         "type": "MainHeader",
         "tier": 2,
-        "description": "Frame-level chrome bar for Tercen. 36px fixed height. Brand mark with theme-aware logo on the left (PNG, light/dark variants). User identicon avatar and dropdown menu on the right with actions: About, Save Layout, Theme Toggle, LLM Settings, Task Manager, Admin (admin-only), Sign Out. Publishes all actions to header.intent channel.",
+        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome \u2014 not user-requested.",
         "props": {},
         "emittedEvents": [
           "header.intent"
         ],
         "acceptedActions": [],
-        "typeColor": "#FF0000"
+        "typeColor": "#FF0000",
+        "domain": "system",
+        "capabilities": [
+          "navigate"
+        ],
+        "selectionMode": "none"
       },
       "template": {
         "type": "Column",
@@ -3174,7 +3242,7 @@
       "metadata": {
         "type": "TaskMonitor",
         "tier": 2,
-        "description": "Live task monitor showing running and recently completed tasks. Polls the Tercen task service and subscribes to event channels for real-time progress. Displays workflow name, project, step, elapsed time, and status. Supports cancelling running tasks.",
+        "description": "Live task monitor showing running and completed tasks with progress, elapsed time, and cancel button. Use when the user wants to see running tasks.",
         "props": {},
         "emittedEvents": [
           "task.cancel",
@@ -3190,7 +3258,15 @@
             "windowSize": "medium",
             "windowAlign": "right"
           }
-        ]
+        ],
+        "domain": "task",
+        "capabilities": [
+          "browse",
+          "monitor",
+          "cancel"
+        ],
+        "selectionMode": "none",
+        "dataSource": "taskService.getRunningTasks"
       },
       "template": {
         "type": "TaskStream",
