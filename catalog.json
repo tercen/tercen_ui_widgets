@@ -384,25 +384,25 @@
                                               "value": "all",
                                               "iconColor": "primary",
                                               "tooltip": "Show all",
-                                              "label": "All"
+                                              "icon": "apps"
                                             },
                                             {
                                               "value": "file",
                                               "icon": "file",
                                               "iconColor": "onSurfaceVariant",
-                                              "tooltip": "Files only"
+                                              "tooltip": "Files"
                                             },
                                             {
                                               "value": "dataset",
                                               "icon": "table",
                                               "iconColor": "warning",
-                                              "tooltip": "Datasets only"
+                                              "tooltip": "Datasets"
                                             },
                                             {
                                               "value": "workflow",
                                               "icon": "sitemap",
                                               "iconColor": "info",
-                                              "tooltip": "Workflows only"
+                                              "tooltip": "Workflows"
                                             }
                                           ]
                                         }
