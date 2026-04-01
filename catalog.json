@@ -662,7 +662,7 @@
                                                         "id": "{{widgetId}}-pproj-coll-{{item.id}}",
                                                         "props": {
                                                           "nodeId": "{{item.id}}",
-                                                          "toggleChannel": "navigator.toggleExpand",
+                                                          "toggleChannel": "navigator.focusChanged",
                                                           "defaultExpanded": false,
                                                           "expandChannel": "navigator.navigateTo"
                                                         },
@@ -672,11 +672,16 @@
                                                             "id": "{{widgetId}}-pproj-tap-{{item.id}}",
                                                             "props": {
                                                               "gesture": "onTap",
-                                                              "channel": "navigator.toggleExpand",
+                                                              "channel": "navigator.focusChanged",
                                                               "payload": {
                                                                 "nodeId": "{{item.id}}",
                                                                 "nodeType": "project",
-                                                                "nodeName": "{{item.name}}"
+                                                                "nodeName": "{{item.name}}",
+                                                                "canUpload": true,
+                                                                "canDownload": false,
+                                                                "canTeam": false,
+                                                                "projectId": "{{item.id}}",
+                                                                "folderId": ""
                                                               },
                                                               "hoverColor": "surfaceContainer"
                                                             },
@@ -1498,7 +1503,7 @@
                                                                             "id": "{{widgetId}}-pfc-{{item.id}}",
                                                                             "props": {
                                                                               "nodeId": "{{item.id}}",
-                                                                              "toggleChannel": "navigator.toggleExpand",
+                                                                              "toggleChannel": "navigator.focusChanged",
                                                                               "defaultExpanded": false
                                                                             },
                                                                             "children": [
@@ -1507,10 +1512,15 @@
                                                                                 "id": "{{widgetId}}-pfld-tap-{{item.id}}",
                                                                                 "props": {
                                                                                   "gesture": "onTap",
-                                                                                  "channel": "navigator.toggleExpand",
+                                                                                  "channel": "navigator.focusChanged",
                                                                                   "payload": {
                                                                                     "nodeId": "{{item.id}}",
-                                                                                    "nodeType": "folder"
+                                                                                    "nodeType": "folder",
+                                                                                    "canUpload": true,
+                                                                                    "canDownload": false,
+                                                                                    "canTeam": false,
+                                                                                    "projectId": "{{item.projectId}}",
+                                                                                    "folderId": "{{item.id}}"
                                                                                   },
                                                                                   "hoverColor": "surfaceContainer"
                                                                                 },
@@ -2440,7 +2450,7 @@
                                                                 "id": "{{widgetId}}-proj-coll-{{item.id}}",
                                                                 "props": {
                                                                   "nodeId": "{{item.id}}",
-                                                                  "toggleChannel": "navigator.toggleExpand",
+                                                                  "toggleChannel": "navigator.focusChanged",
                                                                   "defaultExpanded": false,
                                                                   "expandChannel": "navigator.navigateTo"
                                                                 },
@@ -2451,11 +2461,16 @@
                                                                     "id": "{{widgetId}}-proj-tap-{{item.id}}",
                                                                     "props": {
                                                                       "gesture": "onTap",
-                                                                      "channel": "navigator.toggleExpand",
+                                                                      "channel": "navigator.focusChanged",
                                                                       "payload": {
                                                                         "nodeId": "{{item.id}}",
                                                                         "nodeType": "project",
-                                                                        "nodeName": "{{item.name}}"
+                                                                        "nodeName": "{{item.name}}",
+                                                                        "canUpload": true,
+                                                                        "canDownload": false,
+                                                                        "canTeam": false,
+                                                                        "projectId": "{{item.id}}",
+                                                                        "folderId": ""
                                                                       },
                                                                       "hoverColor": "surfaceContainer"
                                                                     },
@@ -3278,7 +3293,7 @@
                                                                                     "id": "{{widgetId}}-fc2-{{item.id}}",
                                                                                     "props": {
                                                                                       "nodeId": "{{item.id}}",
-                                                                                      "toggleChannel": "navigator.toggleExpand",
+                                                                                      "toggleChannel": "navigator.focusChanged",
                                                                                       "defaultExpanded": false
                                                                                     },
                                                                                     "children": [
@@ -3287,10 +3302,15 @@
                                                                                         "id": "{{widgetId}}-fld2-tap-{{item.id}}",
                                                                                         "props": {
                                                                                           "gesture": "onTap",
-                                                                                          "channel": "navigator.toggleExpand",
+                                                                                          "channel": "navigator.focusChanged",
                                                                                           "payload": {
                                                                                             "nodeId": "{{item.id}}",
-                                                                                            "nodeType": "folder"
+                                                                                            "nodeType": "folder",
+                                                                                            "canUpload": true,
+                                                                                            "canDownload": false,
+                                                                                            "canTeam": false,
+                                                                                            "projectId": "{{item.projectId}}",
+                                                                                            "folderId": "{{item.id}}"
                                                                                           },
                                                                                           "hoverColor": "surfaceContainer"
                                                                                         },
