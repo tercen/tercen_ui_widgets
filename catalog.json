@@ -36,7 +36,11 @@
             "navigator.focusChanged"
           ]
         },
-        "props": {}
+        "props": {},
+        "stateConfig": {
+          "selectionKey": "selectedId",
+          "multiSelect": false
+        }
       },
       "template": {
         "type": "Column",
@@ -218,7 +222,8 @@
                                 "props": {
                                   "icon": "folder_open",
                                   "size": 32,
-                                  "color": "onSurfaceDisabled"
+                                  "color": "onSurfaceDisabled",
+                                  "weight": "regular"
                                 }
                               },
                               {
@@ -306,7 +311,9 @@
                                           "size": 16,
                                           "color": "onPrimary",
                                           "channel": "navigator.upload",
-                                          "tooltip": "Upload"
+                                          "tooltip": "Upload",
+                                          "variant": "toolbar-primary",
+                                          "weight": "solid"
                                         }
                                       }
                                     ]
@@ -334,7 +341,9 @@
                                           "size": 16,
                                           "color": "onPrimary",
                                           "channel": "navigator.downloadFile",
-                                          "tooltip": "Download"
+                                          "tooltip": "Download",
+                                          "variant": "toolbar-primary",
+                                          "weight": "solid"
                                         }
                                       }
                                     ]
@@ -362,7 +371,9 @@
                                           "size": 16,
                                           "color": "primary",
                                           "channel": "navigator.openTeamWidget",
-                                          "tooltip": "Teams"
+                                          "tooltip": "Teams",
+                                          "variant": "toolbar-secondary",
+                                          "weight": "solid"
                                         }
                                       }
                                     ]
@@ -525,7 +536,8 @@
                                                     "props": {
                                                       "icon": "user_group",
                                                       "size": 14,
-                                                      "color": "primary"
+                                                      "color": "primary",
+                                                      "weight": "solid"
                                                     }
                                                   },
                                                   {
@@ -625,7 +637,8 @@
                                                         "props": {
                                                           "icon": "folder",
                                                           "size": 14,
-                                                          "color": "primary"
+                                                          "color": "primary",
+                                                          "weight": "solid"
                                                         }
                                                       },
                                                       {
@@ -804,7 +817,8 @@
                                                                     "props": {
                                                                       "icon": "{{item.iconName}}",
                                                                       "size": 14,
-                                                                      "color": "{{item.iconColor}}"
+                                                                      "color": "{{item.iconColor}}",
+                                                                      "weight": "{{item.iconWeight}}"
                                                                     }
                                                                   },
                                                                   {
