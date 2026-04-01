@@ -9,3 +9,4 @@ _issues/
 *.cache.dill.track.dill
 pubspec.lock
 .playwright-mcp/
+build/
