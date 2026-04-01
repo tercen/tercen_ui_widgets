@@ -382,9 +382,9 @@
                                           "items": [
                                             {
                                               "value": "all",
-                                              "icon": "apps",
                                               "iconColor": "primary",
-                                              "tooltip": "Show all"
+                                              "tooltip": "Show all",
+                                              "label": "All"
                                             },
                                             {
                                               "value": "file",
