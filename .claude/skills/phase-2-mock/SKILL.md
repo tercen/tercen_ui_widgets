@@ -45,7 +45,27 @@ Read `../tercen-style/dist/tercen-tokens.css` and embed full contents in `<style
 - Inputs: outline borders, correct focus states
 
 ### Theme toggle
-Include light/dark toggle button using `[data-theme]` selectors from tokens CSS.
+Include light/dark toggle in the **convenience bar** (see below), not as an in-widget control.
+
+### Convenience bar (standard for all mocks)
+Every styled.html MUST include a convenience bar at the top of the page. This is a **development-only frame** — it represents the orchestrator's tab strip and pane chrome, which the widget does NOT own. The widget itself has no border, no tab, and no frame.
+
+The convenience bar MUST contain:
+1. **Tab mock** — coloured type dot + widget name (matches the orchestrator tab appearance)
+2. **State switcher** — buttons: Active, Loading, Empty, Error. Switches the body state.
+3. **Theme toggle** — light/dark mode button using `[data-theme]` selectors from tokens CSS.
+
+The convenience bar MUST be visually distinct from the widget (dark background, small text) so it cannot be confused with actual widget UI. Mark it with a comment: `<!-- CONVENIENCE BAR — Dev only, not part of widget -->`.
+
+**Do NOT include** in the widget area:
+- Floating action buttons for theme toggle
+- Toast notification demo dots
+- Any other dev controls that are not part of the widget spec
+
+### EventBus modelling
+If the spec defines EventBus events, model them in the mock:
+- **Bottom log bar** — monospace strip showing the last emitted event channel + payload
+- **Toast notification** — appears briefly when an event fires that has no visible UI change (e.g. focusChanged, openViewer, downloadFile). Shows the channel name and payload so reviewers can verify wiring.
 
 ## Step 3 — Gap Evaluation (`gap-report.md`)
 
