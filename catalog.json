@@ -856,7 +856,7 @@
                                                                                 4,
                                                                                 4,
                                                                                 4,
-                                                                                64
+                                                                                86
                                                                               ]
                                                                             },
                                                                             "children": [
@@ -1504,6 +1504,48 @@
                                                                                       ]
                                                                                     },
                                                                                     "children": [
+                                                                                      {
+                                                                                        "type": "Conditional",
+                                                                                        "id": "{{widgetId}}-psfds-{{item.id}}-empty",
+                                                                                        "props": {
+                                                                                          "visible": "{{ready}}"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Conditional",
+                                                                                            "id": "{{widgetId}}-psfds-{{item.id}}-empty-inner",
+                                                                                            "props": {
+                                                                                              "visible": "{{data}}",
+                                                                                              "negate": true
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Padding",
+                                                                                                "id": "{{widgetId}}-psfds-{{item.id}}-empty-pad",
+                                                                                                "props": {
+                                                                                                  "padding": [
+                                                                                                    4,
+                                                                                                    4,
+                                                                                                    4,
+                                                                                                    106
+                                                                                                  ]
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "Text",
+                                                                                                    "id": "{{widgetId}}-psfds-{{item.id}}-empty-text",
+                                                                                                    "props": {
+                                                                                                      "text": "Empty",
+                                                                                                      "textStyle": "bodySmall",
+                                                                                                      "color": "onSurfaceMuted"
+                                                                                                    }
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      },
                                                                                       {
                                                                                         "type": "Conditional",
                                                                                         "id": "{{widgetId}}-psfds-rdy-{{item.id}}",
@@ -2487,7 +2529,7 @@
                                                                                         4,
                                                                                         4,
                                                                                         4,
-                                                                                        64
+                                                                                        86
                                                                                       ]
                                                                                     },
                                                                                     "children": [
@@ -3138,6 +3180,48 @@
                                                                                               ]
                                                                                             },
                                                                                             "children": [
+                                                                                              {
+                                                                                                "type": "Conditional",
+                                                                                                "id": "{{widgetId}}-sfds-{{item.id}}-empty",
+                                                                                                "props": {
+                                                                                                  "visible": "{{ready}}"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "Conditional",
+                                                                                                    "id": "{{widgetId}}-sfds-{{item.id}}-empty-inner",
+                                                                                                    "props": {
+                                                                                                      "visible": "{{data}}",
+                                                                                                      "negate": true
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Padding",
+                                                                                                        "id": "{{widgetId}}-sfds-{{item.id}}-empty-pad",
+                                                                                                        "props": {
+                                                                                                          "padding": [
+                                                                                                            4,
+                                                                                                            4,
+                                                                                                            4,
+                                                                                                            106
+                                                                                                          ]
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Text",
+                                                                                                            "id": "{{widgetId}}-sfds-{{item.id}}-empty-text",
+                                                                                                            "props": {
+                                                                                                              "text": "Empty",
+                                                                                                              "textStyle": "bodySmall",
+                                                                                                              "color": "onSurfaceMuted"
+                                                                                                            }
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              },
                                                                                               {
                                                                                                 "type": "Conditional",
                                                                                                 "id": "{{widgetId}}-sfds-rdy-{{item.id}}",
