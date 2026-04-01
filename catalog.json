@@ -870,8 +870,9 @@
                                                                                 "props": {
                                                                                   "items": "{{data}}",
                                                                                   "where": {
-                                                                                    "subKind": "FolderDocument"
-                                                                                  }
+                                                                                    "kind": "FolderDocument"
+                                                                                  },
+                                                                                  "emptyText": ""
                                                                                 },
                                                                                 "children": [
                                                                                   {
@@ -1144,9 +1145,10 @@
                                                                                 "id": "{{widgetId}}-fe-leaves-{{item.id}}",
                                                                                 "props": {
                                                                                   "items": "{{data}}",
-                                                                                  "where": {
-                                                                                    "kind": "FileDocument"
-                                                                                  }
+                                                                                  "whereNot": {
+                                                                                    "kind": "FolderDocument"
+                                                                                  },
+                                                                                  "emptyText": ""
                                                                                 },
                                                                                 "children": [
                                                                                   {
