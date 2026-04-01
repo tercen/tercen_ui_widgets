@@ -2094,9 +2094,9 @@
                                             "id": "{{widgetId}}-ic-user",
                                             "props": {
                                               "icon": "message",
-                                              "iconStyle": "solid",
                                               "size": 14,
-                                              "color": "warning"
+                                              "color": "warning",
+                                              "weight": "solid"
                                             }
                                           }
                                         ]
@@ -2432,21 +2432,21 @@
                                     "children": [
                                       {
                                         "type": "Conditional",
-                                        "id": "{{widgetId}}-focus-cond",
+                                        "id": "{{widgetId}}-focus-cond-2",
                                         "props": {
                                           "visible": "{{focusLabel}}"
                                         },
                                         "children": [
                                           {
                                             "type": "Row",
-                                            "id": "{{widgetId}}-focus-row",
+                                            "id": "{{widgetId}}-focus-row-2",
                                             "props": {
                                               "crossAxisAlignment": "center"
                                             },
                                             "children": [
                                               {
                                                 "type": "Icon",
-                                                "id": "{{widgetId}}-focus-icon",
+                                                "id": "{{widgetId}}-focus-icon-2",
                                                 "props": {
                                                   "icon": "crosshairs",
                                                   "size": 10,
@@ -2455,14 +2455,14 @@
                                               },
                                               {
                                                 "type": "SizedBox",
-                                                "id": "{{widgetId}}-focus-gap",
+                                                "id": "{{widgetId}}-focus-gap-2",
                                                 "props": {
                                                   "width": 4
                                                 }
                                               },
                                               {
                                                 "type": "Text",
-                                                "id": "{{widgetId}}-focus-text",
+                                                "id": "{{widgetId}}-focus-text-2",
                                                 "props": {
                                                   "text": "Focus: {{focusLabel}}",
                                                   "textStyle": "bodySmall",
@@ -3863,9 +3863,7 @@
                     "type": "Padding",
                     "id": "{{widgetId}}-run-pad-{{_index}}",
                     "props": {
-                      "left": "sm",
-                      "right": "sm",
-                      "bottom": "xs"
+                      "padding": "sm"
                     },
                     "children": [
                       {
