@@ -835,6 +835,48 @@
                                                                   },
                                                                   {
                                                                     "type": "Conditional",
+                                                                    "id": "{{widgetId}}-ppcd-{{item.id}}-empty",
+                                                                    "props": {
+                                                                      "visible": "{{ready}}"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Conditional",
+                                                                        "id": "{{widgetId}}-ppcd-{{item.id}}-empty-inner",
+                                                                        "props": {
+                                                                          "visible": "{{data}}",
+                                                                          "negate": true
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Padding",
+                                                                            "id": "{{widgetId}}-ppcd-{{item.id}}-empty-pad",
+                                                                            "props": {
+                                                                              "padding": [
+                                                                                4,
+                                                                                4,
+                                                                                4,
+                                                                                64
+                                                                              ]
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "Text",
+                                                                                "id": "{{widgetId}}-ppcd-{{item.id}}-empty-text",
+                                                                                "props": {
+                                                                                  "text": "Empty",
+                                                                                  "textStyle": "bodySmall",
+                                                                                  "color": "onSurfaceMuted"
+                                                                                }
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  {
+                                                                    "type": "Conditional",
                                                                     "id": "{{widgetId}}-ppcd-ready-{{item.id}}",
                                                                     "props": {
                                                                       "visible": "{{ready}}"
@@ -2417,6 +2459,48 @@
                                                                                       "variant": "spinner",
                                                                                       "size": 16
                                                                                     }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          },
+                                                                          {
+                                                                            "type": "Conditional",
+                                                                            "id": "{{widgetId}}-pcd-{{item.id}}-empty",
+                                                                            "props": {
+                                                                              "visible": "{{ready}}"
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-pcd-{{item.id}}-empty-inner",
+                                                                                "props": {
+                                                                                  "visible": "{{data}}",
+                                                                                  "negate": true
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Padding",
+                                                                                    "id": "{{widgetId}}-pcd-{{item.id}}-empty-pad",
+                                                                                    "props": {
+                                                                                      "padding": [
+                                                                                        4,
+                                                                                        4,
+                                                                                        4,
+                                                                                        64
+                                                                                      ]
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Text",
+                                                                                        "id": "{{widgetId}}-pcd-{{item.id}}-empty-text",
+                                                                                        "props": {
+                                                                                          "text": "Empty",
+                                                                                          "textStyle": "bodySmall",
+                                                                                          "color": "onSurfaceMuted"
+                                                                                        }
+                                                                                      }
+                                                                                    ]
                                                                                   }
                                                                                 ]
                                                                               }
