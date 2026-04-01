@@ -380,7 +380,7 @@
                             }
                           },
                           {
-                            "_comment": "Tree body \u2014 personal team first, then alphabetical",
+                            "_comment": "Tree body — personal team first, then alphabetical",
                             "type": "Expanded",
                             "id": "{{widgetId}}-tree-exp",
                             "children": [
@@ -422,7 +422,7 @@
                                             },
                                             "children": [
                                               {
-                                                "_comment": "TEAM ROW \u2014 level 0. Click expands/collapses.",
+                                                "_comment": "TEAM ROW — level 0. Click expands/collapses.",
                                                 "type": "Action",
                                                 "id": "{{widgetId}}-team-tap-{{item.id}}",
                                                 "props": {
@@ -546,7 +546,7 @@
                                                 },
                                                 "children": [
                                                   {
-                                                    "_comment": "Nested DataSource \u2014 projects for THIS team",
+                                                    "_comment": "Nested DataSource — projects for THIS team",
                                                     "type": "DataSource",
                                                     "id": "{{widgetId}}-proj-ds-{{item.id}}",
                                                     "props": {
@@ -561,7 +561,7 @@
                                                         [
                                                           "{{item.name}}",
                                                           true,
-                                                          "\uf000"
+                                                          ""
                                                         ],
                                                         200
                                                       ],
@@ -623,7 +623,7 @@
                                                                 },
                                                                 "children": [
                                                                   {
-                                                                    "_comment": "Project row \u2014 level 1, indent 24px. Tap toggles expand AND sets focus.",
+                                                                    "_comment": "Project row — level 1, indent 24px. Tap toggles expand AND sets focus.",
                                                                     "type": "Action",
                                                                     "id": "{{widgetId}}-proj-tap-{{item.id}}",
                                                                     "props": {
@@ -805,7 +805,7 @@
                                                                     },
                                                                     "children": [
                                                                       {
-                                                                        "_comment": "Project contents \u2014 root-level documents/folders",
+                                                                        "_comment": "Project contents — root-level documents/folders",
                                                                         "type": "DataSource",
                                                                         "id": "{{widgetId}}-pcd-{{item.id}}",
                                                                         "props": {
@@ -820,7 +820,7 @@
                                                                             [
                                                                               "{{item.id}}",
                                                                               "",
-                                                                              "\uf000"
+                                                                              ""
                                                                             ],
                                                                             200
                                                                           ]
@@ -864,6 +864,120 @@
                                                                               "visible": "{{ready}}"
                                                                             },
                                                                             "children": [
+                                                                              {
+                                                                                "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-leaves-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "whereNot": {
+                                                                                    "kind": "FolderDocument"
+                                                                                  },
+                                                                                  "emptyText": ""
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Action",
+                                                                                    "id": "{{widgetId}}-dbl-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "gesture": "onDoubleTap",
+                                                                                      "channel": "navigator.openViewer",
+                                                                                      "payload": {
+                                                                                        "nodeId": "{{item.id}}",
+                                                                                        "nodeType": "{{item.subKind}}",
+                                                                                        "nodeName": "{{item.name}}"
+                                                                                      }
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-leaf-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.focusChanged",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "{{item.subKind}}",
+                                                                                            "nodeName": "{{item.name}}"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-leaf-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-leaf-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-chspc-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 16
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-leaf-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "description",
+                                                                                                      "size": 14,
+                                                                                                      "color": "onSurfaceMuted"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-leaf-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-leaf-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
                                                                               {
                                                                                 "type": "ForEach",
                                                                                 "id": "{{widgetId}}-fe-folders-{{item.id}}",
@@ -1022,7 +1136,7 @@
                                                                                                 [
                                                                                                   "{{item.projectId}}",
                                                                                                   "{{item.id}}",
-                                                                                                  "\uf000"
+                                                                                                  ""
                                                                                                 ],
                                                                                                 200
                                                                                               ]
@@ -1139,120 +1253,6 @@
                                                                                     ]
                                                                                   }
                                                                                 ]
-                                                                              },
-                                                                              {
-                                                                                "type": "ForEach",
-                                                                                "id": "{{widgetId}}-fe-leaves-{{item.id}}",
-                                                                                "props": {
-                                                                                  "items": "{{data}}",
-                                                                                  "whereNot": {
-                                                                                    "kind": "FolderDocument"
-                                                                                  },
-                                                                                  "emptyText": ""
-                                                                                },
-                                                                                "children": [
-                                                                                  {
-                                                                                    "type": "Action",
-                                                                                    "id": "{{widgetId}}-dbl-{{item.id}}",
-                                                                                    "props": {
-                                                                                      "gesture": "onDoubleTap",
-                                                                                      "channel": "navigator.openViewer",
-                                                                                      "payload": {
-                                                                                        "nodeId": "{{item.id}}",
-                                                                                        "nodeType": "{{item.subKind}}",
-                                                                                        "nodeName": "{{item.name}}"
-                                                                                      }
-                                                                                    },
-                                                                                    "children": [
-                                                                                      {
-                                                                                        "type": "Action",
-                                                                                        "id": "{{widgetId}}-leaf-tap-{{item.id}}",
-                                                                                        "props": {
-                                                                                          "gesture": "onTap",
-                                                                                          "channel": "navigator.focusChanged",
-                                                                                          "payload": {
-                                                                                            "nodeId": "{{item.id}}",
-                                                                                            "nodeType": "{{item.subKind}}",
-                                                                                            "nodeName": "{{item.name}}"
-                                                                                          },
-                                                                                          "hoverColor": "surfaceContainer"
-                                                                                        },
-                                                                                        "children": [
-                                                                                          {
-                                                                                            "type": "Padding",
-                                                                                            "id": "{{widgetId}}-leaf-pad-{{item.id}}",
-                                                                                            "props": {
-                                                                                              "padding": 4
-                                                                                            },
-                                                                                            "children": [
-                                                                                              {
-                                                                                                "type": "Row",
-                                                                                                "id": "{{widgetId}}-leaf-row-{{item.id}}",
-                                                                                                "props": {
-                                                                                                  "crossAxisAlignment": "center"
-                                                                                                },
-                                                                                                "children": [
-                                                                                                  {
-                                                                                                    "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-indent-{{item.id}}",
-                                                                                                    "props": {
-                                                                                                      "width": 44
-                                                                                                    }
-                                                                                                  },
-                                                                                                  {
-                                                                                                    "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-chspc-{{item.id}}",
-                                                                                                    "props": {
-                                                                                                      "width": 16
-                                                                                                    }
-                                                                                                  },
-                                                                                                  {
-                                                                                                    "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-g1-{{item.id}}",
-                                                                                                    "props": {
-                                                                                                      "width": 4
-                                                                                                    }
-                                                                                                  },
-                                                                                                  {
-                                                                                                    "type": "Icon",
-                                                                                                    "id": "{{widgetId}}-leaf-icon-{{item.id}}",
-                                                                                                    "props": {
-                                                                                                      "icon": "description",
-                                                                                                      "size": 14,
-                                                                                                      "color": "onSurfaceMuted"
-                                                                                                    }
-                                                                                                  },
-                                                                                                  {
-                                                                                                    "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-g2-{{item.id}}",
-                                                                                                    "props": {
-                                                                                                      "width": 8
-                                                                                                    }
-                                                                                                  },
-                                                                                                  {
-                                                                                                    "type": "Expanded",
-                                                                                                    "id": "{{widgetId}}-leaf-name-exp-{{item.id}}",
-                                                                                                    "children": [
-                                                                                                      {
-                                                                                                        "type": "Text",
-                                                                                                        "id": "{{widgetId}}-leaf-name-{{item.id}}",
-                                                                                                        "props": {
-                                                                                                          "text": "{{item.name}}",
-                                                                                                          "textStyle": "bodyMedium",
-                                                                                                          "color": "onSurface"
-                                                                                                        }
-                                                                                                      }
-                                                                                                    ]
-                                                                                                  }
-                                                                                                ]
-                                                                                              }
-                                                                                            ]
-                                                                                          }
-                                                                                        ]
-                                                                                      }
-                                                                                    ]
-                                                                                  }
-                                                                                ]
                                                                               }
                                                                             ]
                                                                           }
@@ -1357,7 +1357,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -1575,7 +1575,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -1857,7 +1857,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -2000,7 +2000,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading\u2026"
+                              "text": "Loading…"
                             }
                           }
                         ]
@@ -3735,7 +3735,7 @@
                                 ],
                                 [
                                   "{{context.userId}}",
-                                  "\uf000"
+                                  ""
                                 ],
                                 20,
                                 0,
