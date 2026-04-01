@@ -200,8 +200,8 @@
                     "type": "Conditional",
                     "id": "{{widgetId}}-st-empty",
                     "props": {
-                      "visible": "{{ready}}",
-                      "visibleWhen": "dataEmpty"
+                      "visible": "{{data}}",
+                      "negate": true
                     },
                     "children": [
                       {
