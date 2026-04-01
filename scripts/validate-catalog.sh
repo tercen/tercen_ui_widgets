@@ -118,6 +118,115 @@ if [ -n "$DUPES" ]; then
   ERRORS=$((ERRORS + 1))
 fi
 
+# 5. Icon name validation — check against SDUI _iconMap and _solidIconMap
+SDUI_WIDGETS="../sdui/lib/src/registry/builtin_widgets.dart"
+if [ -f "$SDUI_WIDGETS" ]; then
+  ICON_ERRORS=$(python3 -c "
+import json, re
+
+catalog = json.load(open('$CATALOG'))
+
+# Extract icon maps from SDUI source
+with open('$SDUI_WIDGETS') as f:
+    lines = f.readlines()
+
+regular = set()
+solid = set()
+in_regular = False
+in_solid = False
+
+for line in lines:
+    if 'const Map<String, IconData> _iconMap' in line:
+        in_regular = True; in_solid = False; continue
+    if 'const Map<String, IconData> _solidIconMap' in line:
+        in_solid = True; in_regular = False; continue
+    if (in_regular or in_solid) and line.strip() == '};':
+        in_regular = False; in_solid = False; continue
+    m = re.search(r\"'(\w+)':\", line)
+    if m:
+        if in_regular: regular.add(m.group(1))
+        elif in_solid: solid.add(m.group(1))
+
+# FA6 Free: these icons only have solid glyphs — regular weight renders as question mark
+fa6_solid_only = {'folder', 'folder_open', 'star', 'heart', 'bookmark', 'bell',
+                  'comment', 'comments', 'envelope', 'calendar', 'clock', 'image',
+                  'user', 'circle', 'file'}
+
+hits = []
+def check_icons(node, widget_type, path=''):
+    if not isinstance(node, dict):
+        return
+    props = node.get('props', {})
+    nid = node.get('id', '?')
+
+    # Check icon prop on Icon and IconButton nodes
+    ntype = node.get('type', '')
+    if ntype in ('Icon', 'IconButton'):
+        icon = props.get('icon', '')
+        weight = props.get('weight', 'regular')
+        if icon and not icon.startswith('{'):
+            if weight == 'solid':
+                if icon not in solid and icon not in regular:
+                    hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" not in SDUI icon map')
+            else:
+                if icon not in regular:
+                    hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" not in SDUI _iconMap')
+                elif icon in fa6_solid_only and weight != 'solid':
+                    hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" is solid-only in FA6 Free but weight=\"{weight}\" — will render as question mark')
+
+    # Check PopupMenu items
+    for item in props.get('items', []):
+        if isinstance(item, dict):
+            icon = item.get('icon', '')
+            if icon and not icon.startswith('{'):
+                if icon not in regular:
+                    hits.append(f'[{widget_type}] {nid} menu item: icon \"{icon}\" not in SDUI _iconMap')
+
+    for child in node.get('children', []):
+        check_icons(child, widget_type, f'{path}/{nid}')
+
+for w in catalog.get('widgets', []):
+    wt = w.get('metadata', {}).get('type', '?')
+    check_icons(w.get('template', {}), wt)
+
+for h in hits:
+    print(h)
+" 2>/dev/null)
+
+  if [ -n "$ICON_ERRORS" ]; then
+    echo "FAIL: Icon validation errors:"
+    echo "$ICON_ERRORS"
+    ERRORS=$((ERRORS + 1))
+  fi
+fi
+
+# 6. Deprecated primitives (ReactTo, StateHolder, Interaction)
+DEPRECATED=$(python3 -c "
+import json
+catalog = json.load(open('$CATALOG'))
+deprecated = {'ReactTo', 'StateHolder', 'Interaction'}
+hits = []
+def check(node, wtype):
+    if not isinstance(node, dict):
+        return
+    ntype = node.get('type', '')
+    if ntype in deprecated:
+        hits.append(f'[{wtype}] {node.get(\"id\",\"?\")}: uses removed primitive \"{ntype}\"')
+    for child in node.get('children', []):
+        check(child, wtype)
+for w in catalog.get('widgets', []):
+    wt = w.get('metadata', {}).get('type', '?')
+    check(w.get('template', {}), wt)
+for h in hits:
+    print(h)
+" 2>/dev/null)
+
+if [ -n "$DEPRECATED" ]; then
+  echo "FAIL: Deprecated primitives found:"
+  echo "$DEPRECATED"
+  ERRORS=$((ERRORS + 1))
+fi
+
 if [ $ERRORS -eq 0 ]; then
   echo "PASS: catalog.json validation passed"
 fi

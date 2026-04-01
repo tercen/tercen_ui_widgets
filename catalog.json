@@ -3,18 +3,27 @@
     {
       "metadata": {
         "type": "ProjectNavigator",
+        "kind": "window",
         "tier": 2,
+        "typeColor": "#F59E0B",
+        "tabLabel": "Navigator",
         "description": "Browsable list of all projects with search, selection, and intent-based navigation. Use when the user wants to see, find, or select projects.",
         "emittedEvents": [
           "navigator.focusChanged",
-          "system.intent"
+          "navigator.openViewer",
+          "navigator.openTeamWidget",
+          "navigator.downloadFile",
+          "navigator.contentChanged",
+          "navigator.upload"
+        ],
+        "inboundEvents": [
+          "navigator.navigateTo",
+          "navigator.refreshTree"
         ],
         "handlesIntent": {
           "intent": "openProjectNavigator",
-          "propsMap": {
-            "projectId": "projectId"
-          },
-          "windowTitle": "Files: {{projectName}}",
+          "propsMap": {},
+          "windowTitle": "Navigator",
           "windowSize": "medium"
         },
         "state": {
@@ -26,6 +35,11 @@
           "publishTo": [
             "navigator.focusChanged"
           ]
+        },
+        "props": {},
+        "stateConfig": {
+          "selectionKey": "selectedId",
+          "multiSelect": false
         },
         "domain": "project",
         "capabilities": [
@@ -45,96 +59,66 @@
         },
         "children": [
           {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": {
-              "color": "surfaceContainerHigh",
-              "padding": "sm"
-            },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": {
-                  "mainAxisAlignment": "spaceBetween"
-                },
-                "children": [
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-toolbar-left",
-                    "children": [
-                      {
-                        "type": "Icon",
-                        "id": "{{widgetId}}-toolbar-icon",
-                        "props": {
-                          "icon": "folder_open",
-                          "size": 16,
-                          "color": "primary"
-                        }
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-toolbar-gap",
-                        "props": {
-                          "width": 8.0
-                        }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-title",
-                        "props": {
-                          "text": "Navigator",
-                          "textStyle": "labelMedium",
-                          "color": "onSurface"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
             "type": "Expanded",
-            "id": "{{widgetId}}-body",
+            "id": "{{widgetId}}-body-exp",
             "children": [
               {
                 "type": "DataSource",
                 "id": "{{widgetId}}-ds",
                 "props": {
-                  "service": "projectDocumentService",
-                  "method": "findProjectObjectsByLastModifiedDate",
+                  "service": "teamService",
+                  "method": "findTeamByOwner",
                   "args": [
                     [
-                      "{{projectId}}",
-                      ""
-                    ],
-                    [
-                      "{{projectId}}",
-                      ""
-                    ],
-                    50
-                  ]
+                      "{{context.userId}}"
+                    ]
+                  ],
+                  "refreshOn": "navigator.refreshTree"
                 },
                 "children": [
                   {
                     "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
+                    "id": "{{widgetId}}-st-loading",
                     "props": {
                       "visible": "{{loading}}"
                     },
                     "children": [
                       {
                         "type": "Center",
-                        "id": "{{widgetId}}-spinner",
+                        "id": "{{widgetId}}-loading-center",
                         "children": [
                           {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-li",
+                            "type": "Column",
+                            "id": "{{widgetId}}-loading-col",
                             "props": {
-                              "variant": "skeleton",
-                              "text": "Loading\u2026"
-                            }
+                              "mainAxisAlignment": "center",
+                              "mainAxisSize": "min"
+                            },
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-spinner",
+                                "props": {
+                                  "variant": "spinner"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-loading-gap",
+                                "props": {
+                                  "height": 12
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-loading-text",
+                                "props": {
+                                  "text": "Loading projects...",
+                                  "textStyle": "bodyMedium",
+                                  "color": "onSurfaceMuted"
+                                }
+                              }
+                            ]
                           }
                         ]
                       }
@@ -142,7 +126,7 @@
                   },
                   {
                     "type": "Conditional",
-                    "id": "{{widgetId}}-error",
+                    "id": "{{widgetId}}-st-error",
                     "props": {
                       "visible": "{{error}}"
                     },
@@ -155,32 +139,64 @@
                             "type": "Column",
                             "id": "{{widgetId}}-err-col",
                             "props": {
-                              "mainAxisAlignment": "center"
+                              "mainAxisAlignment": "center",
+                              "mainAxisSize": "min"
                             },
                             "children": [
                               {
                                 "type": "Icon",
                                 "id": "{{widgetId}}-err-icon",
                                 "props": {
-                                  "icon": "error_outline",
+                                  "icon": "error",
                                   "size": 32,
                                   "color": "error"
                                 }
                               },
                               {
                                 "type": "SizedBox",
-                                "id": "{{widgetId}}-err-gap",
+                                "id": "{{widgetId}}-err-gap1",
                                 "props": {
-                                  "height": 8.0
+                                  "height": 8
                                 }
                               },
                               {
                                 "type": "Text",
-                                "id": "{{widgetId}}-err-text",
+                                "id": "{{widgetId}}-err-title",
+                                "props": {
+                                  "text": "Something went wrong",
+                                  "textStyle": "bodyMedium",
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap2",
+                                "props": {
+                                  "height": 4
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-detail",
                                 "props": {
                                   "text": "{{errorMessage}}",
                                   "textStyle": "bodySmall",
-                                  "color": "error"
+                                  "color": "onSurfaceDisabled"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap3",
+                                "props": {
+                                  "height": 16
+                                }
+                              },
+                              {
+                                "type": "DangerButton",
+                                "id": "{{widgetId}}-err-retry",
+                                "props": {
+                                  "text": "Retry",
+                                  "channel": "navigator.refreshTree"
                                 }
                               }
                             ]
@@ -191,102 +207,660 @@
                   },
                   {
                     "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
+                    "id": "{{widgetId}}-st-empty",
+                    "props": {
+                      "visible": "{{data}}",
+                      "negate": true
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-empty-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-empty-col",
+                            "props": {
+                              "mainAxisAlignment": "center",
+                              "mainAxisSize": "min"
+                            },
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-empty-icon",
+                                "props": {
+                                  "icon": "folder_open",
+                                  "size": 32,
+                                  "color": "onSurfaceDisabled",
+                                  "weight": "solid"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-empty-gap1",
+                                "props": {
+                                  "height": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-empty-msg",
+                                "props": {
+                                  "text": "No projects yet",
+                                  "textStyle": "bodyMedium",
+                                  "color": "onSurfaceMuted"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-empty-gap2",
+                                "props": {
+                                  "height": 4
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-empty-detail",
+                                "props": {
+                                  "text": "Ask the AI to create a project",
+                                  "textStyle": "bodySmall",
+                                  "color": "onSurfaceDisabled"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-st-ready",
                     "props": {
                       "visible": "{{ready}}"
                     },
                     "children": [
                       {
-                        "type": "ListView",
-                        "id": "{{widgetId}}-lv",
+                        "type": "Column",
+                        "id": "{{widgetId}}-active-col",
                         "props": {
-                          "padding": "xs"
+                          "crossAxisAlignment": "stretch"
                         },
                         "children": [
                           {
-                            "type": "ForEach",
-                            "id": "{{widgetId}}-fe",
+                            "_comment": "Toolbar: 48px fixed height, surfaceContainerHigh background, horizontal button row",
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
                             "props": {
-                              "items": "{{data}}"
+                              "height": 48,
+                              "color": "surface",
+                              "padding": 8
                             },
                             "children": [
                               {
-                                "type": "Action",
-                                "id": "dbl-{{item.id}}",
+                                "type": "Row",
+                                "id": "{{widgetId}}-tb-row",
                                 "props": {
-                                  "gesture": "onDoubleTap",
-                                  "channel": "system.intent",
-                                  "payload": {
-                                    "intent": "{{item.kind}}",
-                                    "id": "{{item.id}}",
-                                    "name": "{{item.name}}",
-                                    "kind": "{{item.kind}}",
-                                    "subKind": "{{item.subKind}}"
-                                  }
+                                  "crossAxisAlignment": "center"
                                 },
                                 "children": [
                                   {
-                                    "type": "Action",
-                                    "id": "tap-{{item.id}}",
+                                    "_comment": "Upload button \u2014 primary, enabled when project or folder selected",
+                                    "type": "Tooltip",
+                                    "id": "{{widgetId}}-tb-upload-tip",
                                     "props": {
-                                      "gesture": "onTap",
-                                      "channel": "navigator.focusChanged",
-                                      "payload": {
-                                        "nodeId": "{{item.id}}",
-                                        "nodeType": "{{item.kind}}",
-                                        "nodeName": "{{item.name}}"
-                                      }
+                                      "message": "Upload"
                                     },
                                     "children": [
                                       {
-                                        "type": "Padding",
-                                        "id": "pad-{{item.id}}",
+                                        "type": "IconButton",
+                                        "id": "{{widgetId}}-tb-upload",
                                         "props": {
-                                          "padding": "sm"
+                                          "icon": "upload",
+                                          "size": 16,
+                                          "color": "onPrimary",
+                                          "channel": "navigator.upload",
+                                          "tooltip": "Upload",
+                                          "variant": "toolbar-primary",
+                                          "weight": "solid"
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap1",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Download button \u2014 primary, enabled when file/dataset selected",
+                                    "type": "Tooltip",
+                                    "id": "{{widgetId}}-tb-download-tip",
+                                    "props": {
+                                      "message": "Download"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "IconButton",
+                                        "id": "{{widgetId}}-tb-download",
+                                        "props": {
+                                          "icon": "download",
+                                          "size": 16,
+                                          "color": "onPrimary",
+                                          "channel": "navigator.downloadFile",
+                                          "tooltip": "Download",
+                                          "variant": "toolbar-primary",
+                                          "weight": "solid"
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap2",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Team button \u2014 secondary (outlined), emits openTeamWidget",
+                                    "type": "Tooltip",
+                                    "id": "{{widgetId}}-tb-team-tip",
+                                    "props": {
+                                      "message": "Teams"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "IconButton",
+                                        "id": "{{widgetId}}-tb-team",
+                                        "props": {
+                                          "icon": "group",
+                                          "size": 16,
+                                          "color": "primary",
+                                          "channel": "navigator.openTeamWidget",
+                                          "tooltip": "Teams",
+                                          "variant": "toolbar-secondary",
+                                          "weight": "solid"
+                                        }
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap3",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Type filter \u2014 PopupMenu with icon-only items per design decisions",
+                                    "type": "PopupMenu",
+                                    "id": "{{widgetId}}-tb-filter",
+                                    "props": {
+                                      "icon": "filter",
+                                      "iconSize": 16,
+                                      "iconColor": "primary",
+                                      "tooltip": "Filter by type",
+                                      "channel": "navigator.typeFilter",
+                                      "items": [
+                                        {
+                                          "value": "all",
+                                          "label": "All"
+                                        },
+                                        {
+                                          "value": "file",
+                                          "label": "File",
+                                          "icon": "file"
+                                        },
+                                        {
+                                          "value": "dataset",
+                                          "label": "Data Set",
+                                          "icon": "table"
+                                        },
+                                        {
+                                          "value": "workflow",
+                                          "label": "Workflow",
+                                          "icon": "workflow"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap4",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Search field \u2014 flex-grow text input with magnifying glass",
+                                    "type": "Expanded",
+                                    "id": "{{widgetId}}-tb-search-exp",
+                                    "children": [
+                                      {
+                                        "type": "TextField",
+                                        "id": "{{widgetId}}-tb-search",
+                                        "props": {
+                                          "hint": "Search...",
+                                          "borderless": false
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Divider",
+                            "id": "{{widgetId}}-tb-divider",
+                            "props": {
+                              "color": "outline",
+                              "thickness": 1
+                            }
+                          },
+                          {
+                            "_comment": "Tree body \u2014 scrollable list of team/project/file rows",
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-tree-exp",
+                            "children": [
+                              {
+                                "type": "ListView",
+                                "id": "{{widgetId}}-tree-lv",
+                                "props": {
+                                  "padding": 4
+                                },
+                                "children": [
+                                  {
+                                    "_comment": "Iterate over teams. Data shape: [{id, name, type:team, isPersonal, children:[projects]}]",
+                                    "type": "ForEach",
+                                    "id": "{{widgetId}}-fe-teams",
+                                    "props": {
+                                      "items": "{{data}}",
+                                      "filterChannel": "input.{{widgetId}}-tb-search.changed",
+                                      "filterFields": [
+                                        "name"
+                                      ]
+                                    },
+                                    "children": [
+                                      {
+                                        "_comment": "TEAM ROW \u2014 level 0. Click expands/collapses only (no focusChanged per spec).",
+                                        "type": "Action",
+                                        "id": "{{widgetId}}-team-tap-{{item.id}}",
+                                        "props": {
+                                          "gesture": "onTap",
+                                          "channel": "navigator.toggleExpand",
+                                          "payload": {
+                                            "nodeId": "{{item.id}}",
+                                            "nodeType": "team"
+                                          },
+                                          "hoverColor": "surfaceContainer"
                                         },
                                         "children": [
                                           {
-                                            "type": "Row",
-                                            "id": "row-{{item.id}}",
+                                            "type": "Padding",
+                                            "id": "{{widgetId}}-team-pad-{{item.id}}",
+                                            "props": {
+                                              "padding": 4
+                                            },
                                             "children": [
                                               {
-                                                "type": "Icon",
-                                                "id": "icon-{{item.id}}",
+                                                "type": "Row",
+                                                "id": "{{widgetId}}-team-row-{{item.id}}",
                                                 "props": {
-                                                  "icon": "description",
-                                                  "size": 16,
-                                                  "color": "onSurfaceVariant"
-                                                }
-                                              },
-                                              {
-                                                "type": "SizedBox",
-                                                "id": "gap-{{item.id}}",
-                                                "props": {
-                                                  "width": 8.0
-                                                }
-                                              },
-                                              {
-                                                "type": "Expanded",
-                                                "id": "exp-{{item.id}}",
+                                                  "crossAxisAlignment": "center"
+                                                },
                                                 "children": [
                                                   {
-                                                    "type": "Text",
-                                                    "id": "name-{{item.id}}",
+                                                    "_comment": "Indent: 4px base for level 0",
+                                                    "type": "SizedBox",
+                                                    "id": "{{widgetId}}-team-indent-{{item.id}}",
                                                     "props": {
-                                                      "text": "{{item.name}}",
-                                                      "textStyle": "bodySmall"
+                                                      "width": 4
                                                     }
+                                                  },
+                                                  {
+                                                    "_comment": "Chevron: 16px square, right or down",
+                                                    "type": "Icon",
+                                                    "id": "{{widgetId}}-team-chev-{{item.id}}",
+                                                    "props": {
+                                                      "icon": "chevron_right",
+                                                      "size": 10,
+                                                      "color": "onSurfaceMuted"
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "SizedBox",
+                                                    "id": "{{widgetId}}-team-gap1-{{item.id}}",
+                                                    "props": {
+                                                      "width": 4
+                                                    }
+                                                  },
+                                                  {
+                                                    "_comment": "Team icon: solid user-group, primary colour",
+                                                    "type": "Icon",
+                                                    "id": "{{widgetId}}-team-icon-{{item.id}}",
+                                                    "props": {
+                                                      "icon": "group",
+                                                      "size": 14,
+                                                      "color": "primary",
+                                                      "weight": "solid"
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "SizedBox",
+                                                    "id": "{{widgetId}}-team-gap2-{{item.id}}",
+                                                    "props": {
+                                                      "width": 8
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-team-name-exp-{{item.id}}",
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-team-name-{{item.id}}",
+                                                        "props": {
+                                                          "text": "{{item.name}}",
+                                                          "textStyle": "bodyMedium",
+                                                          "color": "onSurface"
+                                                        }
+                                                      }
+                                                    ]
                                                   }
                                                 ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "_comment": "PROJECT ROWS \u2014 nested ForEach for projects within each team",
+                                        "type": "ForEach",
+                                        "id": "{{widgetId}}-fe-projects-{{item.id}}",
+                                        "props": {
+                                          "items": "{{item.children}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "_comment": "Project row \u2014 level 1, indent 24px (4+20). Single-click emits focusChanged.",
+                                            "type": "Action",
+                                            "id": "{{widgetId}}-proj-tap-{{item.id}}",
+                                            "props": {
+                                              "gesture": "onTap",
+                                              "channel": "navigator.focusChanged",
+                                              "payload": {
+                                                "nodeId": "{{item.id}}",
+                                                "nodeType": "project",
+                                                "nodeName": "{{item.name}}",
+                                                "nodePath": "{{item.path}}"
                                               },
+                                              "hoverColor": "surfaceContainer"
+                                            },
+                                            "children": [
                                               {
-                                                "type": "Text",
-                                                "id": "kind-{{item.id}}",
+                                                "type": "Padding",
+                                                "id": "{{widgetId}}-proj-pad-{{item.id}}",
                                                 "props": {
-                                                  "text": "{{item.kind}}",
-                                                  "textStyle": "labelSmall",
-                                                  "color": "onSurfaceMuted"
-                                                }
+                                                  "padding": 4
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Row",
+                                                    "id": "{{widgetId}}-proj-row-{{item.id}}",
+                                                    "props": {
+                                                      "crossAxisAlignment": "center"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "_comment": "Indent: 4px base + 20px * 1 level = 24px",
+                                                        "type": "SizedBox",
+                                                        "id": "{{widgetId}}-proj-indent-{{item.id}}",
+                                                        "props": {
+                                                          "width": 24
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "Icon",
+                                                        "id": "{{widgetId}}-proj-chev-{{item.id}}",
+                                                        "props": {
+                                                          "icon": "chevron_right",
+                                                          "size": 10,
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "SizedBox",
+                                                        "id": "{{widgetId}}-proj-gap1-{{item.id}}",
+                                                        "props": {
+                                                          "width": 4
+                                                        }
+                                                      },
+                                                      {
+                                                        "_comment": "Project icon: solid folder, primary colour",
+                                                        "type": "Icon",
+                                                        "id": "{{widgetId}}-proj-icon-{{item.id}}",
+                                                        "props": {
+                                                          "icon": "folder",
+                                                          "size": 14,
+                                                          "color": "primary",
+                                                          "weight": "solid"
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "SizedBox",
+                                                        "id": "{{widgetId}}-proj-gap2-{{item.id}}",
+                                                        "props": {
+                                                          "width": 8
+                                                        }
+                                                      },
+                                                      {
+                                                        "type": "Expanded",
+                                                        "id": "{{widgetId}}-proj-name-exp-{{item.id}}",
+                                                        "children": [
+                                                          {
+                                                            "type": "Text",
+                                                            "id": "{{widgetId}}-proj-name-{{item.id}}",
+                                                            "props": {
+                                                              "text": "{{item.name}}",
+                                                              "textStyle": "bodyMedium",
+                                                              "color": "onSurface"
+                                                            }
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "_comment": "Git version chip \u2014 only shown when item.gitVersion is present",
+                                                        "type": "Conditional",
+                                                        "id": "{{widgetId}}-proj-git-cond-{{item.id}}",
+                                                        "props": {
+                                                          "visible": "{{item.gitVersion}}"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Tooltip",
+                                                            "id": "{{widgetId}}-proj-git-tip-{{item.id}}",
+                                                            "props": {
+                                                              "message": "{{item.githubUrl}}"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Badge",
+                                                                "id": "{{widgetId}}-proj-git-badge-{{item.id}}",
+                                                                "props": {
+                                                                  "text": "{{item.gitVersion}}",
+                                                                  "variant": "neutral"
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "_comment": "Public globe icon \u2014 onSurfaceMuted per design decisions (NOT info)",
+                                                        "type": "Conditional",
+                                                        "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
+                                                        "props": {
+                                                          "visible": "{{item.isPublic}}"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
+                                                            "children": [
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-proj-pub-gap-{{item.id}}",
+                                                                "props": {
+                                                                  "width": 8
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Icon",
+                                                                "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
+                                                                "props": {
+                                                                  "icon": "visibility",
+                                                                  "size": 12,
+                                                                  "color": "onSurfaceMuted"
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "_comment": "CONTENT ROWS \u2014 children within each project (files, datasets, workflows, folders). Sorted: README first, then workflows, datasets, files, folders.",
+                                            "type": "Sort",
+                                            "id": "{{widgetId}}-sort-{{item.id}}",
+                                            "props": {
+                                              "items": "{{item.children}}",
+                                              "key": "sortPriority",
+                                              "direction": "asc"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "ForEach",
+                                                "id": "{{widgetId}}-fe-content-{{item.id}}",
+                                                "props": {
+                                                  "items": "{{sorted}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "_comment": "Content row \u2014 leaf nodes (file/dataset/workflow). Double-click emits openViewer, single-click emits focusChanged.",
+                                                    "type": "Action",
+                                                    "id": "{{widgetId}}-dbl-{{item.id}}",
+                                                    "props": {
+                                                      "gesture": "onDoubleTap",
+                                                      "channel": "navigator.openViewer",
+                                                      "payload": {
+                                                        "nodeId": "{{item.id}}",
+                                                        "nodeType": "{{item.type}}"
+                                                      }
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Action",
+                                                        "id": "{{widgetId}}-tap-{{item.id}}",
+                                                        "props": {
+                                                          "gesture": "onTap",
+                                                          "channel": "navigator.focusChanged",
+                                                          "payload": {
+                                                            "nodeId": "{{item.id}}",
+                                                            "nodeType": "{{item.type}}",
+                                                            "nodeName": "{{item.name}}",
+                                                            "nodePath": "{{item.path}}"
+                                                          },
+                                                          "hoverColor": "surfaceContainer"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-content-pad-{{item.id}}",
+                                                            "props": {
+                                                              "padding": 4
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Row",
+                                                                "id": "{{widgetId}}-content-row-{{item.id}}",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "center"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "_comment": "Indent: 4px base + 20px * 2 levels = 44px (leaf inside project)",
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-content-indent-{{item.id}}",
+                                                                    "props": {
+                                                                      "width": 44
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "_comment": "No chevron for leaf nodes \u2014 16px spacer to align with branch chevrons",
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-content-chev-spacer-{{item.id}}",
+                                                                    "props": {
+                                                                      "width": 16
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-content-gap1-{{item.id}}",
+                                                                    "props": {
+                                                                      "width": 4
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "_comment": "Type icon \u2014 colour and icon set by dispatcher based on item.type and item.fileCategory",
+                                                                    "type": "Icon",
+                                                                    "id": "{{widgetId}}-content-icon-{{item.id}}",
+                                                                    "props": {
+                                                                      "icon": "{{item.iconName}}",
+                                                                      "size": 14,
+                                                                      "color": "{{item.iconColor}}",
+                                                                      "weight": "{{item.iconWeight}}"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-content-gap2-{{item.id}}",
+                                                                    "props": {
+                                                                      "width": 8
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "Expanded",
+                                                                    "id": "{{widgetId}}-content-name-exp-{{item.id}}",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-content-name-{{item.id}}",
+                                                                        "props": {
+                                                                          "text": "{{item.name}}",
+                                                                          "textStyle": "bodyMedium",
+                                                                          "color": "onSurface"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
                                               }
                                             ]
                                           }
@@ -1140,7 +1714,8 @@
                                         "props": {
                                           "icon": "image",
                                           "size": 16,
-                                          "color": "primary"
+                                          "color": "primary",
+                                          "weight": "solid"
                                         }
                                       },
                                       {
@@ -1490,7 +2065,8 @@
                                 "props": {
                                   "icon": "comments",
                                   "size": 48,
-                                  "color": "onSurfaceMuted"
+                                  "color": "onSurfaceMuted",
+                                  "weight": "solid"
                                 }
                               },
                               {
@@ -1575,9 +2151,9 @@
                                             "id": "{{widgetId}}-ic-user",
                                             "props": {
                                               "icon": "message",
-                                              "iconStyle": "solid",
                                               "size": 14,
-                                              "color": "warning"
+                                              "color": "warning",
+                                              "weight": "solid"
                                             }
                                           }
                                         ]
@@ -1629,7 +2205,7 @@
                                             "type": "Icon",
                                             "id": "{{widgetId}}-ic-error",
                                             "props": {
-                                              "icon": "circle-exclamation",
+                                              "icon": "error",
                                               "size": 16,
                                               "color": "error"
                                             }
@@ -1803,7 +2379,7 @@
                         "type": "Icon",
                         "id": "{{widgetId}}-focus-icon",
                         "props": {
-                          "icon": "crosshairs",
+                          "icon": "pin",
                           "size": 12,
                           "color": "onSurfaceMuted"
                         }
@@ -1913,37 +2489,37 @@
                                     "children": [
                                       {
                                         "type": "Conditional",
-                                        "id": "{{widgetId}}-focus-cond",
+                                        "id": "{{widgetId}}-focus-cond-2",
                                         "props": {
                                           "visible": "{{focusLabel}}"
                                         },
                                         "children": [
                                           {
                                             "type": "Row",
-                                            "id": "{{widgetId}}-focus-row",
+                                            "id": "{{widgetId}}-focus-row-2",
                                             "props": {
                                               "crossAxisAlignment": "center"
                                             },
                                             "children": [
                                               {
                                                 "type": "Icon",
-                                                "id": "{{widgetId}}-focus-icon",
+                                                "id": "{{widgetId}}-focus-icon-2",
                                                 "props": {
-                                                  "icon": "crosshairs",
+                                                  "icon": "pin",
                                                   "size": 10,
                                                   "color": "onSurfaceMuted"
                                                 }
                                               },
                                               {
                                                 "type": "SizedBox",
-                                                "id": "{{widgetId}}-focus-gap",
+                                                "id": "{{widgetId}}-focus-gap-2",
                                                 "props": {
                                                   "width": 4
                                                 }
                                               },
                                               {
                                                 "type": "Text",
-                                                "id": "{{widgetId}}-focus-text",
+                                                "id": "{{widgetId}}-focus-text-2",
                                                 "props": {
                                                   "text": "Focus: {{focusLabel}}",
                                                   "textStyle": "bodySmall",
@@ -2122,7 +2698,8 @@
                             10,
                             20
                           ],
-                          "defaultPageSize": 5
+                          "defaultPageSize": 5,
+                          "weight": "solid"
                         },
                         "children": [
                           {
@@ -2288,7 +2865,8 @@
                                                                 "props": {
                                                                   "icon": "folder",
                                                                   "size": 14,
-                                                                  "color": "primary"
+                                                                  "color": "primary",
+                                                                  "weight": "solid"
                                                                 }
                                                               }
                                                             ]
@@ -3365,9 +3943,7 @@
                     "type": "Padding",
                     "id": "{{widgetId}}-run-pad-{{_index}}",
                     "props": {
-                      "left": "sm",
-                      "right": "sm",
-                      "bottom": "xs"
+                      "padding": "sm"
                     },
                     "children": [
                       {
@@ -3415,9 +3991,10 @@
                                         "type": "Icon",
                                         "id": "{{widgetId}}-run-pending-{{_index}}",
                                         "props": {
-                                          "icon": "pending",
+                                          "icon": "clock",
                                           "size": 16,
-                                          "color": "warning"
+                                          "color": "warning",
+                                          "weight": "solid"
                                         }
                                       }
                                     ]

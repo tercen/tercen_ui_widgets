@@ -19,23 +19,36 @@ This repo produces **JSON catalog entries** for SDUI widgets (window and header 
 
 ## Phase Pipeline
 
-1. **Spec** — functional specification (`phase-1-functional-spec`)
-2. **Mock** — HTML wireframe + styled rendering + gap evaluation
-3. **Primitives** — fill gaps in sdui package / tokens
-4. **Catalog** — author catalog.json entry (`phase-3-catalog-integration`)
-5. **Review** — validation and sign-off (`phase-3-review`)
+1. **Spec** — functional specification (`phase-1-spec`)
+2. **Mock** — HTML wireframe + styled rendering + gap evaluation (`phase-2-mock`)
+3. **Reconcile** — diff mock against spec, produce binding design-decisions.md (`phase-3-reconcile`)
+4. **Primitives** — fill gaps in sdui package / tokens (`phase-3-primitives`)
+5. **Catalog** — author catalog.json entry (`phase-4-catalog`)
+6. **Review** — validation and sign-off (`phase-5-review`)
 
 ## Sibling repos (read directly, no copies)
 
-| What | Where |
-|------|-------|
-| Approval flags, component specs, rules | `../tercen-style/tokens.meta.json` |
-| Theme values (colours, spacing, fonts) | `../tercen-style/theme-export.json` |
-| Approved CSS for HTML mocks | `../tercen-style/dist/tercen-tokens.css` |
-| Visual style guide (for human review) | `../tercen-style/dist/style-guide.html` |
-| SDUI primitives source | `../sdui/lib/src/registry/builtin_widgets.dart` |
-| Behaviour primitives source | `../sdui/lib/src/registry/behavior_widgets.dart` (imported by builtin_widgets) |
-| SDUI theme source (runtime master) | `../sdui/lib/src/theme/sdui_theme.dart` |
+| What | Where | Authority |
+|------|-------|-----------|
+| **SduiTheme (MASTER for all token values)** | `../sdui/lib/src/theme/sdui_theme.dart` | **Single source of truth** |
+| SDUI primitives source | `../sdui/lib/src/registry/builtin_widgets.dart` | |
+| Behaviour primitives source | `../sdui/lib/src/registry/behavior_widgets.dart` | |
+| Approval flags, component specs, rules | `../tercen-style/tokens.meta.json` | Approval gate |
+| Theme values export (generated from SduiTheme) | `../tercen-style/theme-export.json` | Downstream |
+| CSS tokens (INCOMPLETE — missing toolbar/window) | `../tercen-style/dist/tercen-tokens.css` | Convenience only |
+| Visual style guide (for human review) | `../tercen-style/dist/style-guide.html` | |
+
+### Token hierarchy
+
+```
+SduiTheme.dart (sdui repo)          ← MASTER — all token values defined here
+  → theme-export.json (tercen-style) ← generated, includes all tokens
+    → tercen-tokens.css (tercen-style) ← generated, INCOMPLETE subset
+    → style-guide.html (tercen-style)  ← visual reference
+  → tokens.meta.json (tercen-style)  ← approval gate (which tokens agents may use)
+```
+
+When values conflict between sources, **SduiTheme.dart wins**.
 
 ## Colour governance
 
