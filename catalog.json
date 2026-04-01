@@ -33,7 +33,8 @@
             "payloadField": "nodeId"
           },
           "publishTo": [
-            "navigator.focusChanged"
+            "navigator.focusChanged",
+            "navigator.toggleExpand"
           ]
         },
         "props": {},
@@ -189,83 +190,6 @@
                                   "text": "Retry",
                                   "channel": "navigator.refreshTree"
                                 }
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-st-empty",
-                    "props": {
-                      "visible": "{{ready}}"
-                    },
-                    "children": [
-                      {
-                        "type": "Conditional",
-                        "id": "{{widgetId}}-st-empty-inner",
-                        "props": {
-                          "visible": "{{data}}",
-                          "negate": true
-                        },
-                        "children": [
-                          {
-                            "type": "Center",
-                            "id": "{{widgetId}}-empty-center",
-                            "children": [
-                              {
-                                "type": "Column",
-                                "id": "{{widgetId}}-empty-col",
-                                "props": {
-                                  "mainAxisAlignment": "center",
-                                  "mainAxisSize": "min"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Icon",
-                                    "id": "{{widgetId}}-empty-icon",
-                                    "props": {
-                                      "icon": "folder_open",
-                                      "size": 32,
-                                      "color": "onSurfaceDisabled",
-                                      "weight": "solid"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-empty-gap1",
-                                    "props": {
-                                      "height": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-empty-msg",
-                                    "props": {
-                                      "text": "No teams found",
-                                      "textStyle": "bodyMedium",
-                                      "color": "onSurfaceMuted"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-empty-gap2",
-                                    "props": {
-                                      "height": 4
-                                    }
-                                  },
-                                  {
-                                    "type": "Text",
-                                    "id": "{{widgetId}}-empty-detail",
-                                    "props": {
-                                      "text": "Ask the AI to create a project",
-                                      "textStyle": "bodySmall",
-                                      "color": "onSurfaceDisabled"
-                                    }
-                                  }
-                                ]
                               }
                             ]
                           }
