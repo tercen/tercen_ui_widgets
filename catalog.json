@@ -462,7 +462,7 @@
                                     "id": "{{widgetId}}-pteam-coll",
                                     "props": {
                                       "nodeId": "{{context.username}}",
-                                      "toggleChannel": "navigator.toggleExpand",
+                                      "toggleChannel": "navigator.focusChanged",
                                       "defaultExpanded": false,
                                       "expandChannel": "navigator.expandTeam"
                                     },
@@ -472,10 +472,14 @@
                                         "id": "{{widgetId}}-pteam-tap",
                                         "props": {
                                           "gesture": "onTap",
-                                          "channel": "navigator.toggleExpand",
+                                          "channel": "navigator.focusChanged",
                                           "payload": {
                                             "nodeId": "{{context.username}}",
-                                            "nodeType": "team"
+                                            "nodeType": "team",
+                                            "canUpload": false,
+                                            "canDownload": false,
+                                            "canTeam": true,
+                                            "nodeName": "{{context.username}}"
                                           },
                                           "hoverColor": "surfaceContainer"
                                         },
@@ -1032,8 +1036,8 @@
                                                                                     "nodeId": "{{item.id}}",
                                                                                     "nodeType": "{{item.kind}}",
                                                                                     "nodeName": "{{item.name}}",
-                                                                                    "canUpload": true,
-                                                                                    "canDownload": false,
+                                                                                    "canUpload": false,
+                                                                                    "canDownload": true,
                                                                                     "canTeam": false
                                                                                   },
                                                                                   "hoverColor": "surfaceContainer"
@@ -1153,8 +1157,8 @@
                                                                                     "nodeId": "{{item.id}}",
                                                                                     "nodeType": "{{item.kind}}",
                                                                                     "nodeName": "{{item.name}}",
-                                                                                    "canUpload": true,
-                                                                                    "canDownload": false,
+                                                                                    "canUpload": false,
+                                                                                    "canDownload": true,
                                                                                     "canTeam": false
                                                                                   },
                                                                                   "hoverColor": "surfaceContainer"
@@ -1275,8 +1279,8 @@
                                                                                     "nodeId": "{{item.id}}",
                                                                                     "nodeType": "{{item.kind}}",
                                                                                     "nodeName": "{{item.name}}",
-                                                                                    "canUpload": true,
-                                                                                    "canDownload": false,
+                                                                                    "canUpload": false,
+                                                                                    "canDownload": true,
                                                                                     "canTeam": false
                                                                                   },
                                                                                   "hoverColor": "surfaceContainer"
@@ -1400,8 +1404,8 @@
                                                                                     "nodeId": "{{item.id}}",
                                                                                     "nodeType": "{{item.kind}}",
                                                                                     "nodeName": "{{item.name}}",
-                                                                                    "canUpload": true,
-                                                                                    "canDownload": false,
+                                                                                    "canUpload": false,
+                                                                                    "canDownload": true,
                                                                                     "canTeam": false
                                                                                   },
                                                                                   "hoverColor": "surfaceContainer"
@@ -1743,8 +1747,8 @@
                                                                                                         "nodeId": "{{item.id}}",
                                                                                                         "nodeType": "{{item.kind}}",
                                                                                                         "nodeName": "{{item.name}}",
-                                                                                                        "canUpload": true,
-                                                                                                        "canDownload": false,
+                                                                                                        "canUpload": false,
+                                                                                                        "canDownload": true,
                                                                                                         "canTeam": false
                                                                                                       },
                                                                                                       "hoverColor": "surfaceContainer"
@@ -1864,8 +1868,8 @@
                                                                                                         "nodeId": "{{item.id}}",
                                                                                                         "nodeType": "{{item.kind}}",
                                                                                                         "nodeName": "{{item.name}}",
-                                                                                                        "canUpload": true,
-                                                                                                        "canDownload": false,
+                                                                                                        "canUpload": false,
+                                                                                                        "canDownload": true,
                                                                                                         "canTeam": false
                                                                                                       },
                                                                                                       "hoverColor": "surfaceContainer"
@@ -1986,8 +1990,8 @@
                                                                                                         "nodeId": "{{item.id}}",
                                                                                                         "nodeType": "{{item.kind}}",
                                                                                                         "nodeName": "{{item.name}}",
-                                                                                                        "canUpload": true,
-                                                                                                        "canDownload": false,
+                                                                                                        "canUpload": false,
+                                                                                                        "canDownload": true,
                                                                                                         "canTeam": false
                                                                                                       },
                                                                                                       "hoverColor": "surfaceContainer"
@@ -2111,8 +2115,8 @@
                                                                                                         "nodeId": "{{item.id}}",
                                                                                                         "nodeType": "{{item.kind}}",
                                                                                                         "nodeName": "{{item.name}}",
-                                                                                                        "canUpload": true,
-                                                                                                        "canDownload": false,
+                                                                                                        "canUpload": false,
+                                                                                                        "canDownload": true,
                                                                                                         "canTeam": false
                                                                                                       },
                                                                                                       "hoverColor": "surfaceContainer"
@@ -2248,7 +2252,7 @@
                                             "id": "{{widgetId}}-team-coll-{{item.id}}",
                                             "props": {
                                               "nodeId": "{{item.name}}",
-                                              "toggleChannel": "navigator.toggleExpand",
+                                              "toggleChannel": "navigator.focusChanged",
                                               "defaultExpanded": false,
                                               "expandChannel": "navigator.expandTeam"
                                             },
@@ -2259,10 +2263,14 @@
                                                 "id": "{{widgetId}}-team-tap-{{item.id}}",
                                                 "props": {
                                                   "gesture": "onTap",
-                                                  "channel": "navigator.toggleExpand",
+                                                  "channel": "navigator.focusChanged",
                                                   "payload": {
                                                     "nodeId": "{{item.name}}",
-                                                    "nodeType": "team"
+                                                    "nodeType": "team",
+                                                    "canUpload": false,
+                                                    "canDownload": false,
+                                                    "canTeam": true,
+                                                    "nodeName": "{{item.name}}"
                                                   },
                                                   "hoverColor": "surfaceContainer"
                                                 },
@@ -2822,8 +2830,8 @@
                                                                                             "nodeId": "{{item.id}}",
                                                                                             "nodeType": "{{item.kind}}",
                                                                                             "nodeName": "{{item.name}}",
-                                                                                            "canUpload": true,
-                                                                                            "canDownload": false,
+                                                                                            "canUpload": false,
+                                                                                            "canDownload": true,
                                                                                             "canTeam": false
                                                                                           },
                                                                                           "hoverColor": "surfaceContainer"
@@ -2943,8 +2951,8 @@
                                                                                             "nodeId": "{{item.id}}",
                                                                                             "nodeType": "{{item.kind}}",
                                                                                             "nodeName": "{{item.name}}",
-                                                                                            "canUpload": true,
-                                                                                            "canDownload": false,
+                                                                                            "canUpload": false,
+                                                                                            "canDownload": true,
                                                                                             "canTeam": false
                                                                                           },
                                                                                           "hoverColor": "surfaceContainer"
@@ -3065,8 +3073,8 @@
                                                                                             "nodeId": "{{item.id}}",
                                                                                             "nodeType": "{{item.kind}}",
                                                                                             "nodeName": "{{item.name}}",
-                                                                                            "canUpload": true,
-                                                                                            "canDownload": false,
+                                                                                            "canUpload": false,
+                                                                                            "canDownload": true,
                                                                                             "canTeam": false
                                                                                           },
                                                                                           "hoverColor": "surfaceContainer"
@@ -3190,8 +3198,8 @@
                                                                                             "nodeId": "{{item.id}}",
                                                                                             "nodeType": "{{item.kind}}",
                                                                                             "nodeName": "{{item.name}}",
-                                                                                            "canUpload": true,
-                                                                                            "canDownload": false,
+                                                                                            "canUpload": false,
+                                                                                            "canDownload": true,
                                                                                             "canTeam": false
                                                                                           },
                                                                                           "hoverColor": "surfaceContainer"
@@ -3533,8 +3541,8 @@
                                                                                                                 "nodeId": "{{item.id}}",
                                                                                                                 "nodeType": "{{item.kind}}",
                                                                                                                 "nodeName": "{{item.name}}",
-                                                                                                                "canUpload": true,
-                                                                                                                "canDownload": false,
+                                                                                                                "canUpload": false,
+                                                                                                                "canDownload": true,
                                                                                                                 "canTeam": false
                                                                                                               },
                                                                                                               "hoverColor": "surfaceContainer"
@@ -3654,8 +3662,8 @@
                                                                                                                 "nodeId": "{{item.id}}",
                                                                                                                 "nodeType": "{{item.kind}}",
                                                                                                                 "nodeName": "{{item.name}}",
-                                                                                                                "canUpload": true,
-                                                                                                                "canDownload": false,
+                                                                                                                "canUpload": false,
+                                                                                                                "canDownload": true,
                                                                                                                 "canTeam": false
                                                                                                               },
                                                                                                               "hoverColor": "surfaceContainer"
@@ -3776,8 +3784,8 @@
                                                                                                                 "nodeId": "{{item.id}}",
                                                                                                                 "nodeType": "{{item.kind}}",
                                                                                                                 "nodeName": "{{item.name}}",
-                                                                                                                "canUpload": true,
-                                                                                                                "canDownload": false,
+                                                                                                                "canUpload": false,
+                                                                                                                "canDownload": true,
                                                                                                                 "canTeam": false
                                                                                                               },
                                                                                                               "hoverColor": "surfaceContainer"
@@ -3901,8 +3909,8 @@
                                                                                                                 "nodeId": "{{item.id}}",
                                                                                                                 "nodeType": "{{item.kind}}",
                                                                                                                 "nodeName": "{{item.name}}",
-                                                                                                                "canUpload": true,
-                                                                                                                "canDownload": false,
+                                                                                                                "canUpload": false,
+                                                                                                                "canDownload": true,
                                                                                                                 "canTeam": false
                                                                                                               },
                                                                                                               "hoverColor": "surfaceContainer"
