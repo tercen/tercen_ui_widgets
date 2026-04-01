@@ -51,6 +51,38 @@
         },
         "children": [
           {
+            "_comment": "Auto-navigate: expand team + project when opened with resourceId",
+            "type": "Conditional",
+            "id": "{{widgetId}}-auto-nav-cond",
+            "props": {
+              "visible": "{{props.resourceId}}"
+            },
+            "children": [
+              {
+                "type": "AutoEmit",
+                "id": "{{widgetId}}-auto-expand-team",
+                "props": {
+                  "channel": "navigator.expandTeam",
+                  "payload": {
+                    "nodeId": "{{props.resourceOwner}}"
+                  },
+                  "delayMs": 500
+                }
+              },
+              {
+                "type": "AutoEmit",
+                "id": "{{widgetId}}-auto-expand-project",
+                "props": {
+                  "channel": "navigator.navigateTo",
+                  "payload": {
+                    "nodeId": "{{props.resourceId}}"
+                  },
+                  "delayMs": 1500
+                }
+              }
+            ]
+          },
+          {
             "type": "Expanded",
             "id": "{{widgetId}}-body-exp",
             "children": [
@@ -396,9 +428,10 @@
                                     "type": "Collapsible",
                                     "id": "{{widgetId}}-pteam-coll",
                                     "props": {
-                                      "nodeId": "personal-team",
+                                      "nodeId": "{{context.username}}",
                                       "toggleChannel": "navigator.toggleExpand",
-                                      "defaultExpanded": true
+                                      "defaultExpanded": false,
+                                      "expandChannel": "navigator.expandTeam"
                                     },
                                     "children": [
                                       {
@@ -408,7 +441,7 @@
                                           "gesture": "onTap",
                                           "channel": "navigator.toggleExpand",
                                           "payload": {
-                                            "nodeId": "personal-team",
+                                            "nodeId": "{{context.username}}",
                                             "nodeType": "team"
                                           },
                                           "hoverColor": "surfaceContainer"
@@ -597,7 +630,8 @@
                                                         "props": {
                                                           "nodeId": "{{item.id}}",
                                                           "toggleChannel": "navigator.toggleExpand",
-                                                          "defaultExpanded": false
+                                                          "defaultExpanded": false,
+                                                          "expandChannel": "navigator.navigateTo"
                                                         },
                                                         "children": [
                                                           {
@@ -2110,9 +2144,10 @@
                                             "type": "Collapsible",
                                             "id": "{{widgetId}}-team-coll-{{item.id}}",
                                             "props": {
-                                              "nodeId": "{{item.id}}",
+                                              "nodeId": "{{item.name}}",
                                               "toggleChannel": "navigator.toggleExpand",
-                                              "defaultExpanded": true
+                                              "defaultExpanded": false,
+                                              "expandChannel": "navigator.expandTeam"
                                             },
                                             "children": [
                                               {
@@ -2123,7 +2158,7 @@
                                                   "gesture": "onTap",
                                                   "channel": "navigator.toggleExpand",
                                                   "payload": {
-                                                    "nodeId": "{{item.id}}",
+                                                    "nodeId": "{{item.name}}",
                                                     "nodeType": "team"
                                                   },
                                                   "hoverColor": "surfaceContainer"
@@ -2313,7 +2348,8 @@
                                                                 "props": {
                                                                   "nodeId": "{{item.id}}",
                                                                   "toggleChannel": "navigator.toggleExpand",
-                                                                  "defaultExpanded": false
+                                                                  "defaultExpanded": false,
+                                                                  "expandChannel": "navigator.navigateTo"
                                                                 },
                                                                 "children": [
                                                                   {
@@ -5710,6 +5746,7 @@
                                                 "resourceType": "project",
                                                 "resourceId": "{{item.id}}",
                                                 "resourceName": "{{item.name}}",
+                                                "resourceOwner": "{{item.acl.owner}}",
                                                 "placement": "samePane",
                                                 "sourceWindowId": "{{widgetId}}"
                                               },
