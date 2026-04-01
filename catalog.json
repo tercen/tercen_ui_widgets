@@ -27,21 +27,12 @@
           "windowSize": "medium"
         },
         "state": {
-          "selection": {
-            "channel": "navigator.focusChanged",
-            "matchField": "id",
-            "payloadField": "nodeId"
-          },
           "publishTo": [
             "navigator.focusChanged",
             "navigator.toggleExpand"
           ]
         },
-        "props": {},
-        "stateConfig": {
-          "selectionKey": "selectedId",
-          "multiSelect": false
-        }
+        "props": {}
       },
       "template": {
         "type": "Column",
@@ -325,7 +316,11 @@
                                               "tooltip": "Download",
                                               "variant": "toolbar-primary",
                                               "weight": "solid",
-                                              "enabled": "{{sel.canDownload}}"
+                                              "enabled": "{{sel.canDownload}}",
+                                              "payload": {
+                                                "nodeId": "{{sel.nodeId}}",
+                                                "nodeName": "{{sel.nodeName}}"
+                                              }
                                             }
                                           }
                                         ]
