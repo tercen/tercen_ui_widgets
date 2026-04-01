@@ -380,7 +380,7 @@
                             }
                           },
                           {
-                            "_comment": "Tree body — personal team first, then alphabetical",
+                            "_comment": "Tree body \u2014 personal team first, then alphabetical",
                             "type": "Expanded",
                             "id": "{{widgetId}}-tree-exp",
                             "children": [
@@ -422,7 +422,7 @@
                                             },
                                             "children": [
                                               {
-                                                "_comment": "TEAM ROW — level 0. Click expands/collapses.",
+                                                "_comment": "TEAM ROW \u2014 level 0. Click expands/collapses.",
                                                 "type": "Action",
                                                 "id": "{{widgetId}}-team-tap-{{item.id}}",
                                                 "props": {
@@ -546,7 +546,7 @@
                                                 },
                                                 "children": [
                                                   {
-                                                    "_comment": "Nested DataSource — projects for THIS team",
+                                                    "_comment": "Nested DataSource \u2014 projects for THIS team",
                                                     "type": "DataSource",
                                                     "id": "{{widgetId}}-proj-ds-{{item.id}}",
                                                     "props": {
@@ -561,7 +561,7 @@
                                                         [
                                                           "{{item.name}}",
                                                           true,
-                                                          ""
+                                                          "\uf000"
                                                         ],
                                                         200
                                                       ],
@@ -623,7 +623,7 @@
                                                                 },
                                                                 "children": [
                                                                   {
-                                                                    "_comment": "Project row — level 1, indent 24px. Tap toggles expand AND sets focus.",
+                                                                    "_comment": "Project row \u2014 level 1, indent 24px. Tap toggles expand AND sets focus.",
                                                                     "type": "Action",
                                                                     "id": "{{widgetId}}-proj-tap-{{item.id}}",
                                                                     "props": {
@@ -805,7 +805,7 @@
                                                                     },
                                                                     "children": [
                                                                       {
-                                                                        "_comment": "Project contents — root-level documents/folders",
+                                                                        "_comment": "Project contents \u2014 root-level documents/folders",
                                                                         "type": "DataSource",
                                                                         "id": "{{widgetId}}-pcd-{{item.id}}",
                                                                         "props": {
@@ -820,7 +820,7 @@
                                                                             [
                                                                               "{{item.id}}",
                                                                               "",
-                                                                              ""
+                                                                              "\uf000"
                                                                             ],
                                                                             200
                                                                           ]
@@ -966,10 +966,10 @@
                                                                                                     "type": "Icon",
                                                                                                     "id": "{{widgetId}}-fld2-icon-{{item.id}}",
                                                                                                     "props": {
-                                                                                                      "icon": "folder",
+                                                                                                      "icon": "folder_open",
                                                                                                       "size": 14,
-                                                                                                      "color": "primary",
-                                                                                                      "weight": "solid"
+                                                                                                      "color": "onPrimaryContainer",
+                                                                                                      "weight": "regular"
                                                                                                     }
                                                                                                   },
                                                                                                   {
@@ -1022,7 +1022,7 @@
                                                                                                 [
                                                                                                   "{{item.projectId}}",
                                                                                                   "{{item.id}}",
-                                                                                                  ""
+                                                                                                  "\uf000"
                                                                                                 ],
                                                                                                 200
                                                                                               ]
@@ -1357,7 +1357,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -1575,7 +1575,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -1857,7 +1857,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -2000,7 +2000,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -3735,7 +3735,7 @@
                                 ],
                                 [
                                   "{{context.userId}}",
-                                  ""
+                                  "\uf000"
                                 ],
                                 20,
                                 0,
