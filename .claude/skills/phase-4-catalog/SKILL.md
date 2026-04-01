@@ -120,7 +120,7 @@ Present the gap list to the user. Do NOT proceed to Step 4 until the user either
 - **Layout**: `Row`, `Column`, `Container`, `Expanded`, `SizedBox`, `Padding`, `Spacer`
 - **Display**: `Text`, `Icon`, `CircleAvatar`, `Divider`, `Image`, `Chip`, `Tooltip`
 - **Interactive**: `ElevatedButton`, `TextButton`, `IconButton`, `PopupMenu`, `TextField`, `Switch`, `Checkbox`, `DropdownButton`
-- **Behavior**: `DataSource`, `ForEach`, `Action`, `ReactTo`, `Conditional`, `StateHolder`, `Sort`, `Filter`, `PromptRequired`
+- **Behavior**: `DataSource`, `ForEach`, `Action`, `Conditional`, `Sort`, `Filter`, `PromptRequired`
 
 ### Data connections
 
@@ -134,21 +134,18 @@ Replace mock data with `DataSource` nodes:
 
 ### State management
 
-Replace Provider/ChangeNotifier with `StateHolder`:
+State is managed by StateManager (per-widget, outside the tree). Configure via `stateConfig` in widget metadata:
 ```json
-{ "type": "StateHolder", "id": "{{widgetId}}-state",
-  "props": { "initialState": { "dropdownOpen": false } }, "children": [ ] }
+"stateConfig": {
+  "selectionKey": "selectedId",
+  "multiSelect": false
+}
 ```
-Mutations via `Action` publishing to `state.<nodeId>.set`:
-```json
-{ "type": "Action", "id": "{{widgetId}}-toggle",
-  "props": { "gesture": "onTap", "channel": "state.{{widgetId}}-state.set",
-    "payload": { "op": "toggle", "key": "dropdownOpen" } } }
-```
+StateManager handles selection state automatically — ForEach highlights selected items. Actions inside a StateManager-backed component delegate to the StateManager before publishing to EventBus.
 
 ### Event wiring
 - Mock `eventBus.publish(channel, payload)` -> `Action` node with `channel`/`payload`
-- Mock `eventBus.subscribe(channel)` -> `ReactTo` node with `channel`/`match`
+- Mock `eventBus.subscribe(channel)` -> `DataSource` with `refreshOn` channel, or `Conditional` with scope bindings
 
 ## Step 5: Insert into catalog.json
 
@@ -173,7 +170,7 @@ Headers render in shell's header slot, not as floating windows — see kind-spec
    - `{{props.X}}` — template root only
    - `{{data}}`, `{{loading}}`, `{{ready}}`, `{{error}}` — inside `DataSource` only
    - `{{item}}`, `{{_index}}` — inside `ForEach` only
-   - `{{state}}` — inside `StateHolder` only
+   - `{{state}}` — inside components with `stateConfig` in metadata
    - `{{context.username}}`, `{{context.userId}}`, `{{widgetId}}` — always available
 4. Semantic tokens only
 5. Cross-check DataSource `method` against `discover_methods` output

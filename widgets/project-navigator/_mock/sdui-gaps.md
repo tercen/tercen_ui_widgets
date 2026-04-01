@@ -2,36 +2,29 @@
 
 **Generated:** 2026-04-01
 **Source:** Audit of catalog.json against SduiTheme.dart and builtin_widgets.dart
+**Updated:** 2026-04-01 — all 3 blocking gaps resolved
 
 ---
 
-## GAP: IconButton — no variant prop (primary/secondary)
+## ~~GAP: IconButton — no variant prop (primary/secondary)~~ RESOLVED
 
-**Mock needs:** Toolbar with 3 icon-only buttons: Upload (filled primary background), Download (filled primary background), Team (outlined secondary border).
-**SDUI has:** `IconButton` primitive renders a bare Material `IconButton` — transparent background, no border, ghost styling only. Props: icon, size, color, tooltip, channel, enabled.
-**Missing:** `variant` prop accepting `primary`, `secondary`, `ghost`. When `variant: "primary"`, should render 32x32 filled button using `ctx.theme.window.toolbarButtonSize`, `ctx.theme.window.toolbarButtonRadius`, `ctx.theme.colors.primary` background, `ctx.theme.colors.onPrimary` icon. When `variant: "secondary"`, outlined with `ctx.theme.window.toolbarButtonBorderWidth` border.
-**Suggested fix:** In `_buildIconButton()` in `builtin_widgets.dart`, read `variant` prop. If `primary`: wrap icon in `Container` with primary fill, borderRadius from `ctx.theme.window.toolbarButtonRadius`. If `secondary`: add `Border.all` with primary colour. Default (`ghost`): current behaviour.
-**Blocking:** `{{widgetId}}-tb-upload`, `{{widgetId}}-tb-download`, `{{widgetId}}-tb-team`
+**Resolution:** Added `variant` prop to `IconButton` accepting `"toolbar-primary"` (filled) and `"toolbar-secondary"` (outlined). Toolbar variants use `ctx.theme.window.toolbarButtonSize`, `ctx.theme.window.toolbarButtonRadius`, `ctx.theme.window.toolbarButtonBorderWidth`, `ctx.theme.window.toolbarButtonIconSize`. New `_ToolbarIconButton` StatefulWidget handles hover, disabled state, and animation using theme tokens.
+**Catalog usage:** `"variant": "toolbar-primary"` for Upload/Download, `"variant": "toolbar-secondary"` for Team.
 
 ---
 
-## GAP: IconButton — does not read SduiWindowTokens
+## ~~GAP: IconButton — does not read SduiWindowTokens~~ RESOLVED
 
-**Mock needs:** Toolbar buttons sized 32x32 with 16px icons, 8px radius.
-**SDUI has:** `_buildIconButton()` uses `props['size']` for icon size (default 24) but does not read `ctx.theme.window.toolbarButtonSize` for overall button dimensions or `ctx.theme.window.toolbarButtonRadius` for border radius.
-**Missing:** Builder should use window tokens for sizing when rendered inside a toolbar context, or when a `toolbarButton: true` prop is set.
-**Suggested fix:** Read `ctx.theme.window` tokens in the builder. Apply `toolbarButtonSize` as the button constraint and `toolbarButtonRadius` as the border radius.
-**Blocking:** All toolbar IconButton nodes
+**Resolution:** Toolbar variants (`toolbar-primary`, `toolbar-secondary`) read all `ctx.theme.window` tokens. Also fixed `_WindowToolbar`, `_LabeledShellButton`, `_IconShellButton` which had hardcoded values (36px, 1.5px border) diverged from theme tokens (32px, 1px). All now read from `ctx.theme.window.*`.
+
+Additionally fixed `SduiTheme.fromJson` — 7 token groups (window, opacity, animation, dataTable, internalTab, button, iconSize) were hardcoded to defaults and never parsed from JSON. All 16 token groups now have `fromJson` factories and are wired in `SduiTheme.fromJson`.
 
 ---
 
-## GAP: Icon — no font weight variant (regular vs solid)
+## ~~GAP: Icon — no font weight variant (regular vs solid)~~ RESOLVED
 
-**Mock needs:** Regular (line) weight icons for files (`fa-regular fa-file`), sub-folders (`fa-regular fa-folder-open`). Solid weight for projects, teams, workflows, datasets.
-**SDUI has:** `Icon` widget maps icon names to `FontAwesomeIcons` constants — solid weight only. No `weight` or `style` prop.
-**Missing:** `weight` prop accepting `solid` (default) or `regular` to select FontAwesome weight variant.
-**Suggested fix:** In `_buildIcon()`, read `weight` prop. Map to `FontAwesomeIcons.{name}` (solid) or the regular variant. FontAwesome Flutter package exposes both.
-**Blocking:** All file and sub-folder icon nodes in the tree
+**Resolution:** Added `weight` prop to both `Icon` and `IconButton` accepting `"regular"` (default, line style) or `"solid"` (filled). Added `_solidIconMap` with solid variants for common icons (file, folder, user, star, heart, bookmark, bell, comment, envelope, calendar, clock, image, etc.). `_resolveIcon(name, weight)` checks solid map first when weight is "solid", falls back to regular.
+**Catalog usage:** `"weight": "solid"` for projects/teams/workflows/datasets, omit (or `"regular"`) for files/sub-folders.
 
 ---
 

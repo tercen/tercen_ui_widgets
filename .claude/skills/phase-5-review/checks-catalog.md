@@ -94,10 +94,9 @@ Scan `padding` props. Raw numbers are acceptable (the renderer converts them). B
 Check that:
 - `{{data}}`, `{{loading}}`, `{{ready}}`, `{{error}}`, `{{errorMessage}}` appear only inside `DataSource` children
 - `{{item}}`, `{{_index}}` appear only inside `ForEach` children
-- `{{state}}` appears only inside `StateHolder` children
+- `{{state}}` appears only inside components with `stateConfig` in metadata
 - `{{sorted}}` appears only inside `Sort` children
 - `{{filtered}}` appears only inside `Filter` children
-- `{{matched}}` appears only inside `ReactTo` children
 
 ### D2: Props bindings match metadata
 
@@ -140,13 +139,13 @@ A DataSource node without children will render a default spinner/error. If inten
 
 Every `Action` node must have a `channel` prop. Missing channel means the action publishes nowhere.
 
-### F2: ReactTo match aligns with Action payload
+### F2: StateManager selection wiring
 
-For every `ReactTo` node, check that its `match` keys exist in the corresponding `Action` node's `payload`. Mismatched keys mean the ReactTo will never match.
+If the widget uses `stateConfig` for selection, verify that `Action` nodes publish payloads containing the correct item identifiers so StateManager can track selection. ForEach auto-highlights selected items.
 
-### F3: StateHolder mutation channels
+### F3: DataSource refreshOn alignment
 
-If `StateHolder` is used, verify that `Action` nodes publishing state mutations use the correct channel: `state.<stateHolderId>.set`. The `<stateHolderId>` must match the StateHolder's `id`.
+If a `DataSource` uses `refreshOn`, verify that the channel it listens on is actually published by an `Action` or other event source in the template.
 
 ### F4: Standard event channels
 
@@ -295,8 +294,8 @@ The primitive should be usable by other widgets, not specific to one template. C
 
 ### F: Event Wiring
 - F1: [PASS/FAIL/N/A] — Action nodes have channel [detail if FAIL]
-- F2: [PASS/FAIL/N/A] — ReactTo match aligns with Action payload [detail if FAIL]
-- F3: [PASS/FAIL/N/A] — StateHolder mutation channels correct [detail if FAIL]
+- F2: [PASS/FAIL/N/A] — StateManager selection wiring correct [detail if FAIL]
+- F3: [PASS/FAIL/N/A] — DataSource refreshOn alignment [detail if FAIL]
 - F4: [PASS/FAIL/N/A] — Standard event channels [detail if FAIL]
 
 ### G: Header-Specific (N/A for window)
