@@ -223,7 +223,7 @@
                                   "icon": "folder_open",
                                   "size": 32,
                                   "color": "onSurfaceDisabled",
-                                  "weight": "regular"
+                                  "weight": "solid"
                                 }
                               },
                               {
@@ -2633,7 +2633,8 @@
                             10,
                             20
                           ],
-                          "defaultPageSize": 5
+                          "defaultPageSize": 5,
+                          "weight": "solid"
                         },
                         "children": [
                           {
@@ -2799,7 +2800,8 @@
                                                                 "props": {
                                                                   "icon": "folder",
                                                                   "size": 14,
-                                                                  "color": "primary"
+                                                                  "color": "primary",
+                                                                  "weight": "solid"
                                                                 }
                                                               }
                                                             ]
