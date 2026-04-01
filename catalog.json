@@ -2322,7 +2322,7 @@
                         "type": "Icon",
                         "id": "{{widgetId}}-focus-icon",
                         "props": {
-                          "icon": "search",
+                          "icon": "pin",
                           "size": 12,
                           "color": "onSurfaceMuted"
                         }
@@ -2448,7 +2448,7 @@
                                                 "type": "Icon",
                                                 "id": "{{widgetId}}-focus-icon-2",
                                                 "props": {
-                                                  "icon": "search",
+                                                  "icon": "pin",
                                                   "size": 10,
                                                   "color": "onSurfaceMuted"
                                                 }
