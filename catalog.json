@@ -2337,11 +2337,7 @@
                                             "type": "ForEach",
                                             "id": "{{widgetId}}-fe-teams",
                                             "props": {
-                                              "items": "{{sorted}}",
-                                              "filterChannel": "input.{{widgetId}}-tb-search.changed",
-                                              "filterFields": [
-                                                "name"
-                                              ]
+                                              "items": "{{sorted}}"
                                             },
                                             "children": [
                                               {
