@@ -65,8 +65,7 @@
                   "channel": "navigator.expandTeam",
                   "payload": {
                     "nodeId": "{{props.resourceOwner}}"
-                  },
-                  "delayMs": 500
+                  }
                 }
               },
               {
@@ -76,8 +75,7 @@
                   "channel": "navigator.navigateTo",
                   "payload": {
                     "nodeId": "{{props.resourceId}}"
-                  },
-                  "delayMs": 1500
+                  }
                 }
               }
             ]
