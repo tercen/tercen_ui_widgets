@@ -384,7 +384,7 @@
                                               "value": "all",
                                               "iconColor": "primary",
                                               "tooltip": "Show all",
-                                              "icon": "apps"
+                                              "icon": "filter_list"
                                             },
                                             {
                                               "value": "file",
@@ -428,7 +428,7 @@
                                           }
                                         ],
                                         "props": {
-                                          "maxWidth": 200
+                                          "maxWidth": 300
                                         }
                                       }
                                     ]
