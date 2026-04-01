@@ -1678,7 +1678,8 @@
                                         "props": {
                                           "icon": "image",
                                           "size": 16,
-                                          "color": "primary"
+                                          "color": "primary",
+                                          "weight": "solid"
                                         }
                                       },
                                       {
@@ -2009,7 +2010,8 @@
                                 "props": {
                                   "icon": "comments",
                                   "size": 48,
-                                  "color": "onSurfaceMuted"
+                                  "color": "onSurfaceMuted",
+                                  "weight": "solid"
                                 }
                               },
                               {
@@ -3915,7 +3917,8 @@
                                         "props": {
                                           "icon": "clock",
                                           "size": 16,
-                                          "color": "warning"
+                                          "color": "warning",
+                                          "weight": "solid"
                                         }
                                       }
                                     ]
