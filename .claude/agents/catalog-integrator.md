@@ -32,4 +32,5 @@ Append one-line notes to `_issues/session-log.md` with tags: `[sdk-issue]`, `[sk
 - Missing primitives: create in sdui package using standardised pattern. No hacks.
 - Unique `id` per node: `{{widgetId}}-suffix` convention.
 - Semantic tokens only — no hex colors, no pixel font sizes, no numeric spacing.
+- **SduiTheme.dart is the master** for all token values. Read `../sdui/lib/src/theme/sdui_theme.dart` for correct button, toolbar, window, and spacing values. Do not rely on `tercen-tokens.css` — it is incomplete.
 - Use `{{context.username}}` and `{{context.userId}}` for user-specific data.

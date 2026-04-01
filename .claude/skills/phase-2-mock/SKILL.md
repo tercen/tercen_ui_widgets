@@ -10,9 +10,10 @@ disable-model-invocation: true
 ## Inputs
 
 1. **Functional spec** — `widgets/{name}/{name}-spec.md`
-2. **Tercen tokens CSS** — `../tercen-style/dist/tercen-tokens.css`
-3. **Primitive metadata** — `../tercen-style/theme-export.json` (primitives array)
-4. **Approval flags** — `../tercen-style/tokens.meta.json`
+2. **SduiTheme (MASTER)** — `../sdui/lib/src/theme/sdui_theme.dart` — the single source of truth for all token values. Read this FIRST for colours, spacing, typography, button tokens, toolbar tokens, window tokens, and icon sizes.
+3. **Approval flags** — `../tercen-style/tokens.meta.json` — controls which tokens are approved for use
+4. **Tercen tokens CSS** — `../tercen-style/dist/tercen-tokens.css` — convenience CSS subset. WARNING: this file is INCOMPLETE — it is missing toolbar, window, and some button tokens. Always cross-check values against SduiTheme.dart.
+5. **Primitive metadata** — `../tercen-style/theme-export.json` (primitives array)
 
 ## Output Directory
 
@@ -32,12 +33,18 @@ HTML/CSS layout skeleton with minimal styling (grey boxes, placeholder text).
 Copy wireframe structure, apply Tercen design system.
 
 ### Embedding tokens
-Read `../tercen-style/dist/tercen-tokens.css` and embed full contents in `<style>` tag in `<head>`. Do NOT use `<link>` (relative path won't resolve cross-repo).
+Read `../tercen-style/dist/tercen-tokens.css` and embed in `<style>` tag in `<head>`. Do NOT use `<link>` (relative path won't resolve cross-repo).
+
+**IMPORTANT**: `tercen-tokens.css` is incomplete. After embedding it, read `SduiTheme.dart` and add any missing tokens as additional CSS variables. Key sections to check:
+- `SduiButtonTokens` — button padding, border radius, outlined border width
+- `SduiWindowTokens` — toolbar height, toolbar button size/icon size/radius/border width, toolbar gap
+- `SduiIconSize` — icon sizes sm/md/lg
 
 ### Theme application
-- Font: `--tc-font-family` CSS variable
+- Font: `--font-family` CSS variable
 - Colours: approved tokens only (check `tokens.meta.json` where `approved: true`)
 - Spacing/border-radius: token CSS variables
+- **Button/toolbar values: from SduiTheme.dart** — do not guess or hardcode
 
 ### Controls
 - Reference `tokens.meta.json` components section for control specs

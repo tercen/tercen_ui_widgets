@@ -5,7 +5,7 @@ argument-hint: "[path to Phase 2 mock widget]"
 disable-model-invocation: true
 ---
 
-**READ-ONLY. Do NOT modify. Log gaps to `_issues/session-log.md` and continue.**
+**READ-ONLY. Do NOT modify.**
 
 Translate Phase 2 mock into SDUI catalog.json template. Mock is a visual reference — output is a JSON entry in `catalog.json` rendered by the orchestrator.
 
@@ -23,14 +23,35 @@ Determine widget kind from `skeleton.yaml`. Load kind-specific guide:
 3. Every node needs unique `id`: `{{widgetId}}-suffix`. Inside `ForEach`: `{{item.id}}`/`{{_index}}` suffixes.
 4. Use `{{context.username}}`/`{{context.userId}}` for user-specific data.
 5. Call `discover_methods(serviceName)` before writing any DataSource node. Use exact method names.
-6. Output is catalog.json only. No pubspec.yaml, main.dart, or Dart code (unless creating missing primitives).
+6. Output is catalog.json only. Do NOT modify files in the `sdui` repo. Primitive gaps are reported, not fixed here.
 
-## Inputs
+## Strict error policy
 
-1. Phase 2 mock widget
-2. Functional spec (Phase 1)
-3. SDUI package: `/home/martin/tercen/sdui/`
-4. Widget catalog: `/home/martin/tercen/tercen_ui_widgets/catalog.json`
+**Do NOT silently work around gaps. Do NOT fall back to unapproved behaviour.**
+
+If any of the following occur, **STOP and report the error**. Do not continue authoring the catalog entry:
+
+- A required SDUI primitive does not exist (e.g. no TreeView, no icon-only primary button)
+- A primitive exists but is missing a required prop (e.g. IconButton has no `variant` prop)
+- A token value is needed but not in the approved set in `tokens.meta.json`
+- A DataSource method cannot be confirmed against the actual Tercen API
+- The mock requires behaviour that no existing primitive supports
+
+Log each blocker to `_issues/session-log.md` with tag `[BLOCKED]` and the specific gap. Then present the blocker list to the user before proceeding. The user will either:
+- Direct you to proceed with a known limitation (document it in the catalog entry as a `_comment`)
+- Schedule the fix in the SDUI repo first
+
+**Never use a primitive that renders differently from what the mock shows.** If `IconButton` renders as a ghost icon but the mock shows a filled primary button, that is a blocker — not a "close enough" match.
+
+## Inputs (read in this order)
+
+1. **Design decisions** — `widgets/{name}/_mock/design-decisions.md` — AUTHORITATIVE overrides to the spec. Read FIRST. If a decision says "Removed: X", do not add X.
+2. **Functional spec** — `widgets/{name}/{name}-spec.md` — original spec, overridden by design decisions
+3. **SduiTheme (MASTER)** — `../sdui/lib/src/theme/sdui_theme.dart` — single source of truth for all token values. Read this to understand correct button sizes, toolbar dimensions, border widths, spacing, colours.
+4. **SDUI primitives** — `../sdui/lib/src/registry/builtin_widgets.dart` and `behavior_widgets.dart` — read BOTH the registration metadata AND the builder implementation (`_build*` functions) to understand what each primitive actually renders.
+5. **Approval gate** — `../tercen-style/tokens.meta.json` — only approved tokens may appear in catalog.json
+6. **Phase 2 HTML mock** — `widgets/{name}/_mock/styled.html` — visual reference
+7. **Existing catalog** — `catalog.json` — format and existing entries
 
 ## Step 1: Inventory the mock
 
@@ -43,48 +64,40 @@ Also record: data sources (services/methods), events (EventBus channels), state 
 
 ## Step 2: Gap analysis
 
-Read available primitives:
-1. `/home/martin/tercen/sdui/lib/src/registry/builtin_widgets.dart` — `registry.register(...)` calls
-2. `/home/martin/tercen/sdui/lib/src/registry/behavior_widgets.dart` — `registry.registerScope(...)` calls
-3. Existing `catalog.json` — check for reusable Tier 2 templates
+Read available primitives — BOTH registration AND implementation:
+1. `/home/martin/tercen/sdui/lib/src/registry/builtin_widgets.dart` — read `registry.register(...)` calls for prop specs, AND read the corresponding `_build*()` functions to understand what the primitive actually renders. A primitive may accept a prop but ignore it, or render differently from what its name suggests.
+2. `/home/martin/tercen/sdui/lib/src/registry/behavior_widgets.dart` — same: registration + implementation
+3. `/home/martin/tercen/sdui/lib/src/theme/sdui_theme.dart` — check which theme tokens the builder functions actually use (e.g. does `_buildIconButton` read `ctx.theme.window.toolbarButtonSize`?)
+4. Existing `catalog.json` — check for reusable Tier 2 templates
 
-Classify each element: Available? Which primitive? Output a gap list. If empty, skip to Step 4.
+For each mock element, verify:
+- Does a primitive exist with the right type name?
+- Does the builder function produce the correct visual output (colours, sizes, borders)?
+- Does it read the correct theme tokens?
 
-## Step 3: Create missing primitives
+If a primitive exists by name but renders wrong (e.g. `IconButton` exists but renders as ghost when primary is needed), that is a **GAP**, not a match. Apply the strict error policy.
 
-Add to `/home/martin/tercen/sdui/lib/src/registry/builtin_widgets.dart`.
+## Step 3: Report primitive gaps
 
-### Registration pattern
-```dart
-registry.register('NewWidget', _buildNewWidget,
-    metadata: const WidgetMetadata(
-      type: 'NewWidget',
-      description: 'What this widget does',
-      props: {
-        'propName': PropSpec(type: 'string', required: true, description: 'What this prop does'),
-      },
-    ));
+**Do NOT modify files in the `../sdui/` repo.** Primitive fixes happen in a separate SDUI session.
+
+For each gap found in Step 2, write a gap report entry to `widgets/{name}/_mock/sdui-gaps.md`:
+
+```markdown
+# SDUI Primitive Gaps — {Widget Name}
+
+## GAP: {primitive name} — {short description}
+
+**Mock needs:** {what the mock shows}
+**SDUI has:** {what the primitive actually renders}
+**Missing:** {specific prop, variant, or behaviour}
+**Suggested fix:** {what needs to change in builtin_widgets.dart}
+**Blocking:** {which catalog.json nodes are affected}
 ```
 
-### Builder pattern
-```dart
-Widget _buildNewWidget(SduiNode node, List<Widget> children, SduiRenderContext ctx) {
-  final propValue = node.props['propName'] as String? ?? 'default';
-  final size = PropConverter.to<double>(node.props['size']) ?? 24.0;
-  final color = ctx.theme.resolveColor(node.props['color'] as String?);
-  return YourFlutterWidget(prop: propValue, size: size, color: color,
-    child: children.isEmpty ? null : children.first);
-}
-```
-
-### Primitive rules
-- `PropConverter` for all numeric/bool conversions — never raw `as int`
-- `ctx.theme.resolveColor()` for colors, `resolveTextStyle()` for text, `resolveSpacing()` for spacing
-- Keep generic and reusable
-- Add `WidgetMetadata` with accurate `description` and `props`
-- Run `cd /home/martin/tercen/sdui && dart analyze`
-- New packages: add to `pubspec.yaml`, run `dart pub get`, import in `builtin_widgets.dart`
-- New exports: update `/home/martin/tercen/sdui/lib/sdui.dart` if needed
+Present the gap list to the user. Do NOT proceed to Step 4 until the user either:
+- Confirms the SDUI gaps will be fixed in a separate session and directs you to proceed with `_comment` annotations on affected nodes
+- Tells you to stop and wait for the SDUI fixes
 
 ## Step 4: Author catalog.json entry
 

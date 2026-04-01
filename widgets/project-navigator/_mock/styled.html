@@ -313,12 +313,11 @@
       cursor: default;
     }
 
-    /* Secondary — spec says 1.5px but browsers round sub-pixel borders
-       down on standard DPI. Use 2px to match Flutter's Skia rendering. */
+    /* Secondary — SduiTheme master: window.toolbarButtonBorderWidth = 1px */
     .toolbar-btn.secondary {
       background: transparent;
       color: var(--color-primary);
-      border: 2px solid var(--color-primary);
+      border: 1px solid var(--color-primary);
     }
     .toolbar-btn.secondary:hover:not(:disabled) {
       background: var(--color-primary-container);
@@ -331,12 +330,12 @@
     }
 
     /* Filter button (secondary) */
-    /* Filter button — same 2px border as secondary buttons for visual parity */
+    /* Filter button — SduiTheme master: window.toolbarButtonBorderWidth = 1px */
     .filter-btn {
       width: var(--toolbar-btn-size);
       height: var(--toolbar-btn-size);
       border-radius: var(--button-border-radius);
-      border: 2px solid var(--color-primary);
+      border: 1px solid var(--color-primary);
       background: transparent;
       color: var(--color-primary);
       cursor: pointer;
