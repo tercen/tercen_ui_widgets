@@ -138,7 +138,7 @@
                                 "type": "Icon",
                                 "id": "{{widgetId}}-err-icon",
                                 "props": {
-                                  "icon": "circle_exclamation",
+                                  "icon": "error",
                                   "size": 32,
                                   "color": "error"
                                 }
@@ -367,7 +367,7 @@
                                         "type": "IconButton",
                                         "id": "{{widgetId}}-tb-team",
                                         "props": {
-                                          "icon": "user_group",
+                                          "icon": "group",
                                           "size": 16,
                                           "color": "primary",
                                           "channel": "navigator.openTeamWidget",
@@ -413,7 +413,7 @@
                                         {
                                           "value": "workflow",
                                           "label": "Workflow",
-                                          "icon": "sitemap"
+                                          "icon": "workflow"
                                         }
                                       ]
                                     }
@@ -534,7 +534,7 @@
                                                     "type": "Icon",
                                                     "id": "{{widgetId}}-team-icon-{{item.id}}",
                                                     "props": {
-                                                      "icon": "user_group",
+                                                      "icon": "group",
                                                       "size": 14,
                                                       "color": "primary",
                                                       "weight": "solid"
@@ -713,7 +713,7 @@
                                                                 "type": "Icon",
                                                                 "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
                                                                 "props": {
-                                                                  "icon": "globe",
+                                                                  "icon": "visibility",
                                                                   "size": 12,
                                                                   "color": "onSurfaceMuted"
                                                                 }
@@ -2148,7 +2148,7 @@
                                             "type": "Icon",
                                             "id": "{{widgetId}}-ic-error",
                                             "props": {
-                                              "icon": "circle-exclamation",
+                                              "icon": "error",
                                               "size": 16,
                                               "color": "error"
                                             }
@@ -2322,7 +2322,7 @@
                         "type": "Icon",
                         "id": "{{widgetId}}-focus-icon",
                         "props": {
-                          "icon": "crosshairs",
+                          "icon": "search",
                           "size": 12,
                           "color": "onSurfaceMuted"
                         }
@@ -2448,7 +2448,7 @@
                                                 "type": "Icon",
                                                 "id": "{{widgetId}}-focus-icon-2",
                                                 "props": {
-                                                  "icon": "crosshairs",
+                                                  "icon": "search",
                                                   "size": 10,
                                                   "color": "onSurfaceMuted"
                                                 }
@@ -3911,7 +3911,7 @@
                                         "type": "Icon",
                                         "id": "{{widgetId}}-run-pending-{{_index}}",
                                         "props": {
-                                          "icon": "pending",
+                                          "icon": "clock",
                                           "size": 16,
                                           "color": "warning"
                                         }
