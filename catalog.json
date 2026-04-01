@@ -866,37 +866,37 @@
                                                                             "children": [
                                                                               {
                                                                                 "type": "ForEach",
-                                                                                "id": "{{widgetId}}-fe-leaves-{{item.id}}",
+                                                                                "id": "{{widgetId}}-fe-wf-{{item.id}}",
                                                                                 "props": {
                                                                                   "items": "{{data}}",
-                                                                                  "whereNot": {
-                                                                                    "kind": "FolderDocument"
+                                                                                  "where": {
+                                                                                    "kind": "Workflow"
                                                                                   },
                                                                                   "emptyText": ""
                                                                                 },
                                                                                 "children": [
                                                                                   {
                                                                                     "type": "Action",
-                                                                                    "id": "{{widgetId}}-dbl-{{item.id}}",
+                                                                                    "id": "{{widgetId}}-wf-dbl-{{item.id}}",
                                                                                     "props": {
                                                                                       "gesture": "onDoubleTap",
                                                                                       "channel": "navigator.openViewer",
                                                                                       "payload": {
                                                                                         "nodeId": "{{item.id}}",
-                                                                                        "nodeType": "{{item.subKind}}",
+                                                                                        "nodeType": "{{item.kind}}",
                                                                                         "nodeName": "{{item.name}}"
                                                                                       }
                                                                                     },
                                                                                     "children": [
                                                                                       {
                                                                                         "type": "Action",
-                                                                                        "id": "{{widgetId}}-leaf-tap-{{item.id}}",
+                                                                                        "id": "{{widgetId}}-wf-tap-{{item.id}}",
                                                                                         "props": {
                                                                                           "gesture": "onTap",
                                                                                           "channel": "navigator.focusChanged",
                                                                                           "payload": {
                                                                                             "nodeId": "{{item.id}}",
-                                                                                            "nodeType": "{{item.subKind}}",
+                                                                                            "nodeType": "{{item.kind}}",
                                                                                             "nodeName": "{{item.name}}"
                                                                                           },
                                                                                           "hoverColor": "surfaceContainer"
@@ -904,62 +904,410 @@
                                                                                         "children": [
                                                                                           {
                                                                                             "type": "Padding",
-                                                                                            "id": "{{widgetId}}-leaf-pad-{{item.id}}",
+                                                                                            "id": "{{widgetId}}-wf-pad-{{item.id}}",
                                                                                             "props": {
                                                                                               "padding": 4
                                                                                             },
                                                                                             "children": [
                                                                                               {
                                                                                                 "type": "Row",
-                                                                                                "id": "{{widgetId}}-leaf-row-{{item.id}}",
+                                                                                                "id": "{{widgetId}}-wf-row-{{item.id}}",
                                                                                                 "props": {
                                                                                                   "crossAxisAlignment": "center"
                                                                                                 },
                                                                                                 "children": [
                                                                                                   {
                                                                                                     "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-indent-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-wf-indent-{{item.id}}",
                                                                                                     "props": {
                                                                                                       "width": 44
                                                                                                     }
                                                                                                   },
                                                                                                   {
                                                                                                     "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-chspc-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-wf-chspc-{{item.id}}",
                                                                                                     "props": {
                                                                                                       "width": 16
                                                                                                     }
                                                                                                   },
                                                                                                   {
                                                                                                     "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-g1-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-wf-g1-{{item.id}}",
                                                                                                     "props": {
                                                                                                       "width": 4
                                                                                                     }
                                                                                                   },
                                                                                                   {
                                                                                                     "type": "Icon",
-                                                                                                    "id": "{{widgetId}}-leaf-icon-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-wf-icon-{{item.id}}",
                                                                                                     "props": {
-                                                                                                      "icon": "description",
+                                                                                                      "icon": "sitemap",
                                                                                                       "size": 14,
-                                                                                                      "color": "onSurfaceMuted"
+                                                                                                      "color": "info",
+                                                                                                      "weight": "solid"
                                                                                                     }
                                                                                                   },
                                                                                                   {
                                                                                                     "type": "SizedBox",
-                                                                                                    "id": "{{widgetId}}-leaf-g2-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-wf-g2-{{item.id}}",
                                                                                                     "props": {
                                                                                                       "width": 8
                                                                                                     }
                                                                                                   },
                                                                                                   {
                                                                                                     "type": "Expanded",
-                                                                                                    "id": "{{widgetId}}-leaf-name-exp-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-wf-name-exp-{{item.id}}",
                                                                                                     "children": [
                                                                                                       {
                                                                                                         "type": "Text",
-                                                                                                        "id": "{{widgetId}}-leaf-name-{{item.id}}",
+                                                                                                        "id": "{{widgetId}}-wf-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-ds-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "where": {
+                                                                                    "kind": "TableSchema"
+                                                                                  },
+                                                                                  "emptyText": ""
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Action",
+                                                                                    "id": "{{widgetId}}-ds-dbl-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "gesture": "onDoubleTap",
+                                                                                      "channel": "navigator.openViewer",
+                                                                                      "payload": {
+                                                                                        "nodeId": "{{item.id}}",
+                                                                                        "nodeType": "{{item.kind}}",
+                                                                                        "nodeName": "{{item.name}}"
+                                                                                      }
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-ds-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.focusChanged",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "{{item.kind}}",
+                                                                                            "nodeName": "{{item.name}}"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-ds-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-ds-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds-chspc-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 16
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-ds-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "table",
+                                                                                                      "size": 14,
+                                                                                                      "color": "warning",
+                                                                                                      "weight": "solid"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-ds-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-ds-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-ds2-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "where": {
+                                                                                    "kind": "ComputedTableSchema"
+                                                                                  },
+                                                                                  "emptyText": ""
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Action",
+                                                                                    "id": "{{widgetId}}-ds2-dbl-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "gesture": "onDoubleTap",
+                                                                                      "channel": "navigator.openViewer",
+                                                                                      "payload": {
+                                                                                        "nodeId": "{{item.id}}",
+                                                                                        "nodeType": "{{item.kind}}",
+                                                                                        "nodeName": "{{item.name}}"
+                                                                                      }
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-ds2-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.focusChanged",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "{{item.kind}}",
+                                                                                            "nodeName": "{{item.name}}"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-ds2-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-ds2-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds2-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds2-chspc-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 16
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds2-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-ds2-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "table",
+                                                                                                      "size": 14,
+                                                                                                      "color": "warning",
+                                                                                                      "weight": "solid"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-ds2-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-ds2-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-ds2-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-fi-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "whereNot": {
+                                                                                    "kind": "FolderDocument"
+                                                                                  },
+                                                                                  "where": {
+                                                                                    "kind": "FileDocument"
+                                                                                  },
+                                                                                  "emptyText": ""
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Action",
+                                                                                    "id": "{{widgetId}}-fi-dbl-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "gesture": "onDoubleTap",
+                                                                                      "channel": "navigator.openViewer",
+                                                                                      "payload": {
+                                                                                        "nodeId": "{{item.id}}",
+                                                                                        "nodeType": "{{item.kind}}",
+                                                                                        "nodeName": "{{item.name}}"
+                                                                                      }
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-fi-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.focusChanged",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "{{item.kind}}",
+                                                                                            "nodeName": "{{item.name}}"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-fi-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-fi-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fi-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fi-chspc-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 16
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fi-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-fi-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "file",
+                                                                                                      "size": 14,
+                                                                                                      "color": "onSurfaceVariant"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fi-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-fi-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-fi-name-{{item.id}}",
                                                                                                         "props": {
                                                                                                           "text": "{{item.name}}",
                                                                                                           "textStyle": "bodyMedium",
@@ -1082,8 +1430,7 @@
                                                                                                     "props": {
                                                                                                       "icon": "folder_open",
                                                                                                       "size": 14,
-                                                                                                      "color": "onPrimaryContainer",
-                                                                                                      "weight": "regular"
+                                                                                                      "color": "onPrimaryContainer"
                                                                                                     }
                                                                                                   },
                                                                                                   {
@@ -1151,88 +1498,452 @@
                                                                                                 "children": [
                                                                                                   {
                                                                                                     "type": "ForEach",
-                                                                                                    "id": "{{widgetId}}-fe-sf-{{item.id}}",
+                                                                                                    "id": "{{widgetId}}-sfe-wf-{{item.id}}",
                                                                                                     "props": {
-                                                                                                      "items": "{{data}}"
+                                                                                                      "items": "{{data}}",
+                                                                                                      "where": {
+                                                                                                        "kind": "Workflow"
+                                                                                                      },
+                                                                                                      "emptyText": ""
                                                                                                     },
                                                                                                     "children": [
                                                                                                       {
                                                                                                         "type": "Action",
-                                                                                                        "id": "{{widgetId}}-sf-tap-{{item.id}}",
+                                                                                                        "id": "{{widgetId}}-swf-dbl-{{item.id}}",
                                                                                                         "props": {
-                                                                                                          "gesture": "onTap",
-                                                                                                          "channel": "navigator.focusChanged",
+                                                                                                          "gesture": "onDoubleTap",
+                                                                                                          "channel": "navigator.openViewer",
                                                                                                           "payload": {
                                                                                                             "nodeId": "{{item.id}}",
-                                                                                                            "nodeType": "{{item.subKind}}",
+                                                                                                            "nodeType": "{{item.kind}}",
                                                                                                             "nodeName": "{{item.name}}"
-                                                                                                          },
-                                                                                                          "hoverColor": "surfaceContainer"
+                                                                                                          }
                                                                                                         },
                                                                                                         "children": [
                                                                                                           {
-                                                                                                            "type": "Padding",
-                                                                                                            "id": "{{widgetId}}-sf-pad-{{item.id}}",
+                                                                                                            "type": "Action",
+                                                                                                            "id": "{{widgetId}}-swf-tap-{{item.id}}",
                                                                                                             "props": {
-                                                                                                              "padding": 4
+                                                                                                              "gesture": "onTap",
+                                                                                                              "channel": "navigator.focusChanged",
+                                                                                                              "payload": {
+                                                                                                                "nodeId": "{{item.id}}",
+                                                                                                                "nodeType": "{{item.kind}}",
+                                                                                                                "nodeName": "{{item.name}}"
+                                                                                                              },
+                                                                                                              "hoverColor": "surfaceContainer"
                                                                                                             },
                                                                                                             "children": [
                                                                                                               {
-                                                                                                                "type": "Row",
-                                                                                                                "id": "{{widgetId}}-sf-row-{{item.id}}",
+                                                                                                                "type": "Padding",
+                                                                                                                "id": "{{widgetId}}-swf-pad-{{item.id}}",
                                                                                                                 "props": {
-                                                                                                                  "crossAxisAlignment": "center"
+                                                                                                                  "padding": 4
                                                                                                                 },
                                                                                                                 "children": [
                                                                                                                   {
-                                                                                                                    "type": "SizedBox",
-                                                                                                                    "id": "{{widgetId}}-sf-indent-{{item.id}}",
+                                                                                                                    "type": "Row",
+                                                                                                                    "id": "{{widgetId}}-swf-row-{{item.id}}",
                                                                                                                     "props": {
-                                                                                                                      "width": 64
-                                                                                                                    }
-                                                                                                                  },
-                                                                                                                  {
-                                                                                                                    "type": "SizedBox",
-                                                                                                                    "id": "{{widgetId}}-sf-chspc-{{item.id}}",
-                                                                                                                    "props": {
-                                                                                                                      "width": 16
-                                                                                                                    }
-                                                                                                                  },
-                                                                                                                  {
-                                                                                                                    "type": "SizedBox",
-                                                                                                                    "id": "{{widgetId}}-sf-g1-{{item.id}}",
-                                                                                                                    "props": {
-                                                                                                                      "width": 4
-                                                                                                                    }
-                                                                                                                  },
-                                                                                                                  {
-                                                                                                                    "type": "Icon",
-                                                                                                                    "id": "{{widgetId}}-sf-icon-{{item.id}}",
-                                                                                                                    "props": {
-                                                                                                                      "icon": "description",
-                                                                                                                      "size": 14,
-                                                                                                                      "color": "onSurfaceMuted"
-                                                                                                                    }
-                                                                                                                  },
-                                                                                                                  {
-                                                                                                                    "type": "SizedBox",
-                                                                                                                    "id": "{{widgetId}}-sf-g2-{{item.id}}",
-                                                                                                                    "props": {
-                                                                                                                      "width": 8
-                                                                                                                    }
-                                                                                                                  },
-                                                                                                                  {
-                                                                                                                    "type": "Expanded",
-                                                                                                                    "id": "{{widgetId}}-sf-name-exp-{{item.id}}",
+                                                                                                                      "crossAxisAlignment": "center"
+                                                                                                                    },
                                                                                                                     "children": [
                                                                                                                       {
-                                                                                                                        "type": "Text",
-                                                                                                                        "id": "{{widgetId}}-sf-name-{{item.id}}",
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-swf-indent-{{item.id}}",
                                                                                                                         "props": {
-                                                                                                                          "text": "{{item.name}}",
-                                                                                                                          "textStyle": "bodyMedium",
-                                                                                                                          "color": "onSurface"
+                                                                                                                          "width": 64
                                                                                                                         }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-swf-chspc-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 16
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-swf-g1-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 4
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Icon",
+                                                                                                                        "id": "{{widgetId}}-swf-icon-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "icon": "sitemap",
+                                                                                                                          "size": 14,
+                                                                                                                          "color": "info",
+                                                                                                                          "weight": "solid"
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-swf-g2-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 8
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Expanded",
+                                                                                                                        "id": "{{widgetId}}-swf-name-exp-{{item.id}}",
+                                                                                                                        "children": [
+                                                                                                                          {
+                                                                                                                            "type": "Text",
+                                                                                                                            "id": "{{widgetId}}-swf-name-{{item.id}}",
+                                                                                                                            "props": {
+                                                                                                                              "text": "{{item.name}}",
+                                                                                                                              "textStyle": "bodyMedium",
+                                                                                                                              "color": "onSurface"
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        ]
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "ForEach",
+                                                                                                    "id": "{{widgetId}}-sfe-ds-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "items": "{{data}}",
+                                                                                                      "where": {
+                                                                                                        "kind": "TableSchema"
+                                                                                                      },
+                                                                                                      "emptyText": ""
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Action",
+                                                                                                        "id": "{{widgetId}}-sds-dbl-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "gesture": "onDoubleTap",
+                                                                                                          "channel": "navigator.openViewer",
+                                                                                                          "payload": {
+                                                                                                            "nodeId": "{{item.id}}",
+                                                                                                            "nodeType": "{{item.kind}}",
+                                                                                                            "nodeName": "{{item.name}}"
+                                                                                                          }
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Action",
+                                                                                                            "id": "{{widgetId}}-sds-tap-{{item.id}}",
+                                                                                                            "props": {
+                                                                                                              "gesture": "onTap",
+                                                                                                              "channel": "navigator.focusChanged",
+                                                                                                              "payload": {
+                                                                                                                "nodeId": "{{item.id}}",
+                                                                                                                "nodeType": "{{item.kind}}",
+                                                                                                                "nodeName": "{{item.name}}"
+                                                                                                              },
+                                                                                                              "hoverColor": "surfaceContainer"
+                                                                                                            },
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "type": "Padding",
+                                                                                                                "id": "{{widgetId}}-sds-pad-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "padding": 4
+                                                                                                                },
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "type": "Row",
+                                                                                                                    "id": "{{widgetId}}-sds-row-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "crossAxisAlignment": "center"
+                                                                                                                    },
+                                                                                                                    "children": [
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds-indent-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 64
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds-chspc-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 16
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds-g1-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 4
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Icon",
+                                                                                                                        "id": "{{widgetId}}-sds-icon-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "icon": "table",
+                                                                                                                          "size": 14,
+                                                                                                                          "color": "warning",
+                                                                                                                          "weight": "solid"
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds-g2-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 8
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Expanded",
+                                                                                                                        "id": "{{widgetId}}-sds-name-exp-{{item.id}}",
+                                                                                                                        "children": [
+                                                                                                                          {
+                                                                                                                            "type": "Text",
+                                                                                                                            "id": "{{widgetId}}-sds-name-{{item.id}}",
+                                                                                                                            "props": {
+                                                                                                                              "text": "{{item.name}}",
+                                                                                                                              "textStyle": "bodyMedium",
+                                                                                                                              "color": "onSurface"
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        ]
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "ForEach",
+                                                                                                    "id": "{{widgetId}}-sfe-ds2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "items": "{{data}}",
+                                                                                                      "where": {
+                                                                                                        "kind": "ComputedTableSchema"
+                                                                                                      },
+                                                                                                      "emptyText": ""
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Action",
+                                                                                                        "id": "{{widgetId}}-sds2-dbl-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "gesture": "onDoubleTap",
+                                                                                                          "channel": "navigator.openViewer",
+                                                                                                          "payload": {
+                                                                                                            "nodeId": "{{item.id}}",
+                                                                                                            "nodeType": "{{item.kind}}",
+                                                                                                            "nodeName": "{{item.name}}"
+                                                                                                          }
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Action",
+                                                                                                            "id": "{{widgetId}}-sds2-tap-{{item.id}}",
+                                                                                                            "props": {
+                                                                                                              "gesture": "onTap",
+                                                                                                              "channel": "navigator.focusChanged",
+                                                                                                              "payload": {
+                                                                                                                "nodeId": "{{item.id}}",
+                                                                                                                "nodeType": "{{item.kind}}",
+                                                                                                                "nodeName": "{{item.name}}"
+                                                                                                              },
+                                                                                                              "hoverColor": "surfaceContainer"
+                                                                                                            },
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "type": "Padding",
+                                                                                                                "id": "{{widgetId}}-sds2-pad-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "padding": 4
+                                                                                                                },
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "type": "Row",
+                                                                                                                    "id": "{{widgetId}}-sds2-row-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "crossAxisAlignment": "center"
+                                                                                                                    },
+                                                                                                                    "children": [
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds2-indent-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 64
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds2-chspc-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 16
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds2-g1-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 4
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Icon",
+                                                                                                                        "id": "{{widgetId}}-sds2-icon-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "icon": "table",
+                                                                                                                          "size": 14,
+                                                                                                                          "color": "warning",
+                                                                                                                          "weight": "solid"
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sds2-g2-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 8
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Expanded",
+                                                                                                                        "id": "{{widgetId}}-sds2-name-exp-{{item.id}}",
+                                                                                                                        "children": [
+                                                                                                                          {
+                                                                                                                            "type": "Text",
+                                                                                                                            "id": "{{widgetId}}-sds2-name-{{item.id}}",
+                                                                                                                            "props": {
+                                                                                                                              "text": "{{item.name}}",
+                                                                                                                              "textStyle": "bodyMedium",
+                                                                                                                              "color": "onSurface"
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        ]
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "ForEach",
+                                                                                                    "id": "{{widgetId}}-sfe-fi-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "items": "{{data}}",
+                                                                                                      "where": {
+                                                                                                        "kind": "FileDocument"
+                                                                                                      },
+                                                                                                      "emptyText": ""
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Action",
+                                                                                                        "id": "{{widgetId}}-sfi-dbl-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "gesture": "onDoubleTap",
+                                                                                                          "channel": "navigator.openViewer",
+                                                                                                          "payload": {
+                                                                                                            "nodeId": "{{item.id}}",
+                                                                                                            "nodeType": "{{item.kind}}",
+                                                                                                            "nodeName": "{{item.name}}"
+                                                                                                          }
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Action",
+                                                                                                            "id": "{{widgetId}}-sfi-tap-{{item.id}}",
+                                                                                                            "props": {
+                                                                                                              "gesture": "onTap",
+                                                                                                              "channel": "navigator.focusChanged",
+                                                                                                              "payload": {
+                                                                                                                "nodeId": "{{item.id}}",
+                                                                                                                "nodeType": "{{item.kind}}",
+                                                                                                                "nodeName": "{{item.name}}"
+                                                                                                              },
+                                                                                                              "hoverColor": "surfaceContainer"
+                                                                                                            },
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "type": "Padding",
+                                                                                                                "id": "{{widgetId}}-sfi-pad-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "padding": 4
+                                                                                                                },
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "type": "Row",
+                                                                                                                    "id": "{{widgetId}}-sfi-row-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "crossAxisAlignment": "center"
+                                                                                                                    },
+                                                                                                                    "children": [
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sfi-indent-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 64
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sfi-chspc-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 16
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sfi-g1-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 4
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Icon",
+                                                                                                                        "id": "{{widgetId}}-sfi-icon-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "icon": "file",
+                                                                                                                          "size": 14,
+                                                                                                                          "color": "onSurfaceVariant"
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "SizedBox",
+                                                                                                                        "id": "{{widgetId}}-sfi-g2-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "width": 8
+                                                                                                                        }
+                                                                                                                      },
+                                                                                                                      {
+                                                                                                                        "type": "Expanded",
+                                                                                                                        "id": "{{widgetId}}-sfi-name-exp-{{item.id}}",
+                                                                                                                        "children": [
+                                                                                                                          {
+                                                                                                                            "type": "Text",
+                                                                                                                            "id": "{{widgetId}}-sfi-name-{{item.id}}",
+                                                                                                                            "props": {
+                                                                                                                              "text": "{{item.name}}",
+                                                                                                                              "textStyle": "bodyMedium",
+                                                                                                                              "color": "onSurface"
+                                                                                                                            }
+                                                                                                                          }
+                                                                                                                        ]
                                                                                                                       }
                                                                                                                     ]
                                                                                                                   }
