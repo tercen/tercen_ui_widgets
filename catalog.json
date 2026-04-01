@@ -104,7 +104,7 @@
                                 "type": "Text",
                                 "id": "{{widgetId}}-loading-text",
                                 "props": {
-                                  "text": "Loading projects...",
+                                  "text": "Loading teams...",
                                   "textStyle": "bodyMedium",
                                   "color": "onSurfaceMuted"
                                 }
@@ -200,63 +200,72 @@
                     "type": "Conditional",
                     "id": "{{widgetId}}-st-empty",
                     "props": {
-                      "visible": "{{data}}",
-                      "negate": true
+                      "visible": "{{ready}}"
                     },
                     "children": [
                       {
-                        "type": "Center",
-                        "id": "{{widgetId}}-empty-center",
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-st-empty-inner",
+                        "props": {
+                          "visible": "{{data}}",
+                          "negate": true
+                        },
                         "children": [
                           {
-                            "type": "Column",
-                            "id": "{{widgetId}}-empty-col",
-                            "props": {
-                              "mainAxisAlignment": "center",
-                              "mainAxisSize": "min"
-                            },
+                            "type": "Center",
+                            "id": "{{widgetId}}-empty-center",
                             "children": [
                               {
-                                "type": "Icon",
-                                "id": "{{widgetId}}-empty-icon",
+                                "type": "Column",
+                                "id": "{{widgetId}}-empty-col",
                                 "props": {
-                                  "icon": "folder_open",
-                                  "size": 32,
-                                  "color": "onSurfaceDisabled",
-                                  "weight": "solid"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-empty-gap1",
-                                "props": {
-                                  "height": 8
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-empty-msg",
-                                "props": {
-                                  "text": "No projects yet",
-                                  "textStyle": "bodyMedium",
-                                  "color": "onSurfaceMuted"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-empty-gap2",
-                                "props": {
-                                  "height": 4
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-empty-detail",
-                                "props": {
-                                  "text": "Ask the AI to create a project",
-                                  "textStyle": "bodySmall",
-                                  "color": "onSurfaceDisabled"
-                                }
+                                  "mainAxisAlignment": "center",
+                                  "mainAxisSize": "min"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-empty-icon",
+                                    "props": {
+                                      "icon": "folder_open",
+                                      "size": 32,
+                                      "color": "onSurfaceDisabled",
+                                      "weight": "solid"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-empty-gap1",
+                                    "props": {
+                                      "height": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-empty-msg",
+                                    "props": {
+                                      "text": "No teams found",
+                                      "textStyle": "bodyMedium",
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-empty-gap2",
+                                    "props": {
+                                      "height": 4
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-empty-detail",
+                                    "props": {
+                                      "text": "Ask the AI to create a project",
+                                      "textStyle": "bodySmall",
+                                      "color": "onSurfaceDisabled"
+                                    }
+                                  }
+                                ]
                               }
                             ]
                           }
@@ -279,7 +288,6 @@
                         },
                         "children": [
                           {
-                            "_comment": "Toolbar: 48px fixed height, surface background",
                             "type": "Container",
                             "id": "{{widgetId}}-toolbar",
                             "props": {
@@ -448,7 +456,7 @@
                             }
                           },
                           {
-                            "_comment": "Tree body — scrollable list of team rows with nested project DataSources",
+                            "_comment": "Tree body — personal team first, then alphabetical",
                             "type": "Expanded",
                             "id": "{{widgetId}}-tree-exp",
                             "children": [
@@ -460,286 +468,869 @@
                                 },
                                 "children": [
                                   {
-                                    "_comment": "Iterate over teams from outer DataSource",
-                                    "type": "ForEach",
-                                    "id": "{{widgetId}}-fe-teams",
+                                    "_comment": "Sort teams: personal (name==username) first, then alphabetical",
+                                    "type": "Sort",
+                                    "id": "{{widgetId}}-sort-teams",
                                     "props": {
                                       "items": "{{data}}",
-                                      "filterChannel": "input.{{widgetId}}-tb-search.changed",
-                                      "filterFields": [
-                                        "name"
-                                      ]
+                                      "key": "name",
+                                      "direction": "asc"
                                     },
                                     "children": [
                                       {
-                                        "_comment": "TEAM ROW — level 0. Click expands/collapses.",
-                                        "type": "Action",
-                                        "id": "{{widgetId}}-team-tap-{{item.id}}",
+                                        "type": "ForEach",
+                                        "id": "{{widgetId}}-fe-teams",
                                         "props": {
-                                          "gesture": "onTap",
-                                          "channel": "navigator.toggleExpand",
-                                          "payload": {
-                                            "nodeId": "{{item.id}}",
-                                            "nodeType": "team"
-                                          },
-                                          "hoverColor": "surfaceContainer"
+                                          "items": "{{sorted}}",
+                                          "filterChannel": "input.{{widgetId}}-tb-search.changed",
+                                          "filterFields": [
+                                            "name"
+                                          ]
                                         },
                                         "children": [
                                           {
-                                            "type": "Padding",
-                                            "id": "{{widgetId}}-team-pad-{{item.id}}",
+                                            "type": "Collapsible",
+                                            "id": "{{widgetId}}-team-coll-{{item.id}}",
                                             "props": {
-                                              "padding": 4
+                                              "nodeId": "{{item.id}}",
+                                              "toggleChannel": "navigator.toggleExpand",
+                                              "defaultExpanded": true
                                             },
                                             "children": [
                                               {
-                                                "type": "Row",
-                                                "id": "{{widgetId}}-team-row-{{item.id}}",
+                                                "_comment": "TEAM ROW — level 0. Click expands/collapses.",
+                                                "type": "Action",
+                                                "id": "{{widgetId}}-team-tap-{{item.id}}",
                                                 "props": {
-                                                  "crossAxisAlignment": "center"
+                                                  "gesture": "onTap",
+                                                  "channel": "navigator.toggleExpand",
+                                                  "payload": {
+                                                    "nodeId": "{{item.id}}",
+                                                    "nodeType": "team"
+                                                  },
+                                                  "hoverColor": "surfaceContainer"
                                                 },
                                                 "children": [
                                                   {
-                                                    "type": "SizedBox",
-                                                    "id": "{{widgetId}}-team-indent-{{item.id}}",
+                                                    "type": "Padding",
+                                                    "id": "{{widgetId}}-team-pad-{{item.id}}",
                                                     "props": {
-                                                      "width": 4
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "Icon",
-                                                    "id": "{{widgetId}}-team-chev-{{item.id}}",
-                                                    "props": {
-                                                      "icon": "chevron_right",
-                                                      "size": 10,
-                                                      "color": "onSurfaceMuted"
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "SizedBox",
-                                                    "id": "{{widgetId}}-team-gap1-{{item.id}}",
-                                                    "props": {
-                                                      "width": 4
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "Icon",
-                                                    "id": "{{widgetId}}-team-icon-{{item.id}}",
-                                                    "props": {
-                                                      "icon": "group",
-                                                      "size": 14,
-                                                      "color": "primary",
-                                                      "weight": "solid"
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "SizedBox",
-                                                    "id": "{{widgetId}}-team-gap2-{{item.id}}",
-                                                    "props": {
-                                                      "width": 8
-                                                    }
-                                                  },
-                                                  {
-                                                    "type": "Expanded",
-                                                    "id": "{{widgetId}}-team-name-exp-{{item.id}}",
-                                                    "children": [
-                                                      {
-                                                        "type": "Text",
-                                                        "id": "{{widgetId}}-team-name-{{item.id}}",
-                                                        "props": {
-                                                          "text": "{{item.name}}",
-                                                          "textStyle": "bodyMedium",
-                                                          "color": "onSurface"
-                                                        }
-                                                      }
-                                                    ]
-                                                  }
-                                                ]
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "_comment": "NESTED DataSource — fetches projects for THIS team by name (acl.owner)",
-                                        "type": "DataSource",
-                                        "id": "{{widgetId}}-proj-ds-{{item.id}}",
-                                        "props": {
-                                          "service": "projectService",
-                                          "method": "findByTeamAndIsPublicAndLastModifiedDate",
-                                          "args": [
-                                            [
-                                              "{{item.name}}",
-                                              false,
-                                              ""
-                                            ],
-                                            [
-                                              "{{item.name}}",
-                                              true,
-                                              ""
-                                            ],
-                                            200
-                                          ],
-                                          "refreshOn": "navigator.refreshTree"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Conditional",
-                                            "id": "{{widgetId}}-proj-loading-{{item.id}}",
-                                            "props": {
-                                              "visible": "{{loading}}"
-                                            },
-                                            "children": [
-                                              {
-                                                "type": "Padding",
-                                                "id": "{{widgetId}}-proj-loading-pad-{{item.id}}",
-                                                "props": {
-                                                  "padding": [
-                                                    4,
-                                                    4,
-                                                    4,
-                                                    24
-                                                  ]
-                                                },
-                                                "children": [
-                                                  {
-                                                    "type": "LoadingIndicator",
-                                                    "id": "{{widgetId}}-proj-spinner-{{item.id}}",
-                                                    "props": {
-                                                      "variant": "spinner",
-                                                      "size": 16
-                                                    }
-                                                  }
-                                                ]
-                                              }
-                                            ]
-                                          },
-                                          {
-                                            "type": "Conditional",
-                                            "id": "{{widgetId}}-proj-ready-{{item.id}}",
-                                            "props": {
-                                              "visible": "{{ready}}"
-                                            },
-                                            "children": [
-                                              {
-                                                "type": "ForEach",
-                                                "id": "{{widgetId}}-fe-projects-{{item.id}}",
-                                                "props": {
-                                                  "items": "{{data}}"
-                                                },
-                                                "children": [
-                                                  {
-                                                    "_comment": "Project row — level 1, indent 24px. Single-click emits focusChanged.",
-                                                    "type": "Action",
-                                                    "id": "{{widgetId}}-proj-tap-{{item.id}}",
-                                                    "props": {
-                                                      "gesture": "onTap",
-                                                      "channel": "navigator.focusChanged",
-                                                      "payload": {
-                                                        "nodeId": "{{item.id}}",
-                                                        "nodeType": "project",
-                                                        "nodeName": "{{item.name}}",
-                                                        "nodePath": "{{item.path}}"
-                                                      },
-                                                      "hoverColor": "surfaceContainer"
+                                                      "padding": 4
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "Padding",
-                                                        "id": "{{widgetId}}-proj-pad-{{item.id}}",
+                                                        "type": "Row",
+                                                        "id": "{{widgetId}}-team-row-{{item.id}}",
                                                         "props": {
-                                                          "padding": 4
+                                                          "crossAxisAlignment": "center"
                                                         },
                                                         "children": [
                                                           {
-                                                            "type": "Row",
-                                                            "id": "{{widgetId}}-proj-row-{{item.id}}",
+                                                            "type": "SizedBox",
+                                                            "id": "{{widgetId}}-team-indent-{{item.id}}",
                                                             "props": {
-                                                              "crossAxisAlignment": "center"
+                                                              "width": 4
+                                                            }
+                                                          },
+                                                          {
+                                                            "type": "Conditional",
+                                                            "id": "{{widgetId}}-team-chev-exp-{{item.id}}",
+                                                            "props": {
+                                                              "visible": "{{expanded}}"
                                                             },
                                                             "children": [
                                                               {
-                                                                "type": "SizedBox",
-                                                                "id": "{{widgetId}}-proj-indent-{{item.id}}",
+                                                                "type": "Icon",
+                                                                "id": "{{widgetId}}-team-chev-d-{{item.id}}",
                                                                 "props": {
-                                                                  "width": 24
+                                                                  "icon": "expand_more",
+                                                                  "size": 10,
+                                                                  "color": "onSurfaceMuted"
                                                                 }
-                                                              },
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "Conditional",
+                                                            "id": "{{widgetId}}-team-chev-col-{{item.id}}",
+                                                            "props": {
+                                                              "visible": "{{expanded}}",
+                                                              "negate": true
+                                                            },
+                                                            "children": [
                                                               {
                                                                 "type": "Icon",
-                                                                "id": "{{widgetId}}-proj-chev-{{item.id}}",
+                                                                "id": "{{widgetId}}-team-chev-r-{{item.id}}",
                                                                 "props": {
                                                                   "icon": "chevron_right",
                                                                   "size": 10,
                                                                   "color": "onSurfaceMuted"
                                                                 }
-                                                              },
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "SizedBox",
+                                                            "id": "{{widgetId}}-team-g1-{{item.id}}",
+                                                            "props": {
+                                                              "width": 4
+                                                            }
+                                                          },
+                                                          {
+                                                            "type": "Icon",
+                                                            "id": "{{widgetId}}-team-icon-{{item.id}}",
+                                                            "props": {
+                                                              "icon": "group",
+                                                              "size": 14,
+                                                              "color": "primary",
+                                                              "weight": "solid"
+                                                            }
+                                                          },
+                                                          {
+                                                            "type": "SizedBox",
+                                                            "id": "{{widgetId}}-team-g2-{{item.id}}",
+                                                            "props": {
+                                                              "width": 8
+                                                            }
+                                                          },
+                                                          {
+                                                            "type": "Expanded",
+                                                            "id": "{{widgetId}}-team-name-exp-{{item.id}}",
+                                                            "children": [
                                                               {
-                                                                "type": "SizedBox",
-                                                                "id": "{{widgetId}}-proj-gap1-{{item.id}}",
+                                                                "type": "Text",
+                                                                "id": "{{widgetId}}-team-name-{{item.id}}",
                                                                 "props": {
-                                                                  "width": 4
+                                                                  "text": "{{item.name}}",
+                                                                  "textStyle": "bodyMedium",
+                                                                  "color": "onSurface"
                                                                 }
-                                                              },
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              },
+                                              {
+                                                "type": "Conditional",
+                                                "id": "{{widgetId}}-team-body-{{item.id}}",
+                                                "props": {
+                                                  "visible": "{{expanded}}"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "_comment": "Nested DataSource — projects for THIS team",
+                                                    "type": "DataSource",
+                                                    "id": "{{widgetId}}-proj-ds-{{item.id}}",
+                                                    "props": {
+                                                      "service": "projectService",
+                                                      "method": "findByTeamAndIsPublicAndLastModifiedDate",
+                                                      "args": [
+                                                        [
+                                                          "{{item.name}}",
+                                                          false,
+                                                          ""
+                                                        ],
+                                                        [
+                                                          "{{item.name}}",
+                                                          true,
+                                                          ""
+                                                        ],
+                                                        200
+                                                      ],
+                                                      "refreshOn": "navigator.refreshTree"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Conditional",
+                                                        "id": "{{widgetId}}-proj-loading-{{item.id}}",
+                                                        "props": {
+                                                          "visible": "{{loading}}"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-proj-lpad-{{item.id}}",
+                                                            "props": {
+                                                              "padding": [
+                                                                4,
+                                                                4,
+                                                                4,
+                                                                24
+                                                              ]
+                                                            },
+                                                            "children": [
                                                               {
-                                                                "type": "Icon",
-                                                                "id": "{{widgetId}}-proj-icon-{{item.id}}",
+                                                                "type": "LoadingIndicator",
+                                                                "id": "{{widgetId}}-proj-spin-{{item.id}}",
                                                                 "props": {
-                                                                  "icon": "folder",
-                                                                  "size": 14,
-                                                                  "color": "primary",
-                                                                  "weight": "solid"
+                                                                  "variant": "spinner",
+                                                                  "size": 16
                                                                 }
-                                                              },
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      },
+                                                      {
+                                                        "type": "Conditional",
+                                                        "id": "{{widgetId}}-proj-ready-{{item.id}}",
+                                                        "props": {
+                                                          "visible": "{{ready}}"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "ForEach",
+                                                            "id": "{{widgetId}}-fe-projects-{{item.id}}",
+                                                            "props": {
+                                                              "items": "{{data}}"
+                                                            },
+                                                            "children": [
                                                               {
-                                                                "type": "SizedBox",
-                                                                "id": "{{widgetId}}-proj-gap2-{{item.id}}",
+                                                                "type": "Collapsible",
+                                                                "id": "{{widgetId}}-proj-coll-{{item.id}}",
                                                                 "props": {
-                                                                  "width": 8
-                                                                }
-                                                              },
-                                                              {
-                                                                "type": "Expanded",
-                                                                "id": "{{widgetId}}-proj-name-exp-{{item.id}}",
-                                                                "children": [
-                                                                  {
-                                                                    "type": "Text",
-                                                                    "id": "{{widgetId}}-proj-name-{{item.id}}",
-                                                                    "props": {
-                                                                      "text": "{{item.name}}",
-                                                                      "textStyle": "bodyMedium",
-                                                                      "color": "onSurface"
-                                                                    }
-                                                                  }
-                                                                ]
-                                                              },
-                                                              {
-                                                                "_comment": "Public globe icon",
-                                                                "type": "Conditional",
-                                                                "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
-                                                                "props": {
-                                                                  "visible": "{{item.isPublic}}"
+                                                                  "nodeId": "{{item.id}}",
+                                                                  "toggleChannel": "navigator.toggleExpand",
+                                                                  "defaultExpanded": false
                                                                 },
                                                                 "children": [
                                                                   {
-                                                                    "type": "Row",
-                                                                    "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
+                                                                    "_comment": "Project row — level 1, indent 24px. Tap toggles expand AND sets focus.",
+                                                                    "type": "Action",
+                                                                    "id": "{{widgetId}}-proj-tap-{{item.id}}",
+                                                                    "props": {
+                                                                      "gesture": "onTap",
+                                                                      "channel": "navigator.toggleExpand",
+                                                                      "payload": {
+                                                                        "nodeId": "{{item.id}}",
+                                                                        "nodeType": "project",
+                                                                        "nodeName": "{{item.name}}"
+                                                                      },
+                                                                      "hoverColor": "surfaceContainer"
+                                                                    },
                                                                     "children": [
                                                                       {
-                                                                        "type": "SizedBox",
-                                                                        "id": "{{widgetId}}-proj-pub-gap-{{item.id}}",
+                                                                        "type": "Padding",
+                                                                        "id": "{{widgetId}}-proj-pad-{{item.id}}",
                                                                         "props": {
-                                                                          "width": 8
-                                                                        }
-                                                                      },
+                                                                          "padding": 4
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Row",
+                                                                            "id": "{{widgetId}}-proj-row-{{item.id}}",
+                                                                            "props": {
+                                                                              "crossAxisAlignment": "center"
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-proj-indent-{{item.id}}",
+                                                                                "props": {
+                                                                                  "width": 24
+                                                                                }
+                                                                              },
+                                                                              {
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-proj-chev-exp-{{item.id}}",
+                                                                                "props": {
+                                                                                  "visible": "{{expanded}}"
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Icon",
+                                                                                    "id": "{{widgetId}}-proj-chev-d-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "icon": "expand_more",
+                                                                                      "size": 10,
+                                                                                      "color": "onSurfaceMuted"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-proj-chev-col-{{item.id}}",
+                                                                                "props": {
+                                                                                  "visible": "{{expanded}}",
+                                                                                  "negate": true
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Icon",
+                                                                                    "id": "{{widgetId}}-proj-chev-r-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "icon": "chevron_right",
+                                                                                      "size": 10,
+                                                                                      "color": "onSurfaceMuted"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-proj-g1-{{item.id}}",
+                                                                                "props": {
+                                                                                  "width": 4
+                                                                                }
+                                                                              },
+                                                                              {
+                                                                                "type": "Icon",
+                                                                                "id": "{{widgetId}}-proj-icon-{{item.id}}",
+                                                                                "props": {
+                                                                                  "icon": "folder",
+                                                                                  "size": 14,
+                                                                                  "color": "primary",
+                                                                                  "weight": "solid"
+                                                                                }
+                                                                              },
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-proj-g2-{{item.id}}",
+                                                                                "props": {
+                                                                                  "width": 8
+                                                                                }
+                                                                              },
+                                                                              {
+                                                                                "type": "Expanded",
+                                                                                "id": "{{widgetId}}-proj-name-exp-{{item.id}}",
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-proj-name-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "text": "{{item.name}}",
+                                                                                      "textStyle": "bodyMedium",
+                                                                                      "color": "onSurface"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
+                                                                                "props": {
+                                                                                  "visible": "{{item.isPublic}}"
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Row",
+                                                                                    "id": "{{widgetId}}-proj-pub-row-{{item.id}}",
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "SizedBox",
+                                                                                        "id": "{{widgetId}}-proj-pub-g-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "width": 8
+                                                                                        }
+                                                                                      },
+                                                                                      {
+                                                                                        "type": "Icon",
+                                                                                        "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "icon": "visibility",
+                                                                                          "size": 12,
+                                                                                          "color": "onSurfaceMuted"
+                                                                                        }
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Conditional",
+                                                                                "id": "{{widgetId}}-proj-git-cond-{{item.id}}",
+                                                                                "props": {
+                                                                                  "visible": "{{item.version}}"
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Tooltip",
+                                                                                    "id": "{{widgetId}}-proj-git-tip-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "message": "Version: {{item.version}}"
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Badge",
+                                                                                        "id": "{{widgetId}}-proj-git-badge-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "text": "{{item.version}}",
+                                                                                          "variant": "neutral"
+                                                                                        }
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  {
+                                                                    "type": "Conditional",
+                                                                    "id": "{{widgetId}}-proj-body-{{item.id}}",
+                                                                    "props": {
+                                                                      "visible": "{{expanded}}"
+                                                                    },
+                                                                    "children": [
                                                                       {
-                                                                        "type": "Icon",
-                                                                        "id": "{{widgetId}}-proj-pub-icon-{{item.id}}",
+                                                                        "_comment": "Project contents — root-level documents/folders",
+                                                                        "type": "DataSource",
+                                                                        "id": "{{widgetId}}-pcd-{{item.id}}",
                                                                         "props": {
-                                                                          "icon": "visibility",
-                                                                          "size": 12,
-                                                                          "color": "onSurfaceMuted"
-                                                                        }
+                                                                          "service": "projectDocumentService",
+                                                                          "method": "findProjectObjectsByFolderAndName",
+                                                                          "args": [
+                                                                            [
+                                                                              "{{item.id}}",
+                                                                              "",
+                                                                              ""
+                                                                            ],
+                                                                            [
+                                                                              "{{item.id}}",
+                                                                              "",
+                                                                              ""
+                                                                            ],
+                                                                            200
+                                                                          ]
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Conditional",
+                                                                            "id": "{{widgetId}}-pcd-loading-{{item.id}}",
+                                                                            "props": {
+                                                                              "visible": "{{loading}}"
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "Padding",
+                                                                                "id": "{{widgetId}}-pcd-lpad-{{item.id}}",
+                                                                                "props": {
+                                                                                  "padding": [
+                                                                                    4,
+                                                                                    4,
+                                                                                    4,
+                                                                                    44
+                                                                                  ]
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "LoadingIndicator",
+                                                                                    "id": "{{widgetId}}-pcd-spin-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "variant": "spinner",
+                                                                                      "size": 16
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          },
+                                                                          {
+                                                                            "type": "Conditional",
+                                                                            "id": "{{widgetId}}-pcd-ready-{{item.id}}",
+                                                                            "props": {
+                                                                              "visible": "{{ready}}"
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-folders-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "where": {
+                                                                                    "subKind": "FolderDocument"
+                                                                                  }
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Collapsible",
+                                                                                    "id": "{{widgetId}}-fc2-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "nodeId": "{{item.id}}",
+                                                                                      "toggleChannel": "navigator.toggleExpand",
+                                                                                      "defaultExpanded": false
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-fld2-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.toggleExpand",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "folder"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-fld2-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-fld2-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fld2-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Conditional",
+                                                                                                    "id": "{{widgetId}}-fld2-chev-exp-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "visible": "{{expanded}}"
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Icon",
+                                                                                                        "id": "{{widgetId}}-fld2-chev-d-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "icon": "expand_more",
+                                                                                                          "size": 10,
+                                                                                                          "color": "onSurfaceMuted"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Conditional",
+                                                                                                    "id": "{{widgetId}}-fld2-chev-col-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "visible": "{{expanded}}",
+                                                                                                      "negate": true
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Icon",
+                                                                                                        "id": "{{widgetId}}-fld2-chev-r-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "icon": "chevron_right",
+                                                                                                          "size": 10,
+                                                                                                          "color": "onSurfaceMuted"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fld2-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-fld2-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "folder",
+                                                                                                      "size": 14,
+                                                                                                      "color": "primary",
+                                                                                                      "weight": "solid"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-fld2-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-fld2-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-fld2-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      },
+                                                                                      {
+                                                                                        "type": "Conditional",
+                                                                                        "id": "{{widgetId}}-fc2-body-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "visible": "{{expanded}}"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "DataSource",
+                                                                                            "id": "{{widgetId}}-sfds-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "service": "projectDocumentService",
+                                                                                              "method": "findProjectObjectsByFolderAndName",
+                                                                                              "args": [
+                                                                                                [
+                                                                                                  "{{item.projectId}}",
+                                                                                                  "{{item.id}}",
+                                                                                                  ""
+                                                                                                ],
+                                                                                                [
+                                                                                                  "{{item.projectId}}",
+                                                                                                  "{{item.id}}",
+                                                                                                  ""
+                                                                                                ],
+                                                                                                200
+                                                                                              ]
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Conditional",
+                                                                                                "id": "{{widgetId}}-sfds-rdy-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "visible": "{{ready}}"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "ForEach",
+                                                                                                    "id": "{{widgetId}}-fe-sf-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "items": "{{data}}"
+                                                                                                    },
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Action",
+                                                                                                        "id": "{{widgetId}}-sf-tap-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "gesture": "onTap",
+                                                                                                          "channel": "navigator.focusChanged",
+                                                                                                          "payload": {
+                                                                                                            "nodeId": "{{item.id}}",
+                                                                                                            "nodeType": "{{item.subKind}}",
+                                                                                                            "nodeName": "{{item.name}}"
+                                                                                                          },
+                                                                                                          "hoverColor": "surfaceContainer"
+                                                                                                        },
+                                                                                                        "children": [
+                                                                                                          {
+                                                                                                            "type": "Padding",
+                                                                                                            "id": "{{widgetId}}-sf-pad-{{item.id}}",
+                                                                                                            "props": {
+                                                                                                              "padding": 4
+                                                                                                            },
+                                                                                                            "children": [
+                                                                                                              {
+                                                                                                                "type": "Row",
+                                                                                                                "id": "{{widgetId}}-sf-row-{{item.id}}",
+                                                                                                                "props": {
+                                                                                                                  "crossAxisAlignment": "center"
+                                                                                                                },
+                                                                                                                "children": [
+                                                                                                                  {
+                                                                                                                    "type": "SizedBox",
+                                                                                                                    "id": "{{widgetId}}-sf-indent-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "width": 64
+                                                                                                                    }
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "type": "SizedBox",
+                                                                                                                    "id": "{{widgetId}}-sf-chspc-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "width": 16
+                                                                                                                    }
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "type": "SizedBox",
+                                                                                                                    "id": "{{widgetId}}-sf-g1-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "width": 4
+                                                                                                                    }
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "type": "Icon",
+                                                                                                                    "id": "{{widgetId}}-sf-icon-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "icon": "description",
+                                                                                                                      "size": 14,
+                                                                                                                      "color": "onSurfaceMuted"
+                                                                                                                    }
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "type": "SizedBox",
+                                                                                                                    "id": "{{widgetId}}-sf-g2-{{item.id}}",
+                                                                                                                    "props": {
+                                                                                                                      "width": 8
+                                                                                                                    }
+                                                                                                                  },
+                                                                                                                  {
+                                                                                                                    "type": "Expanded",
+                                                                                                                    "id": "{{widgetId}}-sf-name-exp-{{item.id}}",
+                                                                                                                    "children": [
+                                                                                                                      {
+                                                                                                                        "type": "Text",
+                                                                                                                        "id": "{{widgetId}}-sf-name-{{item.id}}",
+                                                                                                                        "props": {
+                                                                                                                          "text": "{{item.name}}",
+                                                                                                                          "textStyle": "bodyMedium",
+                                                                                                                          "color": "onSurface"
+                                                                                                                        }
+                                                                                                                      }
+                                                                                                                    ]
+                                                                                                                  }
+                                                                                                                ]
+                                                                                                              }
+                                                                                                            ]
+                                                                                                          }
+                                                                                                        ]
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "ForEach",
+                                                                                "id": "{{widgetId}}-fe-leaves-{{item.id}}",
+                                                                                "props": {
+                                                                                  "items": "{{data}}",
+                                                                                  "where": {
+                                                                                    "kind": "FileDocument"
+                                                                                  }
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Action",
+                                                                                    "id": "{{widgetId}}-dbl-{{item.id}}",
+                                                                                    "props": {
+                                                                                      "gesture": "onDoubleTap",
+                                                                                      "channel": "navigator.openViewer",
+                                                                                      "payload": {
+                                                                                        "nodeId": "{{item.id}}",
+                                                                                        "nodeType": "{{item.subKind}}",
+                                                                                        "nodeName": "{{item.name}}"
+                                                                                      }
+                                                                                    },
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Action",
+                                                                                        "id": "{{widgetId}}-leaf-tap-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "gesture": "onTap",
+                                                                                          "channel": "navigator.focusChanged",
+                                                                                          "payload": {
+                                                                                            "nodeId": "{{item.id}}",
+                                                                                            "nodeType": "{{item.subKind}}",
+                                                                                            "nodeName": "{{item.name}}"
+                                                                                          },
+                                                                                          "hoverColor": "surfaceContainer"
+                                                                                        },
+                                                                                        "children": [
+                                                                                          {
+                                                                                            "type": "Padding",
+                                                                                            "id": "{{widgetId}}-leaf-pad-{{item.id}}",
+                                                                                            "props": {
+                                                                                              "padding": 4
+                                                                                            },
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Row",
+                                                                                                "id": "{{widgetId}}-leaf-row-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "crossAxisAlignment": "center"
+                                                                                                },
+                                                                                                "children": [
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-indent-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 44
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-chspc-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 16
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-g1-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 4
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Icon",
+                                                                                                    "id": "{{widgetId}}-leaf-icon-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "icon": "description",
+                                                                                                      "size": 14,
+                                                                                                      "color": "onSurfaceMuted"
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "SizedBox",
+                                                                                                    "id": "{{widgetId}}-leaf-g2-{{item.id}}",
+                                                                                                    "props": {
+                                                                                                      "width": 8
+                                                                                                    }
+                                                                                                  },
+                                                                                                  {
+                                                                                                    "type": "Expanded",
+                                                                                                    "id": "{{widgetId}}-leaf-name-exp-{{item.id}}",
+                                                                                                    "children": [
+                                                                                                      {
+                                                                                                        "type": "Text",
+                                                                                                        "id": "{{widgetId}}-leaf-name-{{item.id}}",
+                                                                                                        "props": {
+                                                                                                          "text": "{{item.name}}",
+                                                                                                          "textStyle": "bodyMedium",
+                                                                                                          "color": "onSurface"
+                                                                                                        }
+                                                                                                      }
+                                                                                                    ]
+                                                                                                  }
+                                                                                                ]
+                                                                                              }
+                                                                                            ]
+                                                                                          }
+                                                                                        ]
+                                                                                      }
+                                                                                    ]
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
                                                                       }
                                                                     ]
                                                                   }
