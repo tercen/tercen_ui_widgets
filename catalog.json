@@ -96,7 +96,7 @@
                   "rootNodes": [
                     {
                       "id": "{{context.userId}}",
-                      "name": "My Projects"
+                      "name": "{{context.username}}"
                     }
                   ]
                 },
