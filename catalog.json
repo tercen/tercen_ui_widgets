@@ -34,7 +34,8 @@
             "payloadField": "nodeId"
           },
           "publishTo": [
-            "navigator.focusChanged"
+            "navigator.focusChanged",
+            "navigator.toggleExpand"
           ]
         },
         "props": {},
