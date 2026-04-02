@@ -5743,59 +5743,6 @@
             ]
           },
           {
-            "type": "Conditional",
-            "id": "{{widgetId}}-focus-cond",
-            "props": {
-              "visible": "{{focusLabel}}"
-            },
-            "children": [
-              {
-                "type": "Container",
-                "id": "{{widgetId}}-focus-bar",
-                "props": {
-                  "color": "surfaceContainerLow",
-                  "padding": 4
-                },
-                "children": [
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-focus-row",
-                    "props": {
-                      "crossAxisAlignment": "center"
-                    },
-                    "children": [
-                      {
-                        "type": "Icon",
-                        "id": "{{widgetId}}-focus-icon",
-                        "props": {
-                          "icon": "pin",
-                          "size": 12,
-                          "color": "onSurfaceMuted"
-                        }
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-focus-gap",
-                        "props": {
-                          "width": 4
-                        }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-focus-text",
-                        "props": {
-                          "text": "Focus: {{focusLabel}}",
-                          "textStyle": "labelSmall",
-                          "color": "onSurfaceMuted"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
             "type": "Padding",
             "id": "{{widgetId}}-compose-pad",
             "props": {
@@ -5894,7 +5841,7 @@
                                                 "type": "Icon",
                                                 "id": "{{widgetId}}-focus-icon-2",
                                                 "props": {
-                                                  "icon": "pin",
+                                                  "icon": "search",
                                                   "size": 10,
                                                   "color": "onSurfaceMuted"
                                                 }
