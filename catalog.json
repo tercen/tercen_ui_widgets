@@ -7901,13 +7901,9 @@
         "tier": 2,
         "typeColor": "#9333EA",
         "tabLabel": "Document",
-        "description": "Rich text and markdown document viewer/editor with source and rendered modes. Opens documents from projects for viewing and editing.",
+        "description": "Markdown document viewer/editor. Loads file content, renders markdown read-only, toggles to raw source for keyboard editing, saves back.",
         "emittedEvents": [
-          "document.saved",
-          "document.contentChanged"
-        ],
-        "inboundEvents": [
-          "document.refresh"
+          "document.saved"
         ],
         "handlesIntent": {
           "intent": "openDocument",
@@ -7923,29 +7919,31 @@
           "documentId": {
             "type": "string",
             "required": true,
-            "description": "ID of the document to load"
+            "description": "FileDocument ID to load and edit"
           },
           "projectId": {
             "type": "string",
-            "required": true,
-            "description": "Project context for the document"
+            "description": "Project context"
           },
           "documentName": {
             "type": "string",
             "description": "Display name for the window title"
           }
         },
-        "stateConfig": {
-          "editMode": "rendered",
-          "isDirty": false
+        "state": {
+          "initialState": {
+            "sourceMode": false
+          },
+          "toggleBindings": {
+            "input.{{widgetId}}-modeToggle.changed": "sourceMode"
+          }
         },
         "domain": "document",
         "capabilities": [
           "view",
           "edit",
           "save"
-        ],
-        "dataSource": "projectDocumentService.get"
+        ]
       },
       "template": {
         "type": "Column",
@@ -7955,483 +7953,261 @@
         },
         "children": [
           {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body-exp",
+            "type": "DataSource",
+            "id": "{{widgetId}}-ds",
+            "props": {
+              "service": "fileService",
+              "method": "download",
+              "args": [
+                "{{props.documentId}}"
+              ],
+              "refreshOn": "{{widgetId}}-save.completed"
+            },
             "children": [
               {
-                "type": "DataSource",
-                "id": "{{widgetId}}-ds",
+                "type": "Conditional",
+                "id": "{{widgetId}}-loading",
                 "props": {
-                  "service": "projectDocumentService",
-                  "method": "get",
-                  "args": [
-                    "{{props.documentId}}"
-                  ],
-                  "refreshOn": "document.refresh"
+                  "visible": "{{loading}}"
                 },
                 "children": [
                   {
-                    "_comment": "Loading state",
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
-                    "props": {
-                      "visible": "{{loading}}"
-                    },
+                    "type": "Center",
+                    "id": "{{widgetId}}-loading-center",
                     "children": [
                       {
-                        "type": "Center",
-                        "id": "{{widgetId}}-loading-center",
-                        "children": [
-                          {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-loading-ind",
-                            "props": {
-                              "variant": "skeleton",
-                              "text": "Loading document\u2026"
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "_comment": "Error state",
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-error",
-                    "props": {
-                      "visible": "{{error}}"
-                    },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-err-center",
-                        "children": [
-                          {
-                            "type": "Column",
-                            "id": "{{widgetId}}-err-col",
-                            "props": {
-                              "mainAxisAlignment": "center",
-                              "crossAxisAlignment": "center"
-                            },
-                            "children": [
-                              {
-                                "type": "Icon",
-                                "id": "{{widgetId}}-err-icon",
-                                "props": {
-                                  "icon": "error_outline",
-                                  "size": 32,
-                                  "color": "error"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-err-gap1",
-                                "props": {
-                                  "height": 8
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-err-title",
-                                "props": {
-                                  "text": "Failed to load document",
-                                  "textStyle": "titleSmall",
-                                  "color": "error"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-err-gap2",
-                                "props": {
-                                  "height": 4
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-err-msg",
-                                "props": {
-                                  "text": "{{errorMessage}}",
-                                  "textStyle": "bodySmall",
-                                  "color": "onSurfaceDisabled"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-err-gap3",
-                                "props": {
-                                  "height": 16
-                                }
-                              },
-                              {
-                                "type": "DangerButton",
-                                "id": "{{widgetId}}-err-retry",
-                                "props": {
-                                  "text": "Retry",
-                                  "channel": "document.refresh"
-                                }
-                              }
-                            ]
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "_comment": "Ready state \u2014 toolbar + body",
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
-                    "props": {
-                      "visible": "{{ready}}"
-                    },
-                    "children": [
-                      {
-                        "type": "Column",
-                        "id": "{{widgetId}}-ready-col",
+                        "type": "LoadingIndicator",
+                        "id": "{{widgetId}}-spinner",
                         "props": {
-                          "crossAxisAlignment": "stretch"
+                          "text": "Loading document\u2026"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Conditional",
+                "id": "{{widgetId}}-error",
+                "props": {
+                  "visible": "{{error}}"
+                },
+                "children": [
+                  {
+                    "type": "Center",
+                    "id": "{{widgetId}}-err-center",
+                    "children": [
+                      {
+                        "type": "Alert",
+                        "id": "{{widgetId}}-err-alert",
+                        "props": {
+                          "variant": "error",
+                          "title": "Failed to load document",
+                          "message": "{{errorMessage}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Conditional",
+                "id": "{{widgetId}}-ready",
+                "props": {
+                  "visible": "{{ready}}"
+                },
+                "children": [
+                  {
+                    "type": "EventScope",
+                    "id": "{{widgetId}}-draft-scope",
+                    "props": {
+                      "channel": "input.{{widgetId}}-editor.changed",
+                      "scopeKey": "draft",
+                      "defaultPayload": {
+                        "value": "{{data.content}}"
+                      }
+                    },
+                    "children": [
+                      {
+                        "type": "ServiceCall",
+                        "id": "{{widgetId}}-save",
+                        "props": {
+                          "service": "fileService",
+                          "method": "updateContent",
+                          "triggerOn": "{{widgetId}}.save",
+                          "args": [
+                            "{{props.documentId}}",
+                            "{{draft.value}}"
+                          ],
+                          "watchChannels": {
+                            "draft": "input.{{widgetId}}-editor.changed"
+                          }
                         },
                         "children": [
                           {
-                            "_comment": "Toolbar",
-                            "type": "Container",
-                            "id": "{{widgetId}}-toolbar",
+                            "type": "Column",
+                            "id": "{{widgetId}}-ready-col",
                             "props": {
-                              "color": "surfaceContainerHigh",
-                              "padding": "sm"
+                              "crossAxisAlignment": "stretch"
                             },
                             "children": [
                               {
-                                "type": "Row",
-                                "id": "{{widgetId}}-toolbar-row",
+                                "type": "Container",
+                                "id": "{{widgetId}}-toolbar",
                                 "props": {
-                                  "crossAxisAlignment": "center"
+                                  "color": "surfaceContainerHigh",
+                                  "padding": "sm"
                                 },
                                 "children": [
                                   {
-                                    "_comment": "INCOMPLETE: Save button needs dynamic variant switching (toolbar-secondary when clean, toolbar-primary when dirty). Requires {{state.isDirty}} binding \u2014 see sdui-gaps.md GAP #4 and #8.",
-                                    "type": "IconButton",
-                                    "id": "{{widgetId}}-btn-save",
-                                    "props": {
-                                      "icon": "floppy_disk",
-                                      "tooltip": "Save (Ctrl+S)",
-                                      "variant": "toolbar-secondary",
-                                      "channel": "widget.{{widgetId}}.save"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-tb-gap1",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "_comment": "INCOMPLETE: Needs VerticalDivider primitive \u2014 see sdui-gaps.md GAP #10.",
-                                    "type": "Placeholder",
-                                    "id": "{{widgetId}}-tb-sep1",
-                                    "props": {
-                                      "label": "ERROR: VerticalDivider primitive missing"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-tb-gap2",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "_comment": "INCOMPLETE: Needs SegmentedButton primitive (GAP #1), {{state.editMode}} binding (GAP #8), and must be hidden for text/plain documents where only source mode applies (GAP #12).",
-                                    "type": "Placeholder",
-                                    "id": "{{widgetId}}-mode-toggle",
-                                    "props": {
-                                      "label": "ERROR: SegmentedButton primitive missing (source/rendered toggle, icons: code/book, channel: widget.{{widgetId}}.setMode). Also: must be Conditional on data.mimeType == text/markdown"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-tb-gap3",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "_comment": "INCOMPLETE: Needs VerticalDivider primitive \u2014 see sdui-gaps.md GAP #10.",
-                                    "type": "Placeholder",
-                                    "id": "{{widgetId}}-tb-sep2",
-                                    "props": {
-                                      "label": "ERROR: VerticalDivider primitive missing"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-tb-gap4",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "_comment": "INCOMPLETE: Formatting buttons should only be visible in source mode. Needs Conditional with {{state.editMode == 'source'}} \u2014 see sdui-gaps.md GAP #8 and #9. Also, text insertion into TextField is not expressible \u2014 see GAP #3. Buttons emit channels but nothing acts on them yet.",
                                     "type": "Row",
-                                    "id": "{{widgetId}}-fmt-row",
+                                    "id": "{{widgetId}}-toolbar-row",
+                                    "props": {
+                                      "crossAxisAlignment": "center"
+                                    },
                                     "children": [
                                       {
-                                        "_comment": "INCOMPLETE: icon 'bold' missing from _iconMap. Add: 'bold': FontAwesomeIcons.bold",
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-bold",
-                                        "props": {
-                                          "label": "ERROR: icon 'bold' not in _iconMap (IconButton: Bold, channel: widget.{{widgetId}}.format, action: bold)"
-                                        }
-                                      },
-                                      {
-                                        "_comment": "INCOMPLETE: icon 'italic' missing from _iconMap. Add: 'italic': FontAwesomeIcons.italic",
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-italic",
-                                        "props": {
-                                          "label": "ERROR: icon 'italic' not in _iconMap (IconButton: Italic, channel: widget.{{widgetId}}.format, action: italic)"
-                                        }
-                                      },
-                                      {
-                                        "_comment": "INCOMPLETE: icon 'strikethrough' missing from _iconMap. Add: 'strikethrough': FontAwesomeIcons.strikethrough",
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-strikethrough",
-                                        "props": {
-                                          "label": "ERROR: icon 'strikethrough' not in _iconMap (IconButton: Strikethrough, channel: widget.{{widgetId}}.format, action: strikethrough)"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-fmt-gap1",
-                                        "props": {
-                                          "width": 4
-                                        }
-                                      },
-                                      {
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-fmt-sep1",
-                                        "props": {
-                                          "label": "ERROR: VerticalDivider primitive missing"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-fmt-gap2",
-                                        "props": {
-                                          "width": 4
-                                        }
-                                      },
-                                      {
-                                        "_comment": "INCOMPLETE: icon 'heading' missing from _iconMap. Add: 'heading': FontAwesomeIcons.heading",
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-h1",
-                                        "props": {
-                                          "label": "ERROR: icon 'heading' not in _iconMap (IconButton: H1, channel: widget.{{widgetId}}.format, action: h1)"
-                                        }
-                                      },
-                                      {
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-h2",
-                                        "props": {
-                                          "label": "ERROR: icon 'heading' not in _iconMap (IconButton: H2, channel: widget.{{widgetId}}.format, action: h2)"
-                                        }
-                                      },
-                                      {
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-h3",
-                                        "props": {
-                                          "label": "ERROR: icon 'heading' not in _iconMap (IconButton: H3, channel: widget.{{widgetId}}.format, action: h3)"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-fmt-gap3",
-                                        "props": {
-                                          "width": 4
-                                        }
-                                      },
-                                      {
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-fmt-sep2",
-                                        "props": {
-                                          "label": "ERROR: VerticalDivider primitive missing"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-fmt-gap4",
-                                        "props": {
-                                          "width": 4
-                                        }
-                                      },
-                                      {
-                                        "_comment": "INCOMPLETE: icon 'list-ul' missing from _iconMap. Add: 'list-ul': FontAwesomeIcons.listUl or 'list_ul': FontAwesomeIcons.listUl",
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-ul",
-                                        "props": {
-                                          "label": "ERROR: icon 'list-ul' not in _iconMap (IconButton: Bullet list, channel: widget.{{widgetId}}.format, action: unorderedList)"
-                                        }
-                                      },
-                                      {
-                                        "_comment": "INCOMPLETE: icon 'list-ol' missing from _iconMap. Add: 'list-ol': FontAwesomeIcons.listOl or 'list_ol': FontAwesomeIcons.listOl",
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-btn-ol",
-                                        "props": {
-                                          "label": "ERROR: icon 'list-ol' not in _iconMap (IconButton: Numbered list, channel: widget.{{widgetId}}.format, action: orderedList)"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-fmt-gap5",
-                                        "props": {
-                                          "width": 4
-                                        }
-                                      },
-                                      {
-                                        "type": "Placeholder",
-                                        "id": "{{widgetId}}-fmt-sep3",
-                                        "props": {
-                                          "label": "ERROR: VerticalDivider primitive missing"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-fmt-gap6",
-                                        "props": {
-                                          "width": 4
-                                        }
-                                      },
-                                      {
-                                        "_comment": "INCOMPLETE: Link/image buttons need FormDialog for user input collection \u2014 see sdui-gaps.md GAP #7.",
-                                        "type": "IconButton",
-                                        "id": "{{widgetId}}-btn-link",
-                                        "props": {
-                                          "icon": "link",
-                                          "tooltip": "Insert link",
-                                          "channel": "widget.{{widgetId}}.format",
-                                          "payload": {
-                                            "action": "link"
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "type": "IconButton",
-                                        "id": "{{widgetId}}-btn-image",
-                                        "props": {
-                                          "icon": "image",
-                                          "tooltip": "Insert image",
-                                          "channel": "widget.{{widgetId}}.format",
-                                          "payload": {
-                                            "action": "image"
-                                          }
-                                        }
-                                      },
-                                      {
-                                        "type": "IconButton",
-                                        "id": "{{widgetId}}-btn-code",
+                                        "type": "ToggleButton",
+                                        "id": "{{widgetId}}-modeToggle",
                                         "props": {
                                           "icon": "code",
-                                          "tooltip": "Inline code",
-                                          "channel": "widget.{{widgetId}}.format",
-                                          "payload": {
-                                            "action": "inlineCode"
-                                          }
+                                          "tooltip": "Toggle source / preview"
                                         }
                                       },
                                       {
-                                        "type": "IconButton",
-                                        "id": "{{widgetId}}-btn-hr",
+                                        "type": "SizedBox",
+                                        "id": "{{widgetId}}-tb-gap1",
                                         "props": {
-                                          "icon": "minus",
-                                          "tooltip": "Horizontal rule",
-                                          "channel": "widget.{{widgetId}}.format",
-                                          "payload": {
-                                            "action": "horizontalRule"
-                                          }
+                                          "width": 8
                                         }
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-saving-cond",
+                                        "props": {
+                                          "visible": "{{saving}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "LoadingIndicator",
+                                            "id": "{{widgetId}}-save-spin",
+                                            "props": {
+                                              "variant": "circular"
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Conditional",
+                                        "id": "{{widgetId}}-saved-cond",
+                                        "props": {
+                                          "visible": "{{saved}}"
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Icon",
+                                            "id": "{{widgetId}}-saved-icon",
+                                            "props": {
+                                              "icon": "check",
+                                              "color": "success",
+                                              "size": 16
+                                            }
+                                          }
+                                        ]
+                                      },
+                                      {
+                                        "type": "Spacer",
+                                        "id": "{{widgetId}}-tb-spacer"
+                                      },
+                                      {
+                                        "type": "IconButton",
+                                        "id": "{{widgetId}}-saveBtn",
+                                        "props": {
+                                          "icon": "floppy-disk",
+                                          "channel": "{{widgetId}}.save",
+                                          "tooltip": "Save",
+                                          "variant": "toolbar-primary"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Divider",
+                                "id": "{{widgetId}}-toolbar-div",
+                                "props": {
+                                  "height": 1,
+                                  "color": "outlineVariant"
+                                }
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-save-err-cond",
+                                "props": {
+                                  "visible": "{{saveError}}"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Alert",
+                                    "id": "{{widgetId}}-save-err",
+                                    "props": {
+                                      "variant": "error",
+                                      "message": "{{saveError}}",
+                                      "dismissible": true
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Expanded",
+                                "id": "{{widgetId}}-editor-exp",
+                                "children": [
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-preview-cond",
+                                    "props": {
+                                      "visible": "{{state.sourceMode}}",
+                                      "negate": true
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "Padding",
+                                        "id": "{{widgetId}}-md-pad",
+                                        "props": {
+                                          "all": 8
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Markdown",
+                                            "id": "{{widgetId}}-md",
+                                            "props": {
+                                              "content": "{{draft.value}}",
+                                              "selectable": true
+                                            }
+                                          }
+                                        ]
                                       }
                                     ]
                                   },
                                   {
-                                    "type": "Spacer",
-                                    "id": "{{widgetId}}-tb-spacer"
-                                  },
-                                  {
-                                    "type": "IconButton",
-                                    "id": "{{widgetId}}-btn-print",
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-source-cond",
                                     "props": {
-                                      "icon": "print",
-                                      "tooltip": "Print",
-                                      "variant": "toolbar-secondary",
-                                      "channel": "widget.{{widgetId}}.print"
-                                    }
-                                  }
-                                ]
-                              }
-                            ]
-                          },
-                          {
-                            "type": "Divider",
-                            "id": "{{widgetId}}-toolbar-div",
-                            "props": {
-                              "height": 1,
-                              "color": "outlineVariant"
-                            }
-                          },
-                          {
-                            "_comment": "INCOMPLETE: Save feedback banners need {{state.saveSuccess}} and {{state.saveError}} bindings with Conditional visibility. Requires state scope injection in template resolver \u2014 see sdui-gaps.md GAP #8. Target structure: Conditional(visible: state.saveSuccess) > Alert(variant: success), Conditional(visible: state.saveError) > Alert(variant: error, message: state.saveErrorMessage).",
-                            "type": "Placeholder",
-                            "id": "{{widgetId}}-banners",
-                            "props": {
-                              "label": "ERROR: Save feedback banners need {{state.X}} scope (success/error Alert with Conditional visibility)"
-                            }
-                          },
-                          {
-                            "_comment": "INCOMPLETE: Editor body needs mode switching via Conditional(visible: state.editMode == 'source'/'rendered'). Requires both {{state.X}} scope (GAP #8) and expression evaluation in bindings (GAP #9). Target: only one editor visible at a time based on mode toggle.",
-                            "type": "Expanded",
-                            "id": "{{widgetId}}-editor-exp",
-                            "children": [
-                              {
-                                "type": "Placeholder",
-                                "id": "{{widgetId}}-mode-switch-error",
-                                "props": {
-                                  "label": "ERROR: Mode switching needs {{state.editMode}} binding + expression evaluation (== operator). Both editors below are always visible until resolved."
-                                }
-                              },
-                              {
-                                "_comment": "INCOMPLETE: Source editor should only show in source mode. Also needs monospace fontFamily prop on TextField \u2014 see sdui-gaps.md GAP #2.",
-                                "type": "Padding",
-                                "id": "{{widgetId}}-source-pad",
-                                "props": {
-                                  "padding": "md"
-                                },
-                                "children": [
-                                  {
-                                    "type": "TextField",
-                                    "id": "{{widgetId}}-source-editor",
-                                    "props": {
-                                      "value": "{{data.content}}",
-                                      "borderless": true,
-                                      "submitOnEnter": false,
-                                      "channel": "widget.{{widgetId}}.contentChanged"
-                                    }
-                                  }
-                                ]
-                              },
-                              {
-                                "_comment": "INCOMPLETE: Rendered editor should only show in rendered mode AND only for text/markdown documents (not text/plain). Needs Conditional on data.mimeType == text/markdown (GAP #12) and state.editMode == rendered (GAP #8, #9).",
-                                "type": "Padding",
-                                "id": "{{widgetId}}-rendered-pad",
-                                "props": {
-                                  "padding": "md"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Markdown",
-                                    "id": "{{widgetId}}-rendered-editor",
-                                    "props": {
-                                      "content": "{{data.content}}",
-                                      "selectable": true
-                                    }
+                                      "visible": "{{state.sourceMode}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "TextField",
+                                        "id": "{{widgetId}}-editor",
+                                        "props": {
+                                          "value": "{{draft.value}}",
+                                          "maxLines": 999,
+                                          "borderless": true,
+                                          "fontFamily": "monospace"
+                                        }
+                                      }
+                                    ]
                                   }
                                 ]
                               }
