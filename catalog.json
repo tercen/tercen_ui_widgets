@@ -466,7 +466,7 @@
                             }
                           },
                           {
-                            "_comment": "Tree body — personal team first, then alphabetical",
+                            "_comment": "Tree body \u2014 personal team first, then alphabetical",
                             "type": "Expanded",
                             "id": "{{widgetId}}-tree-exp",
                             "children": [
@@ -493,7 +493,7 @@
                                     },
                                     "children": [
                                       {
-                                        "_comment": "Personal team — always first, default expanded",
+                                        "_comment": "Personal team \u2014 always first, default expanded",
                                         "type": "Collapsible",
                                         "id": "{{widgetId}}-pteam-coll",
                                         "props": {
@@ -645,7 +645,7 @@
                                                     [
                                                       "{{context.username}}",
                                                       true,
-                                                      ""
+                                                      "\uf000"
                                                     ],
                                                     200
                                                   ],
@@ -956,7 +956,7 @@
                                                                         [
                                                                           "{{item.id}}",
                                                                           "",
-                                                                          ""
+                                                                          "\uf000"
                                                                         ],
                                                                         200
                                                                       ]
@@ -1746,7 +1746,7 @@
                                                                                                 [
                                                                                                   "{{item.projectId}}",
                                                                                                   "{{item.id}}",
-                                                                                                  ""
+                                                                                                  "\uf000"
                                                                                                 ],
                                                                                                 200
                                                                                               ]
@@ -2389,7 +2389,7 @@
                                                 },
                                                 "children": [
                                                   {
-                                                    "_comment": "TEAM ROW — level 0. Click expands/collapses.",
+                                                    "_comment": "TEAM ROW \u2014 level 0. Click expands/collapses.",
                                                     "type": "Action",
                                                     "id": "{{widgetId}}-team-tap-{{item.id}}",
                                                     "props": {
@@ -2518,7 +2518,7 @@
                                                     },
                                                     "children": [
                                                       {
-                                                        "_comment": "Nested DataSource — projects for THIS team",
+                                                        "_comment": "Nested DataSource \u2014 projects for THIS team",
                                                         "type": "DataSource",
                                                         "id": "{{widgetId}}-proj-ds-{{item.id}}",
                                                         "props": {
@@ -2533,7 +2533,7 @@
                                                             [
                                                               "{{item.name}}",
                                                               true,
-                                                              ""
+                                                              "\uf000"
                                                             ],
                                                             200
                                                           ],
@@ -2596,7 +2596,7 @@
                                                                     },
                                                                     "children": [
                                                                       {
-                                                                        "_comment": "Project row — level 1, indent 24px. Tap toggles expand AND sets focus.",
+                                                                        "_comment": "Project row \u2014 level 1, indent 24px. Tap toggles expand AND sets focus.",
                                                                         "type": "Action",
                                                                         "id": "{{widgetId}}-proj-tap-{{item.id}}",
                                                                         "props": {
@@ -2831,7 +2831,7 @@
                                                                         },
                                                                         "children": [
                                                                           {
-                                                                            "_comment": "Project contents — root-level documents/folders",
+                                                                            "_comment": "Project contents \u2014 root-level documents/folders",
                                                                             "type": "DataSource",
                                                                             "id": "{{widgetId}}-pcd-{{item.id}}",
                                                                             "props": {
@@ -2846,7 +2846,7 @@
                                                                                 [
                                                                                   "{{item.id}}",
                                                                                   "",
-                                                                                  ""
+                                                                                  "\uf000"
                                                                                 ],
                                                                                 200
                                                                               ]
@@ -3636,7 +3636,7 @@
                                                                                                         [
                                                                                                           "{{item.projectId}}",
                                                                                                           "{{item.id}}",
-                                                                                                          ""
+                                                                                                          "\uf000"
                                                                                                         ],
                                                                                                         200
                                                                                                       ]
@@ -4346,7 +4346,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -4571,7 +4571,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -4859,7 +4859,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -5008,7 +5008,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -5169,17 +5169,57 @@
     {
       "metadata": {
         "type": "AuditTrail",
+        "kind": "window",
         "tier": 2,
-        "description": "Chronological log of user actions and system events. Use when the user wants to review recent activity or audit history.",
+        "typeColor": "#0D9488",
+        "tabLabel": "Audit Trail",
+        "description": "Chronological log of user actions and system events across projects, teams, and workflows. Supports filtering by event type, column values, and date ranges. Use when the user wants to review recent activity, audit history, or investigate system events.",
         "emittedEvents": [
           "window.intent"
         ],
+        "inboundEvents": [
+          "window.{{widgetId}}.command"
+        ],
+        "handlesIntent": {
+          "intent": "openAuditTrail",
+          "propsMap": {
+            "scopeType": "scopeType",
+            "scopeId": "scopeId"
+          },
+          "windowTitle": "Audit Trail",
+          "windowSize": "large"
+        },
+        "state": {
+          "publishTo": [
+            "audit.focusChanged"
+          ],
+          "selection": {
+            "channel": "audit.focusChanged",
+            "matchField": "id",
+            "payloadField": "eventId",
+            "multi": false
+          }
+        },
+        "props": {
+          "scopeType": {
+            "type": "string",
+            "required": true
+          },
+          "scopeId": {
+            "type": "string",
+            "required": true
+          }
+        },
         "domain": "activity",
         "capabilities": [
-          "browse"
+          "browse",
+          "search",
+          "select",
+          "filter",
+          "export"
         ],
-        "selectionMode": "none",
-        "dataSource": "activityService.findByOwner"
+        "selectionMode": "single",
+        "dataSource": "activityService.findByProjectAndDate"
       },
       "template": {
         "type": "Column",
@@ -5189,71 +5229,1661 @@
         },
         "children": [
           {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": {
-              "color": "surfaceContainerHigh",
-              "padding": "sm"
-            },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": {
-                  "mainAxisAlignment": "spaceBetween"
-                },
-                "children": [
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-toolbar-left",
-                    "children": [
-                      {
-                        "type": "Icon",
-                        "id": "{{widgetId}}-toolbar-icon",
-                        "props": {
-                          "icon": "checklist",
-                          "size": 16,
-                          "color": "primary"
-                        }
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-toolbar-gap",
-                        "props": {
-                          "width": 8.0
-                        }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-title",
-                        "props": {
-                          "text": "Audit Trail",
-                          "textStyle": "labelMedium",
-                          "color": "onSurface"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
-          {
             "type": "Expanded",
             "id": "{{widgetId}}-body",
             "children": [
               {
-                "type": "Center",
-                "id": "{{widgetId}}-placeholder",
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "activityService",
+                  "method": "findByProjectAndDate",
+                  "args": [
+                    [
+                      "{{props.scopeId}}",
+                      ""
+                    ],
+                    [
+                      "{{props.scopeId}}",
+                      "\uf000"
+                    ],
+                    200
+                  ],
+                  "refreshOn": "audit.refresh",
+                  "_comment": "Default uses findByProjectAndDate. For team scope use findByTeamAndDate, for user scope use findByUserAndDate. Scope dispatch requires orchestrator-level routing.",
+                  "_unimplemented": "PAGINATION: Only fetches first page (limit 200). No load-more/infinite-scroll support. DataSource needs onEndReached or pagination-aware fetching to load subsequent pages. Large audit logs will be silently truncated."
+                },
                 "children": [
                   {
-                    "type": "Text",
-                    "id": "{{widgetId}}-placeholder-text",
+                    "_comment": "Loading state",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "text": "Select a scope to view audit events",
-                      "textStyle": "labelSmall",
-                      "color": "onSurfaceMuted"
-                    }
+                      "visible": "{{loading}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-spinner",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-li",
+                            "props": {
+                              "variant": "skeleton",
+                              "text": "Loading audit trail\u2026"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "_comment": "Error state",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-err-col",
+                            "props": {
+                              "mainAxisAlignment": "center",
+                              "crossAxisAlignment": "center"
+                            },
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-err-icon",
+                                "props": {
+                                  "icon": "triangle-exclamation",
+                                  "size": 32,
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap",
+                                "props": {
+                                  "height": 8.0
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "{{errorMessage}}",
+                                  "textStyle": "bodySmall",
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-btn-gap",
+                                "props": {
+                                  "height": 16.0
+                                }
+                              },
+                              {
+                                "type": "SecondaryButton",
+                                "id": "{{widgetId}}-retry-btn",
+                                "props": {
+                                  "text": "Retry",
+                                  "icon": "rotate-right",
+                                  "channel": "audit.refresh"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "_comment": "Ready state \u2014 toolbar + master-detail layout",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Column",
+                        "id": "{{widgetId}}-content",
+                        "props": {
+                          "crossAxisAlignment": "stretch"
+                        },
+                        "children": [
+                          {
+                            "_comment": "Toolbar \u2014 all left-aligned: Columns, Sort, Export, Search, Send to Chat",
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
+                            "props": {
+                              "color": "surfaceContainerHigh",
+                              "padding": "sm"
+                            },
+                            "children": [
+                              {
+                                "type": "Row",
+                                "id": "{{widgetId}}-toolbar-row",
+                                "props": {
+                                  "crossAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "_comment": "Columns visibility \u2014 opens popup with column toggles",
+                                    "type": "PopupMenu",
+                                    "id": "{{widgetId}}-btn-columns",
+                                    "props": {
+                                      "icon": "table-columns",
+                                      "iconSize": 16,
+                                      "tooltip": "Columns",
+                                      "channel": "audit.{{widgetId}}.columnToggle",
+                                      "_unimplemented": "POPUP_MULTI_SELECT: PopupMenu is single-select only. Needs multiSelect/checkbox items for column visibility toggles (17 columns: date, type, user, action, target, team, project, objectKind, targetId, source, public, createdDate, runDate, duration, state, error, recordId). Also needs Show All / Reset to Defaults toggle.",
+                                      "items": [
+                                        {
+                                          "value": "date",
+                                          "label": "Date"
+                                        },
+                                        {
+                                          "value": "type",
+                                          "label": "Type"
+                                        },
+                                        {
+                                          "value": "user",
+                                          "label": "User"
+                                        },
+                                        {
+                                          "value": "action",
+                                          "label": "Action"
+                                        },
+                                        {
+                                          "value": "target",
+                                          "label": "Target"
+                                        },
+                                        {
+                                          "value": "team",
+                                          "label": "Team"
+                                        },
+                                        {
+                                          "value": "project",
+                                          "label": "Project"
+                                        },
+                                        {
+                                          "value": "objectKind",
+                                          "label": "Object Kind"
+                                        },
+                                        {
+                                          "value": "targetId",
+                                          "label": "Target ID"
+                                        },
+                                        {
+                                          "value": "source",
+                                          "label": "Source"
+                                        },
+                                        {
+                                          "value": "public",
+                                          "label": "Public"
+                                        },
+                                        {
+                                          "value": "createdDate",
+                                          "label": "Created"
+                                        },
+                                        {
+                                          "value": "runDate",
+                                          "label": "Run Date"
+                                        },
+                                        {
+                                          "value": "duration",
+                                          "label": "Duration"
+                                        },
+                                        {
+                                          "value": "state",
+                                          "label": "State"
+                                        },
+                                        {
+                                          "value": "error",
+                                          "label": "Error"
+                                        },
+                                        {
+                                          "value": "recordId",
+                                          "label": "Record ID"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap1",
+                                    "props": {
+                                      "width": 8.0
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Sort toggle \u2014 newest/oldest first",
+                                    "type": "IconButton",
+                                    "id": "{{widgetId}}-btn-sort",
+                                    "props": {
+                                      "icon": "arrow-down-wide-short",
+                                      "tooltip": "Sort: Newest first",
+                                      "variant": "toolbar-secondary",
+                                      "channel": "audit.{{widgetId}}.toggleSort"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap2",
+                                    "props": {
+                                      "width": 8.0
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Export CSV",
+                                    "type": "IconButton",
+                                    "id": "{{widgetId}}-btn-export",
+                                    "props": {
+                                      "icon": "file-export",
+                                      "tooltip": "Export CSV",
+                                      "variant": "toolbar-secondary",
+                                      "channel": "audit.{{widgetId}}.exportCsv",
+                                      "_unimplemented": "CSV_EXPORT: No file download handler exists. Channel fires but nothing handles it. Orchestrator needs to register a handler for audit.*.exportCsv that generates CSV from visible columns/filtered rows and triggers browser download."
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap3",
+                                    "props": {
+                                      "width": 8.0
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Search field \u2014 UNIMPLEMENTED: TextField renders but typing does nothing. Needs Filter primitive wired to ForEach to actually filter event rows. Keeping TextField visible so debugger can wire it.",
+                                    "type": "TextField",
+                                    "id": "{{widgetId}}-search",
+                                    "props": {
+                                      "hint": "Search events\u2026",
+                                      "prefixIcon": "magnifying-glass",
+                                      "_unimplemented": "SEARCH_FILTER: TextField publishes to input.{{widgetId}}-search.changed but no Filter primitive is wired between TextField output and ForEach items. Typing will not filter the event list. Need to add Filter behaviour node wrapping ForEach, subscribing to the TextField channel."
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-gap4",
+                                    "props": {
+                                      "width": 8.0
+                                    }
+                                  },
+                                  {
+                                    "_comment": "Send to Chat \u2014 primary filled toolbar button",
+                                    "type": "IconButton",
+                                    "id": "{{widgetId}}-btn-send-chat",
+                                    "props": {
+                                      "icon": "paper-plane",
+                                      "tooltip": "Send to Chat",
+                                      "variant": "toolbar-primary",
+                                      "channel": "audit.{{widgetId}}.sendToChat",
+                                      "_unimplemented": "SEND_TO_CHAT: (1) Button should be disabled when no rows are selected \u2014 needs enabled binding to selection count. (2) No Toast/Snackbar primitive \u2014 user gets no confirmation feedback after send. (3) Channel handler needs to collect selected event data and forward to chat widget."
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Divider",
+                            "id": "{{widgetId}}-div",
+                            "props": {
+                              "color": "outlineVariant"
+                            }
+                          },
+                          {
+                            "_comment": "Master-detail: event list (left) + detail panel (right)",
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-master-detail",
+                            "children": [
+                              {
+                                "type": "Row",
+                                "id": "{{widgetId}}-md-row",
+                                "props": {
+                                  "crossAxisAlignment": "stretch"
+                                },
+                                "children": [
+                                  {
+                                    "_comment": "Left: scrollable event list with column headers",
+                                    "type": "Expanded",
+                                    "id": "{{widgetId}}-list-exp",
+                                    "children": [
+                                      {
+                                        "type": "Column",
+                                        "id": "{{widgetId}}-list-col",
+                                        "props": {
+                                          "crossAxisAlignment": "stretch"
+                                        },
+                                        "children": [
+                                          {
+                                            "_comment": "Column header row",
+                                            "type": "Container",
+                                            "id": "{{widgetId}}-hdr-container",
+                                            "props": {
+                                              "color": "surfaceContainerHigh",
+                                              "padding": "xs"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Row",
+                                                "id": "{{widgetId}}-hdr-row",
+                                                "_unimplemented": "MULTI_SELECT_HEADER: Select-all checkbox removed \u2014 Checkbox renders but has no state binding. Needs orchestrator multi-select support (Ctrl+click, Shift+click, header toggle). See GAP-7 in sdui-gaps.md.",
+                                                "children": [
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-date-exp",
+                                                    "props": {
+                                                      "flex": 2
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-date",
+                                                        "props": {
+                                                          "text": "Date",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-type-exp",
+                                                    "props": {
+                                                      "flex": 1
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-type",
+                                                        "props": {
+                                                          "text": "Type",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-user-exp",
+                                                    "props": {
+                                                      "flex": 2
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-user",
+                                                        "props": {
+                                                          "text": "User",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-action-exp",
+                                                    "props": {
+                                                      "flex": 2
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-action",
+                                                        "props": {
+                                                          "text": "Action",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-target-exp",
+                                                    "props": {
+                                                      "flex": 2
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-target",
+                                                        "props": {
+                                                          "text": "Target",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-team-exp",
+                                                    "props": {
+                                                      "flex": 2
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-team",
+                                                        "props": {
+                                                          "text": "Team",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Expanded",
+                                                    "id": "{{widgetId}}-hdr-project-exp",
+                                                    "props": {
+                                                      "flex": 2
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-hdr-project",
+                                                        "props": {
+                                                          "text": "Project",
+                                                          "textStyle": "labelSmall",
+                                                          "color": "onSurfaceMuted"
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "Divider",
+                                            "id": "{{widgetId}}-hdr-div",
+                                            "props": {
+                                              "color": "outlineVariant"
+                                            }
+                                          },
+                                          {
+                                            "_comment": "Event rows \u2014 iterated from data source",
+                                            "type": "Expanded",
+                                            "id": "{{widgetId}}-list-body",
+                                            "children": [
+                                              {
+                                                "type": "ListView",
+                                                "id": "{{widgetId}}-lv",
+                                                "props": {
+                                                  "padding": "xs"
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "ForEach",
+                                                    "id": "{{widgetId}}-fe",
+                                                    "props": {
+                                                      "items": "{{data}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "_comment": "Single event row \u2014 tap to select, double-tap to navigate",
+                                                        "type": "Action",
+                                                        "id": "tap-{{item.id}}",
+                                                        "props": {
+                                                          "gesture": "onTap",
+                                                          "channel": "audit.focusChanged",
+                                                          "payload": {
+                                                            "eventId": "{{item.id}}",
+                                                            "eventType": "{{item.eventType}}",
+                                                            "targetName": "{{item.targetName}}"
+                                                          }
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "type": "Action",
+                                                            "id": "dbl-{{item.id}}",
+                                                            "props": {
+                                                              "gesture": "onDoubleTap",
+                                                              "channel": "window.intent",
+                                                              "payload": {
+                                                                "intent": "openDocument",
+                                                                "documentId": "{{item.targetId}}",
+                                                                "documentKind": "{{item.objectKind}}",
+                                                                "projectId": "{{item.projectId}}"
+                                                              }
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Container",
+                                                                "id": "row-{{item.id}}",
+                                                                "props": {
+                                                                  "padding": "xs"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Row",
+                                                                    "id": "cells-{{item.id}}",
+                                                                    "props": {
+                                                                      "crossAxisAlignment": "center"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "_comment": "Date column",
+                                                                        "type": "Expanded",
+                                                                        "id": "date-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 2
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "date-{{item.id}}",
+                                                                            "props": {
+                                                                              "text": "{{item.displayDate}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurfaceMuted",
+                                                                              "maxLines": 1,
+                                                                              "overflow": "ellipsis"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "_comment": "Type column \u2014 event type chip",
+                                                                        "type": "Expanded",
+                                                                        "id": "type-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 1
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Chip",
+                                                                            "id": "type-{{item.id}}",
+                                                                            "props": {
+                                                                              "label": "{{item.eventType}}",
+                                                                              "_unimplemented": "CHIP_COLOR_MAP: Chip needs per-eventType colour mapping (create=success, update=info, delete=error, run=info, complete=success, fail=error, cancel=warning). Chip primitive only accepts a single color token \u2014 need colorMap prop or Conditional wrapper per type."
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "_comment": "User column",
+                                                                        "type": "Expanded",
+                                                                        "id": "user-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 2
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "user-{{item.id}}",
+                                                                            "props": {
+                                                                              "text": "{{item.userId}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurface",
+                                                                              "maxLines": 1,
+                                                                              "overflow": "ellipsis"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "_comment": "Action column",
+                                                                        "type": "Expanded",
+                                                                        "id": "action-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 2
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "action-{{item.id}}",
+                                                                            "props": {
+                                                                              "text": "{{item.actionSummary}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurface",
+                                                                              "maxLines": 1,
+                                                                              "overflow": "ellipsis"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "_comment": "Target column \u2014 styled as link",
+                                                                        "type": "Expanded",
+                                                                        "id": "target-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 2
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Action",
+                                                                            "id": "target-action-{{item.id}}",
+                                                                            "props": {
+                                                                              "gesture": "onTap",
+                                                                              "channel": "window.intent",
+                                                                              "payload": {
+                                                                                "intent": "openDocument",
+                                                                                "documentId": "{{item.targetId}}",
+                                                                                "documentKind": "{{item.objectKind}}",
+                                                                                "projectId": "{{item.projectId}}"
+                                                                              }
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "Text",
+                                                                                "id": "target-{{item.id}}",
+                                                                                "props": {
+                                                                                  "text": "{{item.targetName}}",
+                                                                                  "textStyle": "bodySmall",
+                                                                                  "color": "link",
+                                                                                  "maxLines": 1,
+                                                                                  "overflow": "ellipsis"
+                                                                                }
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "_comment": "Team column",
+                                                                        "type": "Expanded",
+                                                                        "id": "team-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 2
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "team-{{item.id}}",
+                                                                            "props": {
+                                                                              "text": "{{item.teamId}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurface",
+                                                                              "maxLines": 1,
+                                                                              "overflow": "ellipsis"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "_comment": "Project column",
+                                                                        "type": "Expanded",
+                                                                        "id": "project-exp-{{item.id}}",
+                                                                        "props": {
+                                                                          "flex": 2
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "project-{{item.id}}",
+                                                                            "props": {
+                                                                              "text": "{{item.projectName}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurface",
+                                                                              "maxLines": 1,
+                                                                              "overflow": "ellipsis"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "_comment": "Right: Detail panel \u2014 shows selected event metadata. Conditional on selection.",
+                                    "type": "Container",
+                                    "id": "{{widgetId}}-detail-container",
+                                    "props": {
+                                      "width": 360,
+                                      "color": "surface",
+                                      "border": {
+                                        "left": {
+                                          "color": "outlineVariant",
+                                          "width": 1
+                                        }
+                                      }
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "EventScope",
+                                        "id": "{{widgetId}}-detail-scope",
+                                        "props": {
+                                          "channel": "audit.focusChanged",
+                                          "scopeKey": "scope"
+                                        },
+                                        "children": [
+                                          {
+                                            "_comment": "No selection \u2014 placeholder message",
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-detail-empty",
+                                            "props": {
+                                              "visible": "{{!scope.eventId}}"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Center",
+                                                "id": "{{widgetId}}-detail-empty-center",
+                                                "children": [
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-detail-empty-text",
+                                                    "props": {
+                                                      "text": "Select an event to view details",
+                                                      "textStyle": "bodySmall",
+                                                      "color": "onSurfaceMuted"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "_comment": "Selected event \u2014 detail content fetched by event ID",
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-detail-has-selection",
+                                            "props": {
+                                              "visible": "{{scope.eventId}}"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "DataSource",
+                                                "id": "{{widgetId}}-detail-ds",
+                                                "props": {
+                                                  "service": "eventService",
+                                                  "method": "get",
+                                                  "args": [
+                                                    "{{scope.eventId}}"
+                                                  ],
+                                                  "_comment": "Detail fetch by event ID. The orchestrator may route this to activityService or taskService based on the event source. Method name 'get' is the standard CRUD read for a single document by ID."
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-detail-loading",
+                                                    "props": {
+                                                      "visible": "{{loading}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Center",
+                                                        "id": "{{widgetId}}-detail-spinner",
+                                                        "children": [
+                                                          {
+                                                            "type": "LoadingIndicator",
+                                                            "id": "{{widgetId}}-detail-li",
+                                                            "props": {
+                                                              "variant": "spinner"
+                                                            }
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-detail-error",
+                                                    "props": {
+                                                      "visible": "{{error}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Center",
+                                                        "id": "{{widgetId}}-detail-err-center",
+                                                        "children": [
+                                                          {
+                                                            "type": "Column",
+                                                            "id": "{{widgetId}}-detail-err-col",
+                                                            "props": {
+                                                              "mainAxisAlignment": "center"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Icon",
+                                                                "id": "{{widgetId}}-detail-err-icon",
+                                                                "props": {
+                                                                  "icon": "triangle-exclamation",
+                                                                  "size": 24,
+                                                                  "color": "error"
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-detail-err-gap",
+                                                                "props": {
+                                                                  "height": 8.0
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Text",
+                                                                "id": "{{widgetId}}-detail-err-text",
+                                                                "props": {
+                                                                  "text": "{{errorMessage}}",
+                                                                  "textStyle": "bodySmall",
+                                                                  "color": "error"
+                                                                }
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-detail-ready",
+                                                    "props": {
+                                                      "visible": "{{ready}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "ListView",
+                                                        "id": "{{widgetId}}-detail-scroll",
+                                                        "props": {
+                                                          "padding": "md"
+                                                        },
+                                                        "children": [
+                                                          {
+                                                            "_comment": "Section 1: Event type chip + timestamp",
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-detail-header-row",
+                                                            "children": [
+                                                              {
+                                                                "type": "Chip",
+                                                                "id": "{{widgetId}}-detail-type-chip",
+                                                                "props": {
+                                                                  "label": "{{data.eventType}}",
+                                                                  "_unimplemented": "CHIP_COLOR_MAP: Same as list chip \u2014 needs per-eventType colour mapping. See GAP-1."
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "SizedBox",
+                                                                "id": "{{widgetId}}-detail-hdr-gap",
+                                                                "props": {
+                                                                  "width": 8.0
+                                                                }
+                                                              },
+                                                              {
+                                                                "type": "Expanded",
+                                                                "id": "{{widgetId}}-detail-ts-exp",
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-timestamp",
+                                                                    "props": {
+                                                                      "text": "{{data.timestamp}}",
+                                                                      "textStyle": "bodySmall",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "Divider",
+                                                            "id": "{{widgetId}}-detail-div1",
+                                                            "props": {
+                                                              "color": "outlineVariant"
+                                                            }
+                                                          },
+                                                          {
+                                                            "_comment": "Section 2: User",
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-detail-user-pad",
+                                                            "props": {
+                                                              "padding": "xs"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Column",
+                                                                "id": "{{widgetId}}-detail-user-col",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "start"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-user-label",
+                                                                    "props": {
+                                                                      "text": "USER",
+                                                                      "textStyle": "micro",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-detail-user-gap",
+                                                                    "props": {
+                                                                      "height": 4.0
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SelectableText",
+                                                                    "id": "{{widgetId}}-detail-user-val",
+                                                                    "props": {
+                                                                      "text": "{{data.userId}}",
+                                                                      "textStyle": "bodySmall",
+                                                                      "color": "onSurface"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "Divider",
+                                                            "id": "{{widgetId}}-detail-div2",
+                                                            "props": {
+                                                              "color": "outlineVariant"
+                                                            }
+                                                          },
+                                                          {
+                                                            "_comment": "Section 3: Scope (Team > Project)",
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-detail-scope-pad",
+                                                            "props": {
+                                                              "padding": "xs"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Column",
+                                                                "id": "{{widgetId}}-detail-scope-col",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "start"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-scope-label",
+                                                                    "props": {
+                                                                      "text": "SCOPE",
+                                                                      "textStyle": "micro",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-detail-scope-gap",
+                                                                    "props": {
+                                                                      "height": 4.0
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "Row",
+                                                                    "id": "{{widgetId}}-detail-scope-row",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Action",
+                                                                        "id": "{{widgetId}}-detail-team-link",
+                                                                        "props": {
+                                                                          "gesture": "onTap",
+                                                                          "channel": "window.intent",
+                                                                          "payload": {
+                                                                            "intent": "openTeamWidget",
+                                                                            "teamId": "{{data.teamId}}"
+                                                                          }
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-team-text",
+                                                                            "props": {
+                                                                              "text": "{{data.teamId}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "link"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-detail-scope-sep",
+                                                                        "props": {
+                                                                          "text": "  >  ",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "onSurfaceMuted"
+                                                                        }
+                                                                      },
+                                                                      {
+                                                                        "type": "Expanded",
+                                                                        "id": "{{widgetId}}-detail-project-link-exp",
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Action",
+                                                                            "id": "{{widgetId}}-detail-project-link",
+                                                                            "props": {
+                                                                              "gesture": "onTap",
+                                                                              "channel": "window.intent",
+                                                                              "payload": {
+                                                                                "intent": "openProjectNavigator",
+                                                                                "projectId": "{{data.projectId}}",
+                                                                                "projectName": "{{data.projectName}}"
+                                                                              }
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "Text",
+                                                                                "id": "{{widgetId}}-detail-project-text",
+                                                                                "props": {
+                                                                                  "text": "{{data.projectName}}",
+                                                                                  "textStyle": "bodySmall",
+                                                                                  "color": "link",
+                                                                                  "maxLines": 1,
+                                                                                  "overflow": "ellipsis"
+                                                                                }
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "Divider",
+                                                            "id": "{{widgetId}}-detail-div3",
+                                                            "props": {
+                                                              "color": "outlineVariant"
+                                                            }
+                                                          },
+                                                          {
+                                                            "_comment": "Section 4: Action",
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-detail-action-pad",
+                                                            "props": {
+                                                              "padding": "xs"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Column",
+                                                                "id": "{{widgetId}}-detail-action-col",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "start"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-action-label",
+                                                                    "props": {
+                                                                      "text": "ACTION",
+                                                                      "textStyle": "micro",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-detail-action-gap",
+                                                                    "props": {
+                                                                      "height": 4.0
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SelectableText",
+                                                                    "id": "{{widgetId}}-detail-action-val",
+                                                                    "props": {
+                                                                      "text": "{{data.actionSummary}}",
+                                                                      "textStyle": "bodySmall",
+                                                                      "color": "onSurface"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "Divider",
+                                                            "id": "{{widgetId}}-detail-div4",
+                                                            "props": {
+                                                              "color": "outlineVariant"
+                                                            }
+                                                          },
+                                                          {
+                                                            "_comment": "Section 5: Target with navigation link + object kind + ID",
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-detail-target-pad",
+                                                            "props": {
+                                                              "padding": "xs"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Column",
+                                                                "id": "{{widgetId}}-detail-target-col",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "start"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-target-label",
+                                                                    "props": {
+                                                                      "text": "TARGET",
+                                                                      "textStyle": "micro",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-detail-target-gap",
+                                                                    "props": {
+                                                                      "height": 4.0
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "Action",
+                                                                    "id": "{{widgetId}}-detail-target-action",
+                                                                    "props": {
+                                                                      "gesture": "onTap",
+                                                                      "channel": "window.intent",
+                                                                      "payload": {
+                                                                        "intent": "openDocument",
+                                                                        "documentId": "{{data.targetId}}",
+                                                                        "documentKind": "{{data.objectKind}}",
+                                                                        "projectId": "{{data.projectId}}"
+                                                                      }
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Text",
+                                                                        "id": "{{widgetId}}-detail-target-name",
+                                                                        "props": {
+                                                                          "text": "{{data.targetName}}",
+                                                                          "textStyle": "bodySmall",
+                                                                          "color": "link"
+                                                                        }
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-target-kind",
+                                                                    "props": {
+                                                                      "text": "({{data.objectKind}})",
+                                                                      "textStyle": "bodySmall",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SelectableText",
+                                                                    "id": "{{widgetId}}-detail-target-id",
+                                                                    "props": {
+                                                                      "text": "ID: {{data.targetId}}",
+                                                                      "textStyle": "labelSmall",
+                                                                      "color": "textTertiary"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "type": "Divider",
+                                                            "id": "{{widgetId}}-detail-div5",
+                                                            "props": {
+                                                              "color": "outlineVariant"
+                                                            }
+                                                          },
+                                                          {
+                                                            "_comment": "Section 6: Task timing \u2014 conditional on source=task",
+                                                            "type": "Conditional",
+                                                            "id": "{{widgetId}}-detail-task-cond",
+                                                            "props": {
+                                                              "visible": "{{data.isTask}}",
+                                                              "_unimplemented": "CONDITIONAL_EQUALITY: Conditional only checks truthiness, not string equality. Needs visible: '{{data.source}} == task' but Conditional doesn't support expressions. Using {{data.isTask}} which does NOT exist on the Activity/Task API response \u2014 service must be extended to provide this boolean, or Conditional needs an 'equals' prop."
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Column",
+                                                                "id": "{{widgetId}}-detail-task-col",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "start"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Padding",
+                                                                    "id": "{{widgetId}}-detail-task-pad",
+                                                                    "props": {
+                                                                      "padding": "xs"
+                                                                    },
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "Column",
+                                                                        "id": "{{widgetId}}-detail-task-inner",
+                                                                        "props": {
+                                                                          "crossAxisAlignment": "start"
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-task-label",
+                                                                            "props": {
+                                                                              "text": "TASK TIMING",
+                                                                              "textStyle": "micro",
+                                                                              "color": "onSurfaceMuted"
+                                                                            }
+                                                                          },
+                                                                          {
+                                                                            "type": "SizedBox",
+                                                                            "id": "{{widgetId}}-detail-task-gap",
+                                                                            "props": {
+                                                                              "height": 8.0
+                                                                            }
+                                                                          },
+                                                                          {
+                                                                            "_comment": "Created row",
+                                                                            "type": "Row",
+                                                                            "id": "{{widgetId}}-detail-task-created-row",
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-detail-task-created-lbl-box",
+                                                                                "props": {
+                                                                                  "width": 80
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-created-lbl",
+                                                                                    "props": {
+                                                                                      "text": "Created",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurfaceMuted"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Expanded",
+                                                                                "id": "{{widgetId}}-detail-task-created-val-exp",
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-created-val",
+                                                                                    "props": {
+                                                                                      "text": "{{data.details.createdDate}}",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurface"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          },
+                                                                          {
+                                                                            "_comment": "Run row",
+                                                                            "type": "Row",
+                                                                            "id": "{{widgetId}}-detail-task-run-row",
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-detail-task-run-lbl-box",
+                                                                                "props": {
+                                                                                  "width": 80
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-run-lbl",
+                                                                                    "props": {
+                                                                                      "text": "Run",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurfaceMuted"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Expanded",
+                                                                                "id": "{{widgetId}}-detail-task-run-val-exp",
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-run-val",
+                                                                                    "props": {
+                                                                                      "text": "{{data.details.runDate}}",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurface"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          },
+                                                                          {
+                                                                            "_comment": "Completed row",
+                                                                            "type": "Row",
+                                                                            "id": "{{widgetId}}-detail-task-completed-row",
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-detail-task-completed-lbl-box",
+                                                                                "props": {
+                                                                                  "width": 80
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-completed-lbl",
+                                                                                    "props": {
+                                                                                      "text": "Completed",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurfaceMuted"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Expanded",
+                                                                                "id": "{{widgetId}}-detail-task-completed-val-exp",
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-completed-val",
+                                                                                    "props": {
+                                                                                      "text": "{{data.details.completedDate}}",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurface"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          },
+                                                                          {
+                                                                            "_comment": "Duration row",
+                                                                            "type": "Row",
+                                                                            "id": "{{widgetId}}-detail-task-duration-row",
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-detail-task-duration-lbl-box",
+                                                                                "props": {
+                                                                                  "width": 80
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-duration-lbl",
+                                                                                    "props": {
+                                                                                      "text": "Duration",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurfaceMuted"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              },
+                                                                              {
+                                                                                "type": "Expanded",
+                                                                                "id": "{{widgetId}}-detail-task-duration-val-exp",
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "Text",
+                                                                                    "id": "{{widgetId}}-detail-task-duration-val",
+                                                                                    "props": {
+                                                                                      "text": "{{data.details.duration}}",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "onSurface"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          },
+                                                                          {
+                                                                            "_comment": "Error box \u2014 only for failed/cancelled tasks",
+                                                                            "type": "Conditional",
+                                                                            "id": "{{widgetId}}-detail-task-error-cond",
+                                                                            "props": {
+                                                                              "visible": "{{data.details.error}}"
+                                                                            },
+                                                                            "children": [
+                                                                              {
+                                                                                "type": "SizedBox",
+                                                                                "id": "{{widgetId}}-detail-task-error-gap",
+                                                                                "props": {
+                                                                                  "height": 8.0
+                                                                                }
+                                                                              },
+                                                                              {
+                                                                                "type": "Container",
+                                                                                "id": "{{widgetId}}-detail-task-error-box",
+                                                                                "props": {
+                                                                                  "color": "errorContainer",
+                                                                                  "padding": "sm",
+                                                                                  "borderRadius": "sm"
+                                                                                },
+                                                                                "children": [
+                                                                                  {
+                                                                                    "type": "SelectableText",
+                                                                                    "id": "{{widgetId}}-detail-task-error-text",
+                                                                                    "props": {
+                                                                                      "text": "{{data.details.error}}",
+                                                                                      "textStyle": "bodySmall",
+                                                                                      "color": "error"
+                                                                                    }
+                                                                                  }
+                                                                                ]
+                                                                              }
+                                                                            ]
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  {
+                                                                    "type": "Divider",
+                                                                    "id": "{{widgetId}}-detail-div6",
+                                                                    "props": {
+                                                                      "color": "outlineVariant"
+                                                                    }
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          },
+                                                          {
+                                                            "_comment": "Section 7: Record Info",
+                                                            "type": "Padding",
+                                                            "id": "{{widgetId}}-detail-record-pad",
+                                                            "props": {
+                                                              "padding": "xs"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Column",
+                                                                "id": "{{widgetId}}-detail-record-col",
+                                                                "props": {
+                                                                  "crossAxisAlignment": "start"
+                                                                },
+                                                                "children": [
+                                                                  {
+                                                                    "type": "Text",
+                                                                    "id": "{{widgetId}}-detail-record-label",
+                                                                    "props": {
+                                                                      "text": "RECORD INFO",
+                                                                      "textStyle": "micro",
+                                                                      "color": "onSurfaceMuted"
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "type": "SizedBox",
+                                                                    "id": "{{widgetId}}-detail-record-gap",
+                                                                    "props": {
+                                                                      "height": 4.0
+                                                                    }
+                                                                  },
+                                                                  {
+                                                                    "_comment": "Source row",
+                                                                    "type": "Row",
+                                                                    "id": "{{widgetId}}-detail-record-source-row",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "SizedBox",
+                                                                        "id": "{{widgetId}}-detail-record-source-lbl-box",
+                                                                        "props": {
+                                                                          "width": 80
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-record-source-lbl",
+                                                                            "props": {
+                                                                              "text": "Source",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurfaceMuted"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "type": "Expanded",
+                                                                        "id": "{{widgetId}}-detail-record-source-val-exp",
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-record-source-val",
+                                                                            "props": {
+                                                                              "text": "{{data.source}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurface"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  {
+                                                                    "_comment": "Public row",
+                                                                    "type": "Row",
+                                                                    "id": "{{widgetId}}-detail-record-public-row",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "SizedBox",
+                                                                        "id": "{{widgetId}}-detail-record-public-lbl-box",
+                                                                        "props": {
+                                                                          "width": 80
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-record-public-lbl",
+                                                                            "props": {
+                                                                              "text": "Public",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurfaceMuted"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "type": "Expanded",
+                                                                        "id": "{{widgetId}}-detail-record-public-val-exp",
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-record-public-val",
+                                                                            "props": {
+                                                                              "text": "{{data.isPublic}}",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurface"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  },
+                                                                  {
+                                                                    "_comment": "Record ID row",
+                                                                    "type": "Row",
+                                                                    "id": "{{widgetId}}-detail-record-id-row",
+                                                                    "children": [
+                                                                      {
+                                                                        "type": "SizedBox",
+                                                                        "id": "{{widgetId}}-detail-record-id-lbl-box",
+                                                                        "props": {
+                                                                          "width": 80
+                                                                        },
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "Text",
+                                                                            "id": "{{widgetId}}-detail-record-id-lbl",
+                                                                            "props": {
+                                                                              "text": "Record ID",
+                                                                              "textStyle": "bodySmall",
+                                                                              "color": "onSurfaceMuted"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      },
+                                                                      {
+                                                                        "type": "Expanded",
+                                                                        "id": "{{widgetId}}-detail-record-id-val-exp",
+                                                                        "children": [
+                                                                          {
+                                                                            "type": "SelectableText",
+                                                                            "id": "{{widgetId}}-detail-record-id-val",
+                                                                            "props": {
+                                                                              "text": "{{data.id}}",
+                                                                              "textStyle": "labelSmall",
+                                                                              "color": "textTertiary"
+                                                                            }
+                                                                          }
+                                                                        ]
+                                                                      }
+                                                                    ]
+                                                                  }
+                                                                ]
+                                                              }
+                                                            ]
+                                                          }
+                                                        ]
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -6731,7 +8361,7 @@
                                 ],
                                 [
                                   "{{context.userId}}",
-                                  ""
+                                  "\uf000"
                                 ],
                                 20,
                                 0,
@@ -6975,7 +8605,7 @@
       "metadata": {
         "type": "MainHeader",
         "tier": 2,
-        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome — not user-requested.",
+        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome \u2014 not user-requested.",
         "props": {},
         "emittedEvents": [
           "header.intent"
