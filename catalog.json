@@ -14,7 +14,8 @@
           "navigator.openTeamWidget",
           "navigator.downloadFile",
           "navigator.contentChanged",
-          "navigator.upload"
+          "navigator.upload",
+          "navigator.toggleExpand"
         ],
         "inboundEvents": [
           "navigator.navigateTo",
