@@ -267,16 +267,14 @@
                                 "props": {
                                   "height": 48,
                                   "color": "surface",
-                                  "padding": 8,
-                                  "clipBehavior": "hardEdge"
+                                  "padding": 8
                                 },
                                 "children": [
                                   {
                                     "type": "Row",
                                     "id": "{{widgetId}}-tb-row",
                                     "props": {
-                                      "crossAxisAlignment": "center",
-                                      "mainAxisSize": "min"
+                                      "crossAxisAlignment": "center"
                                     },
                                     "children": [
                                       {
@@ -430,16 +428,25 @@
                                         }
                                       },
                                       {
-                                        "type": "Flexible",
+                                        "type": "Expanded",
                                         "id": "{{widgetId}}-tb-search-exp",
                                         "children": [
                                           {
-                                            "type": "TextField",
-                                            "id": "{{widgetId}}-tb-search",
+                                            "type": "Container",
+                                            "id": "{{widgetId}}-tb-search-wrap",
                                             "props": {
-                                              "hint": "Search...",
-                                              "borderless": false
-                                            }
+                                              "maxWidth": 300
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "TextField",
+                                                "id": "{{widgetId}}-tb-search",
+                                                "props": {
+                                                  "hint": "Search...",
+                                                  "borderless": false
+                                                }
+                                              }
+                                            ]
                                           }
                                         ],
                                         "props": {}
@@ -809,8 +816,7 @@
                                                                                 "type": "Row",
                                                                                 "id": "{{widgetId}}-pproj-name-inner-row-{{item.id}}",
                                                                                 "props": {
-                                                                                  "crossAxisAlignment": "center",
-                                                                                  "clipBehavior": "hardEdge"
+                                                                                  "crossAxisAlignment": "center"
                                                                                 },
                                                                                 "children": [
                                                                                   {
@@ -1761,7 +1767,7 @@
                                                                                                             4,
                                                                                                             4,
                                                                                                             4,
-                                                                                                            106
+                                                                                                            86
                                                                                                           ]
                                                                                                         },
                                                                                                         "children": [
@@ -1858,7 +1864,7 @@
                                                                                                                             "type": "SizedBox",
                                                                                                                             "id": "{{widgetId}}-srdm-indent-{{item.id}}",
                                                                                                                             "props": {
-                                                                                                                              "width": 64
+                                                                                                                              "width": 48
                                                                                                                             }
                                                                                                                           },
                                                                                                                           {
@@ -1989,7 +1995,7 @@
                                                                                                                             "type": "SizedBox",
                                                                                                                             "id": "{{widgetId}}-pswf-indent-{{item.id}}",
                                                                                                                             "props": {
-                                                                                                                              "width": 64
+                                                                                                                              "width": 48
                                                                                                                             }
                                                                                                                           },
                                                                                                                           {
@@ -2121,7 +2127,7 @@
                                                                                                                             "type": "SizedBox",
                                                                                                                             "id": "{{widgetId}}-psds-indent-{{item.id}}",
                                                                                                                             "props": {
-                                                                                                                              "width": 64
+                                                                                                                              "width": 48
                                                                                                                             }
                                                                                                                           },
                                                                                                                           {
@@ -2256,7 +2262,7 @@
                                                                                                                             "type": "SizedBox",
                                                                                                                             "id": "{{widgetId}}-psfi-indent-{{item.id}}",
                                                                                                                             "props": {
-                                                                                                                              "width": 64
+                                                                                                                              "width": 48
                                                                                                                             }
                                                                                                                           },
                                                                                                                           {
@@ -2691,8 +2697,7 @@
                                                                                         "type": "Row",
                                                                                         "id": "{{widgetId}}-proj-name-inner-row-{{item.id}}",
                                                                                         "props": {
-                                                                                          "crossAxisAlignment": "center",
-                                                                                          "clipBehavior": "hardEdge"
+                                                                                          "crossAxisAlignment": "center"
                                                                                         },
                                                                                         "children": [
                                                                                           {
@@ -3644,7 +3649,7 @@
                                                                                                                     4,
                                                                                                                     4,
                                                                                                                     4,
-                                                                                                                    106
+                                                                                                                    86
                                                                                                                   ]
                                                                                                                 },
                                                                                                                 "children": [
@@ -3741,7 +3746,7 @@
                                                                                                                                     "type": "SizedBox",
                                                                                                                                     "id": "{{widgetId}}-srdm-indent-{{item.id}}",
                                                                                                                                     "props": {
-                                                                                                                                      "width": 64
+                                                                                                                                      "width": 48
                                                                                                                                     }
                                                                                                                                   },
                                                                                                                                   {
@@ -3872,7 +3877,7 @@
                                                                                                                                     "type": "SizedBox",
                                                                                                                                     "id": "{{widgetId}}-swf-indent-{{item.id}}",
                                                                                                                                     "props": {
-                                                                                                                                      "width": 64
+                                                                                                                                      "width": 48
                                                                                                                                     }
                                                                                                                                   },
                                                                                                                                   {
@@ -4004,7 +4009,7 @@
                                                                                                                                     "type": "SizedBox",
                                                                                                                                     "id": "{{widgetId}}-sds-indent-{{item.id}}",
                                                                                                                                     "props": {
-                                                                                                                                      "width": 64
+                                                                                                                                      "width": 48
                                                                                                                                     }
                                                                                                                                   },
                                                                                                                                   {
@@ -4139,7 +4144,7 @@
                                                                                                                                     "type": "SizedBox",
                                                                                                                                     "id": "{{widgetId}}-sfi-indent-{{item.id}}",
                                                                                                                                     "props": {
-                                                                                                                                      "width": 64
+                                                                                                                                      "width": 48
                                                                                                                                     }
                                                                                                                                   },
                                                                                                                                   {
@@ -6994,7 +6999,7 @@
       "metadata": {
         "type": "MainHeader",
         "tier": 2,
-        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome \u2014 not user-requested.",
+        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome — not user-requested.",
         "props": {},
         "emittedEvents": [
           "header.intent"
