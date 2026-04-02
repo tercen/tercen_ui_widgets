@@ -518,7 +518,7 @@
                                           "gesture": "onTap",
                                           "channel": "navigator.toggleExpand",
                                           "payload": {
-                                            "nodeId": "{{item.id}}"
+                                            "_nodeId": "{{item._nodeId}}"
                                           },
                                           "hoverColor": "surfaceContainer"
                                         },
