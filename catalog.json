@@ -5398,325 +5398,338 @@
         "selectionMode": "none"
       },
       "template": {
-        "type": "WindowShell",
-        "id": "{{widgetId}}-root",
+        "type": "EventScope",
+        "id": "{{widgetId}}-focus-scope",
         "props": {
-          "toolbarActions": [
-            {
-              "icon": "plus",
-              "channel": "chat.newSession",
-              "isPrimary": true,
-              "tooltip": "New Session"
-            },
-            {
-              "icon": "comments",
-              "channel": "chat.showHistory",
-              "tooltip": "History"
-            }
-          ]
+          "channel": "system.focus",
+          "scopeKey": "focus",
+          "defaultPayload": {
+            "label": ""
+          }
         },
         "children": [
           {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body",
+            "type": "WindowShell",
+            "id": "{{widgetId}}-root",
+            "props": {
+              "toolbarActions": [
+                {
+                  "icon": "plus",
+                  "channel": "chat.newSession",
+                  "isPrimary": true,
+                  "tooltip": "New Session"
+                },
+                {
+                  "icon": "comments",
+                  "channel": "chat.showHistory",
+                  "tooltip": "History"
+                }
+              ]
+            },
             "children": [
               {
-                "type": "ChatStream",
-                "id": "{{widgetId}}-stream",
-                "props": {
-                  "inputId": "{{widgetId}}-input",
-                  "sendChannel": "chat.send",
-                  "clearChannel": "chat.inputCleared"
-                },
+                "type": "Expanded",
+                "id": "{{widgetId}}-body",
                 "children": [
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-empty-cond",
+                    "type": "ChatStream",
+                    "id": "{{widgetId}}-stream",
                     "props": {
-                      "visible": "{{hasMessages}}",
-                      "negate": true
+                      "inputId": "{{widgetId}}-input",
+                      "sendChannel": "chat.send",
+                      "clearChannel": "chat.inputCleared"
                     },
                     "children": [
                       {
-                        "type": "Center",
-                        "id": "{{widgetId}}-empty",
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-empty-cond",
+                        "props": {
+                          "visible": "{{hasMessages}}",
+                          "negate": true
+                        },
                         "children": [
                           {
-                            "type": "Column",
-                            "id": "{{widgetId}}-empty-col",
-                            "props": {
-                              "mainAxisAlignment": "center"
-                            },
+                            "type": "Center",
+                            "id": "{{widgetId}}-empty",
                             "children": [
                               {
-                                "type": "Icon",
-                                "id": "{{widgetId}}-empty-icon",
+                                "type": "Column",
+                                "id": "{{widgetId}}-empty-col",
                                 "props": {
-                                  "icon": "comments",
-                                  "size": 48,
-                                  "color": "onSurfaceMuted",
-                                  "weight": "solid"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-empty-spacer",
-                                "props": {
-                                  "height": 12
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-empty-msg",
-                                "props": {
-                                  "text": "Start a conversation",
-                                  "textStyle": "titleMedium",
-                                  "color": "onSurfaceVariant"
-                                }
-                              },
-                              {
-                                "type": "SizedBox",
-                                "id": "{{widgetId}}-empty-spacer2",
-                                "props": {
-                                  "height": 4
-                                }
-                              },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-empty-detail",
-                                "props": {
-                                  "text": "Ask a question or give an instruction",
-                                  "textStyle": "bodySmall",
-                                  "color": "onSurfaceMuted"
-                                }
+                                  "mainAxisAlignment": "center"
+                                },
+                                "children": [
+                                  {
+                                    "type": "Icon",
+                                    "id": "{{widgetId}}-empty-icon",
+                                    "props": {
+                                      "icon": "comments",
+                                      "size": 48,
+                                      "color": "onSurfaceMuted",
+                                      "weight": "solid"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-empty-spacer",
+                                    "props": {
+                                      "height": 12
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-empty-msg",
+                                    "props": {
+                                      "text": "Start a conversation",
+                                      "textStyle": "titleMedium",
+                                      "color": "onSurfaceVariant"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-empty-spacer2",
+                                    "props": {
+                                      "height": 4
+                                    }
+                                  },
+                                  {
+                                    "type": "Text",
+                                    "id": "{{widgetId}}-empty-detail",
+                                    "props": {
+                                      "text": "Ask a question or give an instruction",
+                                      "textStyle": "bodySmall",
+                                      "color": "onSurfaceMuted"
+                                    }
+                                  }
+                                ]
                               }
                             ]
                           }
                         ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-active-cond",
-                    "props": {
-                      "visible": "{{hasMessages}}"
-                    },
-                    "children": [
+                      },
                       {
-                        "type": "ListView",
-                        "id": "{{widgetId}}-message-list",
+                        "type": "Conditional",
+                        "id": "{{widgetId}}-active-cond",
+                        "props": {
+                          "visible": "{{hasMessages}}"
+                        },
                         "children": [
                           {
-                            "type": "ForEach",
-                            "id": "{{widgetId}}-messages",
-                            "props": {
-                              "items": "{{messages}}"
-                            },
+                            "type": "ListView",
+                            "id": "{{widgetId}}-message-list",
                             "children": [
                               {
-                                "type": "Padding",
-                                "id": "{{widgetId}}-msg-pad",
+                                "type": "ForEach",
+                                "id": "{{widgetId}}-messages",
                                 "props": {
-                                  "padding": 6
+                                  "items": "{{messages}}"
                                 },
                                 "children": [
                                   {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-msg-row",
+                                    "type": "Padding",
+                                    "id": "{{widgetId}}-msg-pad",
                                     "props": {
-                                      "crossAxisAlignment": "start"
+                                      "padding": 6
                                     },
                                     "children": [
                                       {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-icon-user",
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-msg-row",
                                         "props": {
-                                          "visible": "{{item.isUser}}"
+                                          "crossAxisAlignment": "start"
                                         },
                                         "children": [
                                           {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-ic-user",
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-icon-user",
                                             "props": {
-                                              "icon": "message",
-                                              "size": 14,
-                                              "color": "warning",
-                                              "weight": "solid"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-icon-assistant",
-                                        "props": {
-                                          "visible": "{{item.isAssistant}}"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-ic-assistant",
-                                            "props": {
-                                              "icon": "robot",
-                                              "size": 16,
-                                              "color": "tertiary"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-icon-tool",
-                                        "props": {
-                                          "visible": "{{item.isTool}}"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-ic-tool",
-                                            "props": {
-                                              "icon": "wrench",
-                                              "size": 16,
-                                              "color": "onSurfaceVariant"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-icon-error",
-                                        "props": {
-                                          "visible": "{{item.isError}}"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-ic-error",
-                                            "props": {
-                                              "icon": "error",
-                                              "size": 16,
-                                              "color": "error"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-msg-gap",
-                                        "props": {
-                                          "width": 8
-                                        }
-                                      },
-                                      {
-                                        "type": "Expanded",
-                                        "id": "{{widgetId}}-msg-content",
-                                        "children": [
-                                          {
-                                            "type": "Column",
-                                            "id": "{{widgetId}}-msg-content-col",
-                                            "props": {
-                                              "crossAxisAlignment": "stretch"
+                                              "visible": "{{item.isUser}}"
                                             },
                                             "children": [
                                               {
-                                                "type": "Conditional",
-                                                "id": "{{widgetId}}-content-user",
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-ic-user",
                                                 "props": {
-                                                  "visible": "{{item.isUser}}"
-                                                },
-                                                "children": [
-                                                  {
-                                                    "type": "SelectableText",
-                                                    "id": "{{widgetId}}-text-user",
-                                                    "props": {
-                                                      "text": "{{item.text}}",
-                                                      "color": "onSurface"
-                                                    }
-                                                  }
-                                                ]
-                                              },
+                                                  "icon": "message",
+                                                  "size": 14,
+                                                  "color": "warning",
+                                                  "weight": "solid"
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-icon-assistant",
+                                            "props": {
+                                              "visible": "{{item.isAssistant}}"
+                                            },
+                                            "children": [
                                               {
-                                                "type": "Conditional",
-                                                "id": "{{widgetId}}-content-assistant",
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-ic-assistant",
                                                 "props": {
-                                                  "visible": "{{item.isAssistant}}"
-                                                },
-                                                "children": [
-                                                  {
-                                                    "type": "Markdown",
-                                                    "id": "{{widgetId}}-md-assistant",
-                                                    "props": {
-                                                      "content": "{{item.text}}",
-                                                      "selectable": true
-                                                    }
-                                                  }
-                                                ]
-                                              },
+                                                  "icon": "robot",
+                                                  "size": 16,
+                                                  "color": "tertiary"
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-icon-tool",
+                                            "props": {
+                                              "visible": "{{item.isTool}}"
+                                            },
+                                            "children": [
                                               {
-                                                "type": "Conditional",
-                                                "id": "{{widgetId}}-content-tool",
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-ic-tool",
                                                 "props": {
-                                                  "visible": "{{item.isTool}}"
-                                                },
-                                                "children": [
-                                                  {
-                                                    "type": "Text",
-                                                    "id": "{{widgetId}}-text-tool",
-                                                    "props": {
-                                                      "text": "{{item.text}}",
-                                                      "color": "onSurfaceVariant"
-                                                    }
-                                                  }
-                                                ]
-                                              },
+                                                  "icon": "wrench",
+                                                  "size": 16,
+                                                  "color": "onSurfaceVariant"
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-icon-error",
+                                            "props": {
+                                              "visible": "{{item.isError}}"
+                                            },
+                                            "children": [
                                               {
-                                                "type": "Conditional",
-                                                "id": "{{widgetId}}-content-error",
+                                                "type": "Icon",
+                                                "id": "{{widgetId}}-ic-error",
                                                 "props": {
-                                                  "visible": "{{item.isError}}"
-                                                },
-                                                "children": [
-                                                  {
-                                                    "type": "Text",
-                                                    "id": "{{widgetId}}-text-error",
-                                                    "props": {
-                                                      "text": "{{item.text}}",
-                                                      "color": "error"
-                                                    }
-                                                  }
-                                                ]
-                                              },
+                                                  "icon": "error",
+                                                  "size": 16,
+                                                  "color": "error"
+                                                }
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "SizedBox",
+                                            "id": "{{widgetId}}-msg-gap",
+                                            "props": {
+                                              "width": 8
+                                            }
+                                          },
+                                          {
+                                            "type": "Expanded",
+                                            "id": "{{widgetId}}-msg-content",
+                                            "children": [
                                               {
-                                                "type": "Conditional",
-                                                "id": "{{widgetId}}-streaming-ind",
+                                                "type": "Column",
+                                                "id": "{{widgetId}}-msg-content-col",
                                                 "props": {
-                                                  "visible": "{{item.isStreaming}}"
+                                                  "crossAxisAlignment": "stretch"
                                                 },
                                                 "children": [
                                                   {
-                                                    "type": "Padding",
-                                                    "id": "{{widgetId}}-streaming-pad",
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-content-user",
                                                     "props": {
-                                                      "padding": 4
+                                                      "visible": "{{item.isUser}}"
                                                     },
                                                     "children": [
                                                       {
-                                                        "type": "Row",
-                                                        "id": "{{widgetId}}-streaming-row",
+                                                        "type": "SelectableText",
+                                                        "id": "{{widgetId}}-text-user",
                                                         "props": {
-                                                          "mainAxisAlignment": "start"
+                                                          "text": "{{item.text}}",
+                                                          "color": "onSurface"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-content-assistant",
+                                                    "props": {
+                                                      "visible": "{{item.isAssistant}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Markdown",
+                                                        "id": "{{widgetId}}-md-assistant",
+                                                        "props": {
+                                                          "content": "{{item.text}}",
+                                                          "selectable": true
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-content-tool",
+                                                    "props": {
+                                                      "visible": "{{item.isTool}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-text-tool",
+                                                        "props": {
+                                                          "text": "{{item.text}}",
+                                                          "color": "onSurfaceVariant"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-content-error",
+                                                    "props": {
+                                                      "visible": "{{item.isError}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Text",
+                                                        "id": "{{widgetId}}-text-error",
+                                                        "props": {
+                                                          "text": "{{item.text}}",
+                                                          "color": "error"
+                                                        }
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "type": "Conditional",
+                                                    "id": "{{widgetId}}-streaming-ind",
+                                                    "props": {
+                                                      "visible": "{{item.isStreaming}}"
+                                                    },
+                                                    "children": [
+                                                      {
+                                                        "type": "Padding",
+                                                        "id": "{{widgetId}}-streaming-pad",
+                                                        "props": {
+                                                          "padding": 4
                                                         },
                                                         "children": [
                                                           {
-                                                            "type": "Image",
-                                                            "id": "{{widgetId}}-streaming-gif",
+                                                            "type": "Row",
+                                                            "id": "{{widgetId}}-streaming-row",
                                                             "props": {
-                                                              "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
-                                                              "width": 28,
-                                                              "height": 28,
-                                                              "fit": "contain"
-                                                            }
+                                                              "mainAxisAlignment": "start"
+                                                            },
+                                                            "children": [
+                                                              {
+                                                                "type": "Image",
+                                                                "id": "{{widgetId}}-streaming-gif",
+                                                                "props": {
+                                                                  "src": "https://raw.githubusercontent.com/tercen/tercen_ui_widgets/main/Assets/thinking_indicator_32.gif",
+                                                                  "width": 28,
+                                                                  "height": 28,
+                                                                  "fit": "contain"
+                                                                }
+                                                              }
+                                                            ]
                                                           }
                                                         ]
                                                       }
@@ -5739,176 +5752,176 @@
                     ]
                   }
                 ]
-              }
-            ]
-          },
-          {
-            "type": "Padding",
-            "id": "{{widgetId}}-compose-pad",
-            "props": {
-              "padding": "sm"
-            },
-            "children": [
+              },
               {
-                "type": "Center",
-                "id": "{{widgetId}}-compose-center",
+                "type": "Padding",
+                "id": "{{widgetId}}-compose-pad",
+                "props": {
+                  "padding": "sm"
+                },
                 "children": [
                   {
-                    "type": "Container",
-                    "id": "{{widgetId}}-compose",
-                    "props": {
-                      "color": "surface",
-                      "borderColor": "primary",
-                      "borderWidth": 1.5,
-                      "borderRadius": 12,
-                      "elevation": 3,
-                      "maxWidth": 720
-                    },
+                    "type": "Center",
+                    "id": "{{widgetId}}-compose-center",
                     "children": [
                       {
-                        "type": "Column",
-                        "id": "{{widgetId}}-compose-col",
+                        "type": "Container",
+                        "id": "{{widgetId}}-compose",
                         "props": {
-                          "crossAxisAlignment": "stretch"
+                          "color": "surface",
+                          "borderColor": "primary",
+                          "borderWidth": 1.5,
+                          "borderRadius": 12,
+                          "elevation": 3,
+                          "maxWidth": 720
                         },
                         "children": [
                           {
-                            "type": "Padding",
-                            "id": "{{widgetId}}-input-pad",
+                            "type": "Column",
+                            "id": "{{widgetId}}-compose-col",
                             "props": {
-                              "padding": "sm"
-                            },
-                            "children": [
-                              {
-                                "type": "TextField",
-                                "id": "{{widgetId}}-input",
-                                "props": {
-                                  "hint": "Type a message...",
-                                  "maxLines": 8,
-                                  "autofocus": true,
-                                  "borderless": true,
-                                  "submitOnEnter": true,
-                                  "clearOn": "chat.inputCleared"
-                                }
-                              }
-                            ]
-                          },
-                          {
-                            "type": "Divider",
-                            "id": "{{widgetId}}-compose-divider",
-                            "props": {
-                              "height": 1,
-                              "thickness": 0.5,
-                              "color": "outlineVariant"
-                            }
-                          },
-                          {
-                            "type": "Container",
-                            "id": "{{widgetId}}-bottom-bar",
-                            "props": {
-                              "height": 44
+                              "crossAxisAlignment": "stretch"
                             },
                             "children": [
                               {
                                 "type": "Padding",
-                                "id": "{{widgetId}}-bottom-pad",
+                                "id": "{{widgetId}}-input-pad",
                                 "props": {
-                                  "padding": 4
+                                  "padding": "sm"
                                 },
                                 "children": [
                                   {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-bottom-row",
+                                    "type": "TextField",
+                                    "id": "{{widgetId}}-input",
                                     "props": {
-                                      "crossAxisAlignment": "center"
+                                      "hint": "Type a message...",
+                                      "maxLines": 8,
+                                      "autofocus": true,
+                                      "borderless": true,
+                                      "submitOnEnter": true,
+                                      "clearOn": "chat.inputCleared"
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Divider",
+                                "id": "{{widgetId}}-compose-divider",
+                                "props": {
+                                  "height": 1,
+                                  "thickness": 0.5,
+                                  "color": "outlineVariant"
+                                }
+                              },
+                              {
+                                "type": "Container",
+                                "id": "{{widgetId}}-bottom-bar",
+                                "props": {
+                                  "height": 44
+                                },
+                                "children": [
+                                  {
+                                    "type": "Padding",
+                                    "id": "{{widgetId}}-bottom-pad",
+                                    "props": {
+                                      "padding": 4
                                     },
                                     "children": [
                                       {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-focus-cond-2",
+                                        "type": "Row",
+                                        "id": "{{widgetId}}-bottom-row",
                                         "props": {
-                                          "visible": "{{focusLabel}}"
+                                          "crossAxisAlignment": "center"
                                         },
                                         "children": [
                                           {
-                                            "type": "Row",
-                                            "id": "{{widgetId}}-focus-row-2",
+                                            "type": "Conditional",
+                                            "id": "{{widgetId}}-focus-cond-2",
                                             "props": {
-                                              "crossAxisAlignment": "center"
+                                              "visible": "{{focus.label}}"
                                             },
                                             "children": [
                                               {
-                                                "type": "Icon",
-                                                "id": "{{widgetId}}-focus-icon-2",
+                                                "type": "Row",
+                                                "id": "{{widgetId}}-focus-row-2",
                                                 "props": {
-                                                  "icon": "search",
-                                                  "size": 10,
-                                                  "color": "onSurfaceMuted"
-                                                }
-                                              },
-                                              {
-                                                "type": "SizedBox",
-                                                "id": "{{widgetId}}-focus-gap-2",
-                                                "props": {
-                                                  "width": 4
-                                                }
-                                              },
-                                              {
-                                                "type": "Text",
-                                                "id": "{{widgetId}}-focus-text-2",
-                                                "props": {
-                                                  "text": "Focus: {{focusLabel}}",
-                                                  "textStyle": "bodySmall",
-                                                  "color": "onSurfaceMuted"
-                                                }
-                                              }
-                                            ]
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Spacer",
-                                        "id": "{{widgetId}}-bottom-spacer",
-                                        "props": {}
-                                      },
-                                      {
-                                        "type": "Tooltip",
-                                        "id": "{{widgetId}}-send-tip",
-                                        "props": {
-                                          "message": "Send"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Action",
-                                            "id": "{{widgetId}}-send-action",
-                                            "props": {
-                                              "gesture": "onTap",
-                                              "channel": "chat.send",
-                                              "payload": {}
-                                            },
-                                            "children": [
-                                              {
-                                                "type": "Container",
-                                                "id": "{{widgetId}}-send",
-                                                "props": {
-                                                  "width": 36,
-                                                  "height": 36,
-                                                  "color": "primary",
-                                                  "borderRadius": 8
+                                                  "crossAxisAlignment": "center"
                                                 },
                                                 "children": [
                                                   {
-                                                    "type": "Center",
-                                                    "id": "{{widgetId}}-send-center",
+                                                    "type": "Icon",
+                                                    "id": "{{widgetId}}-focus-icon-2",
+                                                    "props": {
+                                                      "icon": "search",
+                                                      "size": 10,
+                                                      "color": "onSurfaceMuted"
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "SizedBox",
+                                                    "id": "{{widgetId}}-focus-gap-2",
+                                                    "props": {
+                                                      "width": 4
+                                                    }
+                                                  },
+                                                  {
+                                                    "type": "Text",
+                                                    "id": "{{widgetId}}-focus-text-2",
+                                                    "props": {
+                                                      "text": "Focus: {{focus.label}}",
+                                                      "textStyle": "bodySmall",
+                                                      "color": "onSurfaceMuted"
+                                                    }
+                                                  }
+                                                ]
+                                              }
+                                            ]
+                                          },
+                                          {
+                                            "type": "Spacer",
+                                            "id": "{{widgetId}}-bottom-spacer",
+                                            "props": {}
+                                          },
+                                          {
+                                            "type": "Tooltip",
+                                            "id": "{{widgetId}}-send-tip",
+                                            "props": {
+                                              "message": "Send"
+                                            },
+                                            "children": [
+                                              {
+                                                "type": "Action",
+                                                "id": "{{widgetId}}-send-action",
+                                                "props": {
+                                                  "gesture": "onTap",
+                                                  "channel": "chat.send",
+                                                  "payload": {}
+                                                },
+                                                "children": [
+                                                  {
+                                                    "type": "Container",
+                                                    "id": "{{widgetId}}-send",
+                                                    "props": {
+                                                      "width": 36,
+                                                      "height": 36,
+                                                      "color": "primary",
+                                                      "borderRadius": 8
+                                                    },
                                                     "children": [
                                                       {
-                                                        "type": "Icon",
-                                                        "id": "{{widgetId}}-send-icon",
-                                                        "props": {
-                                                          "icon": "send",
-                                                          "size": 14,
-                                                          "color": "onPrimary"
-                                                        }
+                                                        "type": "Center",
+                                                        "id": "{{widgetId}}-send-center",
+                                                        "children": [
+                                                          {
+                                                            "type": "Icon",
+                                                            "id": "{{widgetId}}-send-icon",
+                                                            "props": {
+                                                              "icon": "send",
+                                                              "size": 14,
+                                                              "color": "onPrimary"
+                                                            }
+                                                          }
+                                                        ]
                                                       }
                                                     ]
                                                   }
