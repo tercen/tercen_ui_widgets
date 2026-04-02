@@ -6491,7 +6491,8 @@
                             20
                           ],
                           "defaultPageSize": 5,
-                          "weight": "solid"
+                          "weight": "solid",
+                          "pageSizeChannel": "card.{{widgetId}}-proj-card.pageSize"
                         },
                         "children": [
                           {
@@ -6603,7 +6604,9 @@
                                           "filterChannel": "card.{{widgetId}}-proj-card.filter",
                                           "filterFields": [
                                             "name"
-                                          ]
+                                          ],
+                                          "limitChannel": "card.{{widgetId}}-proj-card.pageSize",
+                                          "limit": 5
                                         },
                                         "children": [
                                           {
@@ -6745,7 +6748,8 @@
                             10,
                             20
                           ],
-                          "defaultPageSize": 5
+                          "defaultPageSize": 5,
+                          "pageSizeChannel": "card.{{widgetId}}-apps-card.pageSize"
                         },
                         "children": [
                           {
@@ -6854,7 +6858,9 @@
                                           "filterChannel": "card.{{widgetId}}-apps-card.filter",
                                           "filterFields": [
                                             "name"
-                                          ]
+                                          ],
+                                          "limitChannel": "card.{{widgetId}}-apps-card.pageSize",
+                                          "limit": 5
                                         },
                                         "children": [
                                           {
@@ -6976,7 +6982,8 @@
                         "id": "{{widgetId}}-help-card",
                         "props": {
                           "title": "Help & Documentation",
-                          "icon": "help"
+                          "icon": "help",
+                          "pageSizeChannel": "card.{{widgetId}}-help-card.pageSize"
                         },
                         "children": [
                           {
@@ -7157,7 +7164,8 @@
                             10,
                             20
                           ],
-                          "defaultPageSize": 5
+                          "defaultPageSize": 5,
+                          "pageSizeChannel": "card.{{widgetId}}-act-card.pageSize"
                         },
                         "children": [
                           {
@@ -7270,7 +7278,9 @@
                                           "filterFields": [
                                             "objectName",
                                             "type"
-                                          ]
+                                          ],
+                                          "limitChannel": "card.{{widgetId}}-act-card.pageSize",
+                                          "limit": 5
                                         },
                                         "children": [
                                           {
