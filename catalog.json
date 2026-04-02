@@ -820,14 +820,20 @@
                                                                                 },
                                                                                 "children": [
                                                                                   {
-                                                                                    "type": "Text",
-                                                                                    "id": "{{widgetId}}-pproj-name-{{item.id}}",
-                                                                                    "props": {
-                                                                                      "text": "{{item.name}}",
-                                                                                      "textStyle": "bodyMedium",
-                                                                                      "color": "onSurface",
-                                                                                      "maxLines": 1
-                                                                                    }
+                                                                                    "type": "Flexible",
+                                                                                    "id": "{{widgetId}}-pproj-name-{{item.id}}-flex",
+                                                                                    "children": [
+                                                                                      {
+                                                                                        "type": "Text",
+                                                                                        "id": "{{widgetId}}-pproj-name-{{item.id}}",
+                                                                                        "props": {
+                                                                                          "text": "{{item.name}}",
+                                                                                          "textStyle": "bodyMedium",
+                                                                                          "color": "onSurface",
+                                                                                          "maxLines": 1
+                                                                                        }
+                                                                                      }
+                                                                                    ]
                                                                                   },
                                                                                   {
                                                                                     "type": "SizedBox",
@@ -840,7 +846,8 @@
                                                                                     "type": "Conditional",
                                                                                     "id": "{{widgetId}}-pproj-pub-cond-{{item.id}}",
                                                                                     "props": {
-                                                                                      "visible": "{{item.isPublic}}"
+                                                                                      "visible": "{{item.isPublic}}",
+                                                                                      "minWidth": 200
                                                                                     },
                                                                                     "children": [
                                                                                       {
@@ -880,7 +887,8 @@
                                                                                     "type": "Conditional",
                                                                                     "id": "{{widgetId}}-pproj-git-cond-{{item.id}}",
                                                                                     "props": {
-                                                                                      "visible": "{{item.version}}"
+                                                                                      "visible": "{{item.version}}",
+                                                                                      "minWidth": 280
                                                                                     },
                                                                                     "children": [
                                                                                       {
@@ -2701,14 +2709,20 @@
                                                                                         },
                                                                                         "children": [
                                                                                           {
-                                                                                            "type": "Text",
-                                                                                            "id": "{{widgetId}}-proj-name-{{item.id}}",
-                                                                                            "props": {
-                                                                                              "text": "{{item.name}}",
-                                                                                              "textStyle": "bodyMedium",
-                                                                                              "color": "onSurface",
-                                                                                              "maxLines": 1
-                                                                                            }
+                                                                                            "type": "Flexible",
+                                                                                            "id": "{{widgetId}}-proj-name-{{item.id}}-flex",
+                                                                                            "children": [
+                                                                                              {
+                                                                                                "type": "Text",
+                                                                                                "id": "{{widgetId}}-proj-name-{{item.id}}",
+                                                                                                "props": {
+                                                                                                  "text": "{{item.name}}",
+                                                                                                  "textStyle": "bodyMedium",
+                                                                                                  "color": "onSurface",
+                                                                                                  "maxLines": 1
+                                                                                                }
+                                                                                              }
+                                                                                            ]
                                                                                           },
                                                                                           {
                                                                                             "type": "SizedBox",
@@ -2721,7 +2735,8 @@
                                                                                             "type": "Conditional",
                                                                                             "id": "{{widgetId}}-proj-pub-cond-{{item.id}}",
                                                                                             "props": {
-                                                                                              "visible": "{{item.isPublic}}"
+                                                                                              "visible": "{{item.isPublic}}",
+                                                                                              "minWidth": 200
                                                                                             },
                                                                                             "children": [
                                                                                               {
@@ -2761,7 +2776,8 @@
                                                                                             "type": "Conditional",
                                                                                             "id": "{{widgetId}}-proj-git-cond-{{item.id}}",
                                                                                             "props": {
-                                                                                              "visible": "{{item.version}}"
+                                                                                              "visible": "{{item.version}}",
+                                                                                              "minWidth": 280
                                                                                             },
                                                                                             "children": [
                                                                                               {
