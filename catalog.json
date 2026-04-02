@@ -5225,7 +5225,8 @@
         "type": "Column",
         "id": "{{widgetId}}-root",
         "props": {
-          "crossAxisAlignment": "stretch"
+          "crossAxisAlignment": "stretch",
+          "clipBehavior": "hardEdge"
         },
         "children": [
           {
@@ -5389,14 +5390,16 @@
                             "props": {
                               "height": 48,
                               "color": "surface",
-                              "padding": 8
+                              "padding": 8,
+                              "clipBehavior": "hardEdge"
                             },
                             "children": [
                               {
                                 "type": "Row",
                                 "id": "{{widgetId}}-toolbar-row",
                                 "props": {
-                                  "crossAxisAlignment": "center"
+                                  "crossAxisAlignment": "center",
+                                  "clipBehavior": "hardEdge"
                                 },
                                 "children": [
                                   {
@@ -5504,7 +5507,8 @@
                                       "icon": "sort",
                                       "tooltip": "Sort: Newest first",
                                       "variant": "toolbar-secondary",
-                                      "channel": "audit.{{widgetId}}.toggleSort"
+                                      "channel": "audit.{{widgetId}}.toggleSort",
+                                      "stateChannel": "audit.{{widgetId}}.toggleSort.state"
                                     }
                                   },
                                   {
@@ -5526,68 +5530,27 @@
                                   },
                                   {
                                     "type": "SizedBox",
-                                    "id": "{{widgetId}}-tb-g3",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "IconButton",
-                                    "id": "{{widgetId}}-btn-date-range",
-                                    "props": {
-                                      "icon": "calendar",
-                                      "tooltip": "Date range",
-                                      "variant": "toolbar-secondary",
-                                      "channel": "audit.{{widgetId}}.dateRange"
-                                    }
-                                  },
-                                  {
-                                    "type": "SizedBox",
                                     "id": "{{widgetId}}-tb-g4",
                                     "props": {
                                       "width": 8
                                     }
                                   },
                                   {
-                                    "type": "Expanded",
-                                    "id": "{{widgetId}}-search-exp",
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-search-box",
+                                    "props": {
+                                      "width": 300
+                                    },
                                     "children": [
                                       {
-                                        "type": "Container",
-                                        "id": "{{widgetId}}-search-wrap",
+                                        "type": "TextField",
+                                        "id": "{{widgetId}}-search",
                                         "props": {
-                                          "maxWidth": 350,
-                                          "alignment": "centerRight"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "TextField",
-                                            "id": "{{widgetId}}-search",
-                                            "props": {
-                                              "hint": "Search events…",
-                                              "prefixIcon": "search"
-                                            }
-                                          }
-                                        ]
+                                          "hint": "Search events…",
+                                          "prefixIcon": "search"
+                                        }
                                       }
                                     ]
-                                  },
-                                  {
-                                    "type": "SizedBox",
-                                    "id": "{{widgetId}}-tb-g5",
-                                    "props": {
-                                      "width": 8
-                                    }
-                                  },
-                                  {
-                                    "type": "IconButton",
-                                    "id": "{{widgetId}}-btn-send-chat",
-                                    "props": {
-                                      "icon": "send",
-                                      "tooltip": "Send to Chat",
-                                      "variant": "toolbar-primary",
-                                      "channel": "audit.{{widgetId}}.sendToChat"
-                                    }
                                   }
                                 ]
                               }
@@ -5619,7 +5582,8 @@
                                       "label": "Date",
                                       "flex": 2,
                                       "visible": true,
-                                      "color": "onSurfaceMuted"
+                                      "color": "onSurfaceMuted",
+                                      "isDate": true
                                     },
                                     {
                                       "key": "eventType",
@@ -5645,9 +5609,7 @@
                                       "key": "targetName",
                                       "label": "Target",
                                       "flex": 2,
-                                      "visible": true,
-                                      "color": "link",
-                                      "isLink": true
+                                      "visible": true
                                     },
                                     {
                                       "key": "teamId",
@@ -5689,13 +5651,15 @@
                                       "key": "createdDate",
                                       "label": "Created",
                                       "flex": 2,
-                                      "visible": false
+                                      "visible": false,
+                                      "isDate": true
                                     },
                                     {
                                       "key": "runDate",
                                       "label": "Run Date",
                                       "flex": 2,
-                                      "visible": false
+                                      "visible": false,
+                                      "isDate": true
                                     },
                                     {
                                       "key": "duration",
@@ -5721,7 +5685,11 @@
                                       "flex": 2,
                                       "visible": false
                                     }
-                                  ]
+                                  ],
+                                  "sortChannel": "audit.{{widgetId}}.toggleSort",
+                                  "exportChannel": "audit.{{widgetId}}.exportCsv",
+                                  "refreshChannel": "audit.{{widgetId}}.refresh",
+                                  "searchChannel": "input.{{widgetId}}-search.changed"
                                 }
                               }
                             ]
