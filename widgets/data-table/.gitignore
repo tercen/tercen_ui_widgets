@@ -8,6 +8,9 @@ build/
 
 # Local review/build artifacts
 _local/
+_research/
+_review/
+_mock/sdui-gaps.md
 
 # IDE
 .idea/
