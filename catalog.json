@@ -7974,6 +7974,12 @@
               "channel": "{{widgetId}}.save",
               "primaryStateKey": "dirty",
               "enabledStateKey": "dirty"
+            },
+            {
+              "icon": "print",
+              "tooltip": "Print",
+              "channel": "{{widgetId}}.print",
+              "isGhost": true
             }
           ]
         },
@@ -8059,89 +8065,102 @@
                         },
                         "children": [
                           {
-                            "type": "ServiceCall",
-                            "id": "{{widgetId}}-save",
+                            "type": "PrintTrigger",
+                            "id": "{{widgetId}}-print",
                             "props": {
-                              "service": "fileService",
-                              "method": "updateContent",
-                              "triggerOn": "{{widgetId}}.save",
-                              "args": [
-                                "{{props.documentId}}",
-                                "{{draft.value}}"
-                              ],
+                              "triggerOn": "{{widgetId}}.print",
+                              "title": "{{props.documentName}}",
                               "watchChannels": {
                                 "draft": "input.{{widgetId}}-editor.changed"
                               }
                             },
                             "children": [
                               {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-save-err-cond",
+                                "type": "ServiceCall",
+                                "id": "{{widgetId}}-save",
                                 "props": {
-                                  "visible": "{{saveError}}"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Alert",
-                                    "id": "{{widgetId}}-save-err",
-                                    "props": {
-                                      "variant": "error",
-                                      "message": "{{saveError}}",
-                                      "dismissible": true
-                                    }
+                                  "service": "fileService",
+                                  "method": "updateContent",
+                                  "triggerOn": "{{widgetId}}.save",
+                                  "args": [
+                                    "{{props.documentId}}",
+                                    "{{draft.value}}"
+                                  ],
+                                  "watchChannels": {
+                                    "draft": "input.{{widgetId}}-editor.changed"
                                   }
-                                ]
-                              },
-                              {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-preview-cond",
-                                "props": {
-                                  "visible": "{{state.sourceMode}}",
-                                  "negate": true
                                 },
                                 "children": [
                                   {
-                                    "type": "ListView",
-                                    "id": "{{widgetId}}-md-scroll",
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-save-err-cond",
                                     "props": {
-                                      "padding": 16
+                                      "visible": "{{saveError}}"
                                     },
                                     "children": [
                                       {
-                                        "type": "Markdown",
-                                        "id": "{{widgetId}}-md",
+                                        "type": "Alert",
+                                        "id": "{{widgetId}}-save-err",
                                         "props": {
-                                          "content": "{{draft.value}}",
-                                          "selectable": true
+                                          "variant": "error",
+                                          "message": "{{saveError}}",
+                                          "dismissible": true
                                         }
                                       }
                                     ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Conditional",
-                                "id": "{{widgetId}}-source-cond",
-                                "props": {
-                                  "visible": "{{state.sourceMode}}"
-                                },
-                                "children": [
+                                  },
                                   {
-                                    "type": "ListView",
-                                    "id": "{{widgetId}}-tf-scroll",
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-preview-cond",
                                     "props": {
-                                      "padding": 16
+                                      "visible": "{{state.sourceMode}}",
+                                      "negate": true
                                     },
                                     "children": [
                                       {
-                                        "type": "TextField",
-                                        "id": "{{widgetId}}-editor",
+                                        "type": "ListView",
+                                        "id": "{{widgetId}}-md-scroll",
                                         "props": {
-                                          "value": "{{draft.value}}",
-                                          "maxLines": null,
-                                          "borderless": true,
-                                          "fontFamily": "monospace"
-                                        }
+                                          "padding": 16
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "Markdown",
+                                            "id": "{{widgetId}}-md",
+                                            "props": {
+                                              "content": "{{draft.value}}",
+                                              "selectable": true
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  },
+                                  {
+                                    "type": "Conditional",
+                                    "id": "{{widgetId}}-source-cond",
+                                    "props": {
+                                      "visible": "{{state.sourceMode}}"
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "ListView",
+                                        "id": "{{widgetId}}-tf-scroll",
+                                        "props": {
+                                          "padding": 16
+                                        },
+                                        "children": [
+                                          {
+                                            "type": "TextField",
+                                            "id": "{{widgetId}}-editor",
+                                            "props": {
+                                              "value": "{{draft.value}}",
+                                              "maxLines": null,
+                                              "borderless": true,
+                                              "fontFamily": "monospace"
+                                            }
+                                          }
+                                        ]
                                       }
                                     ]
                                   }
