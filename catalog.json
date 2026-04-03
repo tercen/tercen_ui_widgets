@@ -8019,7 +8019,23 @@
         "type": "WindowShell",
         "id": "{{widgetId}}-shell",
         "props": {
-          "showToolbar": false
+          "toolbarActions": [
+            {
+              "icon": "info",
+              "tooltip": "Table info",
+              "channel": "{{widgetId}}.info"
+            },
+            {
+              "icon": "download",
+              "tooltip": "Download CSV",
+              "channel": "{{widgetId}}.export"
+            },
+            {
+              "icon": "pen",
+              "tooltip": "Annotate",
+              "channel": "{{widgetId}}.annotate"
+            }
+          ]
         },
         "children": [
           {
@@ -8090,11 +8106,10 @@
                 },
                 "children": [
                   {
-                    "type": "DataTable",
-                    "id": "{{widgetId}}-grid",
+                    "type": "TabbedDataTable",
+                    "id": "{{widgetId}}-table",
                     "props": {
-                      "columns": "{{data.columns}}",
-                      "nRows": "{{data.nRows}}",
+                      "tables": "{{data.tables}}",
                       "maxRows": 100
                     }
                   }
