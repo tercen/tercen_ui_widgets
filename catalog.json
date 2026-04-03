@@ -7932,10 +7932,17 @@
         },
         "state": {
           "initialState": {
-            "sourceMode": false
+            "sourceMode": false,
+            "dirty": false
           },
           "toggleBindings": {
             "input.{{widgetId}}-modeToggle.changed": "sourceMode"
+          },
+          "setBindings": {
+            "input.{{widgetId}}-editor.changed": "dirty"
+          },
+          "resetBindings": {
+            "{{widgetId}}-save.completed": "dirty"
           }
         },
         "domain": "document",
@@ -7946,201 +7953,127 @@
         ]
       },
       "template": {
-        "type": "Column",
+        "type": "WindowShell",
         "id": "{{widgetId}}-root",
         "props": {
-          "crossAxisAlignment": "stretch"
+          "toolbarActions": [
+            {
+              "icon": "pen",
+              "tooltip": "Edit",
+              "toggleIcon": "code",
+              "toggleTooltip": "View",
+              "stateKey": "sourceMode",
+              "channel": "input.{{widgetId}}-modeToggle.changed",
+              "payload": {
+                "value": true
+              }
+            },
+            {
+              "icon": "save",
+              "tooltip": "Save",
+              "channel": "{{widgetId}}.save",
+              "primaryStateKey": "dirty",
+              "enabledStateKey": "dirty"
+            }
+          ]
         },
         "children": [
           {
-            "type": "DataSource",
-            "id": "{{widgetId}}-ds",
-            "props": {
-              "service": "fileService",
-              "method": "download",
-              "args": [
-                "{{props.documentId}}"
-              ],
-              "refreshOn": "{{widgetId}}-save.completed"
-            },
+            "type": "Expanded",
+            "id": "{{widgetId}}-body-exp",
             "children": [
               {
-                "type": "Conditional",
-                "id": "{{widgetId}}-loading",
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
                 "props": {
-                  "visible": "{{loading}}"
+                  "service": "fileService",
+                  "method": "download",
+                  "args": [
+                    "{{props.documentId}}"
+                  ],
+                  "refreshOn": "{{widgetId}}-save.completed"
                 },
                 "children": [
                   {
-                    "type": "Center",
-                    "id": "{{widgetId}}-loading-center",
-                    "children": [
-                      {
-                        "type": "LoadingIndicator",
-                        "id": "{{widgetId}}-spinner",
-                        "props": {
-                          "text": "Loading document\u2026"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "Conditional",
-                "id": "{{widgetId}}-error",
-                "props": {
-                  "visible": "{{error}}"
-                },
-                "children": [
-                  {
-                    "type": "Center",
-                    "id": "{{widgetId}}-err-center",
-                    "children": [
-                      {
-                        "type": "Alert",
-                        "id": "{{widgetId}}-err-alert",
-                        "props": {
-                          "variant": "error",
-                          "title": "Failed to load document",
-                          "message": "{{errorMessage}}"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              {
-                "type": "Conditional",
-                "id": "{{widgetId}}-ready",
-                "props": {
-                  "visible": "{{ready}}"
-                },
-                "children": [
-                  {
-                    "type": "EventScope",
-                    "id": "{{widgetId}}-draft-scope",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "channel": "input.{{widgetId}}-editor.changed",
-                      "scopeKey": "draft",
-                      "defaultPayload": {
-                        "value": "{{data.content}}"
-                      }
+                      "visible": "{{loading}}"
                     },
                     "children": [
                       {
-                        "type": "ServiceCall",
-                        "id": "{{widgetId}}-save",
+                        "type": "Center",
+                        "id": "{{widgetId}}-loading-c",
+                        "children": [
+                          {
+                            "type": "LoadingIndicator",
+                            "id": "{{widgetId}}-spinner",
+                            "props": {
+                              "text": "Loading document\u2026"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-c",
+                        "children": [
+                          {
+                            "type": "Alert",
+                            "id": "{{widgetId}}-err-alert",
+                            "props": {
+                              "variant": "error",
+                              "title": "Failed to load document",
+                              "message": "{{errorMessage}}"
+                            }
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
+                      {
+                        "type": "EventScope",
+                        "id": "{{widgetId}}-draft-scope",
                         "props": {
-                          "service": "fileService",
-                          "method": "updateContent",
-                          "triggerOn": "{{widgetId}}.save",
-                          "args": [
-                            "{{props.documentId}}",
-                            "{{draft.value}}"
-                          ],
-                          "watchChannels": {
-                            "draft": "input.{{widgetId}}-editor.changed"
+                          "channel": "input.{{widgetId}}-editor.changed",
+                          "scopeKey": "draft",
+                          "defaultPayload": {
+                            "value": "{{data.content}}"
                           }
                         },
                         "children": [
                           {
-                            "type": "Column",
-                            "id": "{{widgetId}}-ready-col",
+                            "type": "ServiceCall",
+                            "id": "{{widgetId}}-save",
                             "props": {
-                              "crossAxisAlignment": "stretch"
+                              "service": "fileService",
+                              "method": "updateContent",
+                              "triggerOn": "{{widgetId}}.save",
+                              "args": [
+                                "{{props.documentId}}",
+                                "{{draft.value}}"
+                              ],
+                              "watchChannels": {
+                                "draft": "input.{{widgetId}}-editor.changed"
+                              }
                             },
                             "children": [
-                              {
-                                "type": "Container",
-                                "id": "{{widgetId}}-toolbar",
-                                "props": {
-                                  "color": "surfaceContainerHigh",
-                                  "padding": "sm"
-                                },
-                                "children": [
-                                  {
-                                    "type": "Row",
-                                    "id": "{{widgetId}}-toolbar-row",
-                                    "props": {
-                                      "crossAxisAlignment": "center"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "ToggleButton",
-                                        "id": "{{widgetId}}-modeToggle",
-                                        "props": {
-                                          "icon": "code",
-                                          "tooltip": "Toggle source / preview"
-                                        }
-                                      },
-                                      {
-                                        "type": "SizedBox",
-                                        "id": "{{widgetId}}-tb-gap1",
-                                        "props": {
-                                          "width": 8
-                                        }
-                                      },
-                                      {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-saving-cond",
-                                        "props": {
-                                          "visible": "{{saving}}"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "LoadingIndicator",
-                                            "id": "{{widgetId}}-save-spin",
-                                            "props": {
-                                              "variant": "circular"
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Conditional",
-                                        "id": "{{widgetId}}-saved-cond",
-                                        "props": {
-                                          "visible": "{{saved}}"
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Icon",
-                                            "id": "{{widgetId}}-saved-icon",
-                                            "props": {
-                                              "icon": "check",
-                                              "color": "success",
-                                              "size": 16
-                                            }
-                                          }
-                                        ]
-                                      },
-                                      {
-                                        "type": "Spacer",
-                                        "id": "{{widgetId}}-tb-spacer"
-                                      },
-                                      {
-                                        "type": "IconButton",
-                                        "id": "{{widgetId}}-saveBtn",
-                                        "props": {
-                                          "icon": "floppy-disk",
-                                          "channel": "{{widgetId}}.save",
-                                          "tooltip": "Save",
-                                          "variant": "toolbar-primary"
-                                        }
-                                      }
-                                    ]
-                                  }
-                                ]
-                              },
-                              {
-                                "type": "Divider",
-                                "id": "{{widgetId}}-toolbar-div",
-                                "props": {
-                                  "height": 1,
-                                  "color": "outlineVariant"
-                                }
-                              },
                               {
                                 "type": "Conditional",
                                 "id": "{{widgetId}}-save-err-cond",
@@ -8160,41 +8093,44 @@
                                 ]
                               },
                               {
-                                "type": "Expanded",
-                                "id": "{{widgetId}}-editor-exp",
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-preview-cond",
+                                "props": {
+                                  "visible": "{{state.sourceMode}}",
+                                  "negate": true
+                                },
                                 "children": [
                                   {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-preview-cond",
+                                    "type": "ListView",
+                                    "id": "{{widgetId}}-md-scroll",
                                     "props": {
-                                      "visible": "{{state.sourceMode}}",
-                                      "negate": true
+                                      "padding": 16
                                     },
                                     "children": [
                                       {
-                                        "type": "Padding",
-                                        "id": "{{widgetId}}-md-pad",
+                                        "type": "Markdown",
+                                        "id": "{{widgetId}}-md",
                                         "props": {
-                                          "all": 8
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Markdown",
-                                            "id": "{{widgetId}}-md",
-                                            "props": {
-                                              "content": "{{draft.value}}",
-                                              "selectable": true
-                                            }
-                                          }
-                                        ]
+                                          "content": "{{draft.value}}",
+                                          "selectable": true
+                                        }
                                       }
                                     ]
-                                  },
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-source-cond",
+                                "props": {
+                                  "visible": "{{state.sourceMode}}"
+                                },
+                                "children": [
                                   {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-source-cond",
+                                    "type": "ListView",
+                                    "id": "{{widgetId}}-tf-scroll",
                                     "props": {
-                                      "visible": "{{state.sourceMode}}"
+                                      "padding": 16
                                     },
                                     "children": [
                                       {
@@ -8202,7 +8138,7 @@
                                         "id": "{{widgetId}}-editor",
                                         "props": {
                                           "value": "{{draft.value}}",
-                                          "maxLines": 999,
+                                          "maxLines": null,
                                           "borderless": true,
                                           "fontFamily": "monospace"
                                         }
