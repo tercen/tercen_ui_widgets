@@ -5859,7 +5859,7 @@
                 {
                   "icon": "plus",
                   "channel": "chat.newSession",
-                  "isPrimary": true,
+                  "isPrimary": false,
                   "tooltip": "New Session"
                 },
                 {
