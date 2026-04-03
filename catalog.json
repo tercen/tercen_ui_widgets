@@ -6457,7 +6457,7 @@
             "type": "Container",
             "id": "{{widgetId}}-bg",
             "props": {
-              "color": "surfaceContainerLow"
+              "color": "surface"
             },
             "children": [
               {
@@ -7985,182 +7985,176 @@
         },
         "children": [
           {
-            "type": "Expanded",
-            "id": "{{widgetId}}-body-exp",
+            "type": "DataSource",
+            "id": "{{widgetId}}-ds",
+            "props": {
+              "service": "fileService",
+              "method": "download",
+              "args": [
+                "{{props.documentId}}"
+              ],
+              "refreshOn": "{{widgetId}}-save.completed"
+            },
             "children": [
               {
-                "type": "DataSource",
-                "id": "{{widgetId}}-ds",
+                "type": "Conditional",
+                "id": "{{widgetId}}-loading",
                 "props": {
-                  "service": "fileService",
-                  "method": "download",
-                  "args": [
-                    "{{props.documentId}}"
-                  ],
-                  "refreshOn": "{{widgetId}}-save.completed"
+                  "visible": "{{loading}}"
                 },
                 "children": [
                   {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-loading",
-                    "props": {
-                      "visible": "{{loading}}"
-                    },
+                    "type": "Center",
+                    "id": "{{widgetId}}-loading-c",
                     "children": [
                       {
-                        "type": "Center",
-                        "id": "{{widgetId}}-loading-c",
-                        "children": [
-                          {
-                            "type": "LoadingIndicator",
-                            "id": "{{widgetId}}-spinner",
-                            "props": {
-                              "text": "Loading document\u2026"
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-error",
-                    "props": {
-                      "visible": "{{error}}"
-                    },
-                    "children": [
-                      {
-                        "type": "Center",
-                        "id": "{{widgetId}}-err-c",
-                        "children": [
-                          {
-                            "type": "Alert",
-                            "id": "{{widgetId}}-err-alert",
-                            "props": {
-                              "variant": "error",
-                              "title": "Failed to load document",
-                              "message": "{{errorMessage}}"
-                            }
-                          }
-                        ]
-                      }
-                    ]
-                  },
-                  {
-                    "type": "Conditional",
-                    "id": "{{widgetId}}-ready",
-                    "props": {
-                      "visible": "{{ready}}"
-                    },
-                    "children": [
-                      {
-                        "type": "EventScope",
-                        "id": "{{widgetId}}-draft-scope",
+                        "type": "LoadingIndicator",
+                        "id": "{{widgetId}}-spinner",
                         "props": {
-                          "channel": "input.{{widgetId}}-editor.changed",
-                          "scopeKey": "draft",
-                          "defaultPayload": {
-                            "value": "{{data.content}}"
+                          "text": "Loading document\u2026"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Conditional",
+                "id": "{{widgetId}}-error",
+                "props": {
+                  "visible": "{{error}}"
+                },
+                "children": [
+                  {
+                    "type": "Center",
+                    "id": "{{widgetId}}-err-c",
+                    "children": [
+                      {
+                        "type": "Alert",
+                        "id": "{{widgetId}}-err-alert",
+                        "props": {
+                          "variant": "error",
+                          "title": "Failed to load document",
+                          "message": "{{errorMessage}}"
+                        }
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "Conditional",
+                "id": "{{widgetId}}-ready",
+                "props": {
+                  "visible": "{{ready}}"
+                },
+                "children": [
+                  {
+                    "type": "EventScope",
+                    "id": "{{widgetId}}-draft-scope",
+                    "props": {
+                      "channel": "input.{{widgetId}}-editor.changed",
+                      "scopeKey": "draft",
+                      "defaultPayload": {
+                        "value": "{{data.content}}"
+                      }
+                    },
+                    "children": [
+                      {
+                        "type": "PrintTrigger",
+                        "id": "{{widgetId}}-print",
+                        "props": {
+                          "triggerOn": "{{widgetId}}.print",
+                          "title": "{{props.documentName}}",
+                          "watchChannels": {
+                            "draft": "input.{{widgetId}}-editor.changed"
                           }
                         },
                         "children": [
                           {
-                            "type": "PrintTrigger",
-                            "id": "{{widgetId}}-print",
+                            "type": "ServiceCall",
+                            "id": "{{widgetId}}-save",
                             "props": {
-                              "triggerOn": "{{widgetId}}.print",
-                              "title": "{{props.documentName}}",
+                              "service": "fileService",
+                              "method": "updateContent",
+                              "triggerOn": "{{widgetId}}.save",
+                              "args": [
+                                "{{props.documentId}}",
+                                "{{draft.value}}"
+                              ],
                               "watchChannels": {
                                 "draft": "input.{{widgetId}}-editor.changed"
                               }
                             },
                             "children": [
                               {
-                                "type": "ServiceCall",
-                                "id": "{{widgetId}}-save",
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-save-err-cond",
                                 "props": {
-                                  "service": "fileService",
-                                  "method": "updateContent",
-                                  "triggerOn": "{{widgetId}}.save",
-                                  "args": [
-                                    "{{props.documentId}}",
-                                    "{{draft.value}}"
-                                  ],
-                                  "watchChannels": {
-                                    "draft": "input.{{widgetId}}-editor.changed"
-                                  }
+                                  "visible": "{{saveError}}"
                                 },
                                 "children": [
                                   {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-save-err-cond",
+                                    "type": "Alert",
+                                    "id": "{{widgetId}}-save-err",
                                     "props": {
-                                      "visible": "{{saveError}}"
+                                      "variant": "error",
+                                      "message": "{{saveError}}",
+                                      "dismissible": true
+                                    }
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-preview-cond",
+                                "props": {
+                                  "visible": "{{state.sourceMode}}",
+                                  "negate": true
+                                },
+                                "children": [
+                                  {
+                                    "type": "ListView",
+                                    "id": "{{widgetId}}-md-scroll",
+                                    "props": {
+                                      "padding": 16
                                     },
                                     "children": [
                                       {
-                                        "type": "Alert",
-                                        "id": "{{widgetId}}-save-err",
+                                        "type": "Markdown",
+                                        "id": "{{widgetId}}-md",
                                         "props": {
-                                          "variant": "error",
-                                          "message": "{{saveError}}",
-                                          "dismissible": true
+                                          "content": "{{draft.value}}",
+                                          "selectable": true
                                         }
                                       }
                                     ]
-                                  },
+                                  }
+                                ]
+                              },
+                              {
+                                "type": "Conditional",
+                                "id": "{{widgetId}}-source-cond",
+                                "props": {
+                                  "visible": "{{state.sourceMode}}"
+                                },
+                                "children": [
                                   {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-preview-cond",
+                                    "type": "ListView",
+                                    "id": "{{widgetId}}-tf-scroll",
                                     "props": {
-                                      "visible": "{{state.sourceMode}}",
-                                      "negate": true
+                                      "padding": 16
                                     },
                                     "children": [
                                       {
-                                        "type": "ListView",
-                                        "id": "{{widgetId}}-md-scroll",
+                                        "type": "TextField",
+                                        "id": "{{widgetId}}-editor",
                                         "props": {
-                                          "padding": 16
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "Markdown",
-                                            "id": "{{widgetId}}-md",
-                                            "props": {
-                                              "content": "{{draft.value}}",
-                                              "selectable": true
-                                            }
-                                          }
-                                        ]
-                                      }
-                                    ]
-                                  },
-                                  {
-                                    "type": "Conditional",
-                                    "id": "{{widgetId}}-source-cond",
-                                    "props": {
-                                      "visible": "{{state.sourceMode}}"
-                                    },
-                                    "children": [
-                                      {
-                                        "type": "ListView",
-                                        "id": "{{widgetId}}-tf-scroll",
-                                        "props": {
-                                          "padding": 16
-                                        },
-                                        "children": [
-                                          {
-                                            "type": "TextField",
-                                            "id": "{{widgetId}}-editor",
-                                            "props": {
-                                              "value": "{{draft.value}}",
-                                              "maxLines": null,
-                                              "borderless": true,
-                                              "fontFamily": "monospace"
-                                            }
-                                          }
-                                        ]
+                                          "value": "{{draft.value}}",
+                                          "maxLines": null,
+                                          "borderless": true,
+                                          "fontFamily": "monospace"
+                                        }
                                       }
                                     ]
                                   }
