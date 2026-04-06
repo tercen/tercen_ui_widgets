@@ -429,6 +429,7 @@
                                       "icon": "filter",
                                       "iconSize": 16,
                                       "iconColor": "primary",
+                                      "variant": "toolbar-secondary",
                                       "tooltip": "Filter by type",
                                       "channel": "navigator.typeFilter",
                                       "items": [
@@ -471,6 +472,7 @@
                                         "id": "{{widgetId}}-tb-search",
                                         "props": {
                                           "hint": "Search...",
+                                          "prefixIcon": "search",
                                           "borderless": false
                                         }
                                       }
@@ -853,7 +855,7 @@
                                         "type": "SizedBox",
                                         "id": "{{widgetId}}-toolbar-gap",
                                         "props": {
-                                          "width": 8.0
+                                          "width": 8
                                         }
                                       },
                                       {
@@ -1078,7 +1080,7 @@
                                         "type": "SizedBox",
                                         "id": "{{widgetId}}-toolbar-gap",
                                         "props": {
-                                          "width": 8.0
+                                          "width": 8
                                         }
                                       },
                                       {
@@ -1215,7 +1217,7 @@
                         "type": "SizedBox",
                         "id": "{{widgetId}}-toolbar-gap",
                         "props": {
-                          "width": 8.0
+                          "width": 8
                         }
                       },
                       {
@@ -1516,7 +1518,7 @@
                                         "type": "SizedBox",
                                         "id": "{{widgetId}}-toolbar-gap",
                                         "props": {
-                                          "width": 8.0
+                                          "width": 8
                                         }
                                       },
                                       {
@@ -1625,7 +1627,7 @@
                         "type": "SizedBox",
                         "id": "{{widgetId}}-toolbar-gap",
                         "props": {
-                          "width": 8.0
+                          "width": 8
                         }
                       },
                       {
@@ -1728,7 +1730,7 @@
                         "type": "SizedBox",
                         "id": "{{widgetId}}-toolbar-gap",
                         "props": {
-                          "width": 8.0
+                          "width": 8
                         }
                       },
                       {
@@ -3561,8 +3563,8 @@
                               "icon": "smart_toy"
                             },
                             {
-                              "value": "taskManager",
-                              "label": "Task Manager",
+                              "value": "openTaskMonitor",
+                              "label": "Task Monitor",
                               "icon": "checklist"
                             },
                             {
