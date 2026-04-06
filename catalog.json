@@ -7384,15 +7384,6 @@
                 ]
               }
             ]
-          },
-          {
-            "type": "Divider",
-            "id": "{{widgetId}}-border",
-            "props": {
-              "height": 1,
-              "thickness": 1,
-              "color": "outlineVariant"
-            }
           }
         ]
       }
