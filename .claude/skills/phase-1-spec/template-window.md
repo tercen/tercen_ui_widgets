@@ -107,7 +107,7 @@ Every window functional spec follows this structure. Sections 1–4 are required
 | [Data item] | [e.g. workflowService] | [e.g. getWorkflowGraph] | [e.g. workflowId] | [e.g. DirectedGraph, DataTable, ForEach+Card] |
 
 *Available services:* `tableSchemaService`, `fileService`, `projectService`, `workflowService`, `userService`, `projectDocumentService`, `operatorService`.
-*Available domain primitives:* `DataTable`, `TabbedDataTable`, `DirectedGraph`, `ImageViewer`, `TabbedImageViewer`.
+*Available domain primitives:* `DataGrid`, `DirectedGraph`, `ImageViewer`, `TabbedImageViewer`.
 
 ---
 

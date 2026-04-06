@@ -936,7 +936,7 @@
           "select"
         ],
         "selectionMode": "single",
-        "dataSource": "tableSchemaService.findByWorkflowIdAndStepId"
+        "dataSource": "workflowService.getStepTables"
       },
       "template": {
         "type": "Column",
@@ -1119,8 +1119,18 @@
                             "id": "{{widgetId}}-table-exp",
                             "children": [
                               {
-                                "type": "TabbedDataTable",
-                                "id": "{{widgetId}}-table"
+                                "type": "DataGrid",
+                                "id": "{{widgetId}}-grid",
+                                "props": {
+                                  "items": "{{data.tables[0].items}}",
+                                  "columns": "{{data.tables[0].columns}}",
+                                  "columnMode": "scroll",
+                                  "showRowNumbers": true,
+                                  "sortable": true,
+                                  "searchMode": "highlight",
+                                  "selectionMode": "single",
+                                  "onRowTap": "system.selection.table"
+                                }
                               }
                             ]
                           }
