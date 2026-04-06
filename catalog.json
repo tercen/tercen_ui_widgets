@@ -88,7 +88,7 @@
                       [
                         "{{parent.id}}",
                         true,
-                        ""
+                        "\uf000"
                       ],
                       100
                     ]
@@ -332,7 +332,7 @@
                                 },
                                 "children": [
                                   {
-                                    "_comment": "Upload button — primary, enabled when project or folder selected",
+                                    "_comment": "Upload button \u2014 primary, enabled when project or folder selected",
                                     "type": "Tooltip",
                                     "id": "{{widgetId}}-tb-upload-tip",
                                     "props": {
@@ -362,7 +362,7 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Download button — primary, enabled when file/dataset selected",
+                                    "_comment": "Download button \u2014 primary, enabled when file/dataset selected",
                                     "type": "Tooltip",
                                     "id": "{{widgetId}}-tb-download-tip",
                                     "props": {
@@ -392,7 +392,7 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Team button — secondary (outlined), emits openTeamWidget",
+                                    "_comment": "Team button \u2014 secondary (outlined), emits openTeamWidget",
                                     "type": "Tooltip",
                                     "id": "{{widgetId}}-tb-team-tip",
                                     "props": {
@@ -422,7 +422,7 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Type filter — PopupMenu with icon-only items per design decisions",
+                                    "_comment": "Type filter \u2014 PopupMenu with icon-only items per design decisions",
                                     "type": "PopupMenu",
                                     "id": "{{widgetId}}-tb-filter",
                                     "props": {
@@ -463,7 +463,7 @@
                                     }
                                   },
                                   {
-                                    "_comment": "Search field — flex-grow text input with magnifying glass",
+                                    "_comment": "Search field \u2014 flex-grow text input with magnifying glass",
                                     "type": "Expanded",
                                     "id": "{{widgetId}}-tb-search-exp",
                                     "children": [
@@ -753,7 +753,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -791,7 +791,7 @@
                                 "type": "SizedBox",
                                 "id": "{{widgetId}}-err-gap",
                                 "props": {
-                                  "height": 8.0
+                                  "height": 8
                                 }
                               },
                               {
@@ -978,7 +978,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -1016,7 +1016,7 @@
                                 "type": "SizedBox",
                                 "id": "{{widgetId}}-err-gap",
                                 "props": {
-                                  "height": 8.0
+                                  "height": 8
                                 }
                               },
                               {
@@ -1266,7 +1266,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -1304,7 +1304,7 @@
                                 "type": "SizedBox",
                                 "id": "{{widgetId}}-err-gap",
                                 "props": {
-                                  "height": 8.0
+                                  "height": 8
                                 }
                               },
                               {
@@ -1415,7 +1415,7 @@
                             "id": "{{widgetId}}-li",
                             "props": {
                               "variant": "skeleton",
-                              "text": "Loading…"
+                              "text": "Loading\u2026"
                             }
                           }
                         ]
@@ -1453,7 +1453,7 @@
                                 "type": "SizedBox",
                                 "id": "{{widgetId}}-err-gap",
                                 "props": {
-                                  "height": 8.0
+                                  "height": 8
                                 }
                               },
                               {
@@ -1576,91 +1576,534 @@
     {
       "metadata": {
         "type": "AuditTrail",
+        "kind": "window",
         "tier": 2,
-        "description": "Chronological log of user actions and system events. Use when the user wants to review recent activity or audit history.",
+        "typeColor": "#FF8200",
+        "tabLabel": "Audit Trail",
+        "description": "Chronological log of user actions and system events across projects, teams, and workflows. Supports filtering by event type, column values, and date ranges. Use when the user wants to review recent activity, audit history, or investigate system events.",
         "emittedEvents": [
           "window.intent"
         ],
+        "inboundEvents": [
+          "window.{{widgetId}}.command"
+        ],
+        "handlesIntent": {
+          "intent": "openAuditTrail",
+          "propsMap": {
+            "scopeType": "scopeType",
+            "scopeId": "scopeId"
+          },
+          "windowTitle": "Audit Trail",
+          "windowSize": "large"
+        },
+        "state": {
+          "publishTo": [
+            "audit.focusChanged"
+          ],
+          "selection": {
+            "channel": "audit.focusChanged",
+            "matchField": "id",
+            "payloadField": "eventId",
+            "multi": false
+          }
+        },
+        "props": {
+          "scopeType": {
+            "type": "string",
+            "required": true
+          },
+          "scopeId": {
+            "type": "string",
+            "required": true
+          }
+        },
         "domain": "activity",
         "capabilities": [
-          "browse"
+          "browse",
+          "search",
+          "select",
+          "filter",
+          "export"
         ],
-        "selectionMode": "none",
-        "dataSource": "activityService.findByOwner"
+        "selectionMode": "single",
+        "dataSource": "activityService.findByProjectAndDate"
       },
       "template": {
         "type": "Column",
         "id": "{{widgetId}}-root",
         "props": {
-          "crossAxisAlignment": "stretch"
+          "crossAxisAlignment": "stretch",
+          "clipBehavior": "hardEdge"
         },
         "children": [
-          {
-            "type": "Container",
-            "id": "{{widgetId}}-toolbar",
-            "props": {
-              "color": "surfaceContainerHigh",
-              "padding": "sm"
-            },
-            "children": [
-              {
-                "type": "Row",
-                "id": "{{widgetId}}-toolbar-row",
-                "props": {
-                  "mainAxisAlignment": "spaceBetween"
-                },
-                "children": [
-                  {
-                    "type": "Row",
-                    "id": "{{widgetId}}-toolbar-left",
-                    "children": [
-                      {
-                        "type": "Icon",
-                        "id": "{{widgetId}}-toolbar-icon",
-                        "props": {
-                          "icon": "checklist",
-                          "size": 16,
-                          "color": "primary"
-                        }
-                      },
-                      {
-                        "type": "SizedBox",
-                        "id": "{{widgetId}}-toolbar-gap",
-                        "props": {
-                          "width": 8
-                        }
-                      },
-                      {
-                        "type": "Text",
-                        "id": "{{widgetId}}-title",
-                        "props": {
-                          "text": "Audit Trail",
-                          "textStyle": "labelMedium",
-                          "color": "onSurface"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              }
-            ]
-          },
           {
             "type": "Expanded",
             "id": "{{widgetId}}-body",
             "children": [
               {
-                "type": "Center",
-                "id": "{{widgetId}}-placeholder",
+                "type": "DataSource",
+                "id": "{{widgetId}}-ds",
+                "props": {
+                  "service": "activityService",
+                  "method": "findByProjectAndDate",
+                  "args": [
+                    [
+                      "{{props.scopeId}}",
+                      "{{startDate}}"
+                    ],
+                    [
+                      "{{props.scopeId}}",
+                      "{{endDate}}"
+                    ],
+                    200
+                  ],
+                  "refreshOn": "audit.{{widgetId}}.refresh"
+                },
                 "children": [
                   {
-                    "type": "Text",
-                    "id": "{{widgetId}}-placeholder-text",
+                    "_comment": "Loading state",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-loading",
                     "props": {
-                      "text": "Select a scope to view audit events",
-                      "textStyle": "labelSmall",
-                      "color": "onSurfaceMuted"
-                    }
+                      "visible": "{{loading}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-loading-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-loading-col",
+                            "props": {
+                              "mainAxisAlignment": "center",
+                              "mainAxisSize": "min"
+                            },
+                            "children": [
+                              {
+                                "type": "LoadingIndicator",
+                                "id": "{{widgetId}}-spinner",
+                                "props": {
+                                  "variant": "spinner"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-loading-gap",
+                                "props": {
+                                  "height": 12
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-loading-text",
+                                "props": {
+                                  "text": "Loading audit trail\u2026",
+                                  "textStyle": "bodyMedium",
+                                  "color": "onSurfaceMuted"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "_comment": "Error state",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-error",
+                    "props": {
+                      "visible": "{{error}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Center",
+                        "id": "{{widgetId}}-err-center",
+                        "children": [
+                          {
+                            "type": "Column",
+                            "id": "{{widgetId}}-err-col",
+                            "props": {
+                              "mainAxisAlignment": "center",
+                              "crossAxisAlignment": "center"
+                            },
+                            "children": [
+                              {
+                                "type": "Icon",
+                                "id": "{{widgetId}}-err-icon",
+                                "props": {
+                                  "icon": "triangle-exclamation",
+                                  "size": 32,
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-gap",
+                                "props": {
+                                  "height": 8
+                                }
+                              },
+                              {
+                                "type": "Text",
+                                "id": "{{widgetId}}-err-text",
+                                "props": {
+                                  "text": "{{errorMessage}}",
+                                  "textStyle": "bodySmall",
+                                  "color": "error"
+                                }
+                              },
+                              {
+                                "type": "SizedBox",
+                                "id": "{{widgetId}}-err-btn-gap",
+                                "props": {
+                                  "height": 16
+                                }
+                              },
+                              {
+                                "type": "SecondaryButton",
+                                "id": "{{widgetId}}-retry-btn",
+                                "props": {
+                                  "text": "Retry",
+                                  "icon": "rotate-right",
+                                  "channel": "audit.refresh"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  {
+                    "_comment": "Ready state \u2014 toolbar + master-detail layout",
+                    "type": "Conditional",
+                    "id": "{{widgetId}}-ready",
+                    "props": {
+                      "visible": "{{ready}}"
+                    },
+                    "children": [
+                      {
+                        "type": "Column",
+                        "id": "{{widgetId}}-content",
+                        "props": {
+                          "crossAxisAlignment": "stretch"
+                        },
+                        "children": [
+                          {
+                            "type": "Container",
+                            "id": "{{widgetId}}-toolbar",
+                            "props": {
+                              "height": 48,
+                              "color": "surface",
+                              "padding": 8,
+                              "clipBehavior": "hardEdge"
+                            },
+                            "children": [
+                              {
+                                "type": "Row",
+                                "id": "{{widgetId}}-toolbar-row",
+                                "props": {
+                                  "crossAxisAlignment": "center",
+                                  "clipBehavior": "hardEdge"
+                                },
+                                "children": [
+                                  {
+                                    "type": "PopupMenu",
+                                    "id": "{{widgetId}}-btn-columns",
+                                    "props": {
+                                      "icon": "grid_on",
+                                      "variant": "toolbar-secondary",
+                                      "tooltip": "Columns",
+                                      "multiSelect": true,
+                                      "channel": "audit.{{widgetId}}.columnToggle",
+                                      "items": [
+                                        {
+                                          "value": "displayDate",
+                                          "label": "Date",
+                                          "selected": true
+                                        },
+                                        {
+                                          "value": "eventType",
+                                          "label": "Type",
+                                          "selected": true
+                                        },
+                                        {
+                                          "value": "userName",
+                                          "label": "User",
+                                          "selected": true
+                                        },
+                                        {
+                                          "value": "actionSummary",
+                                          "label": "Action",
+                                          "selected": true
+                                        },
+                                        {
+                                          "value": "targetName",
+                                          "label": "Target",
+                                          "selected": true
+                                        },
+                                        {
+                                          "value": "teamId",
+                                          "label": "Team",
+                                          "selected": true
+                                        },
+                                        {
+                                          "value": "projectName",
+                                          "label": "Project",
+                                          "selected": true
+                                        },
+                                        {
+                                          "divider": true
+                                        },
+                                        {
+                                          "value": "objectKind",
+                                          "label": "Object Kind"
+                                        },
+                                        {
+                                          "value": "targetId",
+                                          "label": "Target ID"
+                                        },
+                                        {
+                                          "value": "source",
+                                          "label": "Source"
+                                        },
+                                        {
+                                          "value": "isPublic",
+                                          "label": "Public"
+                                        },
+                                        {
+                                          "value": "createdDate",
+                                          "label": "Created"
+                                        },
+                                        {
+                                          "value": "runDate",
+                                          "label": "Run Date"
+                                        },
+                                        {
+                                          "value": "duration",
+                                          "label": "Duration"
+                                        },
+                                        {
+                                          "value": "state",
+                                          "label": "State"
+                                        },
+                                        {
+                                          "value": "error",
+                                          "label": "Error"
+                                        },
+                                        {
+                                          "value": "id",
+                                          "label": "Record ID"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-g1",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "IconButton",
+                                    "id": "{{widgetId}}-btn-sort",
+                                    "props": {
+                                      "icon": "sort",
+                                      "tooltip": "Sort: Newest first",
+                                      "variant": "toolbar-secondary",
+                                      "channel": "audit.{{widgetId}}.toggleSort",
+                                      "stateChannel": "audit.{{widgetId}}.toggleSort.state"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-g2",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "IconButton",
+                                    "id": "{{widgetId}}-btn-export",
+                                    "props": {
+                                      "icon": "download",
+                                      "tooltip": "Export CSV",
+                                      "variant": "toolbar-secondary",
+                                      "channel": "audit.{{widgetId}}.exportCsv"
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-tb-g4",
+                                    "props": {
+                                      "width": 8
+                                    }
+                                  },
+                                  {
+                                    "type": "SizedBox",
+                                    "id": "{{widgetId}}-search-box",
+                                    "props": {
+                                      "width": 300
+                                    },
+                                    "children": [
+                                      {
+                                        "type": "TextField",
+                                        "id": "{{widgetId}}-search",
+                                        "props": {
+                                          "hint": "Search events\u2026",
+                                          "prefixIcon": "search"
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            ]
+                          },
+                          {
+                            "type": "Divider",
+                            "id": "{{widgetId}}-div",
+                            "props": {
+                              "color": "outlineVariant"
+                            }
+                          },
+                          {
+                            "type": "Expanded",
+                            "id": "{{widgetId}}-grid-exp",
+                            "children": [
+                              {
+                                "type": "DataGrid",
+                                "id": "{{widgetId}}-grid",
+                                "props": {
+                                  "items": "{{data}}",
+                                  "selectionMode": "multi",
+                                  "onSelectionChanged": "audit.{{widgetId}}.selectionChanged",
+                                  "onRowTap": "audit.focusChanged",
+                                  "columnsChannel": "audit.{{widgetId}}.columnToggle",
+                                  "columns": [
+                                    {
+                                      "key": "displayDate",
+                                      "label": "Date",
+                                      "flex": 2,
+                                      "visible": true,
+                                      "color": "onSurfaceMuted",
+                                      "isDate": true
+                                    },
+                                    {
+                                      "key": "eventType",
+                                      "label": "Type",
+                                      "flex": 1,
+                                      "visible": true,
+                                      "isChip": true,
+                                      "colorTokenField": "colorToken"
+                                    },
+                                    {
+                                      "key": "userName",
+                                      "label": "User",
+                                      "flex": 2,
+                                      "visible": true
+                                    },
+                                    {
+                                      "key": "actionSummary",
+                                      "label": "Action",
+                                      "flex": 2,
+                                      "visible": true
+                                    },
+                                    {
+                                      "key": "targetName",
+                                      "label": "Target",
+                                      "flex": 2,
+                                      "visible": true
+                                    },
+                                    {
+                                      "key": "teamId",
+                                      "label": "Team",
+                                      "flex": 2,
+                                      "visible": true
+                                    },
+                                    {
+                                      "key": "projectName",
+                                      "label": "Project",
+                                      "flex": 2,
+                                      "visible": true
+                                    },
+                                    {
+                                      "key": "objectKind",
+                                      "label": "Object Kind",
+                                      "flex": 1,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "targetId",
+                                      "label": "Target ID",
+                                      "flex": 2,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "source",
+                                      "label": "Source",
+                                      "flex": 1,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "isPublic",
+                                      "label": "Public",
+                                      "flex": 1,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "createdDate",
+                                      "label": "Created",
+                                      "flex": 2,
+                                      "visible": false,
+                                      "isDate": true
+                                    },
+                                    {
+                                      "key": "runDate",
+                                      "label": "Run Date",
+                                      "flex": 2,
+                                      "visible": false,
+                                      "isDate": true
+                                    },
+                                    {
+                                      "key": "duration",
+                                      "label": "Duration",
+                                      "flex": 1,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "state",
+                                      "label": "State",
+                                      "flex": 1,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "error",
+                                      "label": "Error",
+                                      "flex": 2,
+                                      "visible": false
+                                    },
+                                    {
+                                      "key": "id",
+                                      "label": "Record ID",
+                                      "flex": 2,
+                                      "visible": false
+                                    }
+                                  ],
+                                  "sortChannel": "audit.{{widgetId}}.toggleSort",
+                                  "exportChannel": "audit.{{widgetId}}.exportCsv",
+                                  "refreshChannel": "audit.{{widgetId}}.refresh",
+                                  "searchChannel": "input.{{widgetId}}-search.changed"
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    ]
                   }
                 ]
               }
@@ -3177,7 +3620,7 @@
                                 ],
                                 [
                                   "{{context.userId}}",
-                                  ""
+                                  "\uf000"
                                 ],
                                 20,
                                 0,
@@ -3421,7 +3864,7 @@
       "metadata": {
         "type": "MainHeader",
         "tier": 2,
-        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome — not user-requested.",
+        "description": "Top-level header bar with brand logo, user avatar, and dropdown menu. Frame chrome \u2014 not user-requested.",
         "props": {},
         "emittedEvents": [
           "header.intent"
