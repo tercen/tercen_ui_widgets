@@ -8109,8 +8109,8 @@
                     "type": "DataGrid",
                     "id": "{{widgetId}}-grid",
                     "props": {
-                      "items": "{{data.tables[0].items}}",
-                      "columns": "{{data.tables[0].columns}}",
+                      "items": "{{data:$.tables[0].items}}",
+                      "columns": "{{data:$.tables[0].columns}}",
                       "columnMode": "scroll",
                       "showRowNumbers": true,
                       "sortable": true,
