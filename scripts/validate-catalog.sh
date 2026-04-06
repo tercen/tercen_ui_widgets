@@ -127,30 +127,28 @@ import json, re
 catalog = json.load(open('$CATALOG'))
 
 # Extract icon maps from SDUI source
+# _iconMap = default (solid), _regularIconMap = regular weight overrides
 with open('$SDUI_WIDGETS') as f:
     lines = f.readlines()
 
-regular = set()
-solid = set()
-in_regular = False
-in_solid = False
+default_map = set()    # _iconMap (solid is default)
+regular_map = set()    # _regularIconMap (regular overrides)
+current_map = None
 
 for line in lines:
     if 'const Map<String, IconData> _iconMap' in line:
-        in_regular = True; in_solid = False; continue
-    if 'const Map<String, IconData> _solidIconMap' in line:
-        in_solid = True; in_regular = False; continue
-    if (in_regular or in_solid) and line.strip() == '};':
-        in_regular = False; in_solid = False; continue
+        current_map = 'default'; continue
+    if 'const Map<String, IconData> _regularIconMap' in line:
+        current_map = 'regular'; continue
+    if current_map and line.strip() == '};':
+        current_map = None; continue
     m = re.search(r\"'(\w+)':\", line)
-    if m:
-        if in_regular: regular.add(m.group(1))
-        elif in_solid: solid.add(m.group(1))
+    if m and current_map:
+        if current_map == 'default': default_map.add(m.group(1))
+        elif current_map == 'regular': regular_map.add(m.group(1))
 
-# FA6 Free: these icons only have solid glyphs — regular weight renders as question mark
-fa6_solid_only = {'folder', 'folder_open', 'star', 'heart', 'bookmark', 'bell',
-                  'comment', 'comments', 'envelope', 'calendar', 'clock', 'image',
-                  'user', 'circle', 'file'}
+# All known icons = union of both maps
+all_icons = default_map | regular_map
 
 hits = []
 def check_icons(node, widget_type, path=''):
@@ -158,29 +156,26 @@ def check_icons(node, widget_type, path=''):
         return
     props = node.get('props', {})
     nid = node.get('id', '?')
-
-    # Check icon prop on Icon and IconButton nodes
     ntype = node.get('type', '')
+
     if ntype in ('Icon', 'IconButton'):
         icon = props.get('icon', '')
-        weight = props.get('weight', 'regular')
+        weight = props.get('weight', '')  # empty = default (solid)
         if icon and not icon.startswith('{'):
-            if weight == 'solid':
-                if icon not in solid and icon not in regular:
-                    hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" not in SDUI icon map')
-            else:
-                if icon not in regular:
-                    hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" not in SDUI _iconMap')
-                elif icon in fa6_solid_only and weight != 'solid':
-                    hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" is solid-only in FA6 Free but weight=\"{weight}\" — will render as question mark')
+            # Check icon exists in any map
+            if icon not in all_icons:
+                hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" not in SDUI icon map — will render as question mark')
+            # If weight=regular, check it has a regular override
+            elif weight == 'regular' and icon not in regular_map:
+                hits.append(f'[{widget_type}] {nid}: icon \"{icon}\" has no regular variant in _regularIconMap — weight=\"regular\" will fall back to solid')
 
     # Check PopupMenu items
     for item in props.get('items', []):
         if isinstance(item, dict):
             icon = item.get('icon', '')
             if icon and not icon.startswith('{'):
-                if icon not in regular:
-                    hits.append(f'[{widget_type}] {nid} menu item: icon \"{icon}\" not in SDUI _iconMap')
+                if icon not in all_icons:
+                    hits.append(f'[{widget_type}] {nid} menu item: icon \"{icon}\" not in SDUI icon map')
 
     for child in node.get('children', []):
         check_icons(child, widget_type, f'{path}/{nid}')
