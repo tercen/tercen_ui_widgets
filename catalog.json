@@ -4348,7 +4348,8 @@
                 "id": "{{widgetId}}-toolbar",
                 "props": {
                   "color": "surface",
-                  "padding": 8
+                  "padding": 8,
+                  "height": 48
                 },
                 "children": [
                   {
@@ -4375,10 +4376,8 @@
                         "type": "TextField",
                         "id": "{{widgetId}}-search",
                         "props": {
-                          "placeholder": "Search steps\u2026",
-                          "icon": "magnifying-glass",
-                          "width": 220,
-                          "textStyle": "bodySmall"
+                          "hint": "Search steps\u2026",
+                          "prefixIcon": "search"
                         }
                       }
                     ]
@@ -4388,7 +4387,7 @@
               {
                 "type": "Divider",
                 "id": "{{widgetId}}-toolbar-div",
-                "props": { "height": 1, "color": "outlineVariant" }
+                "props": { "color": "outlineVariant" }
               },
               {
                 "type": "Expanded",
