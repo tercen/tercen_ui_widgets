@@ -4344,6 +4344,11 @@
                 },
                 "children": [
               {
+                "type": "Column",
+                "id": "{{widgetId}}-inner-col",
+                "props": { "crossAxisAlignment": "stretch" },
+                "children": [
+              {
                 "type": "Container",
                 "id": "{{widgetId}}-toolbar",
                 "props": {
@@ -4511,6 +4516,8 @@
                     ]
                   }
                 ]
+              }
+              ]
               }
               ]
               }
