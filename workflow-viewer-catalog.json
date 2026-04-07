@@ -5,7 +5,7 @@
         "type": "WorkflowViewer",
         "kind": "window",
         "tier": 2,
-        "typeColor": "#10B981",
+        "typeColor": "#EC4899",
         "tabLabel": "Workflow",
         "description": "Interactive directed graph viewer for Tercen workflows. Displays pipeline steps as shaped nodes with data-flow connectors, state-coloured icons, zoom/pan, and path highlighting. Toolbar provides context-sensitive Run/Stop/Reset button and step search. Use when the user wants to visualise, navigate, or control execution of a workflow.",
         "emittedEvents": [
