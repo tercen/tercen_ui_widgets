@@ -4330,11 +4330,6 @@
         "dataSource": "workflowService.getWorkflowGraph"
       },
       "template": {
-        "type": "Column",
-        "id": "{{widgetId}}-root",
-        "props": { "crossAxisAlignment": "stretch" },
-        "children": [
-          {
                 "type": "EventScope",
                 "id": "{{widgetId}}-search-scope",
                 "props": {
@@ -4345,7 +4340,7 @@
                 "children": [
               {
                 "type": "Column",
-                "id": "{{widgetId}}-inner-col",
+                "id": "{{widgetId}}-root",
                 "props": { "crossAxisAlignment": "stretch" },
                 "children": [
               {
@@ -4521,8 +4516,6 @@
               }
               ]
               }
-        ]
-      }
     },
     {
       "metadata": {
