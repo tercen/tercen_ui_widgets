@@ -4368,11 +4368,7 @@
               }
             ]
           },
-          {
-            "type": "Divider",
-            "id": "{{widgetId}}-toolbar-div",
-            "props": { "color": "outlineVariant" }
-          },
+          { "type": "Divider", "id": "{{widgetId}}-toolbar-div", "props": { "color": "outlineVariant" } },
           {
             "type": "Expanded",
             "id": "{{widgetId}}-body",
@@ -4403,11 +4399,7 @@
                             "children": [
                               { "type": "LoadingIndicator", "id": "{{widgetId}}-spinner", "props": { "variant": "spinner" } },
                               { "type": "SizedBox", "id": "{{widgetId}}-loading-gap", "props": { "height": 12 } },
-                              {
-                                "type": "Text",
-                                "id": "{{widgetId}}-loading-text",
-                                "props": { "text": "Loading workflow\u2026", "textStyle": "bodyMedium", "color": "onSurfaceMuted" }
-                              }
+                              { "type": "Text", "id": "{{widgetId}}-loading-text", "props": { "text": "Loading workflow\u2026", "textStyle": "bodyMedium", "color": "onSurfaceMuted" } }
                             ]
                           }
                         ]
