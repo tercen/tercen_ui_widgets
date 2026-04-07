@@ -4489,10 +4489,6 @@
                         "id": "{{widgetId}}-ready",
                         "props": { "visible": "{{ready}}" },
                         "children": [
-                          {
-                            "type": "Expanded",
-                            "id": "{{widgetId}}-graph-exp",
-                            "children": [
                               {
                                 "type": "DirectedGraph",
                                 "id": "{{widgetId}}-graph",
@@ -4504,8 +4500,6 @@
                                   "searchQuery": "{{search.value}}"
                                 }
                               }
-                            ]
-                          }
                         ]
                       }
                     ]
