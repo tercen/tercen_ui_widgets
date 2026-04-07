@@ -4344,6 +4344,15 @@
             },
             "children": [
               {
+                "type": "EventScope",
+                "id": "{{widgetId}}-search-scope",
+                "props": {
+                  "channel": "input.{{widgetId}}-search.changed",
+                  "scopeKey": "search",
+                  "defaultPayload": { "value": "" }
+                },
+                "children": [
+              {
                 "type": "Container",
                 "id": "{{widgetId}}-toolbar",
                 "props": {
@@ -4475,7 +4484,7 @@
                                     "id": "{{widgetId}}-retry-btn",
                                     "props": {
                                       "text": "Retry",
-                                      "channel": "ds.{{widgetId}}-ds.refresh"
+                                      "channel": "workflow.workflowUpdated"
                                     }
                                   }
                                 ]
@@ -4500,7 +4509,8 @@
                                   "nodes": "{{data.nodes}}",
                                   "edges": "{{data.edges}}",
                                   "channel": "workflow.{{widgetId}}.selection",
-                                  "doubleTapChannel": "workflow.{{widgetId}}.openStep"
+                                  "doubleTapChannel": "workflow.{{widgetId}}.openStep",
+                                  "searchQuery": "{{search.value}}"
                                 }
                               }
                             ]
@@ -4510,6 +4520,8 @@
                     ]
                   }
                 ]
+              }
+              ]
               }
             ]
           }
