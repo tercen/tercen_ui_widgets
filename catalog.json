@@ -4335,15 +4335,6 @@
         "props": { "crossAxisAlignment": "stretch" },
         "children": [
           {
-            "type": "PromptRequired",
-            "id": "{{widgetId}}-prompt",
-            "props": {
-              "fields": [
-                { "name": "workflowId", "label": "Workflow ID" }
-              ]
-            },
-            "children": [
-              {
                 "type": "EventScope",
                 "id": "{{widgetId}}-search-scope",
                 "props": {
@@ -4523,8 +4514,6 @@
               }
               ]
               }
-            ]
-          }
         ]
       }
     },
